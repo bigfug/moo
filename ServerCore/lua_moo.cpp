@@ -10,6 +10,8 @@
 #include "mooexception.h"
 #include "lua_prop.h"
 #include "lua_verb.h"
+#include "lua_osc.h"
+
 #include "connectionmanager.h"
 
 LuaMap		lua_moo::mLuaFun;
@@ -100,6 +102,7 @@ void lua_moo::initialiseAll()
 	lua_connection::initialise();
 	lua_prop::initialise();
 	lua_verb::initialise();
+	lua_osc::initialise();
 }
 
 void lua_moo::luaRegisterAllStates(lua_State *L)
@@ -122,6 +125,9 @@ void lua_moo::luaRegisterAllStates(lua_State *L)
 	Q_ASSERT( lua_gettop( L ) == 0 );
 
 	lua_prop::luaRegisterState( L );
+	Q_ASSERT( lua_gettop( L ) == 0 );
+
+	lua_osc::luaRegisterState( L );
 	Q_ASSERT( lua_gettop( L ) == 0 );
 }
 

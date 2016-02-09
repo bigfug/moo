@@ -39,7 +39,9 @@ SOURCES += \
     taskentry.cpp \
     physicsmanager.cpp \
     inputsinkprogram.cpp \
-    inputsinkset.cpp
+    inputsinkset.cpp \
+    lua_osc.cpp \
+    oscreceive.cpp
 
 HEADERS += \
     verb.h \
@@ -68,7 +70,9 @@ HEADERS += \
     physicsmanager.h \
     inputsink.h \
     inputsinkprogram.h \
-    inputsinkset.h
+    inputsinkset.h \
+    lua_osc.h \
+    oscreceive.h
 
 unix:!symbian {
     maemo5 {

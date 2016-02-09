@@ -9,6 +9,7 @@
 #include <QDateTime>
 #include <QFile>
 #include "objectmanager.h"
+#include "oscreceive.h"
 
 MainWindow		*gMainWindow = 0;
 
@@ -94,26 +95,33 @@ int main( int argc, char *argv[] )
 
 	//w.installModel( &OM );
 
-		ConnectionManager	*CM = ConnectionManager::instance();
+		OSCReceive			*OSC = new OSCReceive( 2424 );
 
-		if( CM != 0 )
+		if( OSC )
 		{
-			Listener	*L = new Listener( 0, ServerPort, CM );
+			ConnectionManager	*CM = ConnectionManager::instance();
 
-			if( L != 0 )
+			if( CM != 0 )
 			{
-				CM->doConnect( 0 );
+				Listener	*L = new Listener( 0, ServerPort, CM );
 
-				qDebug() << "ArtMOO listening for connections on port" << ServerPort;
+				if( L != 0 )
+				{
+					CM->doConnect( 0 );
 
-				Ret = a.exec();
+					qDebug() << "ArtMOO listening for connections on port" << ServerPort;
 
-				qDebug() << "ArtMOO exiting\n";
+					Ret = a.exec();
 
-				delete L;
+					qDebug() << "ArtMOO exiting\n";
+
+					delete L;
+				}
+
+				delete CM;
 			}
 
-			delete CM;
+			delete OSC;
 		}
 
 		delete App;
