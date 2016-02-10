@@ -9,7 +9,7 @@ QT       += network
 
 TARGET = ServerCore
 TEMPLATE = lib
-CONFIG += staticlib create_prl
+CONFIG += staticlib create_prl c++11
 
 # DEFINES += LUA_BUILD_AS_DLL
 
@@ -41,7 +41,7 @@ SOURCES += \
     inputsinkprogram.cpp \
     inputsinkset.cpp \
     lua_osc.cpp \
-    oscreceive.cpp
+    osc.cpp
 
 HEADERS += \
     verb.h \
@@ -72,7 +72,7 @@ HEADERS += \
     inputsinkprogram.h \
     inputsinkset.h \
     lua_osc.h \
-    oscreceive.h
+    osc.h
 
 unix:!symbian {
     maemo5 {

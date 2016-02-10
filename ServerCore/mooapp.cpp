@@ -13,6 +13,9 @@
 #include "lua_task.h"
 #include <iostream>
 #include <algorithm>
+#include <QDateTime>
+
+#include "osc.h"
 
 mooApp::mooApp( const QString &pDataFileName, QObject *pParent )
 	: QObject( pParent ), mTimerId( 0 ), mDataFileName( pDataFileName )
@@ -22,6 +25,8 @@ mooApp::mooApp( const QString &pDataFileName, QObject *pParent )
 	lua_moo::initialiseAll();
 
 	ObjectManager		&OM = *ObjectManager::instance();
+
+	OSC::deviceInitialise();
 
 	OM.load( mDataFileName );
 
@@ -57,6 +62,8 @@ mooApp::~mooApp()
 	ObjectManager::instance()->save( mDataFileName );
 
 	ObjectManager::instance()->reset();
+
+	OSC::deviceDeinitialise();
 }
 
 void mooApp::doOutput( const QString &pText )
@@ -73,7 +80,19 @@ void mooApp::timerEvent( QTimerEvent *pEvent )
 {
 	Q_UNUSED( pEvent )
 
-	ObjectManager::instance()->onFrame( QDateTime::currentMSecsSinceEpoch() );
+	qint64	TimeStamp = QDateTime::currentMSecsSinceEpoch();
+
+	OSC::devicePacketStart( TimeStamp );
+
+	emit frameStart();
+	emit frameStart( TimeStamp );
+
+	ObjectManager::instance()->onFrame( TimeStamp );
+
+	emit frameEnd();
+	emit frameEnd( TimeStamp );
+
+	OSC::devicePacketEnd( TimeStamp );
 }
 
 void mooApp::doTask( TaskEntry &pTask )

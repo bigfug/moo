@@ -382,7 +382,7 @@ void ListenerSocket::processInput( const QByteArray &pData )
 
 	if( mLocalEcho )
 	{
-		//sendData( pData );
+		sendData( pData );
 	}
 }
 

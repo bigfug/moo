@@ -21,6 +21,12 @@ public:
 signals:
 	void textOutput( const QString &pText );
 
+	void frameStart( void );
+	void frameEnd( void );
+
+	void frameStart( qint64 pTimeStamp );
+	void frameEnd( qint64 pTimeStamp );
+
 public slots:
 	void doTask( TaskEntry &pTask );
 	void cleanup( QObject *pObject = 0 );

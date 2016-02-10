@@ -9,7 +9,7 @@
 #include <QDateTime>
 #include <QFile>
 #include "objectmanager.h"
-#include "oscreceive.h"
+#include "osc.h"
 
 MainWindow		*gMainWindow = 0;
 
@@ -95,9 +95,9 @@ int main( int argc, char *argv[] )
 
 	//w.installModel( &OM );
 
-		OSCReceive			*OSC = new OSCReceive( 2424 );
+		OSC			*OSCHost = OSC::newDevice();
 
-		if( OSC )
+		if( OSCHost )
 		{
 			ConnectionManager	*CM = ConnectionManager::instance();
 
@@ -121,7 +121,7 @@ int main( int argc, char *argv[] )
 				delete CM;
 			}
 
-			delete OSC;
+			OSC::delDevice( OSCHost );
 		}
 
 		delete App;

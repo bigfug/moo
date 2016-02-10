@@ -12,6 +12,8 @@ private:
 
 	static void luaRegisterState( lua_State *L );
 
+	static int luaSend( lua_State *L );
+
 	static const luaL_Reg		 mLuaStatic[];
 
 	friend class lua_moo;
