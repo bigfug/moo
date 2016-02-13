@@ -19,58 +19,42 @@ ObjectManager::ObjectManager( QObject *pParent ) :
 {
 }
 
+// The database is empty so set up the most minimal (but useful) set of objects
+// Based on LambdaMOO minimal db
+// https://github.com/wrog/lambdamoo/blob/master/README.Minimal
+
 void ObjectManager::luaMinimal( void )
 {
-	Object			*Root   = newObject();
-	Object			*System = newObject();
-	Object			*Room   = newObject();
-	Object			*Wizard = newObject();
-	//Object			*Programmer = newObject();
-	//Object			*Player = newObject();
-	//Object			*Thing = newObject();
+	Object			*System		= newObject();
+	Object			*Root		= newObject();
+	Object			*FirstRoom	= newObject();
+	Object			*Wizard		= newObject();
+
+	// Object #0 is The System Object
 
 	System->setName( "System Object" );
-	System->setOwner( Wizard->id() );
-	System->setFertile( false );
+	System->setParent( Root->id() );
+
+	// Object #1 is The Root Class. All objects are descended from Object #1
 
 	Root->setName( "Root Class" );
-	Root->setParent( System->id() );
-	Root->setOwner( Wizard->id() );
-	Root->setFertile( false );
 
-	Room->setName( "Generic Room" );
-	Room->setParent( System->id() );
-	Room->setOwner( Wizard->id() );
-	Room->setFertile( true );
+	// Object #2 is The First Room - it has the basic 'eval' verb defined
+
+	FirstRoom->setName( "The First Room" );
+	FirstRoom->setParent( System->id() );
+
+	// Object #3 is the only player object
 
 	Wizard->setName( "Wizard" );
 	Wizard->setParent( System->id() );
 	Wizard->setProgrammer( true );
 	Wizard->setWizard( true );
 	Wizard->setPlayer( true );
-	Wizard->move( Room );
-/*
-	Programmer->setName( "Generic Programmer" );
-	Programmer->setParent( System->id() );
-	Programmer->setProgrammer( true );
-	Programmer->setWizard( false );
-	Programmer->setPlayer( true );
-	Programmer->move( Room );
+	Wizard->move( FirstRoom );
 
-	Player->setName( "Generic Player" );
-	Player->setParent( System->id() );
-	Player->setProgrammer( false );
-	Player->setWizard( false );
-	Player->setPlayer( true );
-	Player->move( Room );
+	// Initialise the login verb to allow the player to login to the system
 
-	Thing->setName( "Generic Thing" );
-	Thing->setParent( System->id() );
-	Thing->setProgrammer( false );
-	Thing->setWizard( false );
-	Thing->setPlayer( false );
-	Thing->move( Room );
-*/
 	Verb			Login;
 
 	Login.initialise();
@@ -81,15 +65,17 @@ void ObjectManager::luaMinimal( void )
 
 	Root->verbAdd( "do_login_command", Login );
 
+	// Define the most basic eval verb to allow further programming
+
 	Verb			Eval;
 
 	Eval.initialise();
 
-	Eval.setOwner( Room->id() );
-	Eval.setObject( Room->id() );
+	Eval.setOwner( FirstRoom->id() );
+	Eval.setObject( FirstRoom->id() );
 	Eval.setScript( "moo.notify( moo.eval( moo.argstr ) );" );
 
-	Room->verbAdd( "eval", Eval );
+	FirstRoom->verbAdd( "eval", Eval );
 }
 
 void ObjectManager::reset( void )
