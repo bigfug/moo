@@ -53,6 +53,8 @@ private:
 	static int luaChildren( lua_State *L );
 	static int luaChild( lua_State *L );
 
+	static int luaPlayers( lua_State *L );
+
 	static int luaVerb( lua_State *L );
 	static int luaProperty( lua_State *L );
 

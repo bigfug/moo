@@ -50,6 +50,7 @@ const luaL_Reg lua_object::mLuaInstanceFunctions[] =
 	{ "verbadd", lua_object::luaVerbAdd },
 	{ "verbdel", lua_object::luaVerbDel },
 	{ "notify", lua_object::luaNotify },
+	{ "players", lua_object::luaPlayers },
 	{ "props", lua_object::luaProps },
 	{ "verbs", lua_object::luaVerbs },
 	{ 0, 0 }
@@ -1370,6 +1371,47 @@ int lua_object::luaChildren( lua_State *L )
 
 	return( LuaErr ? lua_error( L ) : 0 );
 }
+
+int lua_object::luaPlayers( lua_State *L )
+{
+	bool				 LuaErr = false;
+
+	try
+	{
+		Object						*O = argObj( L );
+		const QList<ObjectId>		&C = O->children();
+		int							 i = 1;
+
+		lua_newtable( L );
+
+		for( QList<ObjectId>::const_iterator it = C.begin() ; it != C.end() ; it++, i++ )
+		{
+			Object	*CurObj = ObjectManager::o( *it );
+
+			if( CurObj && CurObj->player() )
+			{
+				lua_pushinteger( L, i );
+				lua_pushobjectid( L, *it );
+				lua_settable( L, -3 );
+			}
+		}
+
+		return( 1 );
+	}
+	catch( mooException e )
+	{
+		e.lua_pushexception( L );
+
+		LuaErr = true;
+	}
+	catch( ... )
+	{
+
+	}
+
+	return( LuaErr ? lua_error( L ) : 0 );
+}
+
 
 int lua_object::luaChild( lua_State *L )
 {
