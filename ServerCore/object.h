@@ -16,11 +16,6 @@
 
 class ObjectManager;
 
-#ifdef USING_PHYSICS
-class btCollisionShape;
-class btRigidBody;
-#endif
-
 class Object
 {
 private:
@@ -41,11 +36,6 @@ private:
 	bool				mPlayer;		// whether or not the object represents a player
 	ObjectId			mParent;		// The object that is its parent
 	QList<ObjectId>		mChildren;		// A list of the objects that are its children
-
-#ifdef USING_PHYSICS
-	btCollisionShape	*mCollisionShape;
-	btRigidBody			*mRigidBody;
-#endif
 
 	// Built-in Properties
 

@@ -37,7 +37,6 @@ SOURCES += \
     func.cpp \
     connectionmanager.cpp \
     taskentry.cpp \
-    physicsmanager.cpp \
     inputsinkprogram.cpp \
     inputsinkset.cpp \
     lua_osc.cpp \
@@ -67,7 +66,6 @@ HEADERS += \
     func.h \
     connectionmanager.h \
     taskentry.h \
-    physicsmanager.h \
     inputsink.h \
     inputsinkprogram.h \
     inputsinkset.h \

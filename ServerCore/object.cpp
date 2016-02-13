@@ -16,11 +16,6 @@ Object::Object( void )
 	mWrite = false;
 	mFertile = false;
 	mRecycled = false;
-
-#ifdef USING_PHYSICS
-	mCollisionShape = 0;
-	mRigidBody = 0;
-#endif
 }
 
 Object::~Object( void )
