@@ -20,7 +20,7 @@ const luaL_Reg lua_verb::mLuaStatic[] =
 	{ 0, 0 }
 };
 
-const luaL_reg lua_verb::mLuaInstance[] =
+const luaL_Reg lua_verb::mLuaInstance[] =
 {
 	{ "__index", lua_verb::luaGet },
 	{ "__newindex", lua_verb::luaSet },
@@ -60,7 +60,11 @@ void lua_verb::luaRegisterState( lua_State *L )
 	lua_pushvalue( L, -2 );  /* pushes the metatable */
 	lua_settable( L, -3 );  /* metatable.__index = metatable */
 
+#if LUA_VERSION_NUM == 501
 	luaL_openlib( L, NULL, lua_verb::mLuaInstance, 0 );
+#else
+#error LUA 5.1
+#endif
 
 	lua_pop( L, 1 );
 

@@ -4,11 +4,11 @@ HEADERS += \
 	mainwindow.h
 
 SOURCES += \
-    mainwindow.cpp \
+	mainwindow.cpp \
 	main.cpp
 
 FORMS += \
-    mainwindow.ui
+	mainwindow.ui
 
 RC_FILE = Server.rc
 
@@ -42,16 +42,16 @@ else:unix:!symbian: PRE_TARGETDEPS += $$OUT_PWD/../ServerCore/libServerCore.a
 #else:unix:!symbian: PRE_TARGETDEPS += $$PWD/../lua514-build-desktop/liblua514.a
 
 windows {
-    LIBS += -L$$PWD/../lua/ -llua5.1
+	LIBS += -L$$PWD/../lua/ -llua5.1
 
-    INCLUDEPATH += $$PWD/../lua
-    DEPENDPATH += $$PWD/../lua
+	INCLUDEPATH += $$PWD/../lua
+	DEPENDPATH += $$PWD/../lua
 }
 
 macx {
-    INCLUDEPATH += /opt/local/include/lua-5.1
+	INCLUDEPATH += /usr/local/opt/lua51/include/lua-5.1
 
-    LIBS += -L/opt/local/lib/lua-5.1 -llua-5.1
+	LIBS += -L/usr/local/opt/lua51/lib -llua5.1
 }
 
 #----------------------------------------------------------------------------
@@ -61,8 +61,8 @@ macx {
 #LIBS += -L$$PWD/../../bullet-2.80/lib/ -lBulletWorldImporter -lBulletFileLoader -lBulletDynamics -lBulletCollision -lLinearMath
 
 OTHER_FILES += \
-    Server.rc \
-    moo-icon.ico
+	Server.rc \
+	moo-icon.ico
 
 RESOURCES += \
-    Server.qrc
+	Server.qrc

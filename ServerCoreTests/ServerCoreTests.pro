@@ -23,19 +23,19 @@ SOURCES += tst_servertest.cpp \
 	tst_lua_create.cpp \
 	tst_lua_recycle.cpp \
 	tst_lua_move.cpp \
-    tst_lua_parent.cpp \
-    tst_lua_prop.cpp \
-    tst_lua_verb.cpp \
-    tst_lua_task.cpp \
-    tst_lua_call_values.cpp \
-    luatestdata.cpp \
-    tst_lua_prop_security.cpp \
-    permissionstest.cpp
+	tst_lua_parent.cpp \
+	tst_lua_prop.cpp \
+	tst_lua_verb.cpp \
+	tst_lua_task.cpp \
+	tst_lua_call_values.cpp \
+	luatestdata.cpp \
+	tst_lua_prop_security.cpp \
+	permissionstest.cpp
 
 HEADERS += tst_servertest.h \
-    stdafx.h \
-    luatestdata.h \
-    permissionstest.h
+	stdafx.h \
+	luatestdata.h \
+	permissionstest.h
 
 DEFINES += SRCDIR=\\\"$$PWD/\\\"
 
@@ -55,16 +55,16 @@ else:unix:!symbian: PRE_TARGETDEPS += $$OUT_PWD/../ServerCore/libServerCore.a
 # LUA
 
 windows {
-    LIBS += -L$$PWD/../lua/ -llua5.1
+	LIBS += -L$$PWD/../lua/ -llua5.1
 
-    INCLUDEPATH += $$PWD/../lua
-    DEPENDPATH += $$PWD/../lua
+	INCLUDEPATH += $$PWD/../lua
+	DEPENDPATH += $$PWD/../lua
 }
 
 macx {
-    INCLUDEPATH += /opt/local/include/lua-5.1
+	INCLUDEPATH += /usr/local/opt/lua51/include/lua-5.1
 
-    LIBS += -L/opt/local/lib/lua-5.1 -llua-5.1
+	LIBS += -L/usr/local/opt/lua51/lib -llua5.1
 }
 
 #----------------------------------------------------------------------------

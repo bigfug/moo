@@ -42,12 +42,12 @@ void ObjectManager::luaMinimal( void )
 	// Object #2 is The First Room - it has the basic 'eval' verb defined
 
 	FirstRoom->setName( "The First Room" );
-	FirstRoom->setParent( System->id() );
+	FirstRoom->setParent( Root->id() );
 
 	// Object #3 is the only player object
 
 	Wizard->setName( "Wizard" );
-	Wizard->setParent( System->id() );
+	Wizard->setParent( Root->id() );
 	Wizard->setProgrammer( true );
 	Wizard->setWizard( true );
 	Wizard->setPlayer( true );
@@ -59,11 +59,11 @@ void ObjectManager::luaMinimal( void )
 
 	Login.initialise();
 
-	Login.setOwner( Root->id() );
-	Login.setObject( Root->id() );
+	Login.setOwner( System->id() );
+	Login.setObject( System->id() );
 	Login.setScript( QString( "return( o( %1 ) );" ).arg( Wizard->id() ) );
 
-	Root->verbAdd( "do_login_command", Login );
+	System->verbAdd( "do_login_command", Login );
 
 	// Define the most basic eval verb to allow further programming
 
@@ -111,37 +111,37 @@ void ObjectManager::load( const QString &pDataFileName )
 {
 	QFile		File( pDataFileName );
 
-    if( !File.open( QIODevice::ReadOnly ) )
-    {
-        return;
-    }
+	if( !File.open( QIODevice::ReadOnly ) )
+	{
+		return;
+	}
 
-    QDataStream		Data( &File );
+	QDataStream		Data( &File );
 
-    Data >> mObjNum;
+	Data >> mObjNum;
 
-    qint32			c;
+	qint32			c;
 
-    Data >> c;
+	Data >> c;
 
-    for( qint32 i = 0 ; i < c ; i++ )
-    {
-        Object		*O = new Object();
+	for( qint32 i = 0 ; i < c ; i++ )
+	{
+		Object		*O = new Object();
 
-        O->load( Data );
+		O->load( Data );
 
-        mObjMap[ O->id() ] = O;
+		mObjMap[ O->id() ] = O;
 
 		if( O->parent() == OBJECT_NONE )
 		{
 			mObjTop.push_back( O );
 		}
 
-        if( O->player() )
-        {
-            mPlayers.push_back( O );
-        }
-    }
+		if( O->player() )
+		{
+			mPlayers.push_back( O );
+		}
+	}
 
 	// Load Tasks
 
@@ -173,22 +173,22 @@ void ObjectManager::save( const QString &pDataFileName )
 	QFile		File( NewNam );
 
 	if( !File.open( QIODevice::WriteOnly ) )
-    {
-        return;
-    }
+	{
+		return;
+	}
 
-    QDataStream		Data( &File );
+	QDataStream		Data( &File );
 
-    Data << mObjNum;
+	Data << mObjNum;
 
-    qint32			c = mObjMap.size();
+	qint32			c = mObjMap.size();
 
-    Data << c;
+	Data << c;
 
-    for( ObjectMap::iterator it = mObjMap.begin() ; it != mObjMap.end() ; it++ )
-    {
-        it.value()->save( Data );
-    }
+	for( ObjectMap::iterator it = mObjMap.begin() ; it != mObjMap.end() ; it++ )
+	{
+		it.value()->save( Data );
+	}
 
 	// Save Tasks
 
@@ -214,10 +214,10 @@ void ObjectManager::save( const QString &pDataFileName )
 
 void ObjectManager::clear()
 {
-    for( ObjectMap::iterator it = mObjMap.begin() ; it != mObjMap.end() ; it++ )
-    {
-        delete it.value();
-    }
+	for( ObjectMap::iterator it = mObjMap.begin() ; it != mObjMap.end() ; it++ )
+	{
+		delete it.value();
+	}
 }
 
 Object *ObjectManager::newObject( void )
@@ -225,7 +225,7 @@ Object *ObjectManager::newObject( void )
 	Object		*O = new Object();
 
 	if( O == 0 )
-    {
+	{
 		return( 0 );
 	}
 
