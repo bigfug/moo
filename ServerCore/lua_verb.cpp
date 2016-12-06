@@ -10,6 +10,7 @@
 #include "connectionmanager.h"
 #include "connection.h"
 #include "inputsinkprogram.h"
+#include "inputsinkeditor.h"
 
 const char	*lua_verb::mLuaName = "moo.verb";
 
@@ -34,6 +35,7 @@ const luaL_Reg lua_verb::mLuaInstanceFunctions[] =
 	{ "aliasrem", lua_verb::luaAliasRem },
 	{ "dump", lua_verb::luaDump },
 	{ "program", lua_verb::luaProgram },
+	{ "edit", lua_verb::luaEdit },
 	{ 0, 0 }
 };
 
@@ -596,6 +598,61 @@ int lua_verb::luaProgram( lua_State *L )
 		InputSinkProgram	*IS = new InputSinkProgram( C, O, V, *LV->mName );
 
 		if( IS == 0 )
+		{
+			return( 0 );
+		}
+
+		C->pushInputSink( IS );
+	}
+	catch( mooException e )
+	{
+		e.lua_pushexception( L );
+
+		LuaErr = true;
+	}
+	catch( ... )
+	{
+
+	}
+
+	return( LuaErr ? lua_error( L ) : 0 );
+}
+
+int lua_verb::luaEdit( lua_State *L )
+{
+	bool		LuaErr = false;
+
+	try
+	{
+		const Task			&T = lua_task::luaGetTask( L )->task();
+		luaVerb				*LV = arg( L );
+		Verb				*V = LV->mVerb;
+		Object				*O = ObjectManager::o( LV->mObjectId );
+		Object				*Player = ObjectManager::instance()->object( T.player() );
+		const bool			 isOwner  = ( Player != 0 && O != 0 ? Player->id() == O->owner() : false );
+		const bool			 isWizard = ( Player != 0 ? Player->wizard() : false );
+		Connection			*C = ConnectionManager::instance()->connection( lua_task::luaGetTask( L )->connectionid() );
+
+		if( !V )
+		{
+			throw( mooException( E_TYPE, "invalid object" ) );
+		}
+
+		if( !isWizard && !isOwner && !V->read() )
+		{
+			throw( mooException( E_NACC, "not allowed to read script" ) );
+		}
+
+		if( !C->supportsLineMode() )
+		{
+			throw( mooException( E_INVARG, "terminal doesn't support linemode" ) );
+		}
+
+		QStringList		Program = V->script().split( "\n" );
+
+		InputSinkEditor	*IS = new InputSinkEditor( C, O, V, Program );
+
+		if( !IS )
 		{
 			return( 0 );
 		}

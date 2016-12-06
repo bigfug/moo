@@ -9,7 +9,7 @@
 
 class Connection : public QObject
 {
-    Q_OBJECT
+	Q_OBJECT
 
 	explicit Connection( ConnectionId pConnectionId, QObject *pParent = 0 );
 
@@ -21,6 +21,12 @@ class Connection : public QObject
 	friend class ConnectionManager;
 
 public:
+	typedef enum LineMode
+	{
+		EDIT,
+		REALTIME
+	} LineMode;
+
 	inline ConnectionId id( void ) const
 	{
 		return( mConnectionId );
@@ -73,13 +79,19 @@ public:
 
 	bool processInput( const QString &pData );
 
+	bool supportsLineMode( void ) const;
+
 signals:
 	void taskOutput( TaskEntry &pTask );
 	void textOutput( const QString &pText );
+	void lineMode( Connection::LineMode pLineMode );
 
 public slots:
 	void notify( const QString &pText );
 	void dataInput( const QString &pText );
+
+	void setLineModeSupport( bool pLineModeSupport );
+	void setLineMode( LineMode pLineMode );
 
 private:
 	ConnectionId		mConnectionId;
@@ -91,6 +103,7 @@ private:
 	qint64				mLastActiveTime;
 	QString				mName;
 	QList<InputSink *>	mInputSinkList;
+	bool				mLineModeSupport;
 };
 
 #endif // CONNECTION_H

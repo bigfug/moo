@@ -7,8 +7,6 @@
 #include "mooexception.h"
 #include <QMutexLocker>
 
-#define TELNET_ECHO					(1)
-
 #define TELNET_SE					(240)	// End of subnegotiation parameters
 #define TELNET_NOP					(241)	// No operation.
 #define TELNET_DATA_MARK			(242)	// The data stream portion of a Synch. This should always be accompanied by a TCP Urgent notification.
@@ -26,6 +24,11 @@
 #define TELNET_DONT					(254)	// Indicates the demand that the other party stop performing, or confirmation that you are no longer expecting the other party to perform, the indicated option.
 #define TELNET_IAC					(255)	// Data Byte 255.
 
+#define TELNET_BINARY				(0)
+#define TELNET_ECHO					(1)
+#define TELNET_SUPPRESS_GO_AHEAD	(3)
+#define TELNET_TERMINAL_TYPE		(24)
+
 #define TELNET_MSSP					(70)
 #define MSSP_VAR					(1)
 #define MSSP_VAL					(2)
@@ -34,12 +37,33 @@
 
 #define TELNET_MXP					(91)
 
+#define TELNET_LINEMODE				(34)
+#define LINEMODE_MODE				(1)
+#define LINEMODE_MODE_EDIT			(1)
+#define LINEMODE_MODE_TRAPSIG		(2)
+#define LINEMODE_MODE_ACK			(4)
+#define LINEMODE_MODE_SOFTTAB		(8)
+#define LINEMODE_MODE_LITECHO		(16)
+#define LINEMODE_FORWARDMASK		(2)
+#define LINEMODE_SLC				(3)
+
+#define SLC_NOSUPPORT				(0)
+#define SLC_CANTCHANGE				(1)
+#define SLC_VALUE					(2)
+#define SLC_DEFAULT					(3)
+
+#define SLC_LEVELBITS				(3)
+
 Listener::Listener( ObjectId pObjectId, quint16 pPort, QObject *pParent ) :
 	QObject( pParent ), mObjectId( pObjectId ), mServer( this )
 {
 	connect( &mServer, SIGNAL( newConnection() ), this, SLOT( newConnection() ) );
 
 	mServer.listen( QHostAddress::Any, pPort );
+
+	mOptions.append( TelnetOption( TELNET_ECHO,					TELNET_WONT, TELNET_DO ) );
+	mOptions.append( TelnetOption( TELNET_SUPPRESS_GO_AHEAD,	TELNET_WONT, TELNET_DONT ) );
+	mOptions.append( TelnetOption( TELNET_TERMINAL_TYPE,		TELNET_WONT, TELNET_DO ) );
 }
 
 Listener::~Listener()
@@ -54,22 +78,22 @@ void Listener::newConnection( void )
 	{
 		ListenerSocket		*LS = new ListenerSocket( this, S );
 
-		if( LS == 0 )
+		if( !LS )
 		{
 			S->close();
 		}
+
+		LS->setOptions( mOptions );
 	}
 }
 
 ListenerSocket::ListenerSocket( QObject *pParent, QTcpSocket *pSocket ) :
-	QObject( pParent ), mSocket( pSocket )
+	QObject( pParent ), mSocket( pSocket ), mLineMode( Connection::EDIT )
 {
 	mDataReceived    = false;
 	mWebSocketHeader = false;
 	mWebSocketActive = false;
-	mLocalEcho = false;
 	mLastChar  = 0;
-	mTelnetDepth = 0;
 	mAnsiEsc = 0;
 	mAnsiPos = 0;
 
@@ -84,6 +108,9 @@ ListenerSocket::ListenerSocket( QObject *pParent, QTcpSocket *pSocket ) :
 
 	connect( CON, SIGNAL(taskOutput(TaskEntry&)), ObjectManager::instance(), SLOT(doTask(TaskEntry&)));
 
+	connect( CON, SIGNAL(lineMode(Connection::LineMode)), this, SLOT(setLineMode(Connection::LineMode)) );
+	connect( this, SIGNAL(lineModeSupported(bool)), CON, SLOT(setLineModeSupport(bool)) );
+
 	connect( mSocket, SIGNAL(disconnected()), this, SLOT(disconnected()) );
 	connect( mSocket, SIGNAL(readyRead()), this, SLOT(readyRead()) );
 
@@ -92,8 +119,28 @@ ListenerSocket::ListenerSocket( QObject *pParent, QTcpSocket *pSocket ) :
 	mTimer.singleShot( 1000, this, SLOT(inputTimeout()) );
 }
 
+bool ListenerSocket::option( quint8 pOption ) const
+{
+	for( const TelnetOption &TE : mOptions )
+	{
+		if( TE.mOption == pOption )
+		{
+			return( TE.mLocal == TELNET_WILL );
+		}
+	}
+
+	return( false );
+}
+
+bool ListenerSocket::echo() const
+{
+	return( false ); //option( TELNET_ECHO ) );
+}
+
 void ListenerSocket::sendData( const QByteArray &pData )
 {
+//	qDebug() << "ListenerSocket::sendData" << pData;
+
 	if( mWebSocketActive )
 	{
 		QByteArray	Pkt;
@@ -124,6 +171,8 @@ void ListenerSocket::sendData( const QByteArray &pData )
 
 void ListenerSocket::processInput( const QByteArray &pData )
 {
+//	qDebug() << "processInput" << pData;
+
 	for( int i = 0 ; i < pData.size() ; i++ )
 	{
 		uint8_t		ch = pData.at( i );
@@ -174,6 +223,15 @@ void ListenerSocket::processInput( const QByteArray &pData )
 		{
 			mTelnetSequence.push_back( ch );
 		}
+		else if( mLineMode == Connection::REALTIME )
+		{
+			Connection		*CON = ConnectionManager::instance()->connection( mConnectionId );
+
+			if( CON )
+			{
+				CON->processInput( QChar( ch ) );
+			}
+		}
 		else if( ch == '\r' || ch == '\n' )
 		{
 			if( mBuffer.isEmpty() )
@@ -197,7 +255,7 @@ void ListenerSocket::processInput( const QByteArray &pData )
 
 					mWebSocketHeader = false;
 					mWebSocketActive = true;
-					mLocalEcho = true;
+					//mLocalEcho = true;
 
 					if( pData.size() > i + 1 )
 					{
@@ -215,7 +273,7 @@ void ListenerSocket::processInput( const QByteArray &pData )
 				{
 					// preserve empty lines
 
-					if( mLocalEcho )
+					if( echo() )
 					{
 						sendData( "\r\n" );
 					}
@@ -248,7 +306,7 @@ void ListenerSocket::processInput( const QByteArray &pData )
 					if( mBuffer.compare( "GET / HTTP/1.1" ) == 0 )
 					{
 						mWebSocketHeader = true;
-						mLocalEcho = false;
+						//mLocalEcho = false;
 					}
 					else
 					{
@@ -263,7 +321,7 @@ void ListenerSocket::processInput( const QByteArray &pData )
 					emit textOutput( mBuffer );
 				}
 
-				if( mLocalEcho )
+				if( echo() )
 				{
 					sendData( "\r\n" );
 				}
@@ -309,7 +367,7 @@ void ListenerSocket::processInput( const QByteArray &pData )
 					{
 						mBuffer.remove( --mAnsiPos, 1 );
 
-						if( mLocalEcho )
+						if( echo() )
 						{
 							QByteArray	Tmp;
 
@@ -343,7 +401,7 @@ void ListenerSocket::processInput( const QByteArray &pData )
 			{
 				mBuffer.remove( mAnsiPos, 1 );
 
-				if( mLocalEcho )
+				if( echo() )
 				{
 					QByteArray	Tmp;
 
@@ -358,7 +416,7 @@ void ListenerSocket::processInput( const QByteArray &pData )
 		{
 			mBuffer.insert( mAnsiPos++, ch );
 
-			if( mLocalEcho )
+			if( echo() )
 			{
 				QByteArray	Tmp;
 
@@ -371,7 +429,7 @@ void ListenerSocket::processInput( const QByteArray &pData )
 					Tmp.append( ch );
 				}
 
-				sendData( Tmp );
+				//sendData( Tmp );
 			}
 		}
 
@@ -380,7 +438,7 @@ void ListenerSocket::processInput( const QByteArray &pData )
 
 	// echo the data back to the client
 
-	if( mLocalEcho )
+	if( echo() )
 	{
 		sendData( pData );
 	}
@@ -388,43 +446,118 @@ void ListenerSocket::processInput( const QByteArray &pData )
 
 void ListenerSocket::processTelnetSequence( const QByteArray &pData )
 {
-	if( static_cast<uint8_t>( pData.at( 1 ) ) == TELNET_DO )
+//	qDebug() << "ListenerSocket::processTelnetSequence" << pData;
+
+	const quint8		Command = pData.at( 1 );
+	const quint8		Option  = pData.at( 2 );
+
+#if 0
+	QString		CmdStr;
+
+	switch( Command )
 	{
-		switch( static_cast<uint8_t>( pData.at( 2 ) ) )
+		case TELNET_DO:		CmdStr = "DO";		break;
+		case TELNET_DONT:	CmdStr = "DONT";	break;
+		case TELNET_WILL:	CmdStr = "WILL";	break;
+		case TELNET_WONT:	CmdStr = "WONT";	break;
+		case TELNET_SB:		CmdStr = "SB";		break;
+		default:
+			CmdStr = QString::number( Command );
+	}
+
+	QString		OptStr;
+
+	switch( Option )
+	{
+		case TELNET_ECHO:				OptStr = "ECHO";				break;
+		case TELNET_SUPPRESS_GO_AHEAD:	OptStr = "SUPPRESS_GO_AHEAD";	break;
+		case TELNET_LINEMODE:			OptStr = "LINEMODE";			break;
+		case TELNET_TERMINAL_TYPE:		OptStr = "TERMINAL_TYPE";		break;
+		default:
+			OptStr = QString::number( Option );
+	}
+
+	qDebug() << CmdStr << OptStr;
+#endif
+
+	if( Command == TELNET_DO )
+	{
+		for( TelnetOption &TE : mOptions )
 		{
-			case TELNET_ECHO:
-				mLocalEcho = true;
+			if( TE.mOption == Option && TE.mLocal != TELNET_WILL )
+			{
+				QByteArray	Msg;
+
+				appendTelnetSequence( Msg, TELNET_WILL, Option );
+
+				sendData( Msg );
+
+				TE.mLocal = TELNET_WILL;
+
 				break;
+			}
+		}
+	}
 
-			case TELNET_MSSP:
-				{
-					QByteArray	Msg;
+	if( Command == TELNET_DONT )
+	{
+		for( TelnetOption &TE : mOptions )
+		{
+			if( TE.mOption == Option && TE.mLocal != TELNET_WONT )
+			{
+				QByteArray	Msg;
 
-					Msg.append( TELNET_IAC );
-					Msg.append( TELNET_SB );
-					Msg.append( TELNET_MSSP );
+				appendTelnetSequence( Msg, TELNET_WONT, Option );
 
-					Msg.append( MSSP_VAR );
-					Msg.append( "NAME" );
-					Msg.append( MSSP_VAL );
-					Msg.append( "ArtMOO" );
+				sendData( Msg );
 
-					Msg.append( MSSP_VAR );
-					Msg.append( "PLAYERS" );
-					Msg.append( MSSP_VAL );
-					Msg.append( "1" );
+				TE.mLocal = TELNET_WONT;
 
-					Msg.append( MSSP_VAR );
-					Msg.append( "UPTIME" );
-					Msg.append( MSSP_VAL );
-					Msg.append( "1" );
-
-					Msg.append( TELNET_IAC );
-					Msg.append( TELNET_SE );
-
-					mSocket->write( Msg );
-				}
 				break;
+			}
+		}
+	}
+
+	if( Command == TELNET_WILL || Command == TELNET_WONT )
+	{
+		for( TelnetOption &TE : mOptions )
+		{
+			if( TE.mOption == Option )
+			{
+				TE.mRemote = Command;
+
+				break;
+			}
+		}
+	}
+
+	if( Option == TELNET_TERMINAL_TYPE )
+	{
+		if( Command == TELNET_WILL )
+		{
+			QByteArray	Msg;
+
+			appendTelnetSequence( Msg, TELNET_SB, TELNET_TERMINAL_TYPE );
+
+			Msg.append( 1 );
+
+			Msg.append( TELNET_IAC );
+			Msg.append( TELNET_SE );
+
+			sendData( Msg );
+		}
+		else if( Command == TELNET_SB )
+		{
+			const quint8		IS = pData.at( 3 );
+
+			if( IS == 0 )
+			{
+				QByteArray	TermName = pData.mid( 4 );
+
+				TermName.truncate( TermName.size() - 2 );
+
+				qDebug() << "TERMINAL_TYPE" << QString( TermName );
+			}
 		}
 	}
 }
@@ -433,28 +566,70 @@ void ListenerSocket::inputTimeout( void )
 {
 	QByteArray	Msg;
 
-	Msg.append( TELNET_IAC );
-	Msg.append( TELNET_WILL );
-	Msg.append( TELNET_ECHO );
+	for( TelnetOption TE : mOptions )
+	{
+		appendTelnetSequence( Msg, TE.mRemote, TE.mOption );
+	}
 
-//	Msg.append( TELNET_IAC );
-//	Msg.append( TELNET_WILL );
-//	Msg.append( TELNET_MSSP );
+//	qDebug() << "inputTimeout" << Msg;
 
-	mSocket->write( Msg );
-
-	mLocalEcho = true;
-
-	//Connection		*CON = ConnectionManager::instance()->connection( mConnectionId );
+	if( !Msg.isEmpty() )
+	{
+		sendData( Msg );
+	}
 
 	TaskEntry		 E( "", mConnectionId );
 
 	ObjectManager::instance()->queueTask( E );
 }
 
+void ListenerSocket::setLineMode( Connection::LineMode pLineMode )
+{
+	QByteArray	Msg;
+
+	if( pLineMode == Connection::EDIT )
+	{
+		setTelnetOption( TELNET_ECHO, TELNET_WONT );
+		setTelnetOption( TELNET_SUPPRESS_GO_AHEAD, TELNET_WONT );
+
+		appendTelnetSequence( Msg, TELNET_WONT, TELNET_ECHO );
+		appendTelnetSequence( Msg, TELNET_WONT, TELNET_SUPPRESS_GO_AHEAD );
+	}
+	else
+	{
+		setTelnetOption( TELNET_ECHO, TELNET_WILL );
+		setTelnetOption( TELNET_SUPPRESS_GO_AHEAD, TELNET_WILL );
+
+		appendTelnetSequence( Msg, TELNET_WILL, TELNET_ECHO );
+		appendTelnetSequence( Msg, TELNET_WILL, TELNET_SUPPRESS_GO_AHEAD );
+	}
+
+	if( !Msg.isEmpty() )
+	{
+		sendData( Msg );
+	}
+
+//	qDebug() << "setLineMode" << Msg;
+
+	mLineMode = pLineMode;
+}
+
+void ListenerSocket::setTelnetOption(quint8 pOption, quint8 pCommand)
+{
+	for( TelnetOption &TE : mOptions )
+	{
+		if( TE.mOption == pOption )
+		{
+			TE.mLocal = pCommand;
+
+			return;
+		}
+	}
+}
+
 void ListenerSocket::disconnected( void )
 {
-	qDebug() << "Connection disconnected from" << mSocket->peerAddress();
+	qInfo() << "Connection disconnected from" << mSocket->peerAddress();
 
 	ConnectionManager::instance()->closeListener( this );
 }
@@ -591,7 +766,12 @@ void ListenerSocket::readyRead( void )
 
 void ListenerSocket::textInput( const QString &pText )
 {
-	QByteArray		Buff = QByteArray( pText.toUtf8() ).append( "\r\n" );
+	QByteArray		Buff = QByteArray( pText.toUtf8() );
+
+	if( mLineMode == Connection::EDIT )
+	{
+		Buff.append( "\r\n" );
+	}
 
 	sendData( Buff );
 }
@@ -624,3 +804,9 @@ void ListenerSocket::processAnsiSequence( const QByteArray &pData )
 	}
 }
 
+void ListenerSocket::appendTelnetSequence( QByteArray &pA, const quint8 p1, const quint8 p2)
+{
+	pA.append( TELNET_IAC );
+	pA.append( p1 );
+	pA.append( p2 );
+}

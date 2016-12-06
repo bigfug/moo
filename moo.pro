@@ -1,10 +1,10 @@
 TEMPLATE = subdirs
 
 SUBDIRS += \
-    ServerCore \
-    ServerCoreTests \
-    Server
+	ServerCore \
+	ServerCoreTests \
+	Server \
+	Editor \
+	EditorTest
 
-
-
-
+EditorTest.depends += Editor

@@ -28,7 +28,7 @@ void myMessageOutput( QtMsgType type, const QMessageLogContext &context, const Q
 			LogMsg = QString( "%1 - %2" ).arg( DateTime ).arg( msg );
 	}
 
-	if( gMainWindow != 0 )
+	if( gMainWindow )
 	{
 		gMainWindow->log( LogMsg );
 	}
@@ -41,6 +41,12 @@ void myMessageOutput( QtMsgType type, const QMessageLogContext &context, const Q
 
 		LogFil.close();
 	}
+
+#if defined( QT_DEBUG )
+	QTextStream out( stdout, QIODevice::WriteOnly );
+
+	out << msg << "\n";
+#endif
 }
 
 int main( int argc, char *argv[] )
