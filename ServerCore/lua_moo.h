@@ -37,6 +37,8 @@ private:
 	static int luaDebug( lua_State *L );
 	static int luaPlayers( lua_State *L );
 
+	static int luaLastObject( lua_State *L );
+
 	static int luaPanic( lua_State *L );
 
 	static void typeDump( lua_State *L, const int i )

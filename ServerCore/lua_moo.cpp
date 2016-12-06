@@ -43,6 +43,7 @@ const luaL_Reg lua_moo::mLuaGetFunc[] =
 {
 	{ "root", lua_moo::luaRoot },
 	{ "players", lua_moo::luaPlayers },
+	{ "last", lua_moo::luaLastObject },
 	{ 0, 0 }
 };
 
@@ -552,6 +553,39 @@ int lua_moo::luaPlayers( lua_State *L )
 	}
 
 	return( 1 );
+}
+
+int lua_moo::luaLastObject(lua_State *L)
+{
+	bool				 LuaErr = false;
+
+	try
+	{
+		lua_task			*Command = lua_task::luaGetTask( L );
+		Connection			*C = ConnectionManager::instance()->connection( Command->connectionid() );
+		Object				*O = ObjectManager::instance()->object( C->lastCreatedObjectId() );
+
+		if( !O )
+		{
+			throw( mooException( E_INVARG, "no last object" ) );
+		}
+
+		lua_object::lua_pushobject( L, O );
+
+		return( 1 );
+	}
+	catch( mooException e )
+	{
+		e.lua_pushexception( L );
+
+		LuaErr = true;
+	}
+	catch( ... )
+	{
+
+	}
+
+	return( LuaErr ? lua_error( L ) : 0 );
 }
 
 int lua_moo::luaPanic( lua_State *L )

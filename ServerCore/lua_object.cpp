@@ -219,6 +219,13 @@ int lua_object::luaCreate( lua_State *L )
 
 				Command->verbCall( T, FndVrb, 0 );
 			}
+
+			Connection	*CON = ConnectionManager::instance()->connection( Command->connectionid() );
+
+			if( CON )
+			{
+				CON->setLastCreatedObjectId( id );
+			}
 		}
 
 		lua_pushobjectid( L, id );

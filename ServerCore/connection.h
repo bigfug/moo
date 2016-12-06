@@ -81,6 +81,11 @@ public:
 
 	bool supportsLineMode( void ) const;
 
+	ObjectId lastCreatedObjectId( void ) const
+	{
+		return( mLastCreatedObjectId );
+	}
+
 signals:
 	void taskOutput( TaskEntry &pTask );
 	void textOutput( const QString &pText );
@@ -93,6 +98,11 @@ public slots:
 	void setLineModeSupport( bool pLineModeSupport );
 	void setLineMode( LineMode pLineMode );
 
+	void setLastCreatedObjectId( const ObjectId pObjectId )
+	{
+		mLastCreatedObjectId = pObjectId;
+	}
+
 private:
 	ConnectionId		mConnectionId;
 	ObjectId			mObjectId;
@@ -104,6 +114,7 @@ private:
 	QString				mName;
 	QList<InputSink *>	mInputSinkList;
 	bool				mLineModeSupport;
+	ObjectId			mLastCreatedObjectId;
 };
 
 #endif // CONNECTION_H
