@@ -650,7 +650,7 @@ int lua_verb::luaEdit( lua_State *L )
 
 		QStringList		Program = V->script().split( "\n" );
 
-		InputSinkEditor	*IS = new InputSinkEditor( C, O, V, Program );
+		InputSinkEditor	*IS = new InputSinkEditor( C, O, V, *LV->mName, Program );
 
 		if( !IS )
 		{

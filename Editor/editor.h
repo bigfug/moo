@@ -5,6 +5,7 @@
 #include <QPoint>
 #include <QSize>
 #include <QStringList>
+#include <QMap>
 
 class Editor : public QObject
 {
@@ -35,6 +36,19 @@ public:
 		return( mQuit );
 	}
 
+	void addControlSlot( quint8 pASCII, QObject *pObject, QString pSlot );
+	void remControlSlot( quint8 pASCII );
+
+	QStringList text( void ) const
+	{
+		return( mText );
+	}
+
+	void setQuit( bool pQuit )
+	{
+		mQuit = pQuit;
+	}
+
 public slots:
 	void setText( QStringList pText );
 
@@ -50,6 +64,8 @@ public slots:
 
 	void clearScreen( void );
 
+	void setStatusMessage( QString pStatusMessage );
+
 signals:
 	void output( const QString &pData );
 
@@ -63,6 +79,8 @@ private:
 	void processTEXT( QChar pC );
 
 	void drawInfo( void );
+
+	void drawStatusMessage( void );
 
 	void updateCursorScreenPosition( void );
 
@@ -78,6 +96,12 @@ private:
 	QString			mANSIArg;
 	QStringList		mANSIArgs;
 	bool			mQuit;
+
+	typedef QMap<quint8,QPair<QObject *,QString>>	ObjectSlotMap;
+
+	ObjectSlotMap	mSlotMap;
+
+	QString			 mStatusMessage;
 };
 
 #endif // EDITOR_H

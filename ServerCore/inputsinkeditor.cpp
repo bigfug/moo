@@ -8,8 +8,8 @@
 #include "lua_moo.h"
 #include <lua.hpp>
 
-InputSinkEditor::InputSinkEditor( Connection *C, Object *O, Verb *V, QStringList pText )
-	: mConnection( C ), mObject( O ), mVerb( V )
+InputSinkEditor::InputSinkEditor(Connection *C, Object *O, Verb *V, const QString &pVerbName, QStringList pText )
+	: mConnection( C ), mObject( O ), mVerb( V ), mVerbName( pVerbName )
 {
 	mConnection->setLineMode( Connection::REALTIME );
 
@@ -18,6 +18,9 @@ InputSinkEditor::InputSinkEditor( Connection *C, Object *O, Verb *V, QStringList
 	mEditor.setText( pText );
 
 	mEditor.redraw();
+
+	mEditor.addControlSlot( 20, this, "test" );
+	mEditor.addControlSlot( 19, this, "save" );
 }
 
 bool InputSinkEditor::input( const QString &pData )
@@ -39,4 +42,54 @@ void InputSinkEditor::output( const QString &pData )
 	qDebug() << "InputSinkEditor::output" << pData;
 
 	mConnection->notify( pData );
+}
+
+void InputSinkEditor::test()
+{
+	lua_State		*L = luaL_newstate();
+
+	lua_moo::luaNewState( L );
+
+	QByteArray		 P = mEditor.text().join( "\n" ).toUtf8();
+
+	int Error = luaL_loadbuffer( L, P, P.size(), mVerbName.toUtf8() );
+
+	if( Error == 0 )
+	{
+		mEditor.setStatusMessage( "No errors detected" );
+	}
+	else
+	{
+		QString		Result = lua_tostring( L, -1 );
+
+		mEditor.setStatusMessage( Result );
+
+		lua_pop( L, 1 );
+	}
+}
+
+void InputSinkEditor::save()
+{
+	lua_State		*L = luaL_newstate();
+
+	lua_moo::luaNewState( L );
+
+	QByteArray		 P = mEditor.text().join( "\n" ).toUtf8();
+
+	int Error = luaL_loadbuffer( L, P, P.size(), mVerbName.toUtf8() );
+
+	if( Error == 0 )
+	{
+		mVerb->setScript( P );
+
+		mEditor.setQuit( true );
+	}
+	else
+	{
+		QString		Result = lua_tostring( L, -1 );
+
+		mEditor.setStatusMessage( Result );
+
+		lua_pop( L, 1 );
+	}
 }

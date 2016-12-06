@@ -12,6 +12,16 @@ Editor::Editor( QObject *pParent )
 	mTextPosition         = QPoint( 0, 0 );
 }
 
+void Editor::addControlSlot(quint8 pASCII, QObject *pObject, QString pSlot)
+{
+	mSlotMap.insert( pASCII, QPair<QObject *,QString>( pObject, pSlot ) );
+}
+
+void Editor::remControlSlot( quint8 pASCII )
+{
+	mSlotMap.remove( pASCII );
+}
+
 void Editor::setText( QStringList pText )
 {
 	mText = pText;
@@ -61,6 +71,8 @@ void Editor::redraw()
 	drawText();
 
 	drawInfo();
+
+	drawStatusMessage();
 
 	setCursorScreenPosition( 0, 0 );
 }
@@ -337,7 +349,16 @@ void Editor::processCTRL( QChar pC )
 			break;
 
 		default:
-			qDebug() << QString::number( pC.unicode(), 16 );
+			if( mSlotMap.contains( pC.toLatin1() ) )
+			{
+				QPair<QObject *,QString>	ObjSlt = mSlotMap.value( pC.toLatin1() );
+
+				QMetaObject::invokeMethod( ObjSlt.first, ObjSlt.second.toLatin1().constData() );
+			}
+			else
+			{
+				qDebug() << QString::number( pC.unicode(), 16 );
+			}
 			break;
 	}
 }
@@ -373,13 +394,20 @@ void Editor::clearScreen()
 	emit output( "\e[2J" );		// clear whole screen
 }
 
+void Editor::setStatusMessage(QString pStatusMessage)
+{
+	mStatusMessage = pStatusMessage;
+
+	drawStatusMessage();
+}
+
 void Editor::drawInfo()
 {
 	setCursorScreenPosition( 0, mWindowSize.height() - 2 );
 
 	QStringList		InfoList;
 
-	InfoList << QString( "Line: %1" ).arg( mCursorTextPosition.y() );
+	InfoList << QString( "Line: %1" ).arg( mCursorTextPosition.y() + 1 );
 
 	QString			InfoText = InfoList.join( ' ' );
 
@@ -394,6 +422,21 @@ void Editor::drawInfo()
 	emit output( InfoText );
 
 	setCursorScreenPosition( 0, 0 );
+}
+
+void Editor::drawStatusMessage()
+{
+	QPoint		TmpCurPos = mCursorScreenPosition;
+
+	setCursorScreenPosition( 0, mWindowSize.height() - 1 );
+
+	QString		TmpTxt = mStatusMessage.mid( 0, mWindowSize.width() );
+
+	TmpTxt.prepend( "\e[0K" );
+
+	emit output( TmpTxt );
+
+	setCursorScreenPosition( TmpCurPos );
 }
 
 void Editor::updateCursorScreenPosition()
