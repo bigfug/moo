@@ -313,6 +313,21 @@ void Editor::processCTRL( QChar pC )
 			drawText();
 			break;
 
+		case 0x04:			// ^D
+			if( mCursorTextPosition.y() < mText.size() )
+			{
+				mText.removeAt( mCursorTextPosition.y() );
+
+				int		LinLen = mText.at( mCursorTextPosition.y() ).length();
+
+				mCursorTextPosition.rx() = qMin( mCursorTextPosition.x(), LinLen );
+
+				updateCursorScreenPosition();
+
+				drawText();
+			}
+			break;
+
 		case 0x18:			// ^X
 			mQuit = true;
 			emit quit();
