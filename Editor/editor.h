@@ -47,6 +47,8 @@ public slots:
 
 	void redraw( void );
 
+	void clearScreen( void );
+
 signals:
 	void output( const QString &pData );
 
@@ -58,8 +60,6 @@ private:
 	void processANSI( QChar pC );
 	void processCTRL( QChar pC );
 	void processTEXT( QChar pC );
-
-	void clear( void );
 
 	void drawInfo( void );
 

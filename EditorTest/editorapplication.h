@@ -13,6 +13,8 @@ class EditorApplication : public QCoreApplication
 public:
 	EditorApplication( int &argc, char **argv );
 
+	virtual ~EditorApplication( void );
+
 private:
 	Editor				 mEditor;
 	CursesReader		*mInputThread;

@@ -30,3 +30,8 @@ EditorApplication::EditorApplication( int &argc, char **argv )
 
 	mEditor.redraw();
 }
+
+EditorApplication::~EditorApplication()
+{
+	mEditor.clearScreen();
+}

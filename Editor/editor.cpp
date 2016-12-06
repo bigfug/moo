@@ -43,22 +43,20 @@ void Editor::setCursorScreenPosition( int x, int y )
 		return;
 	}
 
-	qDebug() << QString( "\033[%1;%2H" ).arg( y + 1 ).arg( x + 1 );
-
-	emit output( QString( "\033[%1;%2H" ).arg( y + 1 ).arg( x + 1 ) );
+	emit output( QString( "\e[%1;%2H" ).arg( y + 1 ).arg( x + 1 ) );
 
 	mCursorScreenPosition = QPoint( x, y );
 }
 
 void Editor::redraw()
 {
-	clear();
+	clearScreen();
 
 	for( int i = 0 ; i < qMin( mWindowSize.height(), mText.size() ); i++ )
 	{
 		setCursorScreenPosition( 0, i );
 
-		emit output( mText.at( i ) );
+		emit output( mText.at( i ).toLatin1() );
 	}
 
 	drawInfo();
@@ -238,7 +236,7 @@ void Editor::processTEXT( QChar pC )
 	emit output( pC );
 }
 
-void Editor::clear()
+void Editor::clearScreen()
 {
 	setCursorScreenPosition( 0, 0 );
 

@@ -11,9 +11,11 @@ CursesReader::CursesReader()
 	noecho();
 }
 
-void CursesReader::output( const QString &pData )
+void CursesReader::output( const QString &pData ) const
 {
-	addstr( pData.toLatin1().constData() );
+	QTextStream qout( stdout );
+
+	qout << pData;
 
 	refresh();
 }

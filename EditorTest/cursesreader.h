@@ -18,7 +18,7 @@ signals:
 	void resized( int w, int h );
 
 public slots:
-	void output( const QString &pData );
+	void output( const QString &pData ) const;
 
 	// QThread interface
 protected:
