@@ -23,8 +23,12 @@ EditorApplication::EditorApplication( int &argc, char **argv )
 
 	QStringList		Text;
 
-	Text << "Hello, World!";
-	Text << "Line 2";
+	for( int i = 0 ; i < 50 ; i++ )
+	{
+		Text << QString( "Line %1" ).arg( i );
+	}
+
+	Text << QString();
 
 	mEditor.setText( Text );
 

@@ -44,6 +44,7 @@ public slots:
 	void input( const QString &pData );
 
 	void setCursorScreenPosition( int x, int y );
+	void setCursorScreenPosition( const QPoint &pP );
 
 	void redraw( void );
 
@@ -63,10 +64,15 @@ private:
 
 	void drawInfo( void );
 
+	void updateCursorScreenPosition( void );
+
+	void drawText( int pStart = 0 );
+
 private:
 	QSize			mWindowSize;
 	QPoint			mCursorScreenPosition;
 	QPoint			mCursorTextPosition;
+	QPoint			mTextPosition;
 	QStringList		mText;
 	int				mANSI;
 	QString			mANSIArg;

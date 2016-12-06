@@ -1,6 +1,7 @@
 #include "cursesreader.h"
 
 #include <QCoreApplication>
+#include <QTextStream>
 
 CursesReader::CursesReader()
 {
