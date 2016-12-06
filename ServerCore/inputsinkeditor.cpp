@@ -56,7 +56,7 @@ void InputSinkEditor::test()
 
 	if( Error == 0 )
 	{
-		mEditor.setStatusMessage( "No errors detected" );
+		mEditor.setStatusMessage( tr( "No errors detected" ) );
 	}
 	else
 	{
