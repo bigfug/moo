@@ -232,9 +232,9 @@ bool Verb::matchName( const QString &pPatternList, const QString &pMatch )
 
 bool Verb::matchPreposition( const QString &pPreposition )
 {
-	const QStringList	PrpLst = pPreposition.split( "/" );
+	const QStringList	PrpLst = mPreposition.split( "/" );
 
-	return( PrpLst.contains( mPreposition, Qt::CaseInsensitive ) );
+	return( PrpLst.contains( pPreposition, Qt::CaseInsensitive ) );
 }
 
 bool Verb::matchArgs( ObjectId pObjectId, ObjectId DirectObjectId, const QString &pPreposition, ObjectId IndirectObjectId )
