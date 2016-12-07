@@ -7,6 +7,7 @@ void Property::save( QDataStream &pData ) const
 	pData << mWrite;
 	pData << mChange;
 	pData << mValue;
+	pData << mParent;
 }
 
 void Property::load( QDataStream &pData )
@@ -16,6 +17,7 @@ void Property::load( QDataStream &pData )
 	pData >> mWrite;
 	pData >> mChange;
 	pData >> mValue;
+	pData >> mParent;
 }
 
 void Property::setPermissions( quint16 pPerms )
