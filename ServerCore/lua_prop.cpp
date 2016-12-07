@@ -167,7 +167,7 @@ int lua_prop::luaSetValue( lua_State *L, const QString &pPrpNam, Object *pObject
 				}
 				break;
 
-			case QVariant::List:
+			case QVariant::Map:
 				{
 					luaL_checktype( L, pIdx, LUA_TTABLE );
 
@@ -459,24 +459,41 @@ void lua_prop::luaNewRecurse( lua_State *L, int pIdx, QVariant &pVariant )
 
 		case LUA_TTABLE:
 			{
-				QList<QVariant>		Lst;
+				QVariantMap		VarMap;
 
 				lua_pushnil( L );		// first key
 
 				while( lua_next( L, pIdx ) != 0 )
 				{
+					QString			K;
+
+					switch( lua_type( L, -2 ) )
+					{
+						case LUA_TNUMBER:
+							K = QString::number( lua_tointeger( L, -2 ) );
+							break;
+
+						case LUA_TSTRING:
+							K = lua_tostring( L, -2 );
+							break;
+
+						default:
+							lua_pop( L, 1 );
+							continue;
+					}
+
 					QVariant		V;
 
 					luaNewRecurse( L, pIdx + 2, V );
 
-					Lst.append( V );
+					VarMap.insert( K, V );
 
 					/* removes 'value'; keeps 'key' for next iteration */
 
 					lua_pop( L, 1 );
 				}
 
-				pVariant = Lst;
+				pVariant = VarMap;
 			}
 			break;
 

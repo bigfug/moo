@@ -462,11 +462,11 @@ bool Object::matchName( const QString &pName )
 		return( p->value().toString().startsWith( pName, Qt::CaseInsensitive ) );
 	}
 
-	if( p->value().type() == QVariant::List )
+	if( p->value().type() == QVariant::Map )
 	{
-		foreach( QVariant v, p->value().toList() )
+		for( const QVariant &V : p->value().toMap().values() )
 		{
-			if( v.type() == QVariant::String && v.toString().startsWith( pName, Qt::CaseInsensitive ) )
+			if( V.type() == QVariant::String && V.toString().startsWith( pName, Qt::CaseInsensitive ) )
 			{
 				return( true );
 			}

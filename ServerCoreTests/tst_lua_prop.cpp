@@ -354,7 +354,7 @@ void ServerTest::luaPropList( void )
 
 	if( true )
 	{
-		QString			 CMD = QString( "o( %1 ):propadd( 'test', { 12, 'thirteen', { 14, 'fifteen' } } );" ).arg( O->id() );
+		QString			 CMD = QString( "o( %1 ):propadd( 'test', { 12.0, 'thirteen', { 14, 'fifteen' } } );" ).arg( O->id() );
 		TaskEntry		 TE( CMD, CID, Programmer->id() );
 		lua_task		 Com( CID, TE );
 
@@ -364,16 +364,19 @@ void ServerTest::luaPropList( void )
 
 		QVERIFY( P != 0 );
 		QCOMPARE( P->owner(), Programmer->id() );
-		QCOMPARE( P->type(), QVariant::List );
-		QCOMPARE( P->value().toList().size(), 3 );
-		QCOMPARE( P->value().toList()[ 0 ].type(), QVariant::Double );
-		QCOMPARE( P->value().toList()[ 0 ].toDouble(), 12.0 );
-		QCOMPARE( P->value().toList()[ 1 ].type(), QVariant::String );
-		QCOMPARE( P->value().toList()[ 2 ].type(), QVariant::List );
-		QCOMPARE( P->value().toList()[ 2 ].toList().size(), 2 );
-		QCOMPARE( P->value().toList()[ 2 ].toList()[ 0 ].type(), QVariant::Double );
-		QCOMPARE( P->value().toList()[ 2 ].toList()[ 0 ].toDouble(), 14.0 );
-		QCOMPARE( P->value().toList()[ 2 ].toList()[ 1 ].type(), QVariant::String );
+		QCOMPARE( P->type(), QVariant::Map );
+
+		QVariantMap		VarMap = P->value().toMap();
+
+		QCOMPARE( VarMap.size(), 3 );
+		QCOMPARE( VarMap.value( "1" ).type(), QVariant::Double );
+		QCOMPARE( VarMap.value( "1" ).toDouble(), 12.0 );
+		QCOMPARE( VarMap.value( "2" ).type(), QVariant::String );
+		QCOMPARE( VarMap.value( "3" ).type(), QVariant::Map );
+		QCOMPARE( VarMap.value( "3" ).toMap().size(), 2 );
+		QCOMPARE( VarMap.value( "3" ).toMap().value( "1" ).type(), QVariant::Double );
+		QCOMPARE( VarMap.value( "3" ).toMap().value( "1" ).toDouble(), 14.0 );
+		QCOMPARE( VarMap.value( "3" ).toMap().value( "2" ).type(), QVariant::String );
 	}
 
 	if( true )
@@ -386,12 +389,12 @@ void ServerTest::luaPropList( void )
 
 		Property	*P = O->prop( "test" );
 
-		QCOMPARE( P->type(), QVariant::List );
-		QCOMPARE( P->value().toList().size(), 2 );
-		QCOMPARE( P->value().toList()[ 0 ].type(), QVariant::String );
-		QCOMPARE( P->value().toList()[ 0 ].toString(), QString( "hello" ) );
-		QCOMPARE( P->value().toList()[ 1 ].type(), QVariant::String );
-		QCOMPARE( P->value().toList()[ 1 ].toString(), QString( "world" ) );
+		QCOMPARE( P->type(), QVariant::Map );
+		QCOMPARE( P->value().toMap().size(), 2 );
+		QCOMPARE( P->value().toMap().value( "1" ).type(), QVariant::String );
+		QCOMPARE( P->value().toMap().value( "1" ).toString(), QString( "hello" ) );
+		QCOMPARE( P->value().toMap().value( "2" ).type(), QVariant::String );
+		QCOMPARE( P->value().toMap().value( "2" ).toString(), QString( "world" ) );
 	}
 
 	if( true )
@@ -404,12 +407,12 @@ void ServerTest::luaPropList( void )
 
 		Property	*P = O->prop( "test" );
 
-		QCOMPARE( P->type(), QVariant::List );
-		QCOMPARE( P->value().toList().size(), 2 );
-		QCOMPARE( P->value().toList()[ 0 ].type(), QVariant::String );
-		QCOMPARE( P->value().toList()[ 0 ].toString(), QString( "hello" ) );
-		QCOMPARE( P->value().toList()[ 1 ].type(), QVariant::String );
-		QCOMPARE( P->value().toList()[ 1 ].toString(), QString( "world" ) );
+		QCOMPARE( P->type(), QVariant::Map );
+		QCOMPARE( P->value().toMap().size(), 2 );
+		QCOMPARE( P->value().toMap().value( "1" ).type(), QVariant::String );
+		QCOMPARE( P->value().toMap().value( "1" ).toString(), QString( "hello" ) );
+		QCOMPARE( P->value().toMap().value( "2" ).type(), QVariant::String );
+		QCOMPARE( P->value().toMap().value( "2" ).toString(), QString( "world" ) );
 	}
 
 	if( true )
