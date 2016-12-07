@@ -1035,23 +1035,6 @@ int lua_object::luaPropAdd( lua_State *L )
 			throw mooException( E_INVARG, "property already exists" );
 		}
 
-		QVariant	V;
-
-		lua_prop::luaNewRecurse( L, 3, V );
-
-		if( !V.isValid() )
-		{
-			throw mooException( E_INVARG, "value not valid" );
-		}
-
-		P.initialise();
-
-		P.setOwner( T.programmer() );
-
-		P.setValue( V );
-
-		//lua_pushproperty( L, OBJECT_NONE, QString( lua_tostring( L, 1 ) ), P );
-
 		O->ancestors( ObjLst );
 
 		foreach( ObjectId id, ObjLst )
@@ -1061,7 +1044,7 @@ int lua_object::luaPropAdd( lua_State *L )
 				continue;
 			}
 
-			if( ( P2 = O->prop( PropName ) ) == 0 )
+			if( ( P2 = O2->prop( PropName ) ) == 0 )
 			{
 				continue;
 			}
@@ -1080,13 +1063,30 @@ int lua_object::luaPropAdd( lua_State *L )
 				continue;
 			}
 
-			if( ( P2 = O->prop( PropName ) ) == 0 )
+			if( ( P2 = O2->prop( PropName ) ) == 0 )
 			{
 				continue;
 			}
 
 			throw mooException( E_INVARG, "property already defined on descendent" );
 		}
+
+		QVariant	V;
+
+		lua_prop::luaNewRecurse( L, 3, V );
+
+		if( !V.isValid() )
+		{
+			throw mooException( E_INVARG, "value not valid" );
+		}
+
+		P.initialise();
+
+		P.setOwner( T.programmer() );
+
+		P.setValue( V );
+
+		//lua_pushproperty( L, OBJECT_NONE, QString( lua_tostring( L, 1 ) ), P );
 
 		O->propAdd( PropName, P );
 

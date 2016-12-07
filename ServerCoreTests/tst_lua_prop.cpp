@@ -95,7 +95,6 @@ void ServerTest::luaPropNumber( void )
 		Property	*P = O->prop( "test" );
 
 		QVERIFY( P == 0 );
-
 	}
 
 	ObjectManager::reset();

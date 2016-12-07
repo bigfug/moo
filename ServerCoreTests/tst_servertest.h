@@ -105,6 +105,8 @@ private Q_SLOTS:
 
 	void luaPropDelSecurityPass( void );
 
+	void luaPropInheritance( void );
+
 	void cleanupTestCase( void );
 };
 

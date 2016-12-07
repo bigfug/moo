@@ -276,6 +276,8 @@ void Object::propSet( const QString &pName, const QVariant &pValue )
 
 		Property		C = *P;
 
+		C.setParent( parent() );
+
 		if( P->change() )
 		{
 			C.setOwner( id() );
