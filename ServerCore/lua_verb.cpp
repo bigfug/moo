@@ -206,6 +206,36 @@ int lua_verb::luaGet( lua_State *L )
 			return( 1 );
 		}
 
+		if( strcmp( s, "dobj" ) == 0 )
+		{
+			lua_pushstring( L, Verb::argobj_name( V->directObject() ) );
+
+			return( 1 );
+		}
+
+		if( strcmp( s, "iobj" ) == 0 )
+		{
+			lua_pushstring( L, Verb::argobj_name( V->indirectObject() ) );
+
+			return( 1 );
+		}
+
+		if( strcmp( s, "prep" ) == 0 )
+		{
+			QString		Prep = V->preposition();
+
+			if( Prep.isEmpty() )
+			{
+				lua_pushstring( L, Verb::argobj_name( V->prepositionType() ) );
+			}
+			else
+			{
+				lua_pushfstring( L, "%s", Prep.toLatin1().constData() );
+			}
+
+			return( 1 );
+		}
+
 		// Nothing found
 
 		throw( mooException( E_PROPNF, QString( "property '%1' is not defined" ).arg( QString( s ) ) ) );
@@ -390,23 +420,17 @@ int lua_verb::luaSet( lua_State *L )
 				throw( mooException( E_PERM, "player is not owner or wizard" ) );
 			}
 
-			const QString	Direct = luaL_checkstring( L, 3 );
+			const char		*Prep = luaL_checkstring( L, 3 );
+			bool			 PrepTypeOK;
+			Verb::ArgObj	 PrepType = Verb::argobj_from( Prep, &PrepTypeOK );
 
-			if( Direct == "this" )
+			if( PrepTypeOK )
 			{
-				V->setPrepositionArgument( Verb::THIS );
-			}
-			else if( Direct == "any" )
-			{
-				V->setPrepositionArgument( Verb::ANY );
-			}
-			else if( Direct == "none" )
-			{
-				V->setPrepositionArgument( Verb::NONE );
+				V->setPrepositionArgument( PrepType );
 			}
 			else
 			{
-				V->setPrepositionArgument( Direct );
+				V->setPrepositionArgument( Prep );
 			}
 
 			return( 0 );

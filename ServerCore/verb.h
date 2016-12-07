@@ -34,6 +34,51 @@ public:
 	bool matchArgs( ObjectId pObjectId, ObjectId DirectObjectId, const QString &pPreposition, ObjectId IndirectObjectId );
 
 public:
+	static const char *argobj_name( ArgObj pArgObj )
+	{
+		switch( pArgObj )
+		{
+			case Verb::THIS:
+				return( "this" );
+
+			case Verb::ANY:
+				return( "any" );
+
+			case Verb::NONE:
+				return( "none" );
+		}
+
+		return( "unknown" );
+	}
+
+	static ArgObj argobj_from( const char *pArgNam, bool *pOK = 0 )
+	{
+		if( !strcmp( pArgNam, "this" ) )
+		{
+			if( pOK ) *pOK = true;
+
+			return( Verb::THIS );
+		}
+
+		if( !strcmp( pArgNam, "any" ) )
+		{
+			if( pOK ) *pOK = true;
+
+			return( Verb::ANY );
+		}
+
+		if( !strcmp( pArgNam, "none" ) )
+		{
+			if( pOK ) *pOK = true;
+
+			return( Verb::NONE );
+		}
+
+		if( pOK ) *pOK = false;
+
+		return( Verb::NONE );
+	}
+
 	inline ArgObj directObject( void ) const
 	{
 		return( mDirectObject );
