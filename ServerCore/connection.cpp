@@ -8,7 +8,7 @@
 
 Connection::Connection( ConnectionId pConnectionId, QObject *pParent ) :
 	QObject( pParent ), mConnectionId( pConnectionId ), mObjectId( 0 ), mPlayerId( OBJECT_NONE ), mConnectionTime( 0 ), mLastActiveTime( 0 ),
-	mLineModeSupport( true ), mLastCreatedObjectId( OBJECT_NONE )
+	mLineModeSupport( true ), mLastCreatedObjectId( OBJECT_NONE ), mTerminalSize( 80, 24 )
 {
 	mConnectionTime = mLastActiveTime = QDateTime::currentMSecsSinceEpoch();
 }

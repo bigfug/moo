@@ -28,6 +28,7 @@
 #define TELNET_ECHO					(1)
 #define TELNET_SUPPRESS_GO_AHEAD	(3)
 #define TELNET_TERMINAL_TYPE		(24)
+#define TELNET_NAWS					(31)
 
 #define TELNET_MSSP					(70)
 #define MSSP_VAR					(1)
@@ -64,6 +65,7 @@ Listener::Listener( ObjectId pObjectId, quint16 pPort, QObject *pParent ) :
 	mOptions.append( TelnetOption( TELNET_ECHO,					TELNET_WONT, TELNET_DO ) );
 	mOptions.append( TelnetOption( TELNET_SUPPRESS_GO_AHEAD,	TELNET_WONT, TELNET_DONT ) );
 	mOptions.append( TelnetOption( TELNET_TERMINAL_TYPE,		TELNET_WONT, TELNET_DO ) );
+	mOptions.append( TelnetOption( TELNET_NAWS,					TELNET_WONT, TELNET_DO ) );
 }
 
 Listener::~Listener()
@@ -473,6 +475,7 @@ void ListenerSocket::processTelnetSequence( const QByteArray &pData )
 		case TELNET_SUPPRESS_GO_AHEAD:	OptStr = "SUPPRESS_GO_AHEAD";	break;
 		case TELNET_LINEMODE:			OptStr = "LINEMODE";			break;
 		case TELNET_TERMINAL_TYPE:		OptStr = "TERMINAL_TYPE";		break;
+		case TELNET_NAWS:				OptStr = "TELNET_NAWS";			break;
 		default:
 			OptStr = QString::number( Option );
 	}
@@ -557,6 +560,24 @@ void ListenerSocket::processTelnetSequence( const QByteArray &pData )
 				TermName.truncate( TermName.size() - 2 );
 
 				qDebug() << "TERMINAL_TYPE" << QString( TermName );
+			}
+		}
+	}
+
+	if( Option == TELNET_NAWS )
+	{
+		if( Command == TELNET_SB )
+		{
+			quint16	w = ( quint8( pData.at( 3 ) ) << 8 ) | quint8( pData.at( 4 ) );
+			quint16	h = ( quint8( pData.at( 5 ) ) << 8 ) | quint8( pData.at( 6 ) );
+
+			qDebug() << "TERMINAL_NAWS" << w << h;
+
+			Connection		*CON = ConnectionManager::instance()->connection( mConnectionId );
+
+			if( CON )
+			{
+				CON->setTerminalSize( QSize( w, h ) );
 			}
 		}
 	}

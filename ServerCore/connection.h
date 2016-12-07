@@ -3,6 +3,8 @@
 
 #include <QObject>
 #include <QByteArray>
+#include <QSize>
+
 #include "mooglobal.h"
 #include "taskentry.h"
 #include "inputsink.h"
@@ -86,6 +88,11 @@ public:
 		return( mLastCreatedObjectId );
 	}
 
+	QSize terminalSize( void ) const
+	{
+		return( mTerminalSize );
+	}
+
 signals:
 	void taskOutput( TaskEntry &pTask );
 	void textOutput( const QString &pText );
@@ -103,6 +110,11 @@ public slots:
 		mLastCreatedObjectId = pObjectId;
 	}
 
+	void setTerminalSize( QSize pSize )
+	{
+		mTerminalSize = pSize;
+	}
+
 private:
 	ConnectionId		mConnectionId;
 	ObjectId			mObjectId;
@@ -115,6 +127,7 @@ private:
 	QList<InputSink *>	mInputSinkList;
 	bool				mLineModeSupport;
 	ObjectId			mLastCreatedObjectId;
+	QSize				mTerminalSize;
 };
 
 #endif // CONNECTION_H

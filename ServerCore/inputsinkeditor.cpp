@@ -13,6 +13,8 @@ InputSinkEditor::InputSinkEditor(Connection *C, Object *O, Verb *V, const QStrin
 {
 	mConnection->setLineMode( Connection::REALTIME );
 
+	mEditor.setSize( mConnection->terminalSize() );
+
 	connect( &mEditor, SIGNAL(output(QString)), this, SLOT(output(QString)) );
 
 	mEditor.setText( pText );
