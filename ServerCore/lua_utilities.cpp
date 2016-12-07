@@ -50,22 +50,33 @@ int luaL_pushvariant( lua_State *L, const QVariant &pV )
 			lua_pushinteger( L, pV.toInt() );
 			return( 1 );
 
-		case QVariant::List:
-		{
-			const QList<QVariant>		&List = pV.toList();
-			int							 i = 0;
-
-			lua_newtable( L );
-
-			for( QList<QVariant>::const_iterator it = List.constBegin() ; it != List.constEnd() ; it++, i++ )
+		case QVariant::Map:
 			{
-				lua_pushinteger( L, i + 1 );
-				luaL_pushvariant( L, *it );
-				lua_settable( L, -3 );
-			}
+				const QVariantMap		&VarMap = pV.toMap();
 
-			return( 1 );
-		}
+				lua_newtable( L );
+
+				for( QVariantMap::const_iterator it = VarMap.constBegin() ; it != VarMap.constEnd() ; it++ )
+				{
+					QString		K = it.key();
+					bool		B;
+					int			V = K.toInt( &B );
+
+					if( B )
+					{
+						lua_pushinteger( L, V );
+					}
+					else
+					{
+						lua_pushstring( L, K.toLatin1().constData() );
+					}
+
+					luaL_pushvariant( L, *it );
+					lua_settable( L, -3 );
+				}
+
+				return( 1 );
+			}
 
 		default:
 			break;
