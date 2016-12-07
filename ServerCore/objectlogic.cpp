@@ -45,7 +45,7 @@ ObjectId ObjectLogic::create( lua_task &pTask, ObjectId pUserId, ObjectId pParen
 
 	if( objParent != 0 && !objParent->fertile() && !UserOwnsParent && !UserIsWizard )
 	{
-		throw( mooException( E_PERM, "" ) );
+		throw( mooException( E_PERM, "parent is not fertile" ) );
 	}
 
 	if( pOwnerId == OBJECT_UNSPECIFIED && pUserId != OBJECT_NONE )
