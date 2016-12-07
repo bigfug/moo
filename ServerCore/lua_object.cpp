@@ -402,7 +402,8 @@ int lua_object::luaGet( lua_State *L )
 		Verb		*FndVrb;
 		Object		*FndObj;
 
-		if( O->verbFind( s, &FndVrb, &FndObj, T.directObjectId(), T.preposition(), T.indirectObjectId() ) )
+		//if( O->verbFind( s, &FndVrb, &FndObj, T.directObjectId(), T.preposition(), T.indirectObjectId() ) )
+		if( O->verbFind( s, &FndVrb, &FndObj, O->id(), QString(), O->id() ) )
 		{
 			lua_pushstring( L, s );
 			lua_verb::lua_pushverb( L, FndVrb, s, O->id() );
