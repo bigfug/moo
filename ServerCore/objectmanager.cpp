@@ -61,7 +61,10 @@ void ObjectManager::luaMinimal( void )
 
 	Login.setOwner( System->id() );
 	Login.setObject( System->id() );
-	Login.setScript( QString( "return( o( %1 ) );" ).arg( Wizard->id() ) );
+	Login.setScript( QString( "return( o( %1 ) )" ).arg( Wizard->id() ) );
+	Login.setDirectObjectArgument( Verb::THIS );
+	Login.setPrepositionArgument( Verb::NONE );
+	Login.setIndirectObjectArgument( Verb::THIS );
 
 	System->verbAdd( "do_login_command", Login );
 
