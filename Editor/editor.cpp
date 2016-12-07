@@ -326,7 +326,7 @@ void Editor::processCTRL( QChar pC )
 			break;
 
 		case 0x04:			// ^D
-			if( mCursorTextPosition.y() < mText.size() )
+			if( mCursorTextPosition.y() < mText.size() - 1 )
 			{
 				mText.removeAt( mCursorTextPosition.y() );
 
