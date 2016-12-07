@@ -12,6 +12,7 @@
 #include "connectionmanager.h"
 #include "connection.h"
 #include "inputsinkset.h"
+#include "inputsinkedittext.h"
 
 const char	*lua_prop::mLuaName = "moo.prop";
 
@@ -34,6 +35,7 @@ const luaL_Reg lua_prop::mLuaInstanceFunctions[] =
 {
 	{ "dump", lua_prop::luaDump },
 	{ "program", lua_prop::luaProgram },
+	{ "edit", lua_prop::luaEdit },
 	{ 0, 0 }
 };
 
@@ -534,7 +536,7 @@ int lua_prop::luaDump( lua_State *L )
 
 		if( !isWizard && !isOwner && !P->read() )
 		{
-			throw( mooException( E_TYPE, "not allowed to read script" ) );
+			throw( mooException( E_TYPE, "not allowed to read property" ) );
 		}
 
 		if( P->value().type() != QVariant::String )
@@ -596,7 +598,7 @@ int lua_prop::luaProgram( lua_State *L )
 
 		if( !isWizard && !isOwner && !P->read() )
 		{
-			throw( mooException( E_TYPE, "not allowed to read script" ) );
+			throw( mooException( E_TYPE, "not allowed to read property" ) );
 		}
 
 		if( P->value().type() != QVariant::String )
@@ -607,6 +609,70 @@ int lua_prop::luaProgram( lua_State *L )
 		InputSinkSet	*IS = new InputSinkSet( C, O, P, *LP->mName );
 
 		if( IS == 0 )
+		{
+			return( 0 );
+		}
+
+		C->pushInputSink( IS );
+	}
+	catch( mooException e )
+	{
+		e.lua_pushexception( L );
+
+		LuaErr = true;
+	}
+	catch( ... )
+	{
+
+	}
+
+	return( LuaErr ? lua_error( L ) : 0 );
+}
+
+int lua_prop::luaEdit(lua_State *L)
+{
+	bool		LuaErr = false;
+
+	try
+	{
+		luaProp				*LP = arg( L );
+
+		if( LP == 0 )
+		{
+			throw( mooException( E_PERM, "property is invalid" ) );
+		}
+
+		lua_task			*Command = lua_task::luaGetTask( L );
+		const Task			&T = Command->task();
+		Object				*Player = ObjectManager::instance()->object( T.player() );
+
+		Property			*P = LP->mProperty;
+		Object				*O = ObjectManager::o( LP->mObjectId );
+		const bool			 isOwner  = ( Player != 0 && O != 0 ? Player->id() == O->owner() : false );
+		const bool			 isWizard = ( Player != 0 ? Player->wizard() : false );
+
+		Connection			*C = ConnectionManager::instance()->connection( lua_task::luaGetTask( L )->connectionid() );
+
+		if( P == 0 )
+		{
+			throw( mooException( E_TYPE, "invalid property" ) );
+		}
+
+		if( !isWizard && !isOwner && !P->read() )
+		{
+			throw( mooException( E_TYPE, "not allowed to read property" ) );
+		}
+
+		if( P->value().type() != QVariant::String )
+		{
+			throw( mooException( E_TYPE, "can only edit string types" ) );
+		}
+
+		QStringList		Text = P->value().toString().split( "\n" );
+
+		InputSinkEditText	*IS = new InputSinkEditText( C, O, P, Text );
+
+		if( !IS )
 		{
 			return( 0 );
 		}

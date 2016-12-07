@@ -41,7 +41,8 @@ SOURCES += \
 	inputsinkset.cpp \
 	lua_osc.cpp \
 	osc.cpp \
-	inputsinkeditor.cpp
+	inputsinkeditor.cpp \
+    inputsinkedittext.cpp
 
 HEADERS += \
 	verb.h \
@@ -72,7 +73,8 @@ HEADERS += \
 	inputsinkset.h \
 	lua_osc.h \
 	osc.h \
-	inputsinkeditor.h
+	inputsinkeditor.h \
+    inputsinkedittext.h
 
 unix:!symbian {
 	maemo5 {

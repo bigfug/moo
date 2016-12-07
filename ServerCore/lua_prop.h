@@ -39,6 +39,7 @@ private:
 
 	static int luaDump( lua_State *L );
 	static int luaProgram( lua_State *L );
+	static int luaEdit( lua_State *L );
 
 	static const char			*mLuaName;
 
