@@ -60,7 +60,7 @@ void ObjectManager::luaMinimal( void )
 	Login.initialise();
 
 	Login.setOwner( System->id() );
-	Login.setObject( System->id() );
+	Login.setObject( Wizard->id() );
 	Login.setScript( QString( "return( o( %1 ) )" ).arg( Wizard->id() ) );
 	Login.setDirectObjectArgument( Verb::THIS );
 	Login.setPrepositionArgument( Verb::NONE );
