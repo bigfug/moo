@@ -29,8 +29,16 @@
 #define TELNET_BINARY				(0)
 #define TELNET_ECHO					(1)
 #define TELNET_SUPPRESS_GO_AHEAD	(3)
+#define TELNET_STATUS				(5)
+#define TELNET_TIMING_MARK			(6)
 #define TELNET_TERMINAL_TYPE		(24)
+#define TELNET_END_OF_RECORD		(25)
 #define TELNET_NAWS					(31)
+#define TELNET_TERMINAL_SPEED		(32)
+#define TELNET_TOGGLE_FLOW_CONTROL	(33)
+#define TELNET_LINEMODE				(34)
+#define TELNET_X_DISPLAY_LOCATION	(35)
+#define TELNET_NEW_ENVIRON			(39)
 
 #define TELNET_MSSP					(70)
 #define MSSP_VAR					(1)
@@ -40,7 +48,6 @@
 
 #define TELNET_MXP					(91)
 
-#define TELNET_LINEMODE				(34)
 #define LINEMODE_MODE				(1)
 #define LINEMODE_MODE_EDIT			(1)
 #define LINEMODE_MODE_TRAPSIG		(2)
@@ -56,6 +63,19 @@
 #define SLC_DEFAULT					(3)
 
 #define SLC_LEVELBITS				(3)
+
+typedef enum ENVIRON
+{
+	IS = 0,
+	SEND,
+	INFO,
+
+	VAR = 0,
+	VALUE,
+	ESC,
+	USERVAR
+} ENVIRON;
+
 
 Listener::Listener( ObjectId pObjectId, quint16 pPort, QObject *pParent ) :
 	QObject( pParent ), mObjectId( pObjectId ), mServer( this )
@@ -100,6 +120,8 @@ ListenerSocket::ListenerSocket( QObject *pParent, QTcpSocket *pSocket ) :
 	mLastChar  = 0;
 	mAnsiEsc = 0;
 	mAnsiPos = 0;
+
+	mTelnetOptionsSent = mTelnetOptionsReceived = false;
 
 	qDebug() << "Connection established from" << mSocket->peerAddress();
 
@@ -479,11 +501,20 @@ void ListenerSocket::processTelnetSequence( const QByteArray &pData )
 
 	switch( Option )
 	{
+		case TELNET_BINARY:				OptStr = "BINARY";				break;
 		case TELNET_ECHO:				OptStr = "ECHO";				break;
 		case TELNET_SUPPRESS_GO_AHEAD:	OptStr = "SUPPRESS_GO_AHEAD";	break;
-		case TELNET_LINEMODE:			OptStr = "LINEMODE";			break;
+		case TELNET_STATUS:				OptStr = "STATUS";				break;
+		case TELNET_TIMING_MARK:		OptStr = "TIMING_MARK";			break;
 		case TELNET_TERMINAL_TYPE:		OptStr = "TERMINAL_TYPE";		break;
+		case TELNET_END_OF_RECORD:		OptStr = "END_OF_RECORD";		break;
 		case TELNET_NAWS:				OptStr = "TELNET_NAWS";			break;
+		case TELNET_TERMINAL_SPEED:		OptStr = "TERMINAL_SPEED";		break;
+		case TELNET_TOGGLE_FLOW_CONTROL:OptStr = "TOGGLE_FLOW_CONTROL";	break;
+		case TELNET_LINEMODE:			OptStr = "LINEMODE";			break;
+		case TELNET_X_DISPLAY_LOCATION:	OptStr = "X_DISPLAY_LOCATION";	break;
+		case TELNET_NEW_ENVIRON:		OptStr = "NEW_ENVIRON";			break;
+
 		default:
 			OptStr = QString::number( Option );
 	}
@@ -593,18 +624,23 @@ void ListenerSocket::processTelnetSequence( const QByteArray &pData )
 
 void ListenerSocket::inputTimeout( void )
 {
-	QByteArray	Msg;
-
-	for( TelnetOption TE : mOptions )
+	if( !mTelnetOptionsReceived && !mTelnetOptionsSent )
 	{
-		appendTelnetSequence( Msg, TE.mRemote, TE.mOption );
-	}
+		QByteArray	Msg;
+
+		for( TelnetOption TE : mOptions )
+		{
+			appendTelnetSequence( Msg, TE.mRemote, TE.mOption );
+		}
 
 //	qDebug() << "inputTimeout" << Msg;
 
-	if( !Msg.isEmpty() )
-	{
-		sendData( Msg );
+		if( !Msg.isEmpty() )
+		{
+			sendData( Msg );
+		}
+
+		mTelnetOptionsSent = true;
 	}
 
 	TaskEntry		 E( "", mConnectionId );

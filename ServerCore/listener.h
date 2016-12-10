@@ -72,7 +72,6 @@ private:
 	QString					 mBuffer;
 	quint8					 mLastChar;
 	QByteArray				 mTelnetSequence;
-//	int						 mTelnetDepth;
 	bool					 mDataReceived;
 	bool					 mWebSocketActive;
 	bool					 mWebSocketHeader;
@@ -84,6 +83,8 @@ private:
 	int						 mAnsiPos;
 	QList<TelnetOption>		 mOptions;
 	Connection::LineMode	 mLineMode;
+	bool					 mTelnetOptionsSent;
+	bool					 mTelnetOptionsReceived;
 };
 
 class Listener : public QObject
