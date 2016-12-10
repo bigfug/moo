@@ -148,17 +148,17 @@ void ListenerSocket::sendData( const QByteArray &pData )
 		QByteArray	Pkt;
 		int			S = pData.size();
 
-		Pkt.append( uint8_t( 0x80 + 0x01 ) );	// FIN + TEXT
+		Pkt.append( quint8( 0x80 + 0x01 ) );	// FIN + TEXT
 
 		if( S <= 125 )
 		{
-			Pkt.append( uint8_t( S ) );
+			Pkt.append( quint8( S ) );
 		}
 		else if( S <= 0xffff )
 		{
-			Pkt.append( uint8_t( 126 ) );
-			Pkt.append( uint8_t( ( S >> 8 ) & 0xff ) );
-			Pkt.append( uint8_t( ( S >> 0 ) & 0xff ) );
+			Pkt.append( quint8( 126 ) );
+			Pkt.append( quint8( ( S >> 8 ) & 0xff ) );
+			Pkt.append( quint8( ( S >> 0 ) & 0xff ) );
 		}
 
 		Pkt.append( pData );
@@ -177,7 +177,7 @@ void ListenerSocket::processInput( const QByteArray &pData )
 
 	for( int i = 0 ; i < pData.size() ; i++ )
 	{
-		uint8_t		ch = pData.at( i );
+		quint8		ch = pData.at( i );
 
 		if( ch == 0x00 && !mDataReceived && mBuffer.compare( "<policy-file-request/>" ) == 0 )
 		{
@@ -208,7 +208,7 @@ void ListenerSocket::processInput( const QByteArray &pData )
 
 				mTelnetSequence.clear();
 			}
-			else if( mTelnetSequence.size() == 3 && uint8_t( mTelnetSequence.at( 1 ) ) != TELNET_SB )
+			else if( mTelnetSequence.size() == 3 && quint8( mTelnetSequence.at( 1 ) ) != TELNET_SB )
 			{
 				processTelnetSequence( mTelnetSequence );
 
@@ -669,17 +669,17 @@ void ListenerSocket::readyRead( void )
 
 	mWebSocketBuffer.append( mSocket->readAll() );
 
-	while( mWebSocketBuffer.size() > int( sizeof( uint16_t ) ) )
+	while( mWebSocketBuffer.size() > int( sizeof( quint16 ) ) )
 	{
-		uint8_t				H1 = mWebSocketBuffer.at( 0 );
-		uint8_t				H2 = mWebSocketBuffer.at( 1 );
+		quint8				H1 = mWebSocketBuffer.at( 0 );
+		quint8				H2 = mWebSocketBuffer.at( 1 );
 		size_t				U  = 2;
-		uint64_t			L;
+		quint64			L;
 		QByteArray			M;
 
 		// process the length
 
-		uint8_t				PAYLOAD = H2 & 0x7f;
+		quint8				PAYLOAD = H2 & 0x7f;
 
 		if( PAYLOAD <= 125 )
 		{
@@ -687,33 +687,33 @@ void ListenerSocket::readyRead( void )
 		}
 		else if( PAYLOAD == 126 )
 		{
-			if( mWebSocketBuffer.size() < int( U + sizeof( uint16_t ) ) )
+			if( mWebSocketBuffer.size() < int( U + sizeof( quint16 ) ) )
 			{
 				return;
 			}
 
-			uint16_t	S16;
+			quint16	S16;
 
-			memcpy( &S16, mWebSocketBuffer.constData() + U, sizeof( uint16_t ) );
+			memcpy( &S16, mWebSocketBuffer.constData() + U, sizeof( quint16 ) );
 
-			L = qFromBigEndian<uint16_t>( S16 );
+			L = qFromBigEndian<quint16>( S16 );
 
-			U += sizeof( uint16_t );
+			U += sizeof( quint16 );
 		}
 		else if( PAYLOAD == 127 )
 		{
-			if( mWebSocketBuffer.size() < int( U + sizeof( uint64_t ) ) )
+			if( mWebSocketBuffer.size() < int( U + sizeof( quint64 ) ) )
 			{
 				return;
 			}
 
-			uint64_t	S64;
+			quint64	S64;
 
-			memcpy( &S64, mWebSocketBuffer.constData() + U, sizeof( uint64_t ) );
+			memcpy( &S64, mWebSocketBuffer.constData() + U, sizeof( quint64 ) );
 
-			L = qFromBigEndian<uint64_t>( S64 );
+			L = qFromBigEndian<quint64>( S64 );
 
-			U += sizeof( uint64_t );
+			U += sizeof( quint64 );
 		}
 
 		// Extract the mask
@@ -742,7 +742,7 @@ void ListenerSocket::readyRead( void )
 			return;
 		}
 
-		const uint8_t	OP = ( H1 & 0x0f );
+		const quint8	OP = ( H1 & 0x0f );
 
 		switch( OP )
 		{
@@ -801,7 +801,7 @@ void ListenerSocket::processAnsiSequence( const QByteArray &pData )
 {
 	if( pData.size() == 3 )
 	{
-		switch( static_cast<uint8_t>( pData.at( 2 ) ) )
+		switch( static_cast<quint8>( pData.at( 2 ) ) )
 		{
 			case 'C':	// CURSOR FORWARD
 				if( mAnsiPos < mBuffer.size() )

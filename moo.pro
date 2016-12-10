@@ -4,11 +4,15 @@ SUBDIRS += \
 	ServerCore \
 	ServerCoreTests \
 	Server \
-	Editor \
-	EditorTest
+	Editor
 
-EditorTest.depends += Editor
 ServerCoreTests.depends += ServerCore
 Server.depends += ServerCore
 ServerCore.depends += Editor
+
+linux {
+	SUBDIRS += EditorTest
+
+	EditorTest.depends += Editor
+}
 

@@ -70,7 +70,7 @@ private:
 	ConnectionId			 mConnectionId;
 	QTcpSocket				*mSocket;
 	QString					 mBuffer;
-	uint8_t					 mLastChar;
+	quint8					 mLastChar;
 	QByteArray				 mTelnetSequence;
 //	int						 mTelnetDepth;
 	bool					 mDataReceived;

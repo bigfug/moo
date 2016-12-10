@@ -40,26 +40,13 @@ HEADERS += tst_servertest.h \
 
 DEFINES += SRCDIR=\\\"$$PWD/\\\"
 
-win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../ServerCore/release/ -lServerCore
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../ServerCore/debug/ -lServerCore
-else:symbian: LIBS += -lServerCore
-else:unix: LIBS += -L$$OUT_PWD/../ServerCore/ -lServerCore
-
-INCLUDEPATH += $$PWD/../ServerCore
-DEPENDPATH += $$PWD/../ServerCore
-
-win32:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../ServerCore/release/libServerCore.a
-else:win32:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../ServerCore/debug/libServerCore.a
-else:unix:!symbian: PRE_TARGETDEPS += $$OUT_PWD/../ServerCore/libServerCore.a
-
 #----------------------------------------------------------------------------
 # LUA
 
 windows {
-	LIBS += -L$$PWD/../lua/ -llua5.1
+	INCLUDEPATH += $$(LIBS)/Lua-5.1.4/include
 
-	INCLUDEPATH += $$PWD/../lua
-	DEPENDPATH += $$PWD/../lua
+	LIBS += -L$$(LIBS)/Lua-5.1.4 -llua5.1
 }
 
 macx {
@@ -70,7 +57,15 @@ macx {
 
 #----------------------------------------------------------------------------
 
-#INCLUDEPATH += $$PWD/../../bullet-2.80/src
-#DEPENDPATH += $$PWD/../../bullet-2.80/src
-#LIBS += -L$$PWD/../../bullet-2.80/lib/ -lBulletWorldImporter -lBulletFileLoader -lBulletDynamics -lBulletCollision -lLinearMath
+win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../ServerCore/release/ -lServerCore
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../ServerCore/debug/ -lServerCore
+else:unix: LIBS += -L$$OUT_PWD/../ServerCore/ -lServerCore
 
+INCLUDEPATH += $$PWD/../ServerCore
+DEPENDPATH += $$PWD/../ServerCore
+
+win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../ServerCore/release/libServerCore.a
+else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../ServerCore/debug/libServerCore.a
+else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../ServerCore/release/ServerCore.lib
+else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../ServerCore/debug/ServerCore.lib
+else:unix: PRE_TARGETDEPS += $$OUT_PWD/../ServerCore/libServerCore.a

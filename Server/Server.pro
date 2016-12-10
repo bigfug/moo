@@ -12,40 +12,35 @@ FORMS += \
 
 RC_FILE = Server.rc
 
+OTHER_FILES += \
+	Server.rc \
+	moo-icon.ico
+
+RESOURCES += \
+	Server.qrc
+
+#----------------------------------------------------------------------------
+
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../ServerCore/release/ -lServerCore
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../ServerCore/debug/ -lServerCore
-else:symbian: LIBS += -lServerCore
 else:unix: LIBS += -L$$OUT_PWD/../ServerCore/ -lServerCore
 
 INCLUDEPATH += $$PWD/../ServerCore
 DEPENDPATH += $$PWD/../ServerCore
 
-win32:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../ServerCore/release/libServerCore.a
-else:win32:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../ServerCore/debug/libServerCore.a
-else:unix:!symbian: PRE_TARGETDEPS += $$OUT_PWD/../ServerCore/libServerCore.a
+win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../ServerCore/release/libServerCore.a
+else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../ServerCore/debug/libServerCore.a
+else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../ServerCore/release/ServerCore.lib
+else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../ServerCore/debug/ServerCore.lib
+else:unix: PRE_TARGETDEPS += $$OUT_PWD/../ServerCore/libServerCore.a
 
 #----------------------------------------------------------------------------
 # LUA
 
-#win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../lua514-build-desktop/release/ -llua514
-#else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../lua514-build-desktop/debug/ -llua514
-#else:symbian: LIBS += -llua514
-#else:unix: LIBS += -L$$PWD/../../lua514-build-desktop/ -llua514
-
-#INCLUDEPATH += $$PWD/../../lua-5.1.4/src
-#DEPENDPATH += $$PWD/../../lua-5.1.4/src
-#INCLUDEPATH += $$PWD/../../lua-5.1.4/etc
-#DEPENDPATH += $$PWD/../../lua-5.1.4/etc
-
-#win32:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../lua514-build-desktop/release/liblua514.a
-#else:win32:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../lua514-build-desktop/debug/liblua514.a
-#else:unix:!symbian: PRE_TARGETDEPS += $$PWD/../lua514-build-desktop/liblua514.a
-
 windows {
-	LIBS += -L$$PWD/../lua/ -llua5.1
+	INCLUDEPATH += $$(LIBS)/Lua-5.1.4/include
 
-	INCLUDEPATH += $$PWD/../lua
-	DEPENDPATH += $$PWD/../lua
+	LIBS += -L$$(LIBS)/Lua-5.1.4 -llua5.1
 }
 
 macx {
@@ -54,15 +49,3 @@ macx {
 	LIBS += -L/usr/local/opt/lua51/lib -llua5.1
 }
 
-#----------------------------------------------------------------------------
-
-#INCLUDEPATH += $$PWD/../../bullet-2.80/src
-#DEPENDPATH += $$PWD/../../bullet-2.80/src
-#LIBS += -L$$PWD/../../bullet-2.80/lib/ -lBulletWorldImporter -lBulletFileLoader -lBulletDynamics -lBulletCollision -lLinearMath
-
-OTHER_FILES += \
-	Server.rc \
-	moo-icon.ico
-
-RESOURCES += \
-	Server.qrc

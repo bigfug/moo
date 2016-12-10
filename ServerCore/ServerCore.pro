@@ -11,7 +11,7 @@ TARGET = ServerCore
 TEMPLATE = lib
 CONFIG += staticlib create_prl c++11
 
-# DEFINES += LUA_BUILD_AS_DLL
+windows: DEFINES += LUA_BUILD_AS_DLL
 
 PRECOMPILED_HEADER = stdafx.h
 
@@ -89,6 +89,12 @@ macx {
 	INCLUDEPATH += /usr/local/opt/lua51/include/lua-5.1
 
 	LIBS += -L/usr/local/opt/lua51/lib -llua5.1
+}
+
+windows {
+	INCLUDEPATH += $$(LIBS)/Lua-5.1.4/include
+
+	LIBS += -L$$(LIBS)/Lua-5.1.4 -llua5.1
 }
 
 DISTFILES += \
