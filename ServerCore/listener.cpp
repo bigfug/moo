@@ -7,6 +7,8 @@
 #include "mooexception.h"
 #include <QMutexLocker>
 
+//#define DEBUG_LISTERNER
+
 #define TELNET_SE					(240)	// End of subnegotiation parameters
 #define TELNET_NOP					(241)	// No operation.
 #define TELNET_DATA_MARK			(242)	// The data stream portion of a Synch. This should always be accompanied by a TCP Urgent notification.
@@ -141,7 +143,9 @@ bool ListenerSocket::echo() const
 
 void ListenerSocket::sendData( const QByteArray &pData )
 {
-//	qDebug() << "ListenerSocket::sendData" << pData;
+#if defined( DEBUG_LISTERNER )
+	qDebug() << "ListenerSocket::sendData" << pData;
+#endif
 
 	if( mWebSocketActive )
 	{
@@ -173,7 +177,9 @@ void ListenerSocket::sendData( const QByteArray &pData )
 
 void ListenerSocket::processInput( const QByteArray &pData )
 {
-//	qDebug() << "processInput" << pData;
+#if defined( DEBUG_LISTERNER )
+	qDebug() << "processInput" << pData;
+#endif
 
 	for( int i = 0 ; i < pData.size() ; i++ )
 	{
@@ -448,12 +454,14 @@ void ListenerSocket::processInput( const QByteArray &pData )
 
 void ListenerSocket::processTelnetSequence( const QByteArray &pData )
 {
-//	qDebug() << "ListenerSocket::processTelnetSequence" << pData;
+#if defined( DEBUG_LISTERNER )
+	qDebug() << "ListenerSocket::processTelnetSequence" << pData;
+#endif
 
 	const quint8		Command = pData.at( 1 );
 	const quint8		Option  = pData.at( 2 );
 
-#if 0
+#if defined( DEBUG_LISTERNER )
 	QString		CmdStr;
 
 	switch( Command )
