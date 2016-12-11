@@ -445,7 +445,7 @@ int lua_task::executeLogin( void )
 		Task			&T				= mTasks.front();
 		ObjectManager	&OM				= *ObjectManager::instance();
 		Object			*Root			= OM.object( 0 );
-		Verb			*LoginCommand	= ( Root != 0 ? Root->verbMatch( "do_login_command" ) : 0 );
+		Verb			*LoginCommand	= ( Root != 0 ? Root->verbMatch( "do_login_command", Root->id(), "", Root->id() ) : 0 );
 		ObjectId		 MaxId			= OM.maxId();
 		Verb			*V;
 
@@ -495,7 +495,7 @@ int lua_task::executeLogin( void )
 			{
 				if( C->object() != 0 )
 				{
-					if( ( V = Root->verbMatch( "user_client_disconnected" ) ) != 0 )
+					if( ( V = Root->verbMatch( "user_client_disconnected", Root->id(), "", Root->id() ) ) != 0 )
 					{
 						verbCall( Root->id(), V );
 					}
@@ -513,21 +513,21 @@ int lua_task::executeLogin( void )
 
 		if( OM.maxId() > MaxId )
 		{
-			if( ( V = Root->verbMatch( "user_created" ) ) != 0 )
+			if( ( V = Root->verbMatch( "user_created", Root->id(), "", Root->id() ) ) != 0 )
 			{
 				verbCall( Root->id(), V );
 			}
 		}
 		else if( UR )
 		{
-			if( ( V = Root->verbMatch( "user_reconnected" ) ) != 0 )
+			if( ( V = Root->verbMatch( "user_reconnected", Root->id(), "", Root->id() ) ) != 0 )
 			{
 				verbCall( Root->id(), V );
 			}
 		}
 		else
 		{
-			if( ( V = Root->verbMatch( "user_connected" ) ) != 0 )
+			if( ( V = Root->verbMatch( "user_connected", Root->id(), "", Root->id() ) ) != 0 )
 			{
 				verbCall( Root->id(), V );
 			}
@@ -566,9 +566,9 @@ int lua_task::execute( void )
 		//   invoked to handle the command as described below.
 
 		Object		*Root = OM.object( 0 );
-		Verb		*DoCommand = ( Root != 0 ? Root->verbMatch( "do_command" ) : 0 );
+		Verb		*DoCommand = ( Root != 0 ? Root->verbMatch( "do_command", Root->id(), "", Root->id() ) : 0 );
 
-		if( DoCommand != 0 && verbCall( *Root, DoCommand ) == 1 && lua_toboolean( mL, -1 ) == true )
+		if( DoCommand && verbCall( *Root, DoCommand ) == 1 && lua_toboolean( mL, -1 ) )
 		{
 			return( lua_gettop( mL ) );
 		}
