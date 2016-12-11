@@ -31,7 +31,7 @@ bool InputSinkEditor::input( const QString &pData )
 
 	if( mEditor.hasQuit() )
 	{
-		mConnection->notify( "\e[2J\e[1;1H" );
+		mConnection->notify( "\x1b[2J\x1b[1;1H" );
 
 		mConnection->setLineMode( Connection::EDIT );
 	}
@@ -41,7 +41,7 @@ bool InputSinkEditor::input( const QString &pData )
 
 void InputSinkEditor::output( const QString &pData )
 {
-	qDebug() << "InputSinkEditor::output" << pData;
+	//qDebug() << "InputSinkEditor::output" << pData;
 
 	mConnection->notify( pData );
 }

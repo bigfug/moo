@@ -7,76 +7,6 @@
 #include "mooexception.h"
 #include <QMutexLocker>
 
-//#define DEBUG_LISTERNER
-
-#define TELNET_SE					(240)	// End of subnegotiation parameters
-#define TELNET_NOP					(241)	// No operation.
-#define TELNET_DATA_MARK			(242)	// The data stream portion of a Synch. This should always be accompanied by a TCP Urgent notification.
-#define TELNET_BREAK				(243)	// NVT character BRK.
-#define TELNET_INTERRUPT_PROCESS	(244)	// The function IP
-#define TELNET_ABORT_OUTPUT			(245)	// The function AO
-#define TELNET_ARE_YOU_THERE		(246)	// The function AYT
-#define TELNET_ERASE_CHARACTER		(247)	// The function EC
-#define TELNET_ERASE_LINE			(248)	// The function EL.
-#define TELNET_GO_AHREAD			(249)	// The GA signal.
-#define TELNET_SB					(250)	// Indicates that what follows is subnegotiation of the indicated option.
-#define TELNET_WILL					(251)	// Indicates the desire to begin performing, or confirmation that you are now performing, the indicated option.
-#define TELNET_WONT					(252)	// Indicates the refusal to perform, or continue performing, the indicated option.
-#define TELNET_DO					(253)	// Indicates the request that the other party perform, or confirmation that you are expecting the other party to perform, the indicated option.
-#define TELNET_DONT					(254)	// Indicates the demand that the other party stop performing, or confirmation that you are no longer expecting the other party to perform, the indicated option.
-#define TELNET_IAC					(255)	// Data Byte 255.
-
-#define TELNET_BINARY				(0)
-#define TELNET_ECHO					(1)
-#define TELNET_SUPPRESS_GO_AHEAD	(3)
-#define TELNET_STATUS				(5)
-#define TELNET_TIMING_MARK			(6)
-#define TELNET_TERMINAL_TYPE		(24)
-#define TELNET_END_OF_RECORD		(25)
-#define TELNET_NAWS					(31)
-#define TELNET_TERMINAL_SPEED		(32)
-#define TELNET_TOGGLE_FLOW_CONTROL	(33)
-#define TELNET_LINEMODE				(34)
-#define TELNET_X_DISPLAY_LOCATION	(35)
-#define TELNET_NEW_ENVIRON			(39)
-
-#define TELNET_MSSP					(70)
-#define MSSP_VAR					(1)
-#define MSSP_VAL					(2)
-
-#define TELNET_MCCP					(86)
-
-#define TELNET_MXP					(91)
-
-#define LINEMODE_MODE				(1)
-#define LINEMODE_MODE_EDIT			(1)
-#define LINEMODE_MODE_TRAPSIG		(2)
-#define LINEMODE_MODE_ACK			(4)
-#define LINEMODE_MODE_SOFTTAB		(8)
-#define LINEMODE_MODE_LITECHO		(16)
-#define LINEMODE_FORWARDMASK		(2)
-#define LINEMODE_SLC				(3)
-
-#define SLC_NOSUPPORT				(0)
-#define SLC_CANTCHANGE				(1)
-#define SLC_VALUE					(2)
-#define SLC_DEFAULT					(3)
-
-#define SLC_LEVELBITS				(3)
-
-typedef enum ENVIRON
-{
-	IS = 0,
-	SEND,
-	INFO,
-
-	VAR = 0,
-	VALUE,
-	ESC,
-	USERVAR
-} ENVIRON;
-
-
 Listener::Listener( ObjectId pObjectId, quint16 pPort, QObject *pParent ) :
 	QObject( pParent ), mObjectId( pObjectId ), mServer( this )
 {
@@ -84,10 +14,22 @@ Listener::Listener( ObjectId pObjectId, quint16 pPort, QObject *pParent ) :
 
 	mServer.listen( QHostAddress::Any, pPort );
 
-	mOptions.append( TelnetOption( TELNET_ECHO,					TELNET_WONT, TELNET_DO ) );
-	mOptions.append( TelnetOption( TELNET_SUPPRESS_GO_AHEAD,	TELNET_WONT, TELNET_DONT ) );
-	mOptions.append( TelnetOption( TELNET_TERMINAL_TYPE,		TELNET_WONT, TELNET_DO ) );
-	mOptions.append( TelnetOption( TELNET_NAWS,					TELNET_WONT, TELNET_DO ) );
+	static const telnet_telopt_t my_telopts[] = {
+		{ TELNET_TELOPT_ECHO,		TELNET_WONT, TELNET_DO },
+		{ TELNET_TELOPT_TTYPE,		TELNET_WILL, TELNET_DO },
+		{ TELNET_TELOPT_SGA,		TELNET_WONT, TELNET_DONT },
+//		{ TELNET_TELOPT_COMPRESS2, TELNET_WONT, TELNET_DO   },
+//		{ TELNET_TELOPT_ZMP,       TELNET_WONT, TELNET_DO   },
+//		{ TELNET_TELOPT_MSSP,      TELNET_WONT, TELNET_DO   },
+//		{ TELNET_TELOPT_BINARY,    TELNET_WILL, TELNET_DO   },
+		{ TELNET_TELOPT_NAWS,		TELNET_WILL, TELNET_DO },
+		{ -1, 0, 0 }
+	  };
+
+	for( const telnet_telopt_t &ta : my_telopts )
+	{
+		mOptions.append( ta );
+	}
 }
 
 Listener::~Listener()
@@ -121,8 +63,6 @@ ListenerSocket::ListenerSocket( QObject *pParent, QTcpSocket *pSocket ) :
 	mAnsiEsc = 0;
 	mAnsiPos = 0;
 
-	mTelnetOptionsSent = mTelnetOptionsReceived = false;
-
 	qDebug() << "Connection established from" << mSocket->peerAddress();
 
 	mConnectionId = ConnectionManager::instance()->doConnect( reinterpret_cast<Listener *>( parent() )->objectid() );
@@ -143,19 +83,11 @@ ListenerSocket::ListenerSocket( QObject *pParent, QTcpSocket *pSocket ) :
 	connect( &mTimer, SIGNAL(timeout()), this, SLOT(inputTimeout()) );
 
 	mTimer.singleShot( 1000, this, SLOT(inputTimeout()) );
-}
 
-bool ListenerSocket::option( quint8 pOption ) const
-{
-	for( const TelnetOption &TE : mOptions )
-	{
-		if( TE.mOption == pOption )
-		{
-			return( TE.mLocal == TELNET_WILL );
-		}
-	}
+	mTelnet = telnet_init( mOptions.constData(), &ListenerSocket::telnetEventHandlerStatic, 0, this );
 
-	return( false );
+	telnet_negotiate( mTelnet, TELNET_DO, TELNET_TELOPT_NAWS );
+	telnet_negotiate( mTelnet, TELNET_DO, TELNET_TELOPT_TTYPE );
 }
 
 bool ListenerSocket::echo() const
@@ -194,7 +126,9 @@ void ListenerSocket::sendData( const QByteArray &pData )
 		return;
 	}
 
-	mSocket->write( pData );
+	//mSocket->write( pData );
+
+	telnet_send( mTelnet, pData.constData(), pData.size() );
 }
 
 void ListenerSocket::processInput( const QByteArray &pData )
@@ -224,35 +158,35 @@ void ListenerSocket::processInput( const QByteArray &pData )
 
 			return;
 		}
-		else if( !mTelnetSequence.isEmpty() )
-		{
-			mTelnetSequence.push_back( ch );
+//		else if( !mTelnetSequence.isEmpty() )
+//		{
+//			mTelnetSequence.push_back( ch );
 
-			// check for IAC IAC escape
+//			// check for IAC IAC escape
 
-			if( mTelnetSequence.size() == 2 && ch == TELNET_IAC )
-			{
-				mBuffer.push_back( ch );
+//			if( mTelnetSequence.size() == 2 && ch == TELNET_IAC )
+//			{
+//				mBuffer.push_back( ch );
 
-				mTelnetSequence.clear();
-			}
-			else if( mTelnetSequence.size() == 3 && quint8( mTelnetSequence.at( 1 ) ) != TELNET_SB )
-			{
-				processTelnetSequence( mTelnetSequence );
+//				mTelnetSequence.clear();
+//			}
+//			else if( mTelnetSequence.size() == 3 && quint8( mTelnetSequence.at( 1 ) ) != TELNET_SB )
+//			{
+//				processTelnetSequence( mTelnetSequence );
 
-				mTelnetSequence.clear();
-			}
-			else if( ch == TELNET_SE && mLastChar == TELNET_IAC )
-			{
-				processTelnetSequence( mTelnetSequence );
+//				mTelnetSequence.clear();
+//			}
+//			else if( ch == TELNET_SE && mLastChar == TELNET_IAC )
+//			{
+//				processTelnetSequence( mTelnetSequence );
 
-				mTelnetSequence.clear();
-			}
-		}
-		else if( ch == TELNET_IAC )
-		{
-			mTelnetSequence.push_back( ch );
-		}
+//				mTelnetSequence.clear();
+//			}
+//		}
+//		else if( ch == TELNET_IAC )
+//		{
+//			mTelnetSequence.push_back( ch );
+//		}
 		else if( mLineMode == Connection::REALTIME )
 		{
 			Connection		*CON = ConnectionManager::instance()->connection( mConnectionId );
@@ -401,9 +335,9 @@ void ListenerSocket::processInput( const QByteArray &pData )
 						{
 							QByteArray	Tmp;
 
-							Tmp.append( "\e[D" );
+							Tmp.append( "\x1b[D" );
 							Tmp.append( mBuffer.mid( mAnsiPos ) );
-							Tmp.append( QString( " \e[%1D" ).arg( mBuffer.size() + 1 - mAnsiPos ) );
+							Tmp.append( QString( " \x1b[%1D" ).arg( mBuffer.size() + 1 - mAnsiPos ) );
 
 							sendData( Tmp );
 						}
@@ -436,7 +370,7 @@ void ListenerSocket::processInput( const QByteArray &pData )
 					QByteArray	Tmp;
 
 					Tmp.append( mBuffer.mid( mAnsiPos ) );
-					Tmp.append( QString( " \e[%1D" ).arg( mBuffer.size() + 1 - mAnsiPos ) );
+					Tmp.append( QString( " \x1b[%1D" ).arg( mBuffer.size() + 1 - mAnsiPos ) );
 
 					sendData( Tmp );
 				}
@@ -452,7 +386,7 @@ void ListenerSocket::processInput( const QByteArray &pData )
 
 				if( mAnsiPos < mBuffer.size() )
 				{
-					Tmp.append( mBuffer.mid( mAnsiPos - 1 ).append( QString( "\e[%1D" ).arg( mBuffer.size() - mAnsiPos ) ) );
+					Tmp.append( mBuffer.mid( mAnsiPos - 1 ).append( QString( "\x1b[%1D" ).arg( mBuffer.size() - mAnsiPos ) ) );
 				}
 				else
 				{
@@ -474,134 +408,9 @@ void ListenerSocket::processInput( const QByteArray &pData )
 	}
 }
 
+/*
 void ListenerSocket::processTelnetSequence( const QByteArray &pData )
 {
-#if defined( DEBUG_LISTERNER )
-	qDebug() << "ListenerSocket::processTelnetSequence" << pData;
-#endif
-
-	const quint8		Command = pData.at( 1 );
-	const quint8		Option  = pData.at( 2 );
-
-#if defined( DEBUG_LISTERNER )
-	QString		CmdStr;
-
-	switch( Command )
-	{
-		case TELNET_DO:		CmdStr = "DO";		break;
-		case TELNET_DONT:	CmdStr = "DONT";	break;
-		case TELNET_WILL:	CmdStr = "WILL";	break;
-		case TELNET_WONT:	CmdStr = "WONT";	break;
-		case TELNET_SB:		CmdStr = "SB";		break;
-		default:
-			CmdStr = QString::number( Command );
-	}
-
-	QString		OptStr;
-
-	switch( Option )
-	{
-		case TELNET_BINARY:				OptStr = "BINARY";				break;
-		case TELNET_ECHO:				OptStr = "ECHO";				break;
-		case TELNET_SUPPRESS_GO_AHEAD:	OptStr = "SUPPRESS_GO_AHEAD";	break;
-		case TELNET_STATUS:				OptStr = "STATUS";				break;
-		case TELNET_TIMING_MARK:		OptStr = "TIMING_MARK";			break;
-		case TELNET_TERMINAL_TYPE:		OptStr = "TERMINAL_TYPE";		break;
-		case TELNET_END_OF_RECORD:		OptStr = "END_OF_RECORD";		break;
-		case TELNET_NAWS:				OptStr = "TELNET_NAWS";			break;
-		case TELNET_TERMINAL_SPEED:		OptStr = "TERMINAL_SPEED";		break;
-		case TELNET_TOGGLE_FLOW_CONTROL:OptStr = "TOGGLE_FLOW_CONTROL";	break;
-		case TELNET_LINEMODE:			OptStr = "LINEMODE";			break;
-		case TELNET_X_DISPLAY_LOCATION:	OptStr = "X_DISPLAY_LOCATION";	break;
-		case TELNET_NEW_ENVIRON:		OptStr = "NEW_ENVIRON";			break;
-
-		default:
-			OptStr = QString::number( Option );
-	}
-
-	qDebug() << CmdStr << OptStr;
-#endif
-
-	if( Command == TELNET_DO )
-	{
-		for( TelnetOption &TE : mOptions )
-		{
-			if( TE.mOption == Option && TE.mLocal != TELNET_WILL )
-			{
-				QByteArray	Msg;
-
-				appendTelnetSequence( Msg, TELNET_WILL, Option );
-
-				sendData( Msg );
-
-				TE.mLocal = TELNET_WILL;
-
-				break;
-			}
-		}
-	}
-
-	if( Command == TELNET_DONT )
-	{
-		for( TelnetOption &TE : mOptions )
-		{
-			if( TE.mOption == Option && TE.mLocal != TELNET_WONT )
-			{
-				QByteArray	Msg;
-
-				appendTelnetSequence( Msg, TELNET_WONT, Option );
-
-				sendData( Msg );
-
-				TE.mLocal = TELNET_WONT;
-
-				break;
-			}
-		}
-	}
-
-	if( Command == TELNET_WILL || Command == TELNET_WONT )
-	{
-		for( TelnetOption &TE : mOptions )
-		{
-			if( TE.mOption == Option )
-			{
-				TE.mRemote = Command;
-
-				break;
-			}
-		}
-	}
-
-	if( Option == TELNET_TERMINAL_TYPE )
-	{
-		if( Command == TELNET_WILL )
-		{
-			QByteArray	Msg;
-
-			appendTelnetSequence( Msg, TELNET_SB, TELNET_TERMINAL_TYPE );
-
-			Msg.append( 1 );
-
-			Msg.append( TELNET_IAC );
-			Msg.append( TELNET_SE );
-
-			sendData( Msg );
-		}
-		else if( Command == TELNET_SB )
-		{
-			const quint8		IS = pData.at( 3 );
-
-			if( IS == 0 )
-			{
-				QByteArray	TermName = pData.mid( 4 );
-
-				TermName.truncate( TermName.size() - 2 );
-
-				qDebug() << "TERMINAL_TYPE" << QString( TermName );
-			}
-		}
-	}
 
 	if( Option == TELNET_NAWS )
 	{
@@ -621,28 +430,10 @@ void ListenerSocket::processTelnetSequence( const QByteArray &pData )
 		}
 	}
 }
+*/
 
 void ListenerSocket::inputTimeout( void )
 {
-	if( !mTelnetOptionsReceived && !mTelnetOptionsSent )
-	{
-		QByteArray	Msg;
-
-		for( TelnetOption TE : mOptions )
-		{
-			appendTelnetSequence( Msg, TE.mRemote, TE.mOption );
-		}
-
-//	qDebug() << "inputTimeout" << Msg;
-
-		if( !Msg.isEmpty() )
-		{
-			sendData( Msg );
-		}
-
-		mTelnetOptionsSent = true;
-	}
-
 	TaskEntry		 E( "", mConnectionId );
 
 	ObjectManager::instance()->queueTask( E );
@@ -650,46 +441,18 @@ void ListenerSocket::inputTimeout( void )
 
 void ListenerSocket::setLineMode( Connection::LineMode pLineMode )
 {
-	QByteArray	Msg;
-
 	if( pLineMode == Connection::EDIT )
 	{
-		setTelnetOption( TELNET_ECHO, TELNET_WONT );
-		setTelnetOption( TELNET_SUPPRESS_GO_AHEAD, TELNET_WONT );
-
-		appendTelnetSequence( Msg, TELNET_WONT, TELNET_ECHO );
-		appendTelnetSequence( Msg, TELNET_WONT, TELNET_SUPPRESS_GO_AHEAD );
+		telnet_negotiate( mTelnet, TELNET_WONT, TELNET_TELOPT_ECHO );
+		telnet_negotiate( mTelnet, TELNET_WONT, TELNET_TELOPT_SGA );
 	}
 	else
 	{
-		setTelnetOption( TELNET_ECHO, TELNET_WILL );
-		setTelnetOption( TELNET_SUPPRESS_GO_AHEAD, TELNET_WILL );
-
-		appendTelnetSequence( Msg, TELNET_WILL, TELNET_ECHO );
-		appendTelnetSequence( Msg, TELNET_WILL, TELNET_SUPPRESS_GO_AHEAD );
+		telnet_negotiate( mTelnet, TELNET_WILL, TELNET_TELOPT_ECHO );
+		telnet_negotiate( mTelnet, TELNET_WILL, TELNET_TELOPT_SGA );
 	}
-
-	if( !Msg.isEmpty() )
-	{
-		sendData( Msg );
-	}
-
-//	qDebug() << "setLineMode" << Msg;
 
 	mLineMode = pLineMode;
-}
-
-void ListenerSocket::setTelnetOption(quint8 pOption, quint8 pCommand)
-{
-	for( TelnetOption &TE : mOptions )
-	{
-		if( TE.mOption == pOption )
-		{
-			TE.mLocal = pCommand;
-
-			return;
-		}
-	}
 }
 
 void ListenerSocket::disconnected( void )
@@ -708,7 +471,13 @@ void ListenerSocket::readyRead( void )
 
 	if( !mWebSocketActive )
 	{
-		processInput( mSocket->readAll() );
+		const QByteArray	SckDat = mSocket->readAll();
+
+		qDebug() << "RECV" << SckDat;
+
+		telnet_recv( mTelnet, SckDat.constData(), SckDat.size() );
+
+		return;
 	}
 
 	mWebSocketBuffer.append( mSocket->readAll() );
@@ -852,7 +621,7 @@ void ListenerSocket::processAnsiSequence( const QByteArray &pData )
 				{
 					mAnsiPos++;
 
-					sendData( "\e[C" );
+					sendData( "\x1b[C" );
 				}
 				break;
 
@@ -861,7 +630,7 @@ void ListenerSocket::processAnsiSequence( const QByteArray &pData )
 				{
 					mAnsiPos--;
 
-					sendData( "\e[D" );
+					sendData( "\x1b[D" );
 				}
 				break;
 
@@ -874,4 +643,65 @@ void ListenerSocket::appendTelnetSequence( QByteArray &pA, const quint8 p1, cons
 	pA.append( TELNET_IAC );
 	pA.append( p1 );
 	pA.append( p2 );
+}
+
+void ListenerSocket::telnetEventHandlerStatic(telnet_t *telnet, telnet_event_t *event, void *user_data)
+{
+	Q_UNUSED( telnet )
+
+	((ListenerSocket *)user_data)->telnetEventHandler( event );
+}
+
+void ListenerSocket::telnetEventHandler(telnet_event_t *event)
+{
+	if( event->type == TELNET_EV_DATA )
+	{
+		qDebug() << "DATA" << QByteArray::fromRawData( event->data.buffer, event->data.size );
+
+		processInput( QByteArray::fromRawData( event->data.buffer, event->data.size ) );
+	}
+	else if( event->type == TELNET_EV_SEND )
+	{
+		qDebug() << "SEND" << QByteArray::fromRawData( event->data.buffer, event->data.size );
+
+		mSocket->write( event->data.buffer, event->data.size );
+	}
+	else if( event->type == TELNET_EV_WILL )
+	{
+		switch( event->neg.telopt )
+		{
+			case TELNET_TELOPT_TTYPE:
+				telnet_subnegotiation( mTelnet, TELNET_TELOPT_TTYPE, "\1", 1 );
+				break;
+		}
+	}
+	else if( event->type == TELNET_EV_SUBNEGOTIATION )
+	{
+		switch( event->sub.telopt )
+		{
+			case TELNET_TELOPT_TTYPE:
+				qDebug() << "TTYPE" << QByteArray::fromRawData( event->sub.buffer, event->sub.size );
+				break;
+
+			case TELNET_TELOPT_NAWS:
+				{
+					quint16	w = ( event->sub.buffer[ 0 ] << 8 ) | event->sub.buffer[ 1 ];
+					quint16	h = ( event->sub.buffer[ 2 ] << 8 ) | event->sub.buffer[ 3 ];
+
+					qDebug() << "TERMINAL_NAWS" << w << h;
+
+					Connection		*CON = ConnectionManager::instance()->connection( mConnectionId );
+
+					if( CON )
+					{
+						CON->setTerminalSize( QSize( w, h ) );
+					}
+				}
+				break;
+		}
+	}
+	else
+	{
+		qDebug() << event->type;
+	}
 }

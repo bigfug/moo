@@ -10,18 +10,7 @@
 #include <QTimerEvent>
 #include <QMutex>
 
-typedef struct TelnetOption
-{
-	quint8			mOption;
-	quint8			mLocal;
-	quint8			mRemote;
-
-	TelnetOption( quint8 pOption, quint8 pLocal = 0, quint8 pRemote = 0 )
-		: mOption( pOption ), mLocal( pLocal ), mRemote( pRemote )
-	{
-
-	}
-} TelnetOption;
+#include "libtelnet.h"
 
 class ListenerSocket : public QObject
 {
@@ -35,22 +24,24 @@ public:
 		return( mConnectionId );
 	}
 
-	void setOptions( const QList<TelnetOption> &pOptions )
+	void setOptions( const QVector<telnet_telopt_t> &pOptions )
 	{
 		mOptions = pOptions;
 	}
 
 	bool echo( void ) const;
 
-	bool option( quint8 pOption ) const;
-
 private:
 	void sendData( const QByteArray &pData );
 	void processInput( const QByteArray &pData );
-	void processTelnetSequence( const QByteArray &pData );
+//	void processTelnetSequence( const QByteArray &pData );
 	void processAnsiSequence( const QByteArray &pData );
 
 	static void appendTelnetSequence( QByteArray &pA, const quint8 p1, const quint8 p2 );
+
+	static void telnetEventHandlerStatic( telnet_t *telnet, telnet_event_t *event, void *user_data );
+
+	void telnetEventHandler( telnet_event_t *event );
 
 private slots:
 	void disconnected( void );
@@ -59,8 +50,6 @@ private slots:
 	void inputTimeout( void );
 
 	void setLineMode( Connection::LineMode pLineMode );
-
-	void setTelnetOption( quint8 pOption, quint8 pCommand );
 
 signals:
 	void textOutput( const QString &pText );
@@ -81,7 +70,8 @@ private:
 	int						 mAnsiEsc;
 	QByteArray				 mAnsiSeq;
 	int						 mAnsiPos;
-	QList<TelnetOption>		 mOptions;
+	telnet_t				*mTelnet;
+	QVector<telnet_telopt_t>	 mOptions;
 	Connection::LineMode	 mLineMode;
 	bool					 mTelnetOptionsSent;
 	bool					 mTelnetOptionsReceived;
@@ -105,10 +95,10 @@ private slots:
 	void newConnection( void );
 
 private:
-	ObjectId				 mObjectId;
-	QTcpServer				 mServer;
-	ObjectId				 mListeningObjectId;
-	QList<TelnetOption>		 mOptions;
+	ObjectId					 mObjectId;
+	QTcpServer					 mServer;
+	ObjectId					 mListeningObjectId;
+	QVector<telnet_telopt_t>	 mOptions;
 };
 
 #endif // LISTENER_H

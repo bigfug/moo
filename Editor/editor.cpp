@@ -54,7 +54,7 @@ void Editor::setCursorScreenPosition( int x, int y )
 		return;
 	}
 
-	emit output( QString( "\e[%1;%2H" ).arg( y + 1 ).arg( x + 1 ) );
+	emit output( QString( "\x1b[%1;%2H" ).arg( y + 1 ).arg( x + 1 ) );
 
 	mCursorScreenPosition = QPoint( x, y );
 }
@@ -391,7 +391,7 @@ void Editor::clearScreen()
 {
 	setCursorScreenPosition( 0, 0 );
 
-	emit output( "\e[2J" );		// clear whole screen
+	emit output( "\x1b[2J" );		// clear whole screen
 }
 
 void Editor::setStatusMessage(QString pStatusMessage)
@@ -416,8 +416,8 @@ void Editor::drawInfo()
 		InfoText.resize( mWindowSize.width() );
 	}
 
-	InfoText.prepend( "\e[30;103m" );	// set black fg, bright yellow bg
-	InfoText.append( "\e[0K\e[0m" );	// clear to EOL, reset attributes
+	InfoText.prepend( "\x1b[30;103m" );	// set black fg, bright yellow bg
+	InfoText.append( "\x1b[0K\x1b[0m" );	// clear to EOL, reset attributes
 
 	emit output( InfoText );
 
@@ -432,7 +432,7 @@ void Editor::drawStatusMessage()
 
 	QString		TmpTxt = mStatusMessage.mid( 0, mWindowSize.width() );
 
-	TmpTxt.prepend( "\e[0K" );
+	TmpTxt.prepend( "\x1b[0K" );
 
 	emit output( TmpTxt );
 
@@ -513,7 +513,7 @@ void Editor::drawText( int pStart )
 			TmpTxt = TmpTxt.mid( mTextPosition.x(), mWindowSize.width() );
 		}
 
-		TmpTxt.prepend( "\e[0K" );
+		TmpTxt.prepend( "\x1b[0K" );
 
 		emit output( TmpTxt );
 	}
