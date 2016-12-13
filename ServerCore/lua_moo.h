@@ -34,6 +34,7 @@ private:
 	static int luaRoot( lua_State *L );
 	static int luaPass( lua_State *L );
 	static int luaEval( lua_State *L );
+	static int luaHash( lua_State *L );
 	static int luaDebug( lua_State *L );
 	static int luaPlayers( lua_State *L );
 

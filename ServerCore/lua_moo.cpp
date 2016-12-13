@@ -1,4 +1,5 @@
 #include <QDebug>
+#include <QCryptographicHash>
 
 #include "lua_moo.h"
 #include "lua_object.h"
@@ -36,6 +37,7 @@ const luaL_Reg lua_moo::mLuaStatic[] =
 	{ "pass", lua_moo::luaPass },
 	{ "eval", lua_moo::luaEval },
 	{ "debug", lua_moo::luaDebug },
+	{ "hash", lua_moo::luaHash },
 	{ 0, 0 }
 };
 
@@ -525,6 +527,17 @@ int lua_moo::luaEval( lua_State *L )
 	}
 
 	return( LuaErr ? lua_error( L ) : 0 );
+}
+
+int lua_moo::luaHash(lua_State *L)
+{
+	const char	*S = luaL_checkstring( L, -1 );
+
+	QByteArray	 H = QCryptographicHash::hash( S, QCryptographicHash::Sha256 );
+
+	lua_pushlstring( L, H.constData(), H.size() );
+
+	return( 1 );
 }
 
 int lua_moo::luaDebug( lua_State *L )
