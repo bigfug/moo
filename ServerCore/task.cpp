@@ -164,7 +164,7 @@ int Task::findPreposition( const QStringList &pWords )
 
 			if( PrpSet.contains( CurWrd ) )
 			{
-				mPreposition = s;
+				mPreposition = CurWrd;
 
 				return( i );
 			}
