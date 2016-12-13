@@ -30,6 +30,6 @@ HEADERS += \
 	editorapplication.h \
 	cursesreader.h
 
-macx {
+linux {
 	LIBS += -lcurses
 }
