@@ -4,11 +4,13 @@ SUBDIRS += \
 	ServerCore \
 	ServerCoreTests \
 	Server \
-	Editor
+	Editor \
+	Daemon
 
 ServerCoreTests.depends += ServerCore
 Server.depends += ServerCore
 ServerCore.depends += Editor
+Daemon.depends += ServerCore
 
 linux {
 	SUBDIRS += EditorTest

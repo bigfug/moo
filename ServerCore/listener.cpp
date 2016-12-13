@@ -473,7 +473,7 @@ void ListenerSocket::readyRead( void )
 	{
 		const QByteArray	SckDat = mSocket->readAll();
 
-		qDebug() << "RECV" << SckDat;
+		//qDebug() << "RECV" << SckDat;
 
 		telnet_recv( mTelnet, SckDat.constData(), SckDat.size() );
 
@@ -656,13 +656,13 @@ void ListenerSocket::telnetEventHandler(telnet_event_t *event)
 {
 	if( event->type == TELNET_EV_DATA )
 	{
-		qDebug() << "DATA" << QByteArray::fromRawData( event->data.buffer, event->data.size );
+		//qDebug() << "DATA" << QByteArray::fromRawData( event->data.buffer, event->data.size );
 
 		processInput( QByteArray::fromRawData( event->data.buffer, event->data.size ) );
 	}
 	else if( event->type == TELNET_EV_SEND )
 	{
-		qDebug() << "SEND" << QByteArray::fromRawData( event->data.buffer, event->data.size );
+		//qDebug() << "SEND" << QByteArray::fromRawData( event->data.buffer, event->data.size );
 
 		mSocket->write( event->data.buffer, event->data.size );
 	}
@@ -680,7 +680,7 @@ void ListenerSocket::telnetEventHandler(telnet_event_t *event)
 		switch( event->sub.telopt )
 		{
 			case TELNET_TELOPT_TTYPE:
-				qDebug() << "TTYPE" << QByteArray::fromRawData( event->sub.buffer, event->sub.size );
+				//qDebug() << "TTYPE" << QByteArray::fromRawData( event->sub.buffer, event->sub.size );
 				break;
 
 			case TELNET_TELOPT_NAWS:
@@ -688,7 +688,7 @@ void ListenerSocket::telnetEventHandler(telnet_event_t *event)
 					quint16	w = ( event->sub.buffer[ 0 ] << 8 ) | event->sub.buffer[ 1 ];
 					quint16	h = ( event->sub.buffer[ 2 ] << 8 ) | event->sub.buffer[ 3 ];
 
-					qDebug() << "TERMINAL_NAWS" << w << h;
+					//qDebug() << "TERMINAL_NAWS" << w << h;
 
 					Connection		*CON = ConnectionManager::instance()->connection( mConnectionId );
 
@@ -702,6 +702,6 @@ void ListenerSocket::telnetEventHandler(telnet_event_t *event)
 	}
 	else
 	{
-		qDebug() << event->type;
+		//qDebug() << event->type;
 	}
 }

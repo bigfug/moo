@@ -2,7 +2,7 @@
 
 void mooException::lua_pushexception(lua_State *L)
 {
-	qDebug() << mMessage;
+	//qDebug() << mMessage;
 
 	luaL_where( L, 1 );
 	lua_pushstring( L, mMessage.toLatin1() );

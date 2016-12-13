@@ -161,7 +161,7 @@ Object *ObjectManager::newObject( void )
 
 		if( mODB )
 		{
-			mODB->registerObject( O );
+			mODB->registerObject( *O );
 		}
 	}
 
