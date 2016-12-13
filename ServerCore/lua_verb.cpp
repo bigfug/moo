@@ -366,15 +366,15 @@ int lua_verb::luaSet( lua_State *L )
 
 			if( Direct == "this" )
 			{
-				V->setDirectObjectArgument( Verb::THIS );
+				V->setDirectObjectArgument( THIS );
 			}
 			else if( Direct == "any" )
 			{
-				V->setDirectObjectArgument( Verb::ANY );
+				V->setDirectObjectArgument( ANY );
 			}
 			else if( Direct == "none" )
 			{
-				V->setDirectObjectArgument( Verb::NONE );
+				V->setDirectObjectArgument( NONE );
 			}
 			else
 			{
@@ -395,15 +395,15 @@ int lua_verb::luaSet( lua_State *L )
 
 			if( Direct == "this" )
 			{
-				V->setIndirectObjectArgument( Verb::THIS );
+				V->setIndirectObjectArgument( THIS );
 			}
 			else if( Direct == "any" )
 			{
-				V->setIndirectObjectArgument( Verb::ANY );
+				V->setIndirectObjectArgument( ANY );
 			}
 			else if( Direct == "none" )
 			{
-				V->setIndirectObjectArgument( Verb::NONE );
+				V->setIndirectObjectArgument( NONE );
 			}
 			else
 			{
@@ -422,7 +422,7 @@ int lua_verb::luaSet( lua_State *L )
 
 			const char		*Prep = luaL_checkstring( L, 3 );
 			bool			 PrepTypeOK;
-			Verb::ArgObj	 PrepType = Verb::argobj_from( Prep, &PrepTypeOK );
+			ArgObj			 PrepType = Verb::argobj_from( Prep, &PrepTypeOK );
 
 			if( PrepTypeOK )
 			{

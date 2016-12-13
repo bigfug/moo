@@ -49,39 +49,39 @@ void ServerTest::verbGetSet( void )
 
 	QVERIFY( V.dirty() == false );
 
-	QVERIFY( V.directObject() == Verb::ANY );
-	QVERIFY( V.indirectObject() == Verb::ANY );
-	QVERIFY( V.prepositionType() == Verb::ANY );
+	QVERIFY( V.directObject() == ANY );
+	QVERIFY( V.indirectObject() == ANY );
+	QVERIFY( V.prepositionType() == ANY );
 	QVERIFY( V.preposition().isEmpty() );
 
-	V.setDirectObjectArgument( Verb::NONE );
-	QVERIFY( V.directObject() == Verb::NONE );
+	V.setDirectObjectArgument( NONE );
+	QVERIFY( V.directObject() == NONE );
 
-	V.setDirectObjectArgument( Verb::THIS );
-	QVERIFY( V.directObject() == Verb::THIS );
+	V.setDirectObjectArgument( THIS );
+	QVERIFY( V.directObject() == THIS );
 
-	V.setDirectObjectArgument( Verb::ANY );
-	QVERIFY( V.directObject() == Verb::ANY );
+	V.setDirectObjectArgument( ANY );
+	QVERIFY( V.directObject() == ANY );
 
-	V.setIndirectObjectArgument( Verb::NONE );
-	QVERIFY( V.indirectObject() == Verb::NONE );
+	V.setIndirectObjectArgument( NONE );
+	QVERIFY( V.indirectObject() == NONE );
 
-	V.setIndirectObjectArgument( Verb::THIS );
-	QVERIFY( V.indirectObject() == Verb::THIS );
+	V.setIndirectObjectArgument( THIS );
+	QVERIFY( V.indirectObject() == THIS );
 
-	V.setIndirectObjectArgument( Verb::ANY );
-	QVERIFY( V.indirectObject() == Verb::ANY );
+	V.setIndirectObjectArgument( ANY );
+	QVERIFY( V.indirectObject() == ANY );
 
-	V.setPrepositionArgument( Verb::NONE );
-	QVERIFY( V.prepositionType() == Verb::NONE );
+	V.setPrepositionArgument( NONE );
+	QVERIFY( V.prepositionType() == NONE );
 	QVERIFY( V.preposition().isEmpty() );
 
 	V.setPrepositionArgument( "from" );
-	QVERIFY( V.prepositionType() == Verb::THIS );
+	QVERIFY( V.prepositionType() == THIS );
 	QCOMPARE( V.preposition(), QString( "from" ) );
 
-	V.setPrepositionArgument( Verb::ANY );
-	QVERIFY( V.prepositionType() == Verb::ANY );
+	V.setPrepositionArgument( ANY );
+	QVERIFY( V.prepositionType() == ANY );
 	QVERIFY( V.preposition().isEmpty() );
 }
 
@@ -91,52 +91,52 @@ void ServerTest::verbArgs( void )
 
 	V.initialise();
 
-	V.setDirectObjectArgument( Verb::NONE );
-	V.setIndirectObjectArgument( Verb::NONE );
-	V.setPrepositionArgument( Verb::NONE );
+	V.setDirectObjectArgument( NONE );
+	V.setIndirectObjectArgument( NONE );
+	V.setPrepositionArgument( NONE );
 
 	QVERIFY( V.matchArgs( OBJECT_NONE, OBJECT_NONE, "", OBJECT_NONE ) );
 
 	// Test Direct Object
 
-	V.setDirectObjectArgument( Verb::ANY );
+	V.setDirectObjectArgument( ANY );
 
 	QVERIFY( V.matchArgs( OBJECT_NONE, OBJECT_NONE, "", OBJECT_NONE ) );
 	QVERIFY( V.matchArgs( OBJECT_NONE, 123, "", OBJECT_NONE ) );
 
-	V.setDirectObjectArgument( Verb::THIS );
+	V.setDirectObjectArgument( THIS );
 
 	QVERIFY( V.matchArgs( OBJECT_NONE, OBJECT_NONE, "", OBJECT_NONE ) );
 	QVERIFY( !V.matchArgs( 123, OBJECT_NONE, "", OBJECT_NONE ) );
 	QVERIFY( !V.matchArgs( OBJECT_NONE, 123, "", OBJECT_NONE ) );
 	QVERIFY( V.matchArgs( 123, 123, "", OBJECT_NONE ) );
 
-	V.setDirectObjectArgument( Verb::NONE );
+	V.setDirectObjectArgument( NONE );
 
 	// Test Indirect Object
 
-	V.setIndirectObjectArgument( Verb::ANY );
+	V.setIndirectObjectArgument( ANY );
 
 	QVERIFY( V.matchArgs( OBJECT_NONE, OBJECT_NONE, "", OBJECT_NONE ) );
 	QVERIFY( V.matchArgs( OBJECT_NONE, OBJECT_NONE, "", 123 ) );
 
-	V.setIndirectObjectArgument( Verb::THIS );
+	V.setIndirectObjectArgument( THIS );
 
 	QVERIFY( V.matchArgs( OBJECT_NONE, OBJECT_NONE, "", OBJECT_NONE ) );
 	QVERIFY( !V.matchArgs( OBJECT_NONE, OBJECT_NONE, "", 123 ) );
 	QVERIFY( !V.matchArgs( 123, OBJECT_NONE, "", OBJECT_NONE ) );
 	QVERIFY( V.matchArgs( 123, OBJECT_NONE, "", 123 ) );
 
-	V.setIndirectObjectArgument( Verb::NONE );
+	V.setIndirectObjectArgument( NONE );
 
 	// Test Preposition
 
-	V.setPrepositionArgument( Verb::NONE );
+	V.setPrepositionArgument( NONE );
 
 	QVERIFY( V.matchArgs( OBJECT_NONE, OBJECT_NONE, "", OBJECT_NONE ) );
 	QVERIFY( !V.matchArgs( OBJECT_NONE, OBJECT_NONE, "burble", OBJECT_NONE ) );
 
-	V.setPrepositionArgument( Verb::ANY );
+	V.setPrepositionArgument( ANY );
 
 	QVERIFY( V.matchArgs( OBJECT_NONE, OBJECT_NONE, "", OBJECT_NONE ) );
 	QVERIFY( V.matchArgs( OBJECT_NONE, OBJECT_NONE, "burble", OBJECT_NONE ) );

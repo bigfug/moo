@@ -1,50 +1,30 @@
 #include "property.h"
 
-void Property::save( QDataStream &pData ) const
-{
-	pData << mOwner;
-	pData << mRead;
-	pData << mWrite;
-	pData << mChange;
-	pData << mValue;
-	pData << mParent;
-}
-
-void Property::load( QDataStream &pData )
-{
-	pData >> mOwner;
-	pData >> mRead;
-	pData >> mWrite;
-	pData >> mChange;
-	pData >> mValue;
-	pData >> mParent;
-}
-
 void Property::setPermissions( quint16 pPerms )
 {
-	mRead   = ( pPerms & Property::READ );
-	mWrite  = ( pPerms & Property::WRITE );
-	mChange = ( pPerms & Property::CHANGE );
+	mData.mRead   = ( pPerms & Property::READ );
+	mData.mWrite  = ( pPerms & Property::WRITE );
+	mData.mChange = ( pPerms & Property::CHANGE );
 }
 
 quint16 Property::permissions( void ) const
 {
 	quint16			P = 0;
 
-	if( mRead   ) P |= Property::READ;
-	if( mWrite  ) P |= Property::WRITE;
-	if( mChange ) P |= Property::CHANGE;
+	if( mData.mRead   ) P |= Property::READ;
+	if( mData.mWrite  ) P |= Property::WRITE;
+	if( mData.mChange ) P |= Property::CHANGE;
 
 	return( P );
 }
 
 void Property::initialise( void )
 {
-	mParent = -1;
-	mOwner  = -1;
-	mRead   = false;
-	mWrite  = false;
-	mChange = true;
+	mData.mParent = -1;
+	mData.mOwner  = -1;
+	mData.mRead   = false;
+	mData.mWrite  = false;
+	mData.mChange = true;
 
-	mValue.clear();
+	mData.mValue.clear();
 }

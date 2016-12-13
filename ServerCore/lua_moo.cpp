@@ -540,12 +540,12 @@ int lua_moo::luaDebug( lua_State *L )
 int lua_moo::luaPlayers( lua_State *L )
 {
 	ObjectManager						&OM = *ObjectManager::instance();
-	const ObjectManager::ObjectList		&OL = OM.players();
+	const ObjectList		&OL = OM.players();
 	int									 i  = 1;
 
 	lua_newtable( L );
 
-	for( ObjectManager::ObjectList::const_iterator it = OL.begin() ; it != OL.end() ; it++, i++ )
+	for( ObjectList::const_iterator it = OL.begin() ; it != OL.end() ; it++, i++ )
 	{
 		lua_pushinteger( L, i );
 		lua_object::lua_pushobject( L, *it );

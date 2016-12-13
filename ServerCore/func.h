@@ -2,19 +2,29 @@
 #define FUNC_H
 
 #include <QString>
-#include <QDataStream>
 #include <QStringList>
 
 #include <lua.hpp>
 
 #include "mooglobal.h"
 
+typedef struct FuncData
+{
+	ObjectId		mObject;		// The object this func is attached to
+	ObjectId		mOwner;
+	bool			mRead;			// lets non-owners see the program for a verb
+	bool			mWrite;			// lets them change that program
+	bool			mExecute;		// whether or not the verb can be invoked from within a MOO program (as opposed to from the command line, like the `put' verb on containers)
+	QString			mScript;
+	QByteArray		mCompiled;
+	bool			mDirty;
+} FuncData;
+
 class Func
 {
-public:
-	virtual void save( QDataStream &pData ) const;
-	virtual void load( QDataStream &pData );
+	friend class ODB;
 
+public:
 	void initialise();
 
 	int compile( void );
@@ -33,73 +43,73 @@ public:
 
 	inline ObjectId object( void ) const
 	{
-		return( mObject );
+		return( mData.mObject );
 	}
 
 	inline ObjectId owner( void ) const
 	{
-		return( mOwner );
+		return( mData.mOwner );
 	}
 
 	inline bool read( void ) const
 	{
-		return( mRead );
+		return( mData.mRead );
 	}
 
 	inline bool write( void ) const
 	{
-		return( mWrite );
+		return( mData.mWrite );
 	}
 
 	inline bool execute( void ) const
 	{
-		return( mExecute );
+		return( mData.mExecute );
 	}
 
 	inline const QString &script( void ) const
 	{
-		return( mScript );
+		return( mData.mScript );
 	}
 
 	inline const QByteArray &compiled( void ) const
 	{
-		return( mCompiled );
+		return( mData.mCompiled );
 	}
 
 	inline bool dirty( void ) const
 	{
-		return( mDirty );
+		return( mData.mDirty );
 	}
 
 	inline void setObject( ObjectId pObject )
 	{
-		mObject = pObject;
+		mData.mObject = pObject;
 	}
 
 	inline void setOwner( ObjectId pOwner )
 	{
-		mOwner = pOwner;
+		mData.mOwner = pOwner;
 	}
 
 	inline void setRead( bool pRead )
 	{
-		mRead = pRead;
+		mData.mRead = pRead;
 	}
 
 	inline void setWrite( bool pWrite )
 	{
-		mWrite = pWrite;
+		mData.mWrite = pWrite;
 	}
 
 	inline void setExecute( bool pExecute )
 	{
-		mExecute = pExecute;
+		mData.mExecute = pExecute;
 	}
 
 	inline void setScript( const QString &pScript )
 	{
-		mScript = pScript;
-		mDirty  = true;
+		mData.mScript = pScript;
+		mData.mDirty  = true;
 	}
 
 private:
@@ -109,15 +119,19 @@ private:
 	static const char *readerStatic( lua_State *L, void *data, size_t *size );
 	const char *reader( lua_State *L, size_t *size );
 
+protected:
+	FuncData &data( void )
+	{
+		return( mData );
+	}
+
+	const FuncData &data( void ) const
+	{
+		return( mData );
+	}
+
 private:
-	ObjectId		mObject;		// The object this func is attached to
-	ObjectId		mOwner;
-	bool			mRead;			// lets non-owners see the program for a verb
-	bool			mWrite;			// lets them change that program
-	bool			mExecute;		// whether or not the verb can be invoked from within a MOO program (as opposed to from the command line, like the `put' verb on containers)
-	QString			mScript;
-	QByteArray		mCompiled;
-	bool			mDirty;
+	FuncData			 mData;
 };
 
 #endif // FUNC_H

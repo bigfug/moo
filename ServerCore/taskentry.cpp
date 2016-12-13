@@ -5,37 +5,19 @@
 
 TaskEntry::TaskEntry( void )
 {
-	mConnectionId	= 0;
-	mId				= 0;
-	mPlayerId		= OBJECT_NONE;
-	mTimeStamp		= 0;
+	mData.mConnectionId	= 0;
+	mData.mId			= 0;
+	mData.mPlayerId		= OBJECT_NONE;
+	mData.mTimeStamp	= 0;
 }
 
-TaskEntry::TaskEntry( const QString &pCommand, ConnectionId pConnectionId, ObjectId pPlayerId ):
-	mCommand( pCommand )
+TaskEntry::TaskEntry( const QString &pCommand, ConnectionId pConnectionId, ObjectId pPlayerId )
 {
 	static TaskId	TID = 0;
 
-	mId				= ++TID;
-	mTimeStamp		= QDateTime::currentMSecsSinceEpoch();
-	mConnectionId	= pConnectionId;
-	mPlayerId		= pPlayerId;
-}
-
-void TaskEntry::save( QDataStream &pData ) const
-{
-	pData << mId;
-	pData << mTimeStamp;
-	pData << mCommand;
-	pData << mPlayerId;
-	pData << mConnectionId;
-}
-
-void TaskEntry::load( QDataStream &pData )
-{
-	pData >> mId;
-	pData >> mTimeStamp;
-	pData >> mCommand;
-	pData >> mPlayerId;
-	pData >> mConnectionId;
+	mData.mId			= ++TID;
+	mData.mTimeStamp	= QDateTime::currentMSecsSinceEpoch();
+	mData.mCommand		= pCommand;
+	mData.mConnectionId	= pConnectionId;
+	mData.mPlayerId		= pPlayerId;
 }

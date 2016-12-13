@@ -1,36 +1,16 @@
 #include "func.h"
 #include "lua_moo.h"
 
-void Func::save( QDataStream &pData ) const
-{
-	pData << mOwner;
-	pData << mRead;
-	pData << mWrite;
-	pData << mExecute;
-	pData << mScript;
-}
-
-void Func::load( QDataStream &pData )
-{
-	pData >> mOwner;
-	pData >> mRead;
-	pData >> mWrite;
-	pData >> mExecute;
-	pData >> mScript;
-
-	mDirty = true;
-}
-
 void Func::initialise( void )
 {
-	mObject = OBJECT_NONE;
-	mOwner  = OBJECT_NONE;
-	mRead    = true;
-	mWrite  = false;
-	mExecute = true;
-	mScript.clear();
-	mCompiled.clear();
-	mDirty = false;
+	mData.mObject = OBJECT_NONE;
+	mData.mOwner  = OBJECT_NONE;
+	mData.mRead    = true;
+	mData.mWrite  = false;
+	mData.mExecute = true;
+	mData.mScript.clear();
+	mData.mCompiled.clear();
+	mData.mDirty = false;
 }
 
 int Func::writerStatic(lua_State *L, const void *p, size_t sz, void *ud)
@@ -42,7 +22,7 @@ int Func::writer( lua_State *L, const void* p, size_t sz )
 {
 	Q_UNUSED( L )
 
-	mCompiled.append( reinterpret_cast<const char *>( p ), sz );
+	mData.mCompiled.append( reinterpret_cast<const char *>( p ), sz );
 
 	return( 0 );
 }
@@ -58,15 +38,15 @@ int Func::compile()
 
 	lua_moo::luaNewState( L );
 
-	int Error = luaL_loadstring( L, mScript.toLatin1() );
+	int Error = luaL_loadstring( L, mData.mScript.toLatin1() );
 
 	if( Error == 0 )
 	{
-		mCompiled.clear();
+		mData.mCompiled.clear();
 
 		lua_dump( L, &Func::writerStatic, this );
 
-		mDirty = false;
+		mData.mDirty = false;
 	}
 
 	//lua_moo::stackDump( L );
@@ -78,18 +58,18 @@ int Func::compile()
 
 void Func::setPermissions( quint16 pPerms )
 {
-	mRead    = ( pPerms & Func::READ );
-	mWrite   = ( pPerms & Func::WRITE );
-	mExecute = ( pPerms & Func::EXECUTE );
+	mData.mRead    = ( pPerms & Func::READ );
+	mData.mWrite   = ( pPerms & Func::WRITE );
+	mData.mExecute = ( pPerms & Func::EXECUTE );
 }
 
 quint16 Func::permissions()
 {
 	quint16			P = 0;
 
-	if( mRead    ) P |= Func::READ;
-	if( mWrite   ) P |= Func::WRITE;
-	if( mExecute ) P |= Func::EXECUTE;
+	if( mData.mRead    ) P |= Func::READ;
+	if( mData.mWrite   ) P |= Func::WRITE;
+	if( mData.mExecute ) P |= Func::EXECUTE;
 
 	return( P );
 }
@@ -103,18 +83,18 @@ const char * Func::reader( lua_State *L, size_t *size )
 {
 	Q_UNUSED( L )
 
-	*size = mCompiled.size();
+	*size = mData.mCompiled.size();
 
-	return( mCompiled );
+	return( mData.mCompiled );
 }
 
 int Func::lua_pushverb( lua_State *L )
 {
-	if( !mDirty && mCompiled.size() > 0 )
+	if( !mData.mDirty && mData.mCompiled.size() > 0 )
 	{
 		return( lua_load( L, &Func::readerStatic, this, "verb" ) );
 	}
 
-	return( luaL_loadstring( L, mScript.toUtf8() ) );
+	return( luaL_loadstring( L, mData.mScript.toUtf8() ) );
 }
 

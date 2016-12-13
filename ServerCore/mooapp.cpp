@@ -17,6 +17,8 @@
 
 #include "osc.h"
 
+#include "odb_file.h"
+
 mooApp::mooApp( const QString &pDataFileName, QObject *pParent )
 	: QObject( pParent ), mTimerId( 0 ), mDataFileName( pDataFileName )
 {
@@ -28,7 +30,9 @@ mooApp::mooApp( const QString &pDataFileName, QObject *pParent )
 
 	OSC::deviceInitialise();
 
-	OM.load( mDataFileName );
+	ODBFile		ODB( mDataFileName );
+
+	ODB.load();
 
 	if( OM.maxId() == 0 )
 	{
@@ -59,7 +63,9 @@ mooApp::~mooApp()
 		killTimer( mTimerId );
 	}
 
-	ObjectManager::instance()->save( mDataFileName );
+	ODBFile		ODB( mDataFileName );
+
+	ODB.save();
 
 	ObjectManager::instance()->reset();
 

@@ -15,25 +15,40 @@ asd
 #include "taskentry.h"
 #include <QAbstractItemModel>
 
+typedef QMap<ObjectId,Object*>	ObjectMap;
+typedef QList<Object *>         ObjectList;
+typedef QList<ObjectId>         ObjectIdList;
+
+typedef struct ObjectManagerData
+{
+	ObjectId				 mObjNum;
+	ObjectMap				 mObjMap;
+	ObjectList				 mObjTop;
+	ObjectList				 mPlayers;
+	ObjectIdList			 mRecycled;
+
+	mutable QMutex			 mTaskMutex;
+
+	QList<TaskEntry>		 mTaskList;
+	QList<TaskEntry>		 mTaskQueue;
+
+} ObjectManagerData;
+
 class ObjectManager : public QAbstractItemModel
 {
 	Q_OBJECT
 
 	explicit ObjectManager( QObject *parent = 0 );
 
-public:
-	typedef QMap<ObjectId,Object*>	ObjectMap;
-	typedef QList<Object *>         ObjectList;
-	typedef QList<ObjectId>         ObjectIdList;
+	friend class ODB;
 
+public:
 	static ObjectManager *instance( void );
 
 	ObjectId newObjectId( void );
 
 	Object *newObject( void );
 
-	void load( const QString &pDataFileName );
-	void save( const QString &pDataFileName );
 	void clear( void );
 
 	static void reset( void );
@@ -45,7 +60,7 @@ public:
 
 	inline Object *object( ObjectId pIndex ) const
 	{
-		return( mObjMap.value( pIndex, 0 ) );
+		return( mData.mObjMap.value( pIndex, 0 ) );
 	}
 
 	void recycle( Object *pObject );
@@ -54,19 +69,19 @@ public:
 
 	inline size_t objectCount( void ) const
 	{
-		return( mObjMap.size() );
+		return( mData.mObjMap.size() );
 	}
 
 	inline ObjectId maxId( void ) const
 	{
-		return( mObjNum );
+		return( mData.mObjNum );
 	}
 
 	//! returns the list of active players
 
 	inline const ObjectList &players( void ) const
 	{
-		return( mPlayers );
+		return( mData.mPlayers );
 	}
 
 	void addPlayer( Object *pPlayer );
@@ -76,6 +91,7 @@ public:
 	void topRem( Object *pTop );
 
 	void luaMinimal( void );
+
 signals:
 
 public slots:
@@ -93,19 +109,21 @@ private:
 	virtual int columnCount ( const QModelIndex & parent = QModelIndex() ) const;
 	virtual QVariant data( const QModelIndex & index, int role = Qt::DisplayRole ) const;
 
+protected:
+	ObjectManagerData &data( void )
+	{
+		return( mData );
+	}
+
+	const ObjectManagerData &data( void ) const
+	{
+		return( mData );
+	}
 
 private:
 	static ObjectManager	*mInstance;
 
-	ObjectId				 mObjNum;
-	ObjectMap				 mObjMap;
-	ObjectList				 mObjTop;
-	ObjectList				 mPlayers;
-	ObjectIdList			 mRecycled;
-
-	QMutex					 mTaskMutex;
-	QList<TaskEntry>		 mTaskList;
-	QList<TaskEntry>		 mTaskQueue;
+	ObjectManagerData		 mData;
 };
 
 #endif // OBJECTMANAGER_H

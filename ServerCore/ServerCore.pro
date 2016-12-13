@@ -42,7 +42,9 @@ SOURCES += \
 	lua_osc.cpp \
 	osc.cpp \
 	inputsinkeditor.cpp \
-    inputsinkedittext.cpp
+    inputsinkedittext.cpp \
+    odb_file.cpp \
+    odb.cpp
 
 HEADERS += \
 	verb.h \
@@ -74,7 +76,9 @@ HEADERS += \
 	lua_osc.h \
 	osc.h \
 	inputsinkeditor.h \
-    inputsinkedittext.h
+    inputsinkedittext.h \
+    odb_file.h \
+    odb.h
 
 unix:!symbian {
 	maemo5 {

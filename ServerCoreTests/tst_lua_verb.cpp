@@ -42,9 +42,9 @@ void ServerTest::luaVerbAdd( void )
 		QCOMPARE( V->read(), true );
 		QCOMPARE( V->write(), false );
 		QCOMPARE( V->execute(), true );
-		QCOMPARE( V->directObject(), Verb::ANY );
-		QCOMPARE( V->indirectObject(), Verb::ANY );
-		QCOMPARE( V->prepositionType(), Verb::ANY );
+		QCOMPARE( V->directObject(), ANY );
+		QCOMPARE( V->indirectObject(), ANY );
+		QCOMPARE( V->prepositionType(), ANY );
 	}
 
 	if( true )
@@ -59,10 +59,10 @@ void ServerTest::luaVerbAdd( void )
 
 		QVERIFY( V != 0 );
 
-		QCOMPARE( V->directObject(), Verb::ANY );
-		QCOMPARE( V->prepositionType(), Verb::THIS );
+		QCOMPARE( V->directObject(), ANY );
+		QCOMPARE( V->prepositionType(), THIS );
 		QCOMPARE( V->preposition(), QString( "from" ) );
-		QCOMPARE( V->indirectObject(), Verb::THIS );
+		QCOMPARE( V->indirectObject(), THIS );
 	}
 
 	if( true )
@@ -77,9 +77,9 @@ void ServerTest::luaVerbAdd( void )
 
 		QVERIFY( V != 0 );
 
-		QCOMPARE( V->directObject(), Verb::ANY );
-		QCOMPARE( V->prepositionType(), Verb::NONE );
-		QCOMPARE( V->indirectObject(), Verb::ANY );
+		QCOMPARE( V->directObject(), ANY );
+		QCOMPARE( V->prepositionType(), NONE );
+		QCOMPARE( V->indirectObject(), ANY );
 	}
 
 	if( true )

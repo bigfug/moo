@@ -4,41 +4,13 @@
 #include "lua_object.h"
 #include <QDebug>
 
-void Verb::save( QDataStream &pData ) const
-{
-	Func::save( pData );
-
-	pData << quint16( mDirectObject );
-	pData << quint16( mIndirectObject );
-	pData << quint16( mPrepositionType );
-	pData << mPreposition;
-	pData << mAliases;
-}
-
-void Verb::load( QDataStream &pData )
-{
-	quint16		D, I, P;
-
-	Func::load( pData );
-
-	pData >> D;
-	pData >> I;
-	pData >> P;
-	pData >> mPreposition;
-	pData >> mAliases;
-
-	mDirectObject    = ArgObj( D );
-	mIndirectObject  = ArgObj( I );
-	mPrepositionType = ArgObj( P );
-}
-
 void Verb::initialise( void )
 {
 	Func::initialise();
 
-	mDirectObject = Verb::ANY;
-	mIndirectObject = Verb::ANY;
-	mPrepositionType = Verb::ANY;
+	mVerbData.mDirectObject = ANY;
+	mVerbData.mIndirectObject = ANY;
+	mVerbData.mPrepositionType = ANY;
 }
 
 QStringList Verb::parse( const QString &pInput, QString &pArgStr )
@@ -232,59 +204,59 @@ bool Verb::matchName( const QString &pPatternList, const QString &pMatch )
 
 bool Verb::matchPreposition( const QString &pPreposition )
 {
-	const QStringList	PrpLst = mPreposition.split( "/" );
+	const QStringList	PrpLst = mVerbData.mPreposition.split( "/" );
 
 	return( PrpLst.contains( pPreposition, Qt::CaseInsensitive ) );
 }
 
 bool Verb::matchArgs( ObjectId pObjectId, ObjectId DirectObjectId, const QString &pPreposition, ObjectId IndirectObjectId )
 {
-	if( mDirectObject == Verb::NONE )
+	if( mVerbData.mDirectObject == NONE )
 	{
 		if( DirectObjectId != -1 )
 		{
 			return( false );
 		}
 	}
-	else if( mDirectObject == Verb::THIS )
+	else if( mVerbData.mDirectObject == THIS )
 	{
 		if( DirectObjectId != pObjectId )
 		{
 			return( false );
 		}
 	}
-	else if( mDirectObject != Verb::ANY )
+	else if( mVerbData.mDirectObject != ANY )
 	{
 		return( false );
 	}
 
-	if( mIndirectObject == Verb::NONE )
+	if( mVerbData.mIndirectObject == NONE )
 	{
 		if( IndirectObjectId != -1 )
 		{
 			return( false );
 		}
 	}
-	else if( mIndirectObject == Verb::THIS )
+	else if( mVerbData.mIndirectObject == THIS )
 	{
 		if( IndirectObjectId != pObjectId )
 		{
 			return( false );
 		}
 	}
-	else if( mIndirectObject != Verb::ANY )
+	else if( mVerbData.mIndirectObject != ANY )
 	{
 		return( false );
 	}
 
-	if( mPrepositionType == Verb::NONE  )
+	if( mVerbData.mPrepositionType == NONE  )
 	{
 		if( !pPreposition.isEmpty() )
 		{
 			return( false );
 		}
 	}
-	else if( mPrepositionType == Verb::THIS )
+	else if( mVerbData.mPrepositionType == THIS )
 	{
 		if( !matchPreposition( pPreposition ) )
 		{
@@ -297,21 +269,21 @@ bool Verb::matchArgs( ObjectId pObjectId, ObjectId DirectObjectId, const QString
 
 void Verb::addAlias( const QString &pAlias )
 {
-	QStringList		AliasList = mAliases.split( ' ', QString::SkipEmptyParts );
+	QStringList		AliasList = mVerbData.mAliases.split( ' ', QString::SkipEmptyParts );
 
 	AliasList.removeAll( pAlias );
 
 	AliasList.append( pAlias );
 
-	mAliases = AliasList.join( " " );
+	mVerbData.mAliases = AliasList.join( " " );
 }
 
 void Verb::remAlias( const QString &pAlias )
 {
-	QStringList		AliasList = mAliases.split( ' ', QString::SkipEmptyParts );
+	QStringList		AliasList = mVerbData.mAliases.split( ' ', QString::SkipEmptyParts );
 
 	AliasList.removeAll( pAlias );
 
-	mAliases = AliasList.join( " " );
+	mVerbData.mAliases = AliasList.join( " " );
 }
 

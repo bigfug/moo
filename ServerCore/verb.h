@@ -10,20 +10,28 @@
 #include "mooglobal.h"
 #include "func.h"
 
+typedef enum ArgObj
+{
+	THIS, ANY, NONE
+} ArgObj;
+
+typedef struct VerbData
+{
+	ArgObj			mDirectObject;
+	ArgObj			mIndirectObject;
+	ArgObj			mPrepositionType;
+	QString			mPreposition;
+	QString			mAliases;
+} VerbData;
+
 class Verb : public Func
 {
+	friend class ODB;
+
 public:
 	virtual ~Verb( void ) {}
 
-	void save( QDataStream &pData ) const;
-	void load( QDataStream &pData );
-
 	void initialise();
-
-	typedef enum ArgObj
-	{
-		THIS, ANY, NONE
-	} ArgObj;
 
 	static QStringList parse( const QString &pInput, QString &pArgStr );
 
@@ -38,13 +46,13 @@ public:
 	{
 		switch( pArgObj )
 		{
-			case Verb::THIS:
+			case THIS:
 				return( "this" );
 
-			case Verb::ANY:
+			case ANY:
 				return( "any" );
 
-			case Verb::NONE:
+			case NONE:
 				return( "none" );
 		}
 
@@ -57,86 +65,93 @@ public:
 		{
 			if( pOK ) *pOK = true;
 
-			return( Verb::THIS );
+			return( THIS );
 		}
 
 		if( !strcmp( pArgNam, "any" ) )
 		{
 			if( pOK ) *pOK = true;
 
-			return( Verb::ANY );
+			return( ANY );
 		}
 
 		if( !strcmp( pArgNam, "none" ) )
 		{
 			if( pOK ) *pOK = true;
 
-			return( Verb::NONE );
+			return( NONE );
 		}
 
 		if( pOK ) *pOK = false;
 
-		return( Verb::NONE );
+		return( NONE );
 	}
 
 	inline ArgObj directObject( void ) const
 	{
-		return( mDirectObject );
+		return( mVerbData.mDirectObject );
 	}
 
 	inline ArgObj indirectObject( void ) const
 	{
-		return( mIndirectObject );
+		return( mVerbData.mIndirectObject );
 	}
 
 	inline const QString &preposition( void ) const
 	{
-		return( mPreposition );
+		return( mVerbData.mPreposition );
 	}
 
 	inline ArgObj prepositionType( void ) const
 	{
-		return( mPrepositionType );
+		return( mVerbData.mPrepositionType );
 	}
 
 	inline void setDirectObjectArgument( ArgObj pArg )
 	{
-		mDirectObject = pArg;
+		mVerbData.mDirectObject = pArg;
 	}
 
 	inline void setIndirectObjectArgument( ArgObj pArg )
 	{
-		mIndirectObject = pArg;
+		mVerbData.mIndirectObject = pArg;
 	}
 
 	inline void setPrepositionArgument( ArgObj pArg )
 	{
-		Q_ASSERT( pArg == Verb::ANY || pArg == Verb::NONE );
+		Q_ASSERT( pArg == ArgObj::ANY || pArg == ArgObj::NONE );
 
-		mPrepositionType = pArg;
-		mPreposition.clear();
+		mVerbData.mPrepositionType = pArg;
+		mVerbData.mPreposition.clear();
 	}
 
 	inline void setPrepositionArgument( const QString &pArg )
 	{
-		mPrepositionType = Verb::THIS;
-		mPreposition = pArg;
+		mVerbData.mPrepositionType = THIS;
+		mVerbData.mPreposition = pArg;
 	}
 
 	const QString &aliases( void ) const
 	{
-		return( mAliases );
+		return( mVerbData.mAliases );
 	}
 
 	void addAlias( const QString &pAlias );
 	void remAlias( const QString &pAlias );
 
+protected:
+	VerbData &data( void )
+	{
+		return( mVerbData );
+	}
+
+	const VerbData &data( void ) const
+	{
+		return( mVerbData );
+	}
+
 private:
-	ArgObj			mDirectObject;
-	ArgObj			mIndirectObject;
-	ArgObj			mPrepositionType;
-	QString			mPreposition;
-	QString			mAliases;
+	VerbData			mVerbData;
 };
 
 

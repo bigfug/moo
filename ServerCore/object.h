@@ -16,19 +16,8 @@
 
 class ObjectManager;
 
-class Object
+typedef struct ObjectData
 {
-private:
-	Object( void );
-
-	virtual ~Object( void );
-
-	friend class ObjectManager;
-	friend class lua_object;
-
-public:
-
-private:
 	ObjectId			mId;
 
 	// Fundamental Object Attributes
@@ -55,7 +44,22 @@ private:
 	QMap<QString,Verb>			mVerbs;
 	QMap<QString,Property>		mProperties;	// Properties defined on this object
 	QList<Task>					mTasks;
+} ObjectData;
 
+class Object
+{
+private:
+	Object( void );
+
+	virtual ~Object( void );
+
+	friend class ObjectManager;
+	friend class lua_object;
+	friend class ODB;
+
+public:
+
+private:
 	bool propFindRecurse( const QString &pName, Property **pProp, Object **pObject );
 	void propDeleteRecurse( const QString &pName );
 
@@ -63,20 +67,18 @@ private:
 
 	inline QMap<QString,Verb> &verbmap( void )
 	{
-		return( mVerbs );
+		return( mData.mVerbs );
 	}
 
 	inline QMap<QString,Property> &propmap( void )
 	{
-		return( mProperties );
+		return( mData.mProperties );
 	}
 
 public:
 	void move( Object *pWhere );
-	void setParent( ObjectId pNewParentId );
 
-	void save( QDataStream &pData ) const;
-	void load( QDataStream &pData );
+	void setParent( ObjectId pNewParentId );
 
 	bool matchName( const QString &pName );
 
@@ -108,7 +110,7 @@ public:
 
 	inline const QMap<QString,Property> &properties( void ) const
 	{
-		return( mProperties );
+		return( mData.mProperties );
 	}
 
 	void verbAdd( const QString &pName, Verb &pVerb );
@@ -120,7 +122,7 @@ public:
 
 	inline const QMap<QString,Verb> &verbs( void ) const
 	{
-		return( mVerbs );
+		return( mData.mVerbs );
 	}
 
 	Verb *verb( const QString &pName );
@@ -129,128 +131,142 @@ public:
 
 	inline operator ObjectId ( void ) const
 	{
-		return( mId );
+		return( mData.mId );
 	}
 
 	inline ObjectId id( void ) const
 	{
-		return( mId );
+		return( mData.mId );
 	}
 
 	inline const QString &name( void ) const
 	{
-		return( mName );
+		return( mData.mName );
 	}
 
 	inline bool player( void ) const
 	{
-		return( mPlayer );
+		return( mData.mPlayer );
 	}
 
 	inline ObjectId location( void ) const
 	{
-		return( mLocation );
+		return( mData.mLocation );
 	}
 
 	inline ObjectId parent( void ) const
 	{
-		return( mParent );
+		return( mData.mParent );
 	}
 
 	inline const QList<ObjectId> &children( void ) const
 	{
-		return( mChildren );
+		return( mData.mChildren );
 	}
 
 	inline const QList<ObjectId> &contents( void ) const
 	{
-		return( mContents );
+		return( mData.mContents );
 	}
 
 	inline bool valid( void ) const
 	{
-		return( !mRecycled );
+		return( !mData.mRecycled );
 	}
 
 	inline bool programmer( void ) const
 	{
-		return( mProgrammer );
+		return( mData.mProgrammer );
 	}
 
 	inline bool wizard( void ) const
 	{
-		return( mWizard );
+		return( mData.mWizard );
 	}
 
 	inline bool fertile( void ) const
 	{
-		return( mFertile );
+		return( mData.mFertile );
 	}
 
 	inline ObjectId owner( void ) const
 	{
-		return( mOwner );
+		return( mData.mOwner );
 	}
 
 	inline bool recycle( void ) const
 	{
-		return( mRecycled );
+		return( mData.mRecycled );
 	}
 
 	inline bool read( void ) const
 	{
-		return( mRead );
+		return( mData.mRead );
 	}
 
 	inline bool write( void ) const
 	{
-		return( mWrite );
+		return( mData.mWrite );
 	}
 
 	inline void setOwner( ObjectId pOwner )
 	{
-		mOwner = pOwner;
+		mData.mOwner = pOwner;
 	}
 
 	void setPlayer( bool pPlayer )
 	{
-		mPlayer = pPlayer;
+		mData.mPlayer = pPlayer;
 	}
 
 	inline void setName( const QString &pName )
 	{
-		mName = pName;
+		mData.mName = pName;
 	}
 
 	inline void setProgrammer( bool pProgrammer )
 	{
-		mProgrammer = pProgrammer;
+		mData.mProgrammer = pProgrammer;
 	}
 
 	inline void setWizard( bool pWizard )
 	{
-		mWizard = pWizard;
+		mData.mWizard = pWizard;
 	}
 
 	inline void setRead( bool pRead )
 	{
-		mRead = pRead;
+		mData.mRead = pRead;
 	}
 
 	inline void setWrite( bool pWrite )
 	{
-		mWrite = pWrite;
+		mData.mWrite = pWrite;
 	}
 
 	inline void setFertile( bool pFertile )
 	{
-		mFertile = pFertile;
+		mData.mFertile = pFertile;
 	}
 
 	inline void setRecycle( bool pRecycle )
 	{
-		mRecycled = pRecycle;
+		mData.mRecycled = pRecycle;
 	}
+
+protected:
+	ObjectData &data( void )
+	{
+		return( mData );
+	}
+
+	const ObjectData &data( void ) const
+	{
+		return( mData );
+	}
+
+private:
+	ObjectData			mData;
 };
 
 #endif // OBJECT_H

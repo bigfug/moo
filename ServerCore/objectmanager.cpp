@@ -15,8 +15,9 @@
 ObjectManager			*ObjectManager::mInstance = 0;
 
 ObjectManager::ObjectManager( QObject *pParent ) :
-	QAbstractItemModel( pParent ), mObjNum( 0 )
+	QAbstractItemModel( pParent )
 {
+	mData.mObjNum = 0;
 }
 
 // The database is empty so set up the most minimal (but useful) set of objects
@@ -62,9 +63,9 @@ void ObjectManager::luaMinimal( void )
 	Login.setOwner( Wizard->id() );
 	Login.setObject( System->id() );
 	Login.setScript( QString( "return( o( %1 ) )" ).arg( Wizard->id() ) );
-	Login.setDirectObjectArgument( Verb::THIS );
-	Login.setPrepositionArgument( Verb::NONE );
-	Login.setIndirectObjectArgument( Verb::THIS );
+	Login.setDirectObjectArgument( THIS );
+	Login.setPrepositionArgument( NONE );
+	Login.setIndirectObjectArgument( THIS );
 
 	System->verbAdd( "do_login_command", Login );
 
@@ -110,131 +111,38 @@ ObjectManager *ObjectManager::instance( void )
 	return( 0 );
 }
 
-void ObjectManager::load( const QString &pDataFileName )
-{
-	QFile		File( pDataFileName );
-
-	if( !File.open( QIODevice::ReadOnly ) )
-	{
-		return;
-	}
-
-	QDataStream		Data( &File );
-
-	Data >> mObjNum;
-
-	qint32			c;
-
-	Data >> c;
-
-	for( qint32 i = 0 ; i < c ; i++ )
-	{
-		Object		*O = new Object();
-
-		O->load( Data );
-
-		mObjMap[ O->id() ] = O;
-
-		if( O->parent() == OBJECT_NONE )
-		{
-			mObjTop.push_back( O );
-		}
-
-		if( O->player() )
-		{
-			mPlayers.push_back( O );
-		}
-	}
-
-	// Load Tasks
-
-	qint32			TaskCount;
-
-	Data >> TaskCount;
-
-	for( qint32 i = 0 ; i < TaskCount ; i++ )
-	{
-		TaskEntry		E;
-
-		E.load( Data );
-
-		mTaskList1.push_back( E );
-	}
-
-	qSort( mTaskList1.begin(), mTaskList1.end(), TaskEntry::lessThan );
-}
-
-void ObjectManager::save( const QString &pDataFileName )
-{
-	QString		DatStr = QDateTime::currentDateTime().toString( "yyyy-MM-dd.hh-mm-ss" );
-	QString		DatNam = pDataFileName.mid( pDataFileName.lastIndexOf( '\\' ) + 1 );
-	QString		NamPrt = DatNam.left( DatNam.lastIndexOf( '.' ) );
-	QString		NamExt = DatNam.mid( DatNam.lastIndexOf( '.' ) + 1 );
-	QString		NewNam = QString( "%1.%2.tmp" ).arg( NamPrt ).arg( DatStr );
-	QString		OldNam = QString( "%1.%2.%3" ).arg( NamPrt ).arg( DatStr ).arg( NamExt );
-
-	QFile		File( NewNam );
-
-	if( !File.open( QIODevice::WriteOnly ) )
-	{
-		return;
-	}
-
-	QDataStream		Data( &File );
-
-	Data << mObjNum;
-
-	qint32			c = mObjMap.size();
-
-	Data << c;
-
-	for( ObjectMap::iterator it = mObjMap.begin() ; it != mObjMap.end() ; it++ )
-	{
-		it.value()->save( Data );
-	}
-
-	// Save Tasks
-
-	qint32			TaskCount = mTaskList1.size() + mTaskList2.size();
-
-	Data << TaskCount;
-
-	for( QList<TaskEntry>::const_iterator it = mTaskList1.begin() ; it != mTaskList1.end() ; it++ )
-	{
-		it->save( Data );
-	}
-
-	for( QList<TaskEntry>::const_iterator it = mTaskList2.begin() ; it != mTaskList2.end() ; it++ )
-	{
-		it->save( Data );
-	}
-
-	File.close();
-
-	QDir().rename( pDataFileName, OldNam );
-	QDir().rename( NewNam, pDataFileName );
-}
-
 void ObjectManager::clear()
 {
-	for( ObjectMap::iterator it = mObjMap.begin() ; it != mObjMap.end() ; it++ )
+	for( ObjectMap::iterator it = mData.mObjMap.begin() ; it != mData.mObjMap.end() ; it++ )
 	{
 		delete it.value();
 	}
+
+	mData.mObjNum = 0;
+
+	mData.mObjMap.clear();
+	mData.mObjTop.clear();
+	mData.mPlayers.clear();
+	mData.mRecycled.clear();
+
+	mData.mTaskMutex.lock();
+
+	mData.mTaskList.clear();
+	mData.mTaskQueue.clear();
+
+	mData.mTaskMutex.unlock();
 }
 
 Object *ObjectManager::newObject( void )
 {
 	Object		*O = new Object();
 
-	if( O == 0 )
+	if( O )
 	{
-		return( 0 );
+		O->mData.mId = newObjectId();
+
+		mData.mObjMap[ O->id() ] = O;
 	}
-
-	O->mId = newObjectId();
-
-	mObjMap[ O->id() ] = O;
 
 	return( O );
 }
@@ -243,40 +151,40 @@ void ObjectManager::recycle( Object *pObject )
 {
 	pObject->setRecycle( true );
 
-	mRecycled.push_back( pObject->id() );
+	mData.mRecycled.push_back( pObject->id() );
 }
 
 ObjectId ObjectManager::newObjectId( void )
 {
-	return( mObjNum++ );
+	return( mData.mObjNum++ );
 }
 
 void ObjectManager::recycleObjects( void )
 {
-	if( mRecycled.empty() )
+	if( mData.mRecycled.empty() )
 	{
 		return;
 	}
 
-	foreach( ObjectId id, mRecycled )
+	foreach( ObjectId id, mData.mRecycled )
 	{
 		Object		*O = object( id );
 
 		Q_ASSERT( O->recycle() );
 
-		mObjMap.remove( id );
+		mData.mObjMap.remove( id );
 
-		Q_ASSERT( O->mChildren.empty() );
+		Q_ASSERT( O->mData.mChildren.empty() );
 
 		delete O;
 	}
 
-	mRecycled.clear();
+	mData.mRecycled.clear();
 }
 
 void ObjectManager::addPlayer( Object *pPlayer )
 {
-	for( ObjectList::iterator it = mPlayers.begin() ; it != mPlayers.end() ; it++ )
+	for( ObjectList::iterator it = mData.mPlayers.begin() ; it != mData.mPlayers.end() ; it++ )
 	{
 		if( *it == pPlayer )
 		{
@@ -284,48 +192,50 @@ void ObjectManager::addPlayer( Object *pPlayer )
 		}
 	}
 
-	mPlayers.append( pPlayer );
+	mData.mPlayers.append( pPlayer );
 }
 
 void ObjectManager::remPlayer( Object *pPlayer )
 {
-	for( ObjectList::iterator it = mPlayers.begin() ; it != mPlayers.end() ; it++ )
+	for( ObjectList::iterator it = mData.mPlayers.begin() ; it != mData.mPlayers.end() ; it++ )
 	{
 		if( *it == pPlayer )
 		{
-			mPlayers.erase( it );
+			mData.mPlayers.erase( it );
 		}
 	}
 }
 
 void ObjectManager::topAdd( Object *pTop )
 {
-	mObjTop.removeAll( pTop );
-	mObjTop.push_back( pTop );
+	mData.mObjTop.removeAll( pTop );
+	mData.mObjTop.push_back( pTop );
 }
 
 void ObjectManager::topRem( Object *pTop )
 {
-	mObjTop.removeAll( pTop );
+	mData.mObjTop.removeAll( pTop );
 }
 
 void ObjectManager::onFrame( qint64 pTimeStamp )
 {
 	QList<TaskEntry>		TaskList;
 
-	mTaskMutex.lock();
+	mData.mTaskMutex.lock();
+
+	TaskList.swap( mData.mTaskList );
 
 	// Take all the queued tasks that are due to be executed and put them
 	// on the current task queue
 
-	while( !mTaskQueue.empty() && mTaskQueue.front().timestamp() <= pTimeStamp )
+	while( !mData.mTaskQueue.empty() && mData.mTaskQueue.front().timestamp() <= pTimeStamp )
 	{
-		TaskList.append( mTaskQueue.takeFirst() );
+		TaskList.append( mData.mTaskQueue.takeFirst() );
 	}
 
 	// Switch over the current task list
 
-	mTaskMutex.unlock();
+	mData.mTaskMutex.unlock();
 
 	// Execute the current tasks
 
@@ -353,47 +263,47 @@ void ObjectManager::onFrame( qint64 pTimeStamp )
 
 void ObjectManager::doTask( TaskEntry &pTask )
 {
-	QMutexLocker		L( &mTaskMutex );
+	QMutexLocker		L( &mData.mTaskMutex );
 
-	mTaskList.push_back( pTask );
+	mData.mTaskList.push_back( pTask );
 }
 
 void ObjectManager::queueTask( TaskEntry &pTask )
 {
-	QMutexLocker		L( &mTaskMutex );
+	QMutexLocker		L( &mData.mTaskMutex );
 
-	for( QList<TaskEntry>::iterator it = mTaskQueue.begin() ; it != mTaskQueue.end() ; it++ )
+	for( QList<TaskEntry>::iterator it = mData.mTaskQueue.begin() ; it != mData.mTaskQueue.end() ; it++ )
 	{
 		if( pTask.timestamp() < it->timestamp() )
 		{
-			mTaskQueue.insert( it, pTask );
+			mData.mTaskQueue.insert( it, pTask );
 
 			return;
 		}
 	}
 
-	mTaskQueue.append( pTask );
+	mData.mTaskQueue.append( pTask );
 }
 
 bool ObjectManager::killTask(TaskId pTaskId)
 {
-	QMutexLocker		L( &mTaskMutex );
+	QMutexLocker		L( &mData.mTaskMutex );
 
-	for( QList<TaskEntry>::iterator it = mTaskQueue.begin() ; it != mTaskQueue.end() ; it++ )
+	for( QList<TaskEntry>::iterator it = mData.mTaskQueue.begin() ; it != mData.mTaskQueue.end() ; it++ )
 	{
 		if( it->id() == pTaskId )
 		{
-			mTaskQueue.erase( it );
+			mData.mTaskQueue.erase( it );
 
 			return( true );
 		}
 	}
 
-	for( QList<TaskEntry>::iterator it = mTaskList.begin() ; it != mTaskList.end() ; it++ )
+	for( QList<TaskEntry>::iterator it = mData.mTaskList.begin() ; it != mData.mTaskList.end() ; it++ )
 	{
 		if( it->id() == pTaskId )
 		{
-			mTaskList.erase( it );
+			mData.mTaskList.erase( it );
 
 			return( true );
 		}
@@ -411,7 +321,7 @@ QModelIndex ObjectManager::index( int row, int column, const QModelIndex &parent
 		return( createIndex( row, column, object( object( ParentId )->children().at( row ) ) ) );
 	}
 
-	return( createIndex( row, column, mObjTop.at( row ) ) );
+	return( createIndex( row, column, mData.mObjTop.at( row ) ) );
 }
 
 QModelIndex ObjectManager::parent(const QModelIndex &index) const
@@ -423,21 +333,21 @@ QModelIndex ObjectManager::parent(const QModelIndex &index) const
 		return( QModelIndex() );
 	}
 
-	Object		*P = mObjMap.value( O->parent(), 0 );
+	Object		*P = mData.mObjMap.value( O->parent(), 0 );
 
 	if( P == 0 )
 	{
 		return( QModelIndex() );
 	}
 
-	Object		*PP = mObjMap.value( P->parent(), 0 );
+	Object		*PP = mData.mObjMap.value( P->parent(), 0 );
 
 	if( PP != 0 )
 	{
 		return( createIndex( PP->children().indexOf( P->id() ), 0, P ) );
 	}
 
-	return( createIndex( mObjTop.indexOf( P ), 0, P ) );
+	return( createIndex( mData.mObjTop.indexOf( P ), 0, P ) );
 }
 
 int ObjectManager::rowCount(const QModelIndex &parent) const
@@ -449,7 +359,7 @@ int ObjectManager::rowCount(const QModelIndex &parent) const
 		return( object( ParentId )->children().size() );
 	}
 
-	return( mObjTop.size() );
+	return( mData.mObjTop.size() );
 }
 
 int ObjectManager::columnCount(const QModelIndex &parent) const
