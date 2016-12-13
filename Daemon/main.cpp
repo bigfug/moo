@@ -8,14 +8,17 @@
 #include <lua.hpp>
 #include <QDateTime>
 #include <QFile>
+#include <QFileInfo>
 #include "objectmanager.h"
 #include "osc.h"
+
+QString		LogFileName;
 
 void myMessageOutput( QtMsgType type, const QMessageLogContext &context, const QString &msg )
 {
 	Q_UNUSED( context )
 
-	QFile				LogFil( "moo.log" );
+	QFile				LogFil( LogFileName );
 	const QDateTime		CurDat = QDateTime::currentDateTime();
 	QString				DateTime = CurDat.toString( "dd-MMM-yyyy hh:mm:ss" );
 	QString				LogMsg;
@@ -51,10 +54,6 @@ int main( int argc, char *argv[] )
 	a.setOrganizationDomain( "http://www.bigfug.com" );
 	a.setApplicationVersion( "0.1" );
 
-	qInstallMessageHandler( myMessageOutput );
-
-	qDebug() << "ArtMOO v0.1 by Alex May - www.bigfug.com";
-
 	QString			DataFileName = "moo.dat";
 	quint16			ServerPort   = 1123;
 
@@ -76,6 +75,14 @@ int main( int argc, char *argv[] )
 			continue;
 		}
 	}
+
+	QFileInfo	LogFileInfo = QFileInfo( DataFileName );
+
+	LogFileName = LogFileInfo.path() + "/" + LogFileInfo.completeBaseName() + ".log";
+
+	qInstallMessageHandler( myMessageOutput );
+
+	qDebug() << "ArtMOO v0.1 by Alex May - www.bigfug.com";
 
 	int				 Ret = -1;
 
