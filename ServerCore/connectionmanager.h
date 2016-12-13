@@ -3,6 +3,8 @@
 
 #include <QObject>
 #include <QMap>
+#include <QMutex>
+
 #include "mooglobal.h"
 
 class Connection;

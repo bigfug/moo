@@ -103,6 +103,12 @@ windows {
 	LIBS += -L$$(LIBS)/Lua-5.1.4 -llua5.1
 }
 
+linux:!macx:exists( /usr/include/lua5.1 ) {
+	INCLUDEPATH += /usr/include/lua5.1
+
+	LIBS += -llua5.1
+}
+
 DISTFILES += \
 	../LICENSE \
 	../README.md

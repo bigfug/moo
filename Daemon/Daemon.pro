@@ -41,6 +41,12 @@ macx {
 	LIBS += -L/usr/local/opt/lua51/lib -llua5.1
 }
 
+linux:!macx:exists( /usr/include/lua5.1 ) {
+	INCLUDEPATH += /usr/include/lua5.1
+
+	LIBS += -llua5.1
+}
+
 #----------------------------------------------------------------------------
 # libtelnet
 
