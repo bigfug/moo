@@ -15,7 +15,7 @@
 ObjectManager			*ObjectManager::mInstance = 0;
 
 ObjectManager::ObjectManager( QObject *pParent ) :
-	QAbstractItemModel( pParent ), mObjNum( 0 ), mTaskListId( 1 )
+	QAbstractItemModel( pParent ), mObjNum( 0 )
 {
 }
 
@@ -311,7 +311,7 @@ void ObjectManager::topRem( Object *pTop )
 
 void ObjectManager::onFrame( qint64 pTimeStamp )
 {
-	QList<TaskEntry>		&TaskList  = ( mTaskListId == 1 ? mTaskList1 : mTaskList2 );
+	QList<TaskEntry>		TaskList;
 
 	mTaskMutex.lock();
 
@@ -325,16 +325,12 @@ void ObjectManager::onFrame( qint64 pTimeStamp )
 
 	// Switch over the current task list
 
-	mTaskListId = ( mTaskListId == 1 ? 2 : 1 );
-
 	mTaskMutex.unlock();
 
 	// Execute the current tasks
 
-	for( QList<TaskEntry>::iterator it = TaskList.begin() ; it != TaskList.end() ; it++ )
+	for( const TaskEntry &TE : TaskList )
 	{
-		const TaskEntry		&TE = *it;
-
 		Task				 T( TE );
 
 		qDebug() << TE.connectionid() << T.command();
@@ -359,14 +355,7 @@ void ObjectManager::doTask( TaskEntry &pTask )
 {
 	QMutexLocker		L( &mTaskMutex );
 
-	if( mTaskListId == 1 )
-	{
-		mTaskList1.push_back( pTask );
-	}
-	else
-	{
-		mTaskList2.push_back( pTask );
-	}
+	mTaskList.push_back( pTask );
 }
 
 void ObjectManager::queueTask( TaskEntry &pTask )
@@ -400,13 +389,11 @@ bool ObjectManager::killTask(TaskId pTaskId)
 		}
 	}
 
-	QList<TaskEntry>		&TaskList  = ( mTaskListId == 1 ? mTaskList1 : mTaskList2 );
-
-	for( QList<TaskEntry>::iterator it = TaskList.begin() ; it != TaskList.end() ; it++ )
+	for( QList<TaskEntry>::iterator it = mTaskList.begin() ; it != mTaskList.end() ; it++ )
 	{
 		if( it->id() == pTaskId )
 		{
-			TaskList.erase( it );
+			mTaskList.erase( it );
 
 			return( true );
 		}

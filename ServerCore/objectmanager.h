@@ -104,9 +104,7 @@ private:
 	ObjectIdList			 mRecycled;
 
 	QMutex					 mTaskMutex;
-	int						 mTaskListId;
-	QList<TaskEntry>		 mTaskList1;
-	QList<TaskEntry>		 mTaskList2;
+	QList<TaskEntry>		 mTaskList;
 	QList<TaskEntry>		 mTaskQueue;
 };
 
