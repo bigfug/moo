@@ -53,6 +53,7 @@ const luaL_Reg lua_object::mLuaInstanceFunctions[] =
 	{ "players", lua_object::luaPlayers },
 	{ "props", lua_object::luaProps },
 	{ "verbs", lua_object::luaVerbs },
+	{ "find", lua_object::luaFind },
 	{ 0, 0 }
 };
 
@@ -1326,6 +1327,66 @@ int lua_object::luaVerbs( lua_State *L )
 		{
 			lua_pushinteger( L, i );
 			lua_verb::lua_pushverb( L, &it.value(), it.key(), O->id() );
+			lua_settable( L, -3 );
+		}
+
+		return( 1 );
+	}
+	catch( mooException e )
+	{
+		e.lua_pushexception( L );
+
+		LuaErr = true;
+	}
+	catch( ... )
+	{
+
+	}
+
+	return( LuaErr ? lua_error( L ) : 0 );
+}
+
+int lua_object::luaFind( lua_State *L )
+{
+	bool				 LuaErr = false;
+
+	try
+	{
+		const QString				 N = luaL_checkstring( L, -1 );
+
+		Object						*O = argObj( L );
+		const QList<ObjectId>		&C = O->contents();
+		int							 i = 1;
+		ObjectList					 ObjLst;
+
+		for( ObjectId id : C )
+		{
+			Object					*F = ObjectManager::o( id );
+
+			if( F && F->name().compare( N, Qt::CaseInsensitive ) == 0 )
+			{
+				ObjLst << F;
+			}
+		}
+
+		if( ObjLst.size() == 0 )
+		{
+			return( 0 );
+		}
+
+		if( ObjLst.size() == 1 )
+		{
+			lua_pushobject( L, ObjLst.first() );
+
+			return( 1 );
+		}
+
+		lua_newtable( L );
+
+		for( ObjectList::iterator it = ObjLst.begin() ; it != ObjLst.end() ; it++, i++ )
+		{
+			lua_pushinteger( L, i );
+			lua_pushobject( L, *it );
 			lua_settable( L, -3 );
 		}
 

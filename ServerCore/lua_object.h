@@ -71,6 +71,8 @@ private:
 	static int luaProps( lua_State *L );
 	static int luaVerbs( lua_State *L );
 
+	static int luaFind( lua_State *L );
+
 	static int luaPushVariant( lua_State *L, const QVariant &pV );
 
 	static LuaMap				 mLuaMap;
