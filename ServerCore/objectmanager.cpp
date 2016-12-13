@@ -1,21 +1,25 @@
 #include "objectmanager.h"
+
+#include <algorithm>
+
 #include <QFile>
 #include <QDir>
 #include <QDateTime>
+#include <QModelIndex>
+
 #include "lua_moo.h"
 #include "lua_object.h"
 #include "lua_task.h"
 #include "task.h"
-#include <algorithm>
 #include "mooexception.h"
 #include "connection.h"
 #include "connectionmanager.h"
-#include <QModelIndex>
+#include "odb.h"
 
 ObjectManager			*ObjectManager::mInstance = 0;
 
 ObjectManager::ObjectManager( QObject *pParent ) :
-	QAbstractItemModel( pParent )
+	QAbstractItemModel( pParent ), mODB( 0 )
 {
 	mData.mObjNum = 0;
 }
@@ -94,6 +98,18 @@ void ObjectManager::reset( void )
 	mInstance = 0;
 }
 
+Object *ObjectManager::object( ObjectId pIndex ) const
+{
+	Object *O = mData.mObjMap.value( pIndex, 0 );
+
+	if( !O && mODB )
+	{
+		O = mODB->object( pIndex );
+	}
+
+	return( O );
+}
+
 ObjectManager *ObjectManager::instance( void )
 {
 	if( mInstance != 0 )
@@ -142,6 +158,11 @@ Object *ObjectManager::newObject( void )
 		O->mData.mId = newObjectId();
 
 		mData.mObjMap[ O->id() ] = O;
+
+		if( mODB )
+		{
+			mODB->registerObject( O );
+		}
 	}
 
 	return( O );

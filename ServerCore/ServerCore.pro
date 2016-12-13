@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 QT       -= gui
-QT       += network
+QT       += network sql
 
 TARGET = ServerCore
 TEMPLATE = lib
@@ -42,9 +42,10 @@ SOURCES += \
 	lua_osc.cpp \
 	osc.cpp \
 	inputsinkeditor.cpp \
-    inputsinkedittext.cpp \
-    odb_file.cpp \
-    odb.cpp
+	inputsinkedittext.cpp \
+	odb_file.cpp \
+	odb.cpp \
+	odb_sql.cpp
 
 HEADERS += \
 	verb.h \
@@ -76,9 +77,10 @@ HEADERS += \
 	lua_osc.h \
 	osc.h \
 	inputsinkeditor.h \
-    inputsinkedittext.h \
-    odb_file.h \
-    odb.h
+	inputsinkedittext.h \
+	odb_file.h \
+	odb.h \
+	odb_sql.h
 
 unix:!symbian {
 	maemo5 {

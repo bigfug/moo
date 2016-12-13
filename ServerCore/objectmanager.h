@@ -10,10 +10,13 @@ asd
 #include <QMap>
 #include <QList>
 #include <QMutex>
+#include <QAbstractItemModel>
+
 #include "object.h"
 #include "task.h"
 #include "taskentry.h"
-#include <QAbstractItemModel>
+
+class ODB;
 
 typedef QMap<ObjectId,Object*>	ObjectMap;
 typedef QList<Object *>         ObjectList;
@@ -58,10 +61,7 @@ public:
 		return( instance()->object( pId ) );
 	}
 
-	inline Object *object( ObjectId pIndex ) const
-	{
-		return( mData.mObjMap.value( pIndex, 0 ) );
-	}
+	Object *object( ObjectId pIndex ) const;
 
 	void recycle( Object *pObject );
 
@@ -123,6 +123,7 @@ protected:
 private:
 	static ObjectManager	*mInstance;
 
+	ODB						*mODB;
 	ObjectManagerData		 mData;
 };
 

@@ -23,6 +23,18 @@ public:
 	virtual void load( void ) Q_DECL_OVERRIDE;
 	virtual void save( void ) Q_DECL_OVERRIDE;
 
+	virtual Object *object( ObjectId pIndex ) const Q_DECL_OVERRIDE
+	{
+		Q_UNUSED( pIndex )
+
+		return( 0 );
+	}
+
+	virtual void registerObject( Object &pObject ) Q_DECL_OVERRIDE
+	{
+		Q_UNUSED( pObject )
+	}
+
 private:
 	void loadObject( QDataStream &DS, Object &O );
 	void saveObject( QDataStream &DS, const Object &O );
