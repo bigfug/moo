@@ -1387,7 +1387,7 @@ int lua_object::luaPlayers( lua_State *L )
 	try
 	{
 		Object						*O = argObj( L );
-		const QList<ObjectId>		&C = O->children();
+		const QList<ObjectId>		&C = O->contents();
 		int							 i = 1;
 
 		lua_newtable( L );
