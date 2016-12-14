@@ -367,7 +367,12 @@ int lua_prop::luaSet( lua_State *L )
 
 			Object				*D = lua_object::argObj( L, 3 );
 
-			P->setOwner( D->id() );
+			if( P->owner() != D->id() )
+			{
+				P->setOwner( D->id() );
+
+				ObjectManager::instance()->markObject( O );
+			}
 
 			return( 0 );
 		}
@@ -381,7 +386,12 @@ int lua_prop::luaSet( lua_State *L )
 
 			bool		v = lua_toboolean( L, 3 );
 
-			P->setRead( v );
+			if( v != P->read() )
+			{
+				P->setRead( v );
+
+				ObjectManager::instance()->markObject( O );
+			}
 
 			return( 0 );
 		}
@@ -395,7 +405,12 @@ int lua_prop::luaSet( lua_State *L )
 
 			bool		v = lua_toboolean( L, 3 );
 
-			P->setWrite( v );
+			if( v != P->write() )
+			{
+				P->setWrite( v );
+
+				ObjectManager::instance()->markObject( O );
+			}
 
 			return( 0 );
 		}
@@ -409,7 +424,12 @@ int lua_prop::luaSet( lua_State *L )
 
 			bool		v = lua_toboolean( L, 3 );
 
-			P->setChange( v );
+			if( v != P->change() )
+			{
+				P->setChange( v );
+
+				ObjectManager::instance()->markObject( O );
+			}
 
 			return( 0 );
 		}

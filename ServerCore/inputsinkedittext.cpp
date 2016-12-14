@@ -4,6 +4,8 @@
 #include "object.h"
 #include "verb.h"
 #include "lua_moo.h"
+#include "objectmanager.h"
+
 #include <lua.hpp>
 
 InputSinkEditText::InputSinkEditText( Connection *C, Object *O, Property *P, QStringList pText )
@@ -45,7 +47,12 @@ void InputSinkEditText::save()
 {
 	const QString		Text = mEditor.text().join( "\n" );
 
-	mProperty->setValue( Text );
+	if( Text != mProperty->value() )
+	{
+		mProperty->setValue( Text );
+
+		ObjectManager::instance()->markObject( mObject );
+	}
 
 	mEditor.setQuit( true );
 }

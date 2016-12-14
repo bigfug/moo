@@ -3,6 +3,7 @@
 #include <QDebug>
 #include <QBuffer>
 #include <QDataStream>
+#include <QStringList>
 
 #include "objectmanager.h"
 #include "object.h"
@@ -26,9 +27,19 @@ ODBSQL::ODBSQL()
 
 void ODBSQL::load()
 {
+	ObjectManager				&OM = *ObjectManager::instance();
+	ObjectManagerData			&Data = data( OM );
+
 	if( !mDB.isOpen() )
 	{
 		return;
+	}
+
+	QSqlQuery	Q1 = mDB.exec( "SELECT MAX( id ) FROM object" );
+
+	if( Q1.next() )
+	{
+		Data.mObjNum = Q1.value( 0 ).toInt() + 1;
 	}
 }
 
@@ -137,6 +148,13 @@ void ODBSQL::save()
 	}
 }
 
+void ODBSQL::saveObject( Object *O )
+{
+	saveObject( *O );
+
+	data( *O ).mLastWrite = ObjectManager::timestamp();
+}
+
 Object *ODBSQL::object( ObjectId pIndex ) const
 {
 	QSqlQuery	Q;
@@ -175,6 +193,8 @@ Object *ODBSQL::object( ObjectId pIndex ) const
 	D.mRead = Q.value( "read" ).toBool();
 	D.mWizard = Q.value( "wizard" ).toBool();
 	D.mWrite = Q.value( "write" ).toBool();
+
+	D.mLastRead = ObjectManager::timestamp();
 
 	Q.prepare( "SELECT id FROM object WHERE parent = :id" );
 
@@ -298,7 +318,7 @@ Object *ODBSQL::object( ObjectId pIndex ) const
 		}
 	}
 
-	return( 0 );
+	return( O );
 }
 
 void bindObject( const ObjectData &D, QSqlQuery &Q )
@@ -396,16 +416,14 @@ void ODBSQL::registerObject( const Object &pObject )
 
 	if( Q.exec() )
 	{
-		if( !Q.lastInsertId().isValid() )
+		if( Q.lastInsertId().type() == QVariant::Invalid )
 		{
-			Q.prepare( "UPDATE object SET ( parent = :parent, name = :name, player = :player, owner = :owner, location = :location, programmer = :programmer, wizard = :wizard, read = :read, write = :write, fertile = :fertile ) WHERE id = :id" );
+			Q.prepare( "UPDATE object SET parent = :parent, name = :name, player = :player, owner = :owner, location = :location, programmer = :programmer, wizard = :wizard, read = :read, write = :write, fertile = :fertile WHERE id = :id" );
 
 			bindObject( D, Q );
 
 			Q.exec();
 		}
-
-		return;
 	}
 
 	QSqlError		DBE = Q.lastError();
@@ -416,55 +434,179 @@ void ODBSQL::registerObject( const Object &pObject )
 	}
 }
 
+ObjectId ODBSQL::findPlayer( QString pName ) const
+{
+	if( !mDB.isOpen() )
+	{
+		return( OBJECT_NONE );
+	}
+
+	QSqlQuery	Q1;
+
+	Q1.prepare( "SELECT id FROM object WHERE name = :name" );
+
+	Q1.bindValue( ":name", pName );
+
+	if( !Q1.exec() )
+	{
+		return( OBJECT_NONE );
+	}
+
+	if( !Q1.next() )
+	{
+		return( OBJECT_NONE );
+	}
+
+	return( Q1.value( 0 ).toInt() );
+}
+
 void ODBSQL::saveObject( const Object &O )
 {
 	const ObjectData	&D = data( O );
 
-	QSqlQuery			 Q1, Q2;
-
 	registerObject( O );
 
-	Q1.prepare( "DELETE FROM property WHERE object = :object AND name = :name" );
-
-	Q2.prepare( "INSERT INTO property "
-				"( name, object, parent, owner, read, write, change, type, value )"
-				"VALUES "
-				"( :name, :object, :parent, :owner, :read, :write, :change, :type, :value )"
-				);
-
-	for( QMap<QString,Property>::const_iterator it = D.mProperties.constBegin() ; it != D.mProperties.end() ; it++ )
 	{
+		QSqlQuery			 Q1, Q2, Q3;
+
+		QStringList			 PrpLst1, PrpLst2, PrpLst3;
+
+		Q1.prepare( "SELECT name FROM property WHERE object = :object" );
+
 		Q1.bindValue( ":object", D.mId );
-		Q1.bindValue( ":name", it.key() );
 
-		bindProperty( it.key(), D.mId, data( it.value() ), Q2 );
+		if( Q1.exec() )
+		{
+			while( Q1.next() )
+			{
+				PrpLst1 << Q1.value( 0 ).toString();
+			}
+		}
 
-		Q1.exec();
-		Q2.exec();
+		Q2.prepare( "INSERT INTO property "
+					"( name, object, parent, owner, read, write, change, type, value )"
+					"VALUES "
+					"( :name, :object, :parent, :owner, :read, :write, :change, :type, :value )"
+					);
+
+		Q3.prepare( "UPDATE property SET "
+					"parent = :parent, owner = :owner, read = :read, write = :write, change = :change, type = :type, value = :value "
+					"WHERE name = :name AND object = :object"
+					);
+
+		PrpLst2 = D.mProperties.keys();
+
+		PrpLst3.append( PrpLst1 );
+		PrpLst3.append( PrpLst2 );
+
+		qSort( PrpLst3 );
+
+		PrpLst3.removeDuplicates();
+
+		for( QString P3 : PrpLst3 )
+		{
+			bool		P1 = PrpLst1.contains( P3 );
+			bool		P2 = PrpLst2.contains( P3 );
+
+			if( P1 && P2 )
+			{
+				bindProperty( P3, D.mId, data( D.mProperties.value( P3 ) ), Q3 );
+
+				Q3.exec();
+			}
+			else if( P1 && !P2 )
+			{
+				QSqlQuery	Q;
+
+				Q.prepare( "DELETE FROM property WHERE object = :object AND name = :name" );
+
+				Q.bindValue( ":object", D.mId );
+				Q.bindValue( ":name",   P3 );
+
+				Q.exec();
+			}
+			else
+			{
+				bindProperty( P3, D.mId, data( D.mProperties.value( P3 ) ), Q2 );
+
+				Q2.exec();
+			}
+		}
 	}
 
-	QSqlQuery			 Q3, Q4;
-
-	Q3.prepare( "DELETE FROM verb WHERE object = :object AND name = :name" );
-
-	Q4.prepare( "INSERT INTO verb "
-				"( name, object, owner, read, write, execute, script, dobj, preptype, iobj, prep, aliases )"
-				"VALUES "
-				"( :name, :object, :owner, :read, :write, :execute, :script, :dobj, :preptype, :iobj, :prep, :aliases )"
-				);
-
-	for( QMap<QString,Verb>::const_iterator it = D.mVerbs.constBegin() ; it != D.mVerbs.constEnd() ; it++ )
 	{
-		Q3.bindValue( ":object", D.mId );
-		Q3.bindValue( ":name", it.key() );
+		QSqlQuery			 Q1, Q2, Q3;
 
-		Q4.bindValue( ":object", D.mId );
-		Q4.bindValue( ":name", it.key() );
+		QStringList			 PrpLst1, PrpLst2, PrpLst3;
 
-		bindFunc( funcdata( it.value() ), Q4 );
-		bindVerb( verbdata( it.value() ), Q4 );
+		Q1.prepare( "SELECT name FROM verb WHERE object = :object" );
 
-		Q3.exec();
-		Q4.exec();
+		Q1.bindValue( ":object", D.mId );
+
+		if( Q1.exec() )
+		{
+			while( Q1.next() )
+			{
+				PrpLst1 << Q1.value( 0 ).toString();
+			}
+		}
+
+		Q2.prepare( "INSERT INTO verb "
+					"( name, object, owner, read, write, execute, script, dobj, preptype, iobj, prep, aliases )"
+					"VALUES "
+					"( :name, :object, :owner, :read, :write, :execute, :script, :dobj, :preptype, :iobj, :prep, :aliases )"
+					);
+
+		Q3.prepare( "UPDATE verb SET "
+					"owner, read, write, execute, script, dobj, preptype, iobj, prep, aliases "
+					"WHERE object = :object AND name = :name"
+					);
+
+		PrpLst2 = D.mVerbs.keys();
+
+		PrpLst3.append( PrpLst1 );
+		PrpLst3.append( PrpLst2 );
+
+		qSort( PrpLst3 );
+
+		PrpLst3.removeDuplicates();
+
+		for( QString P3 : PrpLst3 )
+		{
+			bool		P1 = PrpLst1.contains( P3 );
+			bool		P2 = PrpLst2.contains( P3 );
+
+			if( P1 && P2 )
+			{
+				Q3.bindValue( ":object", D.mId );
+				Q3.bindValue( ":name", it.key() );
+
+				bindFunc( funcdata( it.value() ), Q3 );
+				bindVerb( verbdata( it.value() ), Q3 );
+
+				Q3.exec();
+			}
+			else if( P1 && !P2 )
+			{
+				QSqlQuery	Q;
+
+				Q.prepare( "DELETE FROM verb WHERE object = :object AND name = :name" );
+
+				Q.bindValue( ":object", D.mId );
+				Q.bindValue( ":name",   P3 );
+
+				Q.exec();
+			}
+			else
+			{
+				Q2.bindValue( ":object", D.mId );
+				Q2.bindValue( ":name", it.key() );
+
+				bindFunc( funcdata( it.value() ), Q2 );
+				bindVerb( verbdata( it.value() ), Q2 );
+
+				Q3.exec();
+			}
+		}
 	}
 }

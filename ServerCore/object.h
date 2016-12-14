@@ -39,6 +39,10 @@ typedef struct ObjectData
 	bool				mFertile;		// is the object fertile?
 	bool				mRecycled;		//
 
+	qint64				mLastRead;
+	qint64				mLastUpdate;
+	qint64				mLastWrite;
+
 	// Properties and Verbs
 
 	QMap<QString,Verb>			mVerbs;

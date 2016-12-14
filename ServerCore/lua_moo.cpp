@@ -38,13 +38,13 @@ const luaL_Reg lua_moo::mLuaStatic[] =
 	{ "eval", lua_moo::luaEval },
 	{ "debug", lua_moo::luaDebug },
 	{ "hash", lua_moo::luaHash },
+	{ "findPlayer", lua_moo::luaFindPlayer },
 	{ 0, 0 }
 };
 
 const luaL_Reg lua_moo::mLuaGetFunc[] =
 {
 	{ "root", lua_moo::luaRoot },
-	{ "players", lua_moo::luaPlayers },
 	{ "last", lua_moo::luaLastObject },
 	{ 0, 0 }
 };
@@ -535,7 +535,7 @@ int lua_moo::luaHash(lua_State *L)
 
 	QByteArray	 H = QCryptographicHash::hash( S, QCryptographicHash::Sha256 );
 
-	lua_pushlstring( L, H.constData(), H.size() );
+	lua_pushstring( L, H.toBase64() );
 
 	return( 1 );
 }
@@ -550,19 +550,20 @@ int lua_moo::luaDebug( lua_State *L )
 	return( 0 );
 }
 
-int lua_moo::luaPlayers( lua_State *L )
+int lua_moo::luaFindPlayer( lua_State *L )
 {
-	ObjectManager						&OM = *ObjectManager::instance();
-	const ObjectList		&OL = OM.players();
-	int									 i  = 1;
+	const char				*S = luaL_checkstring( L, -1 );
 
-	lua_newtable( L );
+	ObjectManager			&OM = *ObjectManager::instance();
+	ObjectId				 PID = OM.findPlayer( QString::fromLatin1( S ) );
 
-	for( ObjectList::const_iterator it = OL.begin() ; it != OL.end() ; it++, i++ )
+	if( PID == OBJECT_NONE )
 	{
-		lua_pushinteger( L, i );
-		lua_object::lua_pushobject( L, *it );
-		lua_settable( L, -3 );
+		lua_pushnil( L );
+	}
+	else
+	{
+		lua_object::lua_pushobjectid( L, PID );
 	}
 
 	return( 1 );

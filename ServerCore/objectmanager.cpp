@@ -17,11 +17,14 @@
 #include "odb.h"
 
 ObjectManager			*ObjectManager::mInstance = 0;
+qint64					 ObjectManager::mTimeStamp = 0;
 
-ObjectManager::ObjectManager( QObject *pParent ) :
-	QAbstractItemModel( pParent ), mODB( 0 )
+ObjectManager::ObjectManager( QObject *pParent )
+	: QObject( pParent ), mODB( 0 )
 {
 	mData.mObjNum = 0;
+
+	mTimeStamp = QDateTime::currentMSecsSinceEpoch();
 }
 
 // The database is empty so set up the most minimal (but useful) set of objects
@@ -98,13 +101,41 @@ void ObjectManager::reset( void )
 	mInstance = 0;
 }
 
-Object *ObjectManager::object( ObjectId pIndex ) const
+void ObjectManager::markObject(ObjectId pIndex)
+{
+	Object		*O = object( pIndex );
+
+	if( O )
+	{
+		markObject( O );
+	}
+}
+
+void ObjectManager::markObject( Object *O )
+{
+	O->data().mLastUpdate = mTimeStamp;
+}
+
+ObjectId ObjectManager::findPlayer( QString pName ) const
+{
+	return( mODB ? mODB->findPlayer( pName ) : OBJECT_NONE );
+}
+
+Object *ObjectManager::object( ObjectId pIndex )
 {
 	Object *O = mData.mObjMap.value( pIndex, 0 );
 
 	if( !O && mODB )
 	{
-		O = mODB->object( pIndex );
+		if( ( O = mODB->object( pIndex ) ) != 0 )
+		{
+			mData.mObjMap.insert( pIndex, O );
+		}
+	}
+
+	if( O )
+	{
+		O->data().mLastRead = ObjectManager::timestamp();
 	}
 
 	return( O );
@@ -137,8 +168,6 @@ void ObjectManager::clear()
 	mData.mObjNum = 0;
 
 	mData.mObjMap.clear();
-	mData.mObjTop.clear();
-	mData.mPlayers.clear();
 	mData.mRecycled.clear();
 
 	mData.mTaskMutex.lock();
@@ -203,43 +232,10 @@ void ObjectManager::recycleObjects( void )
 	mData.mRecycled.clear();
 }
 
-void ObjectManager::addPlayer( Object *pPlayer )
-{
-	for( ObjectList::iterator it = mData.mPlayers.begin() ; it != mData.mPlayers.end() ; it++ )
-	{
-		if( *it == pPlayer )
-		{
-			return;
-		}
-	}
-
-	mData.mPlayers.append( pPlayer );
-}
-
-void ObjectManager::remPlayer( Object *pPlayer )
-{
-	for( ObjectList::iterator it = mData.mPlayers.begin() ; it != mData.mPlayers.end() ; it++ )
-	{
-		if( *it == pPlayer )
-		{
-			mData.mPlayers.erase( it );
-		}
-	}
-}
-
-void ObjectManager::topAdd( Object *pTop )
-{
-	mData.mObjTop.removeAll( pTop );
-	mData.mObjTop.push_back( pTop );
-}
-
-void ObjectManager::topRem( Object *pTop )
-{
-	mData.mObjTop.removeAll( pTop );
-}
-
 void ObjectManager::onFrame( qint64 pTimeStamp )
 {
+	mTimeStamp = QDateTime::currentMSecsSinceEpoch();
+
 	QList<TaskEntry>		TaskList;
 
 	mData.mTaskMutex.lock();
@@ -280,6 +276,8 @@ void ObjectManager::onFrame( qint64 pTimeStamp )
 	// Process closed connections
 
 	ConnectionManager::instance()->processClosedSockets();
+
+	timeoutObjects();
 }
 
 void ObjectManager::doTask( TaskEntry &pTask )
@@ -333,76 +331,37 @@ bool ObjectManager::killTask(TaskId pTaskId)
 	return( false );
 }
 
-QModelIndex ObjectManager::index( int row, int column, const QModelIndex &parent ) const
+void ObjectManager::timeoutObjects()
 {
-	ObjectId	ParentId = ( parent.isValid() ? reinterpret_cast<Object *>( parent.internalPointer() )->id() : OBJECT_NONE );
-
-	if( ParentId != OBJECT_NONE )
+	for( ObjectId OID : mData.mObjMap.keys() )
 	{
-		return( createIndex( row, column, object( object( ParentId )->children().at( row ) ) ) );
-	}
+		Object		*O = mData.mObjMap.value( OID );
 
-	return( createIndex( row, column, mData.mObjTop.at( row ) ) );
-}
-
-QModelIndex ObjectManager::parent(const QModelIndex &index) const
-{
-	Object		*O = reinterpret_cast<Object *>( index.internalPointer() );
-
-	if( O->parent() == OBJECT_NONE )
-	{
-		return( QModelIndex() );
-	}
-
-	Object		*P = mData.mObjMap.value( O->parent(), 0 );
-
-	if( P == 0 )
-	{
-		return( QModelIndex() );
-	}
-
-	Object		*PP = mData.mObjMap.value( P->parent(), 0 );
-
-	if( PP != 0 )
-	{
-		return( createIndex( PP->children().indexOf( P->id() ), 0, P ) );
-	}
-
-	return( createIndex( mData.mObjTop.indexOf( P ), 0, P ) );
-}
-
-int ObjectManager::rowCount(const QModelIndex &parent) const
-{
-	ObjectId	ParentId = ( parent.isValid() ? reinterpret_cast<Object *>( parent.internalPointer() )->id() : OBJECT_NONE );
-
-	if( ParentId != OBJECT_NONE )
-	{
-		return( object( ParentId )->children().size() );
-	}
-
-	return( mData.mObjTop.size() );
-}
-
-int ObjectManager::columnCount(const QModelIndex &parent) const
-{
-	Q_UNUSED( parent )
-
-	return( 2 );
-}
-
-QVariant ObjectManager::data(const QModelIndex &index, int role) const
-{
-	Object		*O = reinterpret_cast<Object *>( index.internalPointer() );
-
-	if( role == Qt::DisplayRole )
-	{
-		if( index.column() == 0 )
+		if( O->data().mLastUpdate > O->data().mLastWrite )
 		{
-			return( O->id() );
+			if( mODB )
+			{
+				mODB->saveObject( O );
+			}
 		}
 
-		return( O->name() );
-	}
+		if( O->player() )
+		{
+			continue;
+		}
 
-	return( QVariant() );
+		if( O->id() < 10 )
+		{
+			continue;
+		}
+
+		if( mTimeStamp - O->data().mLastRead < 15000 )
+		{
+			continue;
+		}
+
+		mData.mObjMap.remove( OID );
+
+		delete O;
+	}
 }

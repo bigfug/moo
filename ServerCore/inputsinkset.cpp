@@ -4,6 +4,8 @@
 #include "object.h"
 #include "property.h"
 #include "lua_moo.h"
+#include "objectmanager.h"
+
 #include <lua.hpp>
 
 InputSinkSet::InputSinkSet( Connection *C, Object *O, Property *P, const QString &pPropName )
@@ -19,6 +21,8 @@ bool InputSinkSet::input( const QString &pData )
 	if( pData.compare( "." ) == 0 )
 	{
 		mProperty->setValue( mData.join( "\n" ).toUtf8() );
+
+		ObjectManager::instance()->markObject( mObject );
 
 		return( false );
 	}

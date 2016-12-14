@@ -21,6 +21,10 @@ public:
 	virtual void load( void ) = 0;
 	virtual void save( void ) = 0;
 
+	virtual void saveObject( Object *O ) = 0;
+
+	virtual ObjectId findPlayer( QString pName ) const = 0;
+
 	virtual Object *object( ObjectId pIndex ) const = 0;
 
 	virtual void registerObject( const Object &pObject ) = 0;

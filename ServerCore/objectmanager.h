@@ -10,7 +10,6 @@ asd
 #include <QMap>
 #include <QList>
 #include <QMutex>
-#include <QAbstractItemModel>
 
 #include "object.h"
 #include "task.h"
@@ -26,8 +25,6 @@ typedef struct ObjectManagerData
 {
 	ObjectId				 mObjNum;
 	ObjectMap				 mObjMap;
-	ObjectList				 mObjTop;
-	ObjectList				 mPlayers;
 	ObjectIdList			 mRecycled;
 
 	mutable QMutex			 mTaskMutex;
@@ -37,7 +34,7 @@ typedef struct ObjectManagerData
 
 } ObjectManagerData;
 
-class ObjectManager : public QAbstractItemModel
+class ObjectManager : public QObject
 {
 	Q_OBJECT
 
@@ -48,6 +45,11 @@ class ObjectManager : public QAbstractItemModel
 public:
 	static ObjectManager *instance( void );
 
+	inline static qint64 timestamp( void )
+	{
+		return( mTimeStamp );
+	}
+
 	ObjectId newObjectId( void );
 
 	Object *newObject( void );
@@ -56,12 +58,22 @@ public:
 
 	static void reset( void );
 
+	void markObject( ObjectId pIndex );
+	void markObject( Object *O );
+
+	ObjectId findPlayer( QString pName ) const;
+
+	void setODB( ODB *pODB )
+	{
+		mODB = pODB;
+	}
+
 	inline static Object *o( ObjectId pId )
 	{
 		return( instance()->object( pId ) );
 	}
 
-	Object *object( ObjectId pIndex ) const;
+	Object *object( ObjectId pIndex );
 
 	void recycle( Object *pObject );
 
@@ -77,19 +89,6 @@ public:
 		return( mData.mObjNum );
 	}
 
-	//! returns the list of active players
-
-	inline const ObjectList &players( void ) const
-	{
-		return( mData.mPlayers );
-	}
-
-	void addPlayer( Object *pPlayer );
-	void remPlayer( Object *pPlayer );
-
-	void topAdd( Object *pTop );
-	void topRem( Object *pTop );
-
 	void luaMinimal( void );
 
 signals:
@@ -100,16 +99,9 @@ public slots:
 	void queueTask( TaskEntry &pTask );
 	bool killTask( TaskId pTaskId );
 
-private:
-	// QAbstractItemModel
-
-	virtual QModelIndex index( int row, int column, const QModelIndex & parent = QModelIndex() ) const;
-	virtual QModelIndex parent ( const QModelIndex & index ) const;
-	virtual int rowCount ( const QModelIndex & parent = QModelIndex() ) const;
-	virtual int columnCount ( const QModelIndex & parent = QModelIndex() ) const;
-	virtual QVariant data( const QModelIndex & index, int role = Qt::DisplayRole ) const;
-
 protected:
+	void timeoutObjects( void );
+
 	ObjectManagerData &data( void )
 	{
 		return( mData );
@@ -122,6 +114,7 @@ protected:
 
 private:
 	static ObjectManager	*mInstance;
+	static qint64			 mTimeStamp;
 
 	ODB						*mODB;
 	ObjectManagerData		 mData;

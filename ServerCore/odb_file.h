@@ -23,6 +23,11 @@ public:
 	virtual void load( void ) Q_DECL_OVERRIDE;
 	virtual void save( void ) Q_DECL_OVERRIDE;
 
+	virtual void saveObject( Object *O ) Q_DECL_OVERRIDE
+	{
+		Q_UNUSED( O )
+	}
+
 	virtual Object *object( ObjectId pIndex ) const Q_DECL_OVERRIDE
 	{
 		Q_UNUSED( pIndex )
@@ -34,6 +39,8 @@ public:
 	{
 		Q_UNUSED( pObject )
 	}
+
+	virtual ObjectId findPlayer( QString pName ) const Q_DECL_OVERRIDE;
 
 private:
 	void loadObject( QDataStream &DS, Object &O );
@@ -50,6 +57,7 @@ private:
 
 private:
 	QString			 mFileName;
+	ObjectList		 mPlayers;
 };
 
 #endif // ODBFILE_H

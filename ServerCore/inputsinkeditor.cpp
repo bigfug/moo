@@ -6,6 +6,8 @@
 #include "object.h"
 #include "verb.h"
 #include "lua_moo.h"
+#include "objectmanager.h"
+
 #include <lua.hpp>
 
 InputSinkEditor::InputSinkEditor(Connection *C, Object *O, Verb *V, const QString &pVerbName, QStringList pText )
@@ -83,6 +85,8 @@ void InputSinkEditor::save()
 	if( Error == 0 )
 	{
 		mVerb->setScript( P );
+
+		ObjectManager::instance()->markObject( mObject );
 
 		mEditor.setQuit( true );
 	}

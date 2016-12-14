@@ -4,6 +4,8 @@
 #include "object.h"
 #include "verb.h"
 #include "lua_moo.h"
+#include "objectmanager.h"
+
 #include <lua.hpp>
 
 InputSinkProgram::InputSinkProgram( Connection *C, Object *O, Verb *V, const QString &pVerbName )
@@ -29,6 +31,8 @@ bool InputSinkProgram::input( const QString &pData )
 		if( Error == 0 )
 		{
 			mVerb->setScript( P );
+
+			ObjectManager::instance()->markObject( mObject );
 		}
 		else
 		{

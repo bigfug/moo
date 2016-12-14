@@ -24,9 +24,13 @@ public:
 	virtual void load( void ) Q_DECL_OVERRIDE;
 	virtual void save( void ) Q_DECL_OVERRIDE;
 
+	virtual void saveObject( Object *O ) Q_DECL_OVERRIDE;
+
 	virtual Object *object( ObjectId pIndex ) const Q_DECL_OVERRIDE;
 
 	virtual void registerObject( const Object &pObject ) Q_DECL_OVERRIDE;
+
+	virtual ObjectId findPlayer( QString pName ) const Q_DECL_OVERRIDE;
 
 private:
 //	void loadObject( QDataStream &DS, Object &O );

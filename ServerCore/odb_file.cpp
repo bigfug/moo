@@ -48,14 +48,14 @@ void ODBFile::load()
 
 		Data.mObjMap[ O->id() ] = O;
 
-		if( O->parent() == OBJECT_NONE )
-		{
-			Data.mObjTop.push_back( O );
-		}
+//		if( O->parent() == OBJECT_NONE )
+//		{
+//			Data.mObjTop.push_back( O );
+//		}
 
 		if( O->player() )
 		{
-			Data.mPlayers.push_back( O );
+			mPlayers.push_back( O );
 		}
 	}
 
@@ -144,6 +144,19 @@ void ODBFile::save()
 
 	QDir().rename( mFileName, OldNam );
 	QDir().rename( NewNam, mFileName );
+}
+
+ObjectId ODBFile::findPlayer( QString pName ) const
+{
+	for( Object *O : mPlayers )
+	{
+		if( O->name().compare( pName, Qt::CaseSensitive ) )
+		{
+			return( O->id() );
+		}
+	}
+
+	return( OBJECT_NONE );
 }
 
 void ODBFile::loadObject( QDataStream &DS, Object &O )

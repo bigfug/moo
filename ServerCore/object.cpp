@@ -17,6 +17,10 @@ Object::Object( void )
 	mData.mWrite = false;
 	mData.mFertile = false;
 	mData.mRecycled = false;
+
+	mData.mLastRead   = ObjectManager::timestamp();
+	mData.mLastUpdate = 0;
+	mData.mLastWrite = 0;
 }
 
 Object::~Object( void )
@@ -26,11 +30,15 @@ Object::~Object( void )
 void Object::verbAdd( const QString &pName, Verb &pVerb )
 {
 	mData.mVerbs.insert( pName, pVerb );
+
+	ObjectManager::instance()->markObject( this );
 }
 
 void Object::verbDelete( const QString &pName )
 {
 	mData.mVerbs.remove( pName );
+
+	ObjectManager::instance()->markObject( this );
 }
 
 Property * Object::propParent( const QString &pName )
@@ -108,7 +116,7 @@ Verb *Object::verbMatch( const QString &pName )
 	return( 0 );
 }
 
-Verb *Object::verbParent(const QString &pName)
+Verb *Object::verbParent( const QString &pName )
 {
 	if( mData.mParent == -1 )
 	{
@@ -135,13 +143,18 @@ Verb *Object::verbParent(const QString &pName)
 void Object::propAdd( const QString &pName, Property &pProp )
 {
 	mData.mProperties.insert( pName, pProp );
+
+	ObjectManager::instance()->markObject( this );
 }
 
 void Object::propDeleteRecurse(const QString &pName)
 {
 	ObjectManager	&OM = *ObjectManager::instance();
 
-	mData.mProperties.remove( pName );
+	if( mData.mProperties.remove( pName ) )
+	{
+		OM.markObject( this );
+	}
 
 	for( ObjectId id : mData.mChildren )
 	{
@@ -165,7 +178,10 @@ void Object::propDelete( const QString &pName )
 
 	if( it.value().parent() != -1 )
 	{
-		mData.mProperties.remove( pName );
+		if( mData.mProperties.remove( pName ) )
+		{
+			ObjectManager::instance()->markObject( this );
+		}
 	}
 	else
 	{
@@ -184,7 +200,10 @@ void Object::propClear( const QString &pName )
 
 	if( it.value().parent() != OBJECT_NONE )
 	{
-		mData.mProperties.remove( pName );
+		if( mData.mProperties.remove( pName ) )
+		{
+			ObjectManager::instance()->markObject( this );
+		}
 	}
 }
 
@@ -217,9 +236,14 @@ void Object::propSet( const QString &pName, const QVariant &pValue )
 			C.setOwner( id() );
 		}
 
-		C.setValue( pValue );
+		if( C.value() != pValue )
+		{
+			C.setValue( pValue );
 
-		mData.mProperties.insert( pName, C );
+			mData.mProperties.insert( pName, C );
+
+			ObjectManager::instance()->markObject( this );
+		}
 	}
 }
 
@@ -296,6 +320,8 @@ void Object::move( Object *pWhere )
 	}
 
 	mData.mLocation = ( pWhere == 0 ? -1 : pWhere->id() );
+
+	ObjectManager::instance()->markObject( this );
 }
 
 void Object::setParent( ObjectId pNewParentId )
@@ -318,10 +344,6 @@ void Object::setParent( ObjectId pNewParentId )
 			Q_ASSERT( c == 1 );
 		}
 	}
-	else
-	{
-		ObjectManager::instance()->topRem( this );
-	}
 
 	if( pNewParentId != -1 )
 	{
@@ -336,12 +358,10 @@ void Object::setParent( ObjectId pNewParentId )
 			O->mData.mChildren.push_back( mData.mId );
 		}
 	}
-	else
-	{
-		ObjectManager::instance()->topAdd( this );
-	}
 
 	mData.mParent = pNewParentId;
+
+	ObjectManager::instance()->markObject( this );
 }
 
 void Object::propNames( QStringList &pList )
@@ -505,6 +525,11 @@ bool Object::verbFindRecurse( const QString &pName, Verb **pVerb, Object **pObje
 		*pObject = this;
 
 		return( true );
+	}
+
+	if( parent() == OBJECT_NONE )
+	{
+		return( false );
 	}
 
 	Object	*P = ObjectManager::o( parent() );

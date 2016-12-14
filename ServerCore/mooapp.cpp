@@ -31,9 +31,16 @@ mooApp::mooApp( const QString &pDataFileName, QObject *pParent )
 
 	OSC::deviceInitialise();
 
-	ODBFile		ODB( mDataFileName );
+//	ODBFile		ODB( mDataFileName );
 
-	ODB.load();
+	ODBSQL		*ODB = new ODBSQL();
+
+	if( ODB )
+	{
+		OM.setODB( ODB );
+
+		ODB->load();
+	}
 
 	if( OM.maxId() == 0 )
 	{
@@ -64,13 +71,14 @@ mooApp::~mooApp()
 		killTimer( mTimerId );
 	}
 
-	ODBFile		ODB( mDataFileName );
+//	ODBFile		ODB( mDataFileName );
 
-	ODB.save();
+//	ODB.save();
 
-	ODBSQL		SQL;
+//	if
+//	ODBSQL		SQL;
 
-	SQL.save();
+//	SQL.save();
 
 	ObjectManager::instance()->reset();
 

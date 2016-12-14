@@ -36,7 +36,7 @@ private:
 	static int luaEval( lua_State *L );
 	static int luaHash( lua_State *L );
 	static int luaDebug( lua_State *L );
-	static int luaPlayers( lua_State *L );
+	static int luaFindPlayer( lua_State *L );
 
 	static int luaLastObject( lua_State *L );
 
