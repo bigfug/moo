@@ -163,9 +163,11 @@ int lua_prop::luaSetValue( lua_State *L, const QString &pPrpNam, Object *pObject
 
 			case QVariant::String:
 				{
-					const char *v = luaL_checkstring( L, pIdx );
+					size_t		l;
 
-					pObject->propSet( pPrpNam, QString( v ) );
+					const char *v = luaL_checklstring( L, pIdx, &l );
+
+					pObject->propSet( pPrpNam, QString::fromLatin1( v, l ) );
 				}
 				break;
 
