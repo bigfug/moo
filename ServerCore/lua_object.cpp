@@ -1454,13 +1454,13 @@ int lua_object::luaPlayers( lua_State *L )
 
 		lua_newtable( L );
 
-		for( QList<ObjectId>::const_iterator it = C.begin() ; it != C.end() ; it++, i++ )
+		for( QList<ObjectId>::const_iterator it = C.begin() ; it != C.end() ; it++ )
 		{
 			Object	*CurObj = ObjectManager::o( *it );
 
 			if( CurObj && CurObj->player() )
 			{
-				lua_pushinteger( L, i );
+				lua_pushinteger( L, i++ );
 				lua_pushobjectid( L, *it );
 				lua_settable( L, -3 );
 			}
