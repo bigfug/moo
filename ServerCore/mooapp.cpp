@@ -18,6 +18,7 @@
 #include "osc.h"
 
 #include "odb_file.h"
+#include "odb_sql.h"
 
 mooApp::mooApp( const QString &pDataFileName, QObject *pParent )
 	: QObject( pParent ), mTimerId( 0 ), mDataFileName( pDataFileName )
@@ -66,6 +67,10 @@ mooApp::~mooApp()
 	ODBFile		ODB( mDataFileName );
 
 	ODB.save();
+
+	ODBSQL		SQL;
+
+	SQL.save();
 
 	ObjectManager::instance()->reset();
 

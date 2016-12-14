@@ -30,7 +30,7 @@ public:
 		return( 0 );
 	}
 
-	virtual void registerObject( Object &pObject ) Q_DECL_OVERRIDE
+	virtual void registerObject( const Object &pObject ) Q_DECL_OVERRIDE
 	{
 		Q_UNUSED( pObject )
 	}

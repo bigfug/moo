@@ -23,7 +23,7 @@ public:
 
 	virtual Object *object( ObjectId pIndex ) const = 0;
 
-	virtual void registerObject( Object &pObject ) = 0;
+	virtual void registerObject( const Object &pObject ) = 0;
 
 	Object *newObject( void ) const;
 

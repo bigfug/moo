@@ -26,7 +26,7 @@ public:
 
 	virtual Object *object( ObjectId pIndex ) const Q_DECL_OVERRIDE;
 
-	virtual void registerObject( Object &pObject ) Q_DECL_OVERRIDE;
+	virtual void registerObject( const Object &pObject ) Q_DECL_OVERRIDE;
 
 private:
 //	void loadObject( QDataStream &DS, Object &O );
