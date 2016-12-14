@@ -7,6 +7,7 @@
 #include "lua_task.h"
 #include "lua_verb.h"
 #include "lua_prop.h"
+#include "lua_connection.h"
 #include "task.h"
 #include "objectlogic.h"
 #include <cstdio>
@@ -338,6 +339,25 @@ int lua_object::luaGet( lua_State *L )
 		if( strcmp( s, "location" ) == 0 )
 		{
 			lua_pushobjectid( L, O->location() );
+
+			return( 1 );
+		}
+
+		if( strcmp( s, "connection" ) == 0 )
+		{
+			if( O->player() )
+			{
+				Connection			*C = ConnectionManager::instance()->connection( ConnectionManager::instance()->fromPlayer( O->id() ) );
+
+				if( C )
+				{
+					lua_connection::lua_pushconnection( L, C );
+
+					return( 1 );
+				}
+			}
+
+			lua_pushnil( L );
 
 			return( 1 );
 		}
