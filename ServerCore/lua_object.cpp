@@ -1384,9 +1384,44 @@ int lua_object::luaFind( lua_State *L )
 		{
 			Object					*F = ObjectManager::o( id );
 
-			if( F && F->name().compare( N, Qt::CaseInsensitive ) == 0 )
+			if( !F )
+			{
+				continue;
+			}
+
+			if( F->name().compare( N, Qt::CaseInsensitive ) == 0 )
 			{
 				ObjLst << F;
+
+				continue;
+			}
+
+			Property				*P = F->prop( "aliases" );
+
+			if( !P )
+			{
+				continue;
+			}
+
+			if( P->value().type() == QVariant::String )
+			{
+				if( P->value().toString().startsWith( N, Qt::CaseInsensitive ) )
+				{
+					ObjLst << F;
+				}
+			}
+
+			if( P->value().type() == QVariant::Map )
+			{
+				for( const QVariant &V : P->value().toMap().values() )
+				{
+					if( V.type() == QVariant::String && V.toString().startsWith( N, Qt::CaseInsensitive ) )
+					{
+						ObjLst << F;
+
+						break;
+					}
+				}
 			}
 		}
 
