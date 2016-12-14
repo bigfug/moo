@@ -81,6 +81,57 @@ Verb * Object::verbParent( const QString &pName, ObjectId pDirectObjectId, const
 	return( ParentObject->verbParent( pName, pDirectObjectId, pPreposition, pIndirectObjectId ) );
 }
 
+Verb *Object::verbMatch( const QString &pName )
+{
+	for( QMap<QString,Verb>::iterator it = mData.mVerbs.begin() ; it != mData.mVerbs.end() ; it++ )
+	{
+		Verb				&v = it.value();
+
+		if( pName.compare( it.key(), Qt::CaseInsensitive ) != 0 )
+		{
+			const QString		&a = v.aliases();
+
+			if( a.isEmpty() )
+			{
+				continue;
+			}
+
+			if( !Verb::matchName( a, pName ) )
+			{
+				continue;
+			}
+		}
+
+		return( &it.value() );
+	}
+
+	return( 0 );
+}
+
+Verb *Object::verbParent(const QString &pName)
+{
+	if( mData.mParent == -1 )
+	{
+		return( 0 );
+	}
+
+	Object      *ParentObject = ObjectManager::instance()->object( mData.mParent );
+
+	if( ParentObject == 0 )
+	{
+		return( 0 );
+	}
+
+	Verb		*V = ParentObject->verbMatch( pName );
+
+	if( V != 0 )
+	{
+		return( V );
+	}
+
+	return( ParentObject->verbParent( pName ) );
+}
+
 void Object::propAdd( const QString &pName, Property &pProp )
 {
 	mData.mProperties.insert( pName, pProp );
@@ -398,6 +449,11 @@ bool Object::verbFind( const QString &pName, Verb **pVerb, Object **pObject, Obj
 	return( verbFindRecurse( pName, pVerb, pObject, pDirectObjectId, pPreposition, pIndirectObjectId ) );
 }
 
+bool Object::verbFind( const QString &pName, Verb **pVerb, Object **pObject )
+{
+	return( verbFindRecurse( pName, pVerb, pObject ) );
+}
+
 Verb *Object::verb( const QString &pName )
 {
 	for( QMap<QString,Verb>::iterator it = mData.mVerbs.begin() ; it != mData.mVerbs.end() ; it++ )
@@ -440,4 +496,23 @@ bool Object::verbFindRecurse( const QString &pName, Verb **pVerb, Object **pObje
 	}
 
 	return( P->verbFindRecurse( pName, pVerb, pObject, pDirectObjectId, pPreposition, pIndirectObjectId ) );
+}
+
+bool Object::verbFindRecurse( const QString &pName, Verb **pVerb, Object **pObject )
+{
+	if( ( *pVerb = verbMatch( pName ) ) != 0 )
+	{
+		*pObject = this;
+
+		return( true );
+	}
+
+	Object	*P = ObjectManager::o( parent() );
+
+	if( P == 0 )
+	{
+		return( false );
+	}
+
+	return( P->verbFindRecurse( pName, pVerb, pObject ) );
 }

@@ -64,6 +64,7 @@ private:
 	void propDeleteRecurse( const QString &pName );
 
 	bool verbFindRecurse( const QString &pName, Verb **pVerb, Object **pObject, ObjectId pDirectObjectId, const QString &pPreposition, ObjectId pIndirectObjectId );
+	bool verbFindRecurse( const QString &pName, Verb **pVerb, Object **pObject );
 
 	inline QMap<QString,Verb> &verbmap( void )
 	{
@@ -115,10 +116,14 @@ public:
 
 	void verbAdd( const QString &pName, Verb &pVerb );
 	void verbDelete( const QString &pName );
-	bool verbFind( const QString &pName, Verb **pVerb, Object **pObject, ObjectId pDirectObjectId = OBJECT_NONE, const QString &pPreposition = "", ObjectId pIndirectObjectId = OBJECT_NONE );
+	bool verbFind( const QString &pName, Verb **pVerb, Object **pObject, ObjectId pDirectObjectId, const QString &pPreposition, ObjectId pIndirectObjectId );
+	bool verbFind( const QString &pName, Verb **pVerb, Object **pObject );
 
-	Verb *verbMatch( const QString &pName, ObjectId pDirectObjectId = OBJECT_NONE, const QString &pPreposition = "", ObjectId pIndirectObjectId = OBJECT_NONE );
-	Verb *verbParent( const QString &pName, ObjectId pDirectObjectId = OBJECT_NONE, const QString &pPreposition = "", ObjectId pIndirectObjectId = OBJECT_NONE );
+	Verb *verbMatch( const QString &pName, ObjectId pDirectObjectId, const QString &pPreposition, ObjectId pIndirectObjectId );
+	Verb *verbParent( const QString &pName, ObjectId pDirectObjectId, const QString &pPreposition, ObjectId pIndirectObjectId );
+
+	Verb *verbMatch( const QString &pName );
+	Verb *verbParent( const QString &pName );
 
 	inline const QMap<QString,Verb> &verbs( void ) const
 	{

@@ -406,7 +406,7 @@ void ObjectLogic::recycle( lua_task &pTask, ObjectId pUserId, ObjectId pObjectId
 
 	// and then object's `recycle' verb, if any, is called with no arguments.
 
-	if( ( V = objObject->verbMatch( "recycle", objObject->id(), "", objObject->id() ) ) != 0 )
+	if( ( V = objObject->verbMatch( "recycle" ) ) != 0 )
 	{
 		pTask.verbCall( objObject->id(), V );
 	}

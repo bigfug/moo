@@ -513,21 +513,21 @@ int lua_task::executeLogin( void )
 
 		if( OM.maxId() > MaxId )
 		{
-			if( ( V = Root->verbMatch( "user_created", Root->id(), "", Root->id() ) ) != 0 )
+			if( ( V = Root->verbMatch( "user_created" ) ) != 0 )
 			{
 				verbCall( Root->id(), V );
 			}
 		}
 		else if( UR )
 		{
-			if( ( V = Root->verbMatch( "user_reconnected", Root->id(), "", Root->id() ) ) != 0 )
+			if( ( V = Root->verbMatch( "user_reconnected" ) ) != 0 )
 			{
 				verbCall( Root->id(), V );
 			}
 		}
 		else
 		{
-			if( ( V = Root->verbMatch( "user_connected", Root->id(), "", Root->id() ) ) != 0 )
+			if( ( V = Root->verbMatch( "user_connected" ) ) != 0 )
 			{
 				verbCall( Root->id(), V );
 			}
@@ -646,23 +646,23 @@ int lua_task::execute( void )
 		Verb			*FndVrb;
 		Object			*FndObj;
 
-		if( Player != 0 && Player->verbFind( T.verb(), &FndVrb, &FndObj, DirectObjectId, T.preposition(), IndirectObjectId ) )
+		if( Player && Player->verbFind( T.verb(), &FndVrb, &FndObj, DirectObjectId, T.preposition(), IndirectObjectId ) )
 		{
 			T.setObject( Player->id() );
 		}
-		else if( Location != 0 && Location->verbFind( T.verb(), &FndVrb, &FndObj, DirectObjectId, T.preposition(), IndirectObjectId ) )
+		else if( Location && Location->verbFind( T.verb(), &FndVrb, &FndObj, DirectObjectId, T.preposition(), IndirectObjectId ) )
 		{
 			T.setObject( Location->id() );
 		}
-		else if( DirectObject != 0 && DirectObject->verbFind( T.verb(), &FndVrb, &FndObj, DirectObjectId, T.preposition(), IndirectObjectId ) )
+		else if( DirectObject && DirectObject->verbFind( T.verb(), &FndVrb, &FndObj, DirectObjectId, T.preposition(), IndirectObjectId ) )
 		{
 			T.setObject( DirectObject->id() );
 		}
-		else if( IndirectObject != 0 && IndirectObject->verbFind( T.verb(), &FndVrb, &FndObj, DirectObjectId, T.preposition(), IndirectObjectId ) )
+		else if( IndirectObject && IndirectObject->verbFind( T.verb(), &FndVrb, &FndObj, DirectObjectId, T.preposition(), IndirectObjectId ) )
 		{
 			T.setObject( IndirectObject->id() );
 		}
-		else if( Location != 0 && Location->verbFind( "huh", &FndVrb, &FndObj, DirectObjectId, T.preposition(), IndirectObjectId ) )
+		else if( Location && Location->verbFind( "huh", &FndVrb, &FndObj ) )
 		{
 			T.setObject( Location->id() );
 		}
