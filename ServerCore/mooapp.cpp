@@ -1,4 +1,6 @@
 #include <QDateTime>
+#include <QFileInfo>
+
 #include "mooapp.h"
 #include "object.h"
 #include "objectmanager.h"
@@ -31,15 +33,26 @@ mooApp::mooApp( const QString &pDataFileName, QObject *pParent )
 
 	OSC::deviceInitialise();
 
-//	ODBFile		ODB( mDataFileName );
+	bool LoadFromFile = !QFileInfo( "moo.sql" ).exists();
 
-	ODBSQL		*ODB = new ODBSQL();
+	ODBSQL		*SQL = new ODBSQL();
 
-	if( ODB )
+	if( SQL )
 	{
-		OM.setODB( ODB );
+		OM.setODB( SQL );
+	}
 
-		ODB->load();
+	if( LoadFromFile )
+	{
+		ODBFile		ODB( mDataFileName );
+
+		ODB.load();
+
+		SQL->save();
+	}
+	else
+	{
+		SQL->load();
 	}
 
 	if( OM.maxId() == 0 )

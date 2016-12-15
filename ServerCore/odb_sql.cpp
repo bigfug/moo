@@ -464,6 +464,8 @@ void ODBSQL::saveObject( const Object &O )
 {
 	const ObjectData	&D = data( O );
 
+	QSqlError		DBE;
+
 	registerObject( O );
 
 	{
@@ -513,6 +515,8 @@ void ODBSQL::saveObject( const Object &O )
 				bindProperty( P3, D.mId, data( D.mProperties.value( P3 ) ), Q3 );
 
 				Q3.exec();
+
+				DBE = Q3.lastError();
 			}
 			else if( P1 && !P2 )
 			{
@@ -524,13 +528,22 @@ void ODBSQL::saveObject( const Object &O )
 				Q.bindValue( ":name",   P3 );
 
 				Q.exec();
+
+				DBE = Q.lastError();
 			}
 			else
 			{
 				bindProperty( P3, D.mId, data( D.mProperties.value( P3 ) ), Q2 );
 
 				Q2.exec();
+
+				DBE = Q2.lastError();
 			}
+		}
+
+		if( DBE.type() != QSqlError::NoError )
+		{
+			qDebug() << DBE.databaseText() << DBE.driverText();
 		}
 	}
 
@@ -558,7 +571,7 @@ void ODBSQL::saveObject( const Object &O )
 					);
 
 		Q3.prepare( "UPDATE verb SET "
-					"owner, read, write, execute, script, dobj, preptype, iobj, prep, aliases "
+					"owner = :owner, read = :read, write = :write, execute = :execute, script = :script, dobj = :dobj, preptype = :preptype, iobj = :iobj, prep = :prep, aliases = :aliases "
 					"WHERE object = :object AND name = :name"
 					);
 
@@ -579,12 +592,14 @@ void ODBSQL::saveObject( const Object &O )
 			if( P1 && P2 )
 			{
 				Q3.bindValue( ":object", D.mId );
-				Q3.bindValue( ":name", it.key() );
+				Q3.bindValue( ":name", P3 );
 
-				bindFunc( funcdata( it.value() ), Q3 );
-				bindVerb( verbdata( it.value() ), Q3 );
+				bindFunc( funcdata( D.mVerbs.value( P3 ) ), Q3 );
+				bindVerb( verbdata( D.mVerbs.value( P3 ) ), Q3 );
 
 				Q3.exec();
+
+				DBE = Q3.lastError();
 			}
 			else if( P1 && !P2 )
 			{
@@ -596,17 +611,26 @@ void ODBSQL::saveObject( const Object &O )
 				Q.bindValue( ":name",   P3 );
 
 				Q.exec();
+
+				DBE = Q.lastError();
 			}
 			else
 			{
 				Q2.bindValue( ":object", D.mId );
-				Q2.bindValue( ":name", it.key() );
+				Q2.bindValue( ":name", P3 );
 
-				bindFunc( funcdata( it.value() ), Q2 );
-				bindVerb( verbdata( it.value() ), Q2 );
+				bindFunc( funcdata( D.mVerbs.value( P3 ) ), Q2 );
+				bindVerb( verbdata( D.mVerbs.value( P3 ) ), Q2 );
 
-				Q3.exec();
+				Q2.exec();
+
+				DBE = Q2.lastError();
 			}
+		}
+
+		if( DBE.type() != QSqlError::NoError )
+		{
+			qDebug() << DBE.databaseText() << DBE.driverText();
 		}
 	}
 }
