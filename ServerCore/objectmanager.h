@@ -91,6 +91,8 @@ public:
 
 	void luaMinimal( void );
 
+	QList<Object *> connectedPlayers( void ) const;
+
 signals:
 	void stats( int pTaskCount, int pObjectCount );
 

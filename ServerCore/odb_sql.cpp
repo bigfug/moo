@@ -23,43 +23,15 @@ ODBSQL::ODBSQL()
 	{
 		return;
 	}
-}
-
-void ODBSQL::load()
-{
-	ObjectManager				&OM = *ObjectManager::instance();
-	ObjectManagerData			&Data = data( OM );
-
-	if( !mDB.isOpen() )
-	{
-		return;
-	}
-
-	QSqlQuery	Q1 = mDB.exec( "SELECT MAX( id ) FROM object" );
-
-	if( Q1.next() )
-	{
-		Data.mObjNum = Q1.value( 0 ).toInt() + 1;
-	}
-}
-
-void ODBSQL::save()
-{
-	ObjectManager				&OM = *ObjectManager::instance();
-	const ObjectManagerData		&Data = data( OM );
-
-	if( !mDB.isOpen() )
-	{
-		return;
-	}
 
 	if( !mDB.tables().contains( "object" ) )
 	{
 		mDB.exec( "CREATE TABLE object ( "
 				  "id INTEGER PRIMARY KEY,"
-				  "parent INTEGER DEFAULT -1,"
 				  "name VARCHAR(255),"
+				  "parent INTEGER DEFAULT -1,"
 				  "player BOOLEAN DEFAULT false,"
+				  "connection INTEGER DEFAULT -1,"
 				  "owner INTEGER DEFAULT -1,"
 				  "location INTEGER DEFAULT -1,"
 				  "programmer BOOLEAN DEFAULT false,"
@@ -141,6 +113,44 @@ void ODBSQL::save()
 			return;
 		}
 	}
+}
+
+void ODBSQL::load()
+{
+	ObjectManager				&OM = *ObjectManager::instance();
+	ObjectManagerData			&Data = data( OM );
+
+	if( !mDB.isOpen() )
+	{
+		return;
+	}
+
+	QSqlQuery	Q1 = mDB.exec( "SELECT MAX( id ) FROM object" );
+
+	if( Q1.next() )
+	{
+		Data.mObjNum = Q1.value( 0 ).toInt() + 1;
+	}
+
+	// Load all the player objects that were previously connected
+
+	QSqlQuery	Q2 = mDB.exec( "SELECT id FROM object WHERE player AND connection != -1" );
+
+	while( Q2.next() )
+	{
+		ObjectManager::instance()->object( Q2.value( 0 ).toInt() );
+	}
+}
+
+void ODBSQL::save()
+{
+	ObjectManager				&OM = *ObjectManager::instance();
+	const ObjectManagerData		&Data = data( OM );
+
+	if( !mDB.isOpen() )
+	{
+		return;
+	}
 
 	for( const Object *O : Data.mObjMap.values() )
 	{
@@ -189,6 +199,7 @@ Object *ODBSQL::object( ObjectId pIndex ) const
 	D.mOwner = Q.value( "owner" ).toInt();
 	D.mParent = Q.value( "parent" ).toInt();
 	D.mPlayer = Q.value( "player" ).toBool();
+	D.mConnection = Q.value( "connection" ).toInt();
 	D.mProgrammer = Q.value( "programmer" ).toBool();
 	D.mRead = Q.value( "read" ).toBool();
 	D.mWizard = Q.value( "wizard" ).toBool();
@@ -327,6 +338,7 @@ void bindObject( const ObjectData &D, QSqlQuery &Q )
 	Q.bindValue( ":parent", D.mParent );
 	Q.bindValue( ":name", D.mName );
 	Q.bindValue( ":player", D.mPlayer );
+	Q.bindValue( ":connection", D.mConnection );
 	Q.bindValue( ":owner", D.mOwner );
 	Q.bindValue( ":location", D.mLocation );
 	Q.bindValue( ":programmer", D.mProgrammer );
@@ -408,9 +420,9 @@ void ODBSQL::registerObject( const Object &pObject )
 	QSqlQuery			 Q;
 
 	Q.prepare( "INSERT OR IGNORE INTO object "
-			   "( id, parent, name, player, owner, location, programmer, wizard, read, write, fertile ) "
+			   "( id, parent, name, player, connection, owner, location, programmer, wizard, read, write, fertile ) "
 			   "VALUES "
-			   "( :id, :parent, :name, :player, :owner, :location, :programmer, :wizard, :read, :write, :fertile )" );
+			   "( :id, :parent, :name, :player, :connection, :owner, :location, :programmer, :wizard, :read, :write, :fertile )" );
 
 	bindObject( D, Q );
 
@@ -418,7 +430,7 @@ void ODBSQL::registerObject( const Object &pObject )
 	{
 		if( Q.lastInsertId().type() == QVariant::Invalid )
 		{
-			Q.prepare( "UPDATE object SET parent = :parent, name = :name, player = :player, owner = :owner, location = :location, programmer = :programmer, wizard = :wizard, read = :read, write = :write, fertile = :fertile WHERE id = :id" );
+			Q.prepare( "UPDATE object SET parent = :parent, name = :name, player = :player, connection = :connection, owner = :owner, location = :location, programmer = :programmer, wizard = :wizard, read = :read, write = :write, fertile = :fertile WHERE id = :id" );
 
 			bindObject( D, Q );
 

@@ -39,6 +39,8 @@ typedef struct ObjectData
 	bool				mFertile;		// is the object fertile?
 	bool				mRecycled;		//
 
+	ConnectionId		mConnection;
+
 	qint64				mLastRead;
 	qint64				mLastUpdate;
 	qint64				mLastWrite;
@@ -218,6 +220,11 @@ public:
 		return( mData.mWrite );
 	}
 
+	inline ConnectionId connection( void ) const
+	{
+		return( mData.mConnection );
+	}
+
 	inline void setOwner( ObjectId pOwner )
 	{
 		mData.mOwner = pOwner;
@@ -261,6 +268,11 @@ public:
 	inline void setRecycle( bool pRecycle )
 	{
 		mData.mRecycled = pRecycle;
+	}
+
+	inline void setConnection( ConnectionId pConnectionId )
+	{
+		mData.mConnection = pConnectionId;
 	}
 
 protected:

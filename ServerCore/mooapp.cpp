@@ -62,11 +62,25 @@ mooApp::mooApp( const QString &pDataFileName, QObject *pParent )
 
 	if( OM.object( 0 ) != 0 )
 	{
-		QString			 CMD = QString( "moo.root:server_started()" );
-		TaskEntry		 TE( CMD, 0, 0 );
-		lua_task		 Com( 0, TE );
+		QList<Object *>		ObjLst = ObjectManager::instance()->connectedPlayers();
 
-		Com.eval();
+		for( Object *O : ObjLst )
+		{
+			QString			 CMD = QString( "moo.root:user_disconnected( o( %1 ) )" ).arg( O->id() );
+			TaskEntry		 TE( CMD, 0, 0 );
+			lua_task		 Com( 0, TE );
+
+			Com.eval();
+		}
+
+		if( true )
+		{
+			QString			 CMD = QString( "moo.root:server_started()" );
+			TaskEntry		 TE( CMD, 0, 0 );
+			lua_task		 Com( 0, TE );
+
+			Com.eval();
+		}
 	}
 
 	mTimerId = startTimer( 40 );

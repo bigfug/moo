@@ -481,8 +481,6 @@ int lua_task::executeLogin( void )
 			return( 0 );
 		}
 
-		//Connection		*C = ConnectionManager::instance()->connection( connectionid() );
-
 		ConnectionManager			&CM = *ConnectionManager::instance();
 		const ConnectionNodeMap		&NM = CM.connectionList();
 		bool						 UR = false;
@@ -495,19 +493,27 @@ int lua_task::executeLogin( void )
 			{
 				if( C->object() != 0 )
 				{
-					if( ( V = Root->verbMatch( "user_client_disconnected", Root->id(), "", Root->id() ) ) != 0 )
+					if( ( V = Root->verbMatch( "user_client_disconnected" ) ) != 0 )
 					{
-						verbCall( Root->id(), V );
+						lua_object::lua_pushobject( mL, Player );
+
+						verbCall( Root->id(), V, 1 );
 					}
 				}
 				else
 				{
 					UR = true;
 				}
+
+				C->setPlayerId( OBJECT_NONE );
 			}
 		}
 
 		CM.logon( connectionid(), Player->id() );
+
+		Player->setConnection( connectionid() );
+
+		ObjectManager::instance()->markObject( Player );
 
 		T.setPlayer( Player->id() );
 
@@ -515,21 +521,27 @@ int lua_task::executeLogin( void )
 		{
 			if( ( V = Root->verbMatch( "user_created" ) ) != 0 )
 			{
-				verbCall( Root->id(), V );
+				lua_object::lua_pushobject( mL, Player );
+
+				verbCall( Root->id(), V, 1 );
 			}
 		}
 		else if( UR )
 		{
 			if( ( V = Root->verbMatch( "user_reconnected" ) ) != 0 )
 			{
-				verbCall( Root->id(), V );
+				lua_object::lua_pushobject( mL, Player );
+
+				verbCall( Root->id(), V, 1 );
 			}
 		}
 		else
 		{
 			if( ( V = Root->verbMatch( "user_connected" ) ) != 0 )
 			{
-				verbCall( Root->id(), V );
+				lua_object::lua_pushobject( mL, Player );
+
+				verbCall( Root->id(), V, 1 );
 			}
 		}
 	}
@@ -566,7 +578,7 @@ int lua_task::execute( void )
 		//   invoked to handle the command as described below.
 
 		Object		*Root = OM.object( 0 );
-		Verb		*DoCommand = ( Root != 0 ? Root->verbMatch( "do_command", Root->id(), "", Root->id() ) : 0 );
+		Verb		*DoCommand = ( Root ? Root->verbMatch( "do_command" ) : 0 );
 
 		if( DoCommand && verbCall( *Root, DoCommand ) == 1 && lua_toboolean( mL, -1 ) )
 		{

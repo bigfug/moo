@@ -18,6 +18,8 @@ Object::Object( void )
 	mData.mFertile = false;
 	mData.mRecycled = false;
 
+	mData.mConnection = -1;
+
 	mData.mLastRead   = ObjectManager::timestamp();
 	mData.mLastUpdate = 0;
 	mData.mLastWrite = 0;

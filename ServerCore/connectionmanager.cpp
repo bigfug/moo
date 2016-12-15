@@ -129,7 +129,7 @@ void ConnectionManager::processClosedSockets( void )
 		{
 			try
 			{
-				QString			 CMD = QString( "o( %1 ):user_disconnected()" ).arg( CON->object() );
+				QString			 CMD = QString( "moo.root:user_client_disconnected( o( %1 ) )" ).arg( CON->player() );
 				TaskEntry		 TE( CMD, LS->connectionId(), CON->player() );
 				lua_task		 Com( 0, TE );
 

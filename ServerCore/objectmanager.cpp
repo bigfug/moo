@@ -89,6 +89,25 @@ void ObjectManager::luaMinimal( void )
 	FirstRoom->verbAdd( "eval", Eval );
 }
 
+QList<Object *> ObjectManager::connectedPlayers() const
+{
+	QList<Object *>		ObjLst;
+
+	for( QMap<ObjectId,Object*>::const_iterator it = mData.mObjMap.constBegin() ; it != mData.mObjMap.constEnd() ; it++ )
+	{
+		Object		*O = it.value();
+
+		if( !O->player() || O->connection() == -1 )
+		{
+			continue;
+		}
+
+		ObjLst << O;
+	}
+
+	return( ObjLst );
+}
+
 void ObjectManager::reset( void )
 {
 	if( mInstance == 0 )
