@@ -92,6 +92,7 @@ public:
 	void luaMinimal( void );
 
 signals:
+	void stats( int pTaskCount, int pObjectCount );
 
 public slots:
 	void onFrame( qint64 pTimeStamp );
@@ -118,6 +119,8 @@ private:
 
 	ODB						*mODB;
 	ObjectManagerData		 mData;
+
+	int						 mTaskCount;
 };
 
 #endif // OBJECTMANAGER_H

@@ -20,7 +20,7 @@ ObjectManager			*ObjectManager::mInstance = 0;
 qint64					 ObjectManager::mTimeStamp = 0;
 
 ObjectManager::ObjectManager( QObject *pParent )
-	: QObject( pParent ), mODB( 0 )
+	: QObject( pParent ), mODB( 0 ), mTaskCount( 0 )
 {
 	mData.mObjNum = 0;
 
@@ -236,6 +236,13 @@ void ObjectManager::onFrame( qint64 pTimeStamp )
 {
 	mTimeStamp = QDateTime::currentMSecsSinceEpoch();
 
+	static quint64		LastTime = mTimeStamp;
+
+	if( mTimeStamp - LastTime > 1000 )
+	{
+
+	}
+
 	QList<TaskEntry>		TaskList;
 
 	mData.mTaskMutex.lock();
@@ -265,6 +272,8 @@ void ObjectManager::onFrame( qint64 pTimeStamp )
 		lua_task			 L( TE.connectionid(), T );
 
 		L.execute( pTimeStamp );
+
+		mTaskCount++;
 	}
 
 	TaskList.clear();
@@ -278,6 +287,15 @@ void ObjectManager::onFrame( qint64 pTimeStamp )
 	ConnectionManager::instance()->processClosedSockets();
 
 	timeoutObjects();
+
+	if( mTimeStamp - LastTime > 1000 )
+	{
+		emit stats( mTaskCount, mData.mObjMap.size() );
+
+		mTaskCount = 0;
+
+		LastTime += 1000;
+	}
 }
 
 void ObjectManager::doTask( TaskEntry &pTask )

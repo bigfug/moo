@@ -19,7 +19,6 @@ MainWindow::MainWindow( QWidget *pParent )
 	mTrayIcon->setToolTip( "ArtMOO" );
 
 	mTrayIcon->show();
-
 }
 
 MainWindow::~MainWindow()
@@ -36,6 +35,11 @@ void MainWindow::installModel( QAbstractItemModel *pModel )
 {
 	Q_UNUSED( pModel )
 	//ui->treeView->setModel( pModel );
+}
+
+void MainWindow::stats(int pTaskCount, int pObjectCount)
+{
+	ui->mStatusBar->showMessage( tr( "Tasks: %1 - Objects: %2" ).arg( pTaskCount ).arg( pObjectCount ) );
 }
 
 void MainWindow::trayActivated( QSystemTrayIcon::ActivationReason pReason )

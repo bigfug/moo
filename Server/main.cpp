@@ -96,10 +96,7 @@ int main( int argc, char *argv[] )
 
 	if( App != 0 )
 	{
-
-	//ObjectManager	&OM = *ObjectManager::instance();
-
-	//w.installModel( &OM );
+		QObject::connect( ObjectManager::instance(), SIGNAL(stats(int,int)), &w, SLOT(stats(int,int)) );
 
 		OSC			*OSCHost = OSC::newDevice();
 

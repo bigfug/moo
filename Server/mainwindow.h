@@ -21,6 +21,9 @@ public:
 
 	void installModel( QAbstractItemModel *pModel );
 
+public slots:
+	void stats( int pTaskCount, int pObjectCount );
+
 private slots:
 	void trayActivated( QSystemTrayIcon::ActivationReason pReason );
 
