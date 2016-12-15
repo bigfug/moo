@@ -219,6 +219,8 @@ void Object::propSet( const QString &pName, const QVariant &pValue )
 		}
 
 		P->setValue( pValue );
+
+		ObjectManager::instance()->markObject( this );
 	}
 	else if( ( P = propParent( pName ) ) != 0 )
 	{
