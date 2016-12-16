@@ -228,6 +228,8 @@ void ODBFile::loadObject( QDataStream &DS, Object &O )
 
 		Data.mProperties[ n ] = p;
 	}
+
+	Data.mConnection = -1;
 }
 
 void ODBFile::saveObject(QDataStream &DS, const Object &O)

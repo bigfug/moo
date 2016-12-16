@@ -4,8 +4,8 @@
 #include <QtGlobal>
 
 typedef	qint32		ObjectId;
-typedef quint32		TaskId;
-typedef quint32		ConnectionId;
+typedef qint32		TaskId;
+typedef qint32		ConnectionId;
 
 #define OBJECT_NONE			(-1)
 #define OBJECT_AMBIGUOUS	(-2)
