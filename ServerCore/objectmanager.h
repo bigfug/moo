@@ -102,6 +102,8 @@ public slots:
 	void queueTask( TaskEntry &pTask );
 	bool killTask( TaskId pTaskId );
 
+	void checkpoint( void );
+
 protected:
 	void timeoutObjects( void );
 

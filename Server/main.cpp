@@ -8,6 +8,9 @@
 #include <lua.hpp>
 #include <QDateTime>
 #include <QFile>
+#include <QDir>
+#include <QDebug>
+
 #include "objectmanager.h"
 #include "osc.h"
 
@@ -68,16 +71,16 @@ int main( int argc, char *argv[] )
 
 	qDebug() << "ArtMOO v0.1 by Alex May - www.bigfug.com";
 
-	QString			DataFileName = "moo.dat";
-	quint16			ServerPort   = 1123;
+	QString			DataDir    = ".";
+	quint16			ServerPort = 1123;
 
 	const QStringList	args = a.arguments();
 
 	foreach( const QString &arg, args )
 	{
-		if( arg.startsWith( "-db=", Qt::CaseSensitive ) )
+		if( arg.startsWith( "-dir=", Qt::CaseSensitive ) )
 		{
-			DataFileName = arg.mid( 4 );
+			DataDir = arg.mid( 5 );
 
 			continue;
 		}
@@ -90,9 +93,17 @@ int main( int argc, char *argv[] )
 		}
 	}
 
+	if( DataDir != "." )
+	{
+		if( !QDir::setCurrent( DataDir ) )
+		{
+			qFatal( QString( QObject::tr( "Can't set directory to %1" ) ).arg( DataDir ).toLatin1() );
+		}
+	}
+
 	int				 Ret = -1;
 
-	mooApp			*App = new mooApp( DataFileName );
+	mooApp			*App = new mooApp();
 
 	if( App != 0 )
 	{

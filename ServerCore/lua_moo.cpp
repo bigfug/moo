@@ -33,6 +33,7 @@ const luaL_Reg lua_moo::mLuaMeta[] =
 
 const luaL_Reg lua_moo::mLuaStatic[] =
 {
+	{ "checkpoint", lua_moo::luaCheckPoint },
 	{ "notify", lua_moo::luaNotify },
 	{ "pass", lua_moo::luaPass },
 	{ "eval", lua_moo::luaEval },
@@ -567,6 +568,40 @@ int lua_moo::luaFindPlayer( lua_State *L )
 	}
 
 	return( 1 );
+}
+
+int lua_moo::luaCheckPoint( lua_State *L )
+{
+	bool				 LuaErr = false;
+
+	try
+	{
+		lua_task			*Command = lua_task::luaGetTask( L );
+		const Task			&T = Command->task();
+		Object				*PRG = ObjectManager::o( T.programmer() );
+
+		if( PRG == 0 || !PRG->wizard() )
+		{
+			throw mooException( E_PERM, "wizard is not a wizard!" );
+		}
+
+		ObjectManager			&OM = *ObjectManager::instance();
+
+		OM.checkpoint();
+	}
+	catch( mooException e )
+	{
+		e.lua_pushexception( L );
+
+		LuaErr = true;
+	}
+	catch( ... )
+	{
+
+	}
+
+	return( LuaErr ? lua_error( L ) : 0 );
+
 }
 
 int lua_moo::luaLastObject(lua_State *L)

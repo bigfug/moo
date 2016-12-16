@@ -15,6 +15,7 @@
 #include "connection.h"
 #include "connectionmanager.h"
 #include "odb.h"
+#include "odb_file.h"
 
 ObjectManager			*ObjectManager::mInstance = 0;
 qint64					 ObjectManager::mTimeStamp = 0;
@@ -366,6 +367,13 @@ bool ObjectManager::killTask(TaskId pTaskId)
 	}
 
 	return( false );
+}
+
+void ObjectManager::checkpoint()
+{
+	QString		DatStr = QDateTime::currentDateTime().toString( "yyyy-MM-dd.hh-mm-ss" );
+
+	QFile( "moo.sql" ).copy( QString( "%1.sql" ).arg( DatStr ) );
 }
 
 void ObjectManager::timeoutObjects()

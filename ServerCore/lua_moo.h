@@ -38,6 +38,8 @@ private:
 	static int luaDebug( lua_State *L );
 	static int luaFindPlayer( lua_State *L );
 
+	static int luaCheckPoint( lua_State *L );
+
 	static int luaLastObject( lua_State *L );
 
 	static int luaPanic( lua_State *L );
