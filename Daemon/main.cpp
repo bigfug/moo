@@ -9,16 +9,15 @@
 #include <QDateTime>
 #include <QFile>
 #include <QFileInfo>
+#include <QDir>
 #include "objectmanager.h"
 #include "osc.h"
-
-QString		LogFileName;
 
 void myMessageOutput( QtMsgType type, const QMessageLogContext &context, const QString &msg )
 {
 	Q_UNUSED( context )
 
-	QFile				LogFil( LogFileName );
+	QFile				LogFil( "moo.log" );
 	const QDateTime		CurDat = QDateTime::currentDateTime();
 	QString				DateTime = CurDat.toString( "dd-MMM-yyyy hh:mm:ss" );
 	QString				LogMsg;
@@ -54,16 +53,16 @@ int main( int argc, char *argv[] )
 	a.setOrganizationDomain( "http://www.bigfug.com" );
 	a.setApplicationVersion( "0.1" );
 
-	QString			DataFileName = "moo.dat";
-	quint16			ServerPort   = 1123;
+	QString			DataDir    = ".";
+	quint16			ServerPort = 1123;
 
 	const QStringList	args = a.arguments();
 
 	foreach( const QString &arg, args )
 	{
-		if( arg.startsWith( "-db=", Qt::CaseSensitive ) )
+		if( arg.startsWith( "-dir=", Qt::CaseSensitive ) )
 		{
-			DataFileName = arg.mid( 4 );
+			DataDir = arg.mid( 5 );
 
 			continue;
 		}
@@ -76,9 +75,13 @@ int main( int argc, char *argv[] )
 		}
 	}
 
-	QFileInfo	LogFileInfo = QFileInfo( DataFileName );
-
-	LogFileName = LogFileInfo.path() + "/" + LogFileInfo.completeBaseName() + ".log";
+	if( DataDir != "." )
+	{
+		if( !QDir::setCurrent( DataDir ) )
+		{
+			qFatal( QString( QObject::tr( "Can't set directory to %1" ) ).arg( DataDir ).toLatin1() );
+		}
+	}
 
 	qInstallMessageHandler( myMessageOutput );
 
@@ -86,7 +89,7 @@ int main( int argc, char *argv[] )
 
 	int				 Ret = -1;
 
-	mooApp			*App = new mooApp( DataFileName );
+	mooApp			*App = new mooApp();
 
 	if( App != 0 )
 	{
