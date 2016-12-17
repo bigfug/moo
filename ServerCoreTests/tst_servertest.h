@@ -107,6 +107,9 @@ private Q_SLOTS:
 
 	void luaPropInheritance( void );
 
+	void luaVerbVerbCall( void );
+	void luaVerbParentVerbCall( void );
+
 	void cleanupTestCase( void );
 };
 

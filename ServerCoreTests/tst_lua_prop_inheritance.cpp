@@ -41,6 +41,8 @@ void ServerTest::luaPropInheritance( void )
 		Property	*P = O2->prop( "test" );
 
 		QVERIFY( P != 0 );
+		QCOMPARE( P->object(), O2->id() );
+		QCOMPARE( P->name(), QStringLiteral( "test" ) );
 		QCOMPARE( P->parent(), OBJECT_NONE );
 		QCOMPARE( P->owner(), Programmer->id() );
 		QCOMPARE( P->type(), QVariant::Double );
@@ -90,6 +92,8 @@ void ServerTest::luaPropInheritance( void )
 		Property	*P = O3->prop( "test" );
 
 		QVERIFY( P != 0 );
+		QCOMPARE( P->object(), O3->id() );
+		QCOMPARE( P->name(), QStringLiteral( "test" ) );
 		QCOMPARE( P->parent(), O2->id() );
 		QCOMPARE( P->owner(), O3->id() );
 		QCOMPARE( P->type(), QVariant::Double );

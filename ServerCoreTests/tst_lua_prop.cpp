@@ -36,6 +36,8 @@ void ServerTest::luaPropNumber( void )
 		Property	*P = O->prop( "test" );
 
 		QVERIFY( P != 0 );
+		QCOMPARE( P->object(), O->id() );
+		QCOMPARE( P->name(), QStringLiteral( "test" ) );
 		QCOMPARE( P->parent(), OBJECT_NONE );
 		QCOMPARE( P->owner(), Programmer->id() );
 		QCOMPARE( P->type(), QVariant::Double );

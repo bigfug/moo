@@ -164,8 +164,6 @@ void ODBSQL::save()
 
 Object *ODBSQL::object( ObjectId pIndex ) const
 {
-	qDebug() << "Loading" << pIndex;
-
 	QSqlQuery	Q;
 
 	Q.prepare( "SELECT * FROM object WHERE id = :id" );
