@@ -117,7 +117,7 @@ void ODBFile::save()
 
 	for( const Object *O : Data.mObjMap.values() )
 	{
-		saveObject( DS, *O );
+		updateObject( DS, *O );
 	}
 
 	// Save Tasks
@@ -212,6 +212,7 @@ void ODBFile::loadObject( QDataStream &DS, Object &O )
 		loadVerb( DS, v );
 
 		v.setObject( O.id() );
+		v.setName( n );
 
 		Data.mVerbs.insert( n, v );
 	}
@@ -226,13 +227,16 @@ void ODBFile::loadObject( QDataStream &DS, Object &O )
 
 		loadProperty( DS, p );
 
+		p.setObject( O.id() );
+		p.setName( n );
+
 		Data.mProperties[ n ] = p;
 	}
 
 	Data.mConnection = -1;
 }
 
-void ODBFile::saveObject(QDataStream &DS, const Object &O)
+void ODBFile::updateObject(QDataStream &DS, const Object &O)
 {
 	const ObjectData		&Data = data( O );
 

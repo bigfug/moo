@@ -21,9 +21,11 @@ ObjectManager			*ObjectManager::mInstance = 0;
 qint64					 ObjectManager::mTimeStamp = 0;
 
 ObjectManager::ObjectManager( QObject *pParent )
-	: QObject( pParent ), mODB( 0 ), mTaskCount( 0 )
+	: QObject( pParent ), mODB( 0 )
 {
 	mData.mObjNum = 0;
+
+	memset( &mStats, 0, sizeof( mStats ) );
 
 	mTimeStamp = QDateTime::currentMSecsSinceEpoch();
 }
@@ -121,21 +123,6 @@ void ObjectManager::reset( void )
 	mInstance = 0;
 }
 
-void ObjectManager::markObject(ObjectId pIndex)
-{
-	Object		*O = object( pIndex );
-
-	if( O )
-	{
-		markObject( O );
-	}
-}
-
-void ObjectManager::markObject( Object *O )
-{
-	O->data().mLastUpdate = mTimeStamp;
-}
-
 ObjectId ObjectManager::findPlayer( QString pName ) const
 {
 	return( mODB ? mODB->findPlayer( pName ) : OBJECT_NONE );
@@ -143,6 +130,11 @@ ObjectId ObjectManager::findPlayer( QString pName ) const
 
 Object *ObjectManager::object( ObjectId pIndex )
 {
+	if( pIndex < 0 )
+	{
+		return( nullptr );
+	}
+
 	Object *O = mData.mObjMap.value( pIndex, 0 );
 
 	if( !O && mODB )
@@ -188,7 +180,6 @@ void ObjectManager::clear()
 	mData.mObjNum = 0;
 
 	mData.mObjMap.clear();
-	mData.mRecycled.clear();
 
 	mData.mTaskMutex.lock();
 
@@ -196,6 +187,10 @@ void ObjectManager::clear()
 	mData.mTaskQueue.clear();
 
 	mData.mTaskMutex.unlock();
+
+	mAddedObjects.clear();
+	mDeletedObjects.clear();
+	mUpdatedObjects.clear();
 }
 
 Object *ObjectManager::newObject( void )
@@ -208,10 +203,7 @@ Object *ObjectManager::newObject( void )
 
 		mData.mObjMap[ O->id() ] = O;
 
-		if( mODB )
-		{
-			mODB->registerObject( *O );
-		}
+		mAddedObjects << O->id();
 	}
 
 	return( O );
@@ -221,7 +213,12 @@ void ObjectManager::recycle( Object *pObject )
 {
 	pObject->setRecycle( true );
 
-	mData.mRecycled.push_back( pObject->id() );
+	mAddedObjects.removeAll( pObject->id() );
+	mUpdatedObjects.removeAll( pObject->id() );
+
+	// TODO: Verbs, Props
+
+	mDeletedObjects << pObject->id();
 }
 
 ObjectId ObjectManager::newObjectId( void )
@@ -231,14 +228,19 @@ ObjectId ObjectManager::newObjectId( void )
 
 void ObjectManager::recycleObjects( void )
 {
-	if( mData.mRecycled.empty() )
+	if( mDeletedObjects.empty() )
 	{
 		return;
 	}
 
-	foreach( ObjectId id, mData.mRecycled )
+	for( ObjectId id : mDeletedObjects )
 	{
 		Object		*O = object( id );
+
+		if( mODB )
+		{
+			mODB->deleteObject( *O );
+		}
 
 		Q_ASSERT( O->recycle() );
 
@@ -249,7 +251,73 @@ void ObjectManager::recycleObjects( void )
 		delete O;
 	}
 
-	mData.mRecycled.clear();
+	mDeletedObjects.clear();
+}
+
+void ObjectManager::updateObject(Object *pObject)
+{
+	mUpdatedObjects.removeAll( pObject->id() );
+	mUpdatedObjects.append( pObject->id() );
+}
+
+void ObjectManager::addVerb( Object *pObject, QString pName )
+{
+	QStringList		StrLst = mAddedVerbs.value( pObject->id() );
+
+	StrLst.removeAll( pName );
+	StrLst.append( pName );
+
+	mAddedVerbs.insert( pObject->id(), StrLst );
+}
+
+void ObjectManager::deleteVerb( Object *pObject, QString pName )
+{
+	QStringList		StrLst = mDeletedVerbs.value( pObject->id() );
+
+	StrLst.removeAll( pName );
+	StrLst.append( pName );
+
+	mDeletedVerbs.insert( pObject->id(), StrLst );
+}
+
+void ObjectManager::updateVerb( Object *pObject, QString pName )
+{
+	QStringList		StrLst = mUpdatedVerbs.value( pObject->id() );
+
+	StrLst.removeAll( pName );
+	StrLst.append( pName );
+
+	mUpdatedVerbs.insert( pObject->id(), StrLst );
+}
+
+void ObjectManager::addProperty(Object *pObject, QString pName)
+{
+	QStringList		StrLst = mAddedProperties.value( pObject->id() );
+
+	StrLst.removeAll( pName );
+	StrLst.append( pName );
+
+	mAddedProperties.insert( pObject->id(), StrLst );
+}
+
+void ObjectManager::deleteProperty(Object *pObject, QString pName)
+{
+	QStringList		StrLst = mDeletedProperties.value( pObject->id() );
+
+	StrLst.removeAll( pName );
+	StrLst.append( pName );
+
+	mDeletedProperties.insert( pObject->id(), StrLst );
+}
+
+void ObjectManager::updateProperty(Object *pObject, QString pName)
+{
+	QStringList		StrLst = mUpdatedProperties.value( pObject->id() );
+
+	StrLst.removeAll( pName );
+	StrLst.append( pName );
+
+	mUpdatedProperties.insert( pObject->id(), StrLst );
 }
 
 void ObjectManager::onFrame( qint64 pTimeStamp )
@@ -293,14 +361,10 @@ void ObjectManager::onFrame( qint64 pTimeStamp )
 
 		L.execute( pTimeStamp );
 
-		mTaskCount++;
+		mStats.mTasks++;
 	}
 
 	TaskList.clear();
-
-	// Recycle objects
-
-	recycleObjects();
 
 	// Process closed connections
 
@@ -310,9 +374,11 @@ void ObjectManager::onFrame( qint64 pTimeStamp )
 
 	if( mTimeStamp - LastTime > 1000 )
 	{
-		emit stats( mTaskCount, mData.mObjMap.size() );
+		mStats.mObjectCount = mData.mObjMap.size();
 
-		mTaskCount = 0;
+		emit stats( mStats );
+
+		memset( &mStats, 0, sizeof( mStats ) );
 
 		LastTime += 1000;
 	}
@@ -378,18 +444,140 @@ void ObjectManager::checkpoint()
 
 void ObjectManager::timeoutObjects()
 {
-	for( ObjectId OID : mData.mObjMap.keys() )
+	for( ObjectId OID : mAddedObjects )
 	{
 		Object		*O = mData.mObjMap.value( OID );
 
-		if( O->data().mLastUpdate > O->data().mLastWrite )
+		if( O && mODB )
 		{
-			if( mODB )
+			mODB->addObject( *O );
+		}
+	}
+
+	mAddedObjects.clear();
+
+	//-------------------------------------------------------------------------
+
+	for( ObjectId OID : mUpdatedObjects )
+	{
+		Object		*O = mData.mObjMap.value( OID );
+
+		if( O && mODB )
+		{
+			mODB->updateObject( *O );
+		}
+	}
+
+	mUpdatedObjects.clear();
+
+	//-------------------------------------------------------------------------
+
+	for( QMap<ObjectId,QStringList>::const_iterator it = mAddedVerbs.begin() ; it != mAddedVerbs.end() ; it++ )
+	{
+		Object		*O = mData.mObjMap.value( it.key() );
+
+		if( O && mODB )
+		{
+			for( QString Name : it.value() )
 			{
-				mODB->saveObject( O );
+				mODB->addVerb( *O, Name );
 			}
 		}
+	}
 
+	mAddedVerbs.clear();
+
+	//-------------------------------------------------------------------------
+
+	for( QMap<ObjectId,QStringList>::const_iterator it = mUpdatedVerbs.begin() ; it != mUpdatedVerbs.end() ; it++ )
+	{
+		Object		*O = mData.mObjMap.value( it.key() );
+
+		if( O && mODB )
+		{
+			for( QString Name : it.value() )
+			{
+				mODB->updateVerb( *O, Name );
+			}
+		}
+	}
+
+	mUpdatedVerbs.clear();
+
+	//-------------------------------------------------------------------------
+
+	for( QMap<ObjectId,QStringList>::const_iterator it = mDeletedVerbs.begin() ; it != mDeletedVerbs.end() ; it++ )
+	{
+		Object		*O = mData.mObjMap.value( it.key() );
+
+		if( O && mODB )
+		{
+			for( QString Name : it.value() )
+			{
+				mODB->deleteVerb( *O, Name );
+			}
+		}
+	}
+
+	mDeletedVerbs.clear();
+
+	//-------------------------------------------------------------------------
+
+	for( QMap<ObjectId,QStringList>::const_iterator it = mAddedProperties.begin() ; it != mAddedProperties.end() ; it++ )
+	{
+		Object		*O = mData.mObjMap.value( it.key() );
+
+		if( O && mODB )
+		{
+			for( QString Name : it.value() )
+			{
+				mODB->addProperty( *O, Name );
+			}
+		}
+	}
+
+	mAddedProperties.clear();
+
+	//-------------------------------------------------------------------------
+
+	for( QMap<ObjectId,QStringList>::const_iterator it = mUpdatedProperties.begin() ; it != mUpdatedProperties.end() ; it++ )
+	{
+		Object		*O = mData.mObjMap.value( it.key() );
+
+		if( O && mODB )
+		{
+			for( QString Name : it.value() )
+			{
+				mODB->updateProperty( *O, Name );
+			}
+		}
+	}
+
+	mUpdatedProperties.clear();
+
+	//-------------------------------------------------------------------------
+
+	for( QMap<ObjectId,QStringList>::const_iterator it = mDeletedProperties.begin() ; it != mDeletedProperties.end() ; it++ )
+	{
+		Object		*O = mData.mObjMap.value( it.key() );
+
+		if( O && mODB )
+		{
+			for( QString Name : it.value() )
+			{
+				mODB->deleteProperty( *O, Name );
+			}
+		}
+	}
+
+	mDeletedProperties.clear();
+
+	//-------------------------------------------------------------------------
+
+	ObjectList	IDS = mData.mObjMap.values();
+
+	for( Object *O : IDS )
+	{
 		if( O->player() )
 		{
 			continue;
@@ -405,8 +593,10 @@ void ObjectManager::timeoutObjects()
 			continue;
 		}
 
-		mData.mObjMap.remove( OID );
+		mData.mObjMap.remove( O->id() );
 
 		delete O;
 	}
+
+	recycleObjects();
 }

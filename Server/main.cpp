@@ -107,7 +107,7 @@ int main( int argc, char *argv[] )
 
 	if( App != 0 )
 	{
-		QObject::connect( ObjectManager::instance(), SIGNAL(stats(int,int)), &w, SLOT(stats(int,int)) );
+		QObject::connect( ObjectManager::instance(), SIGNAL(stats(ObjectManagerStats)), &w, SLOT(stats(ObjectManagerStats)) );
 
 		OSC			*OSCHost = OSC::newDevice();
 

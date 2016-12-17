@@ -24,26 +24,28 @@ public:
 	virtual void load( void ) Q_DECL_OVERRIDE;
 	virtual void save( void ) Q_DECL_OVERRIDE;
 
-	virtual void saveObject( Object *O ) Q_DECL_OVERRIDE;
-
 	virtual Object *object( ObjectId pIndex ) const Q_DECL_OVERRIDE;
 
-	virtual void registerObject( const Object &pObject ) Q_DECL_OVERRIDE;
+	virtual void addObject( Object &pObject ) Q_DECL_OVERRIDE;
+	virtual void deleteObject( Object &pObject ) Q_DECL_OVERRIDE;
+	virtual void updateObject( Object &pObject ) Q_DECL_OVERRIDE;
+
+	virtual void addVerb( Object &pObject, QString pName ) Q_DECL_OVERRIDE;
+
+	virtual void deleteVerb( Object &pObject, QString pName ) Q_DECL_OVERRIDE;
+
+	virtual void updateVerb( Object &pObject, QString pName ) Q_DECL_OVERRIDE;
+
+	virtual void addProperty( Object &pObject, QString pName ) Q_DECL_OVERRIDE;
+
+	virtual void deleteProperty( Object &pObject, QString pName ) Q_DECL_OVERRIDE;
+
+	virtual void updateProperty( Object &pObject, QString pName ) Q_DECL_OVERRIDE;
 
 	virtual ObjectId findPlayer( QString pName ) const Q_DECL_OVERRIDE;
 
 private:
-//	void loadObject( QDataStream &DS, Object &O );
-	void saveObject( const Object &O );
-
-//	void loadVerb( QDataStream &DS, Verb &V );
-//	void saveVerb( QDataStream &DS, const Verb &V );
-
-//	void loadProperty( QDataStream &DS, Property &P );
-//	void saveProperty( QDataStream &DS, const Property &P );
-
-//	void loadTask( QDataStream &DS, TaskEntry &TE );
-//	void saveTask( QDataStream &DS, const TaskEntry &TE );
+	//void updateObject( const Object &O );
 
 private:
 	QSqlDatabase			 mDB;

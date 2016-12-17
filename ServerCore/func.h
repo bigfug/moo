@@ -11,7 +11,8 @@
 typedef struct FuncData
 {
 	ObjectId		mObject;		// The object this func is attached to
-	ObjectId		mOwner;
+	QString			mName;			// The name of this verb
+	ObjectId		mOwner;			// The object that owns the verb
 	bool			mRead;			// lets non-owners see the program for a verb
 	bool			mWrite;			// lets them change that program
 	bool			mExecute;		// whether or not the verb can be invoked from within a MOO program (as opposed to from the command line, like the `put' verb on containers)
@@ -44,6 +45,11 @@ public:
 	inline ObjectId object( void ) const
 	{
 		return( mData.mObject );
+	}
+
+	inline QString name( void ) const
+	{
+		return( mData.mName );
 	}
 
 	inline ObjectId owner( void ) const
@@ -81,36 +87,19 @@ public:
 		return( mData.mDirty );
 	}
 
-	inline void setObject( ObjectId pObject )
-	{
-		mData.mObject = pObject;
-	}
+	void setObject( ObjectId pObject );
 
-	inline void setOwner( ObjectId pOwner )
-	{
-		mData.mOwner = pOwner;
-	}
+	void setName( QString pName );
 
-	inline void setRead( bool pRead )
-	{
-		mData.mRead = pRead;
-	}
+	void setOwner( ObjectId pOwner );
 
-	inline void setWrite( bool pWrite )
-	{
-		mData.mWrite = pWrite;
-	}
+	void setRead( bool pRead );
 
-	inline void setExecute( bool pExecute )
-	{
-		mData.mExecute = pExecute;
-	}
+	void setWrite( bool pWrite );
 
-	inline void setScript( const QString &pScript )
-	{
-		mData.mScript = pScript;
-		mData.mDirty  = true;
-	}
+	void setExecute( bool pExecute );
+
+	void setScript( const QString &pScript );
 
 private:
 	static int writerStatic( lua_State *L, const void* p, size_t sz, void* ud );
@@ -129,6 +118,8 @@ protected:
 	{
 		return( mData );
 	}
+
+	void setUpdated( void );
 
 private:
 	FuncData			 mData;

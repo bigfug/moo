@@ -37,9 +37,9 @@ public:
 
 	static bool matchName( const QString &pPattern, const QString &pMatch );
 
-	bool matchPreposition( const QString &pPreposition );
+	bool matchPreposition( const QString &pPreposition ) const;
 
-	bool matchArgs( ObjectId pObjectId, ObjectId DirectObjectId, const QString &pPreposition, ObjectId IndirectObjectId );
+	bool matchArgs( ObjectId pObjectId, ObjectId DirectObjectId, const QString &pPreposition, ObjectId IndirectObjectId ) const;
 
 public:
 	static const char *argobj_name( ArgObj pArgObj )
@@ -107,29 +107,13 @@ public:
 		return( mVerbData.mPrepositionType );
 	}
 
-	inline void setDirectObjectArgument( ArgObj pArg )
-	{
-		mVerbData.mDirectObject = pArg;
-	}
+	void setDirectObjectArgument( ArgObj pArg );
 
-	inline void setIndirectObjectArgument( ArgObj pArg )
-	{
-		mVerbData.mIndirectObject = pArg;
-	}
+	void setIndirectObjectArgument( ArgObj pArg );
 
-	inline void setPrepositionArgument( ArgObj pArg )
-	{
-		Q_ASSERT( pArg == ArgObj::ANY || pArg == ArgObj::NONE );
+	void setPrepositionArgument( ArgObj pArg );
 
-		mVerbData.mPrepositionType = pArg;
-		mVerbData.mPreposition.clear();
-	}
-
-	inline void setPrepositionArgument( const QString &pArg )
-	{
-		mVerbData.mPrepositionType = THIS;
-		mVerbData.mPreposition = pArg;
-	}
+	void setPrepositionArgument( const QString &pArg );
 
 	const QString &aliases( void ) const
 	{

@@ -87,7 +87,7 @@ public:
 
 	void setParent( ObjectId pNewParentId );
 
-	bool matchName( const QString &pName );
+	bool matchName( const QString &pName ) const;
 
 	typedef enum Permissions
 	{
@@ -101,8 +101,8 @@ public:
 
 	//
 
-	void ancestors( QList<ObjectId> &pList );
-	void descendants( QList<ObjectId> &pList );
+	void ancestors( QList<ObjectId> &pList ) const;
+	void descendants( QList<ObjectId> &pList ) const;
 
 	// Define property on this object
 	void propAdd( const QString &pName, Property &pProp );
@@ -110,10 +110,11 @@ public:
 	void propClear( const QString &pName );
 	void propSet( const QString &pName, const QVariant &pValue );
 	bool propFind( const QString &pName, Property **pProp, Object **pObject );
-	void propNames( QStringList &pList );
+	void propNames( QStringList &pList ) const;
 
+	const Property *prop( const QString &pName ) const;
 	Property *prop( const QString &pName );
-	Property *propParent( const QString &pName );
+	Property *propParent( const QString &pName ) const;
 
 	inline const QMap<QString,Property> &properties( void ) const
 	{
@@ -126,16 +127,17 @@ public:
 	bool verbFind( const QString &pName, Verb **pVerb, Object **pObject );
 
 	Verb *verbMatch( const QString &pName, ObjectId pDirectObjectId, const QString &pPreposition, ObjectId pIndirectObjectId );
-	Verb *verbParent( const QString &pName, ObjectId pDirectObjectId, const QString &pPreposition, ObjectId pIndirectObjectId );
+	Verb *verbParent( const QString &pName, ObjectId pDirectObjectId, const QString &pPreposition, ObjectId pIndirectObjectId ) const;
 
 	Verb *verbMatch( const QString &pName );
-	Verb *verbParent( const QString &pName );
+	Verb *verbParent( const QString &pName ) const;
 
 	inline const QMap<QString,Verb> &verbs( void ) const
 	{
 		return( mData.mVerbs );
 	}
 
+	const Verb *verb( const QString &pName ) const;
 	Verb *verb( const QString &pName );
 
 	//
@@ -225,55 +227,25 @@ public:
 		return( mData.mConnection );
 	}
 
-	inline void setOwner( ObjectId pOwner )
-	{
-		mData.mOwner = pOwner;
-	}
+	void setOwner( ObjectId pOwner );
 
-	void setPlayer( bool pPlayer )
-	{
-		mData.mPlayer = pPlayer;
-	}
+	void setPlayer( bool pPlayer );
 
-	inline void setName( const QString &pName )
-	{
-		mData.mName = pName;
-	}
+	void setName( const QString &pName );
 
-	inline void setProgrammer( bool pProgrammer )
-	{
-		mData.mProgrammer = pProgrammer;
-	}
+	void setProgrammer( bool pProgrammer );
 
-	inline void setWizard( bool pWizard )
-	{
-		mData.mWizard = pWizard;
-	}
+	void setWizard( bool pWizard );
 
-	inline void setRead( bool pRead )
-	{
-		mData.mRead = pRead;
-	}
+	void setRead( bool pRead );
 
-	inline void setWrite( bool pWrite )
-	{
-		mData.mWrite = pWrite;
-	}
+	void setWrite( bool pWrite );
 
-	inline void setFertile( bool pFertile )
-	{
-		mData.mFertile = pFertile;
-	}
+	void setFertile( bool pFertile );
 
-	inline void setRecycle( bool pRecycle )
-	{
-		mData.mRecycled = pRecycle;
-	}
+	void setRecycle( bool pRecycle );
 
-	inline void setConnection( ConnectionId pConnectionId )
-	{
-		mData.mConnection = pConnectionId;
-	}
+	void setConnection( ConnectionId pConnectionId );
 
 protected:
 	ObjectData &data( void )
@@ -285,6 +257,9 @@ protected:
 	{
 		return( mData );
 	}
+
+private:
+	void setUpdated();
 
 private:
 	ObjectData			mData;

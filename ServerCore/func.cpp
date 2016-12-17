@@ -1,6 +1,8 @@
 #include "func.h"
 #include "lua_moo.h"
 
+#include "objectmanager.h"
+
 void Func::initialise( void )
 {
 	mData.mObject = OBJECT_NONE;
@@ -61,6 +63,8 @@ void Func::setPermissions( quint16 pPerms )
 	mData.mRead    = ( pPerms & Func::READ );
 	mData.mWrite   = ( pPerms & Func::WRITE );
 	mData.mExecute = ( pPerms & Func::EXECUTE );
+
+	setUpdated();
 }
 
 quint16 Func::permissions()
@@ -72,6 +76,67 @@ quint16 Func::permissions()
 	if( mData.mExecute ) P |= Func::EXECUTE;
 
 	return( P );
+}
+
+void Func::setObject( ObjectId pObject )
+{
+	mData.mObject = pObject;
+}
+
+void Func::setName( QString pName )
+{
+	mData.mName = pName;
+}
+
+void Func::setOwner(ObjectId pOwner)
+{
+	if( mData.mOwner != pOwner )
+	{
+		mData.mOwner = pOwner;
+
+		setUpdated();
+	}
+}
+
+void Func::setRead(bool pRead)
+{
+	if( mData.mRead != pRead )
+	{
+		mData.mRead = pRead;
+
+		setUpdated();
+	}
+}
+
+void Func::setWrite(bool pWrite)
+{
+	if( mData.mWrite != pWrite )
+	{
+		mData.mWrite = pWrite;
+
+		setUpdated();
+	}
+}
+
+void Func::setExecute(bool pExecute)
+{
+	if( mData.mExecute != pExecute )
+	{
+		mData.mExecute = pExecute;
+
+		setUpdated();
+	}
+}
+
+void Func::setScript(const QString &pScript)
+{
+	if( mData.mScript != pScript )
+	{
+		mData.mScript = pScript;
+		mData.mDirty  = true;
+
+		setUpdated();
+	}
 }
 
 const char * Func::readerStatic( lua_State *L, void *data, size_t *size )
@@ -86,6 +151,17 @@ const char * Func::reader( lua_State *L, size_t *size )
 	*size = mData.mCompiled.size();
 
 	return( mData.mCompiled );
+}
+
+void Func::setUpdated()
+{
+	ObjectManager	*OM = ObjectManager::instance();
+	Object			*O  = OM->o( mData.mObject );
+
+	if( O )
+	{
+		OM->updateVerb( O, mData.mName );
+	}
 }
 
 int Func::lua_pushverb( lua_State *L )

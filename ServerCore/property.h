@@ -8,7 +8,9 @@
 
 typedef struct PropertyData
 {
-	ObjectId		mParent;
+	ObjectId		mObject;		// The object this property is attached to
+	QString			mName;			// The name of this property
+	ObjectId		mParent;		// The parent object that defined this property
 	ObjectId		mOwner;			// The object that owns this property
 	bool			mRead;			// Read permission lets non-owners get the value of the property
 	bool			mWrite;			// write permission lets them set that value
@@ -29,6 +31,16 @@ public:
 	};
 
 	quint16 permissions( void ) const;
+
+	inline ObjectId object( void ) const
+	{
+		return( mData.mObject );
+	}
+
+	inline QString name( void ) const
+	{
+		return( mData.mName );
+	}
 
 	inline ObjectId parent( void ) const
 	{
@@ -65,37 +77,23 @@ public:
 		return( mData.mValue.type() );
 	}
 
+	void setObject( ObjectId pObject );
+
+	void setName( QString pName );
+
 	void setPermissions( quint16 pPerms );
 
-	inline void setParent( ObjectId pParent )
-	{
-		mData.mParent = pParent;
-	}
+	void setParent( ObjectId pParent );
 
-	inline void setOwner( ObjectId pOwner )
-	{
-		mData.mOwner = pOwner;
-	}
+	void setOwner( ObjectId pOwner );
 
-	inline void setValue( const QVariant &pValue )
-	{
-		mData.mValue = pValue;
-	}
+	void setValue( const QVariant &pValue );
 
-	inline void setRead( bool pValue )
-	{
-		mData.mRead = pValue;
-	}
+	void setRead( bool pValue );
 
-	inline void setWrite( bool pValue )
-	{
-		mData.mWrite = pValue;
-	}
+	void setWrite( bool pValue );
 
-	inline void setChange( bool pValue )
-	{
-		mData.mChange = pValue;
-	}
+	void setChange( bool pValue );
 
 	void initialise( void );
 
@@ -109,6 +107,9 @@ protected:
 	{
 		return( mData );
 	}
+
+private:
+	void setUpdated( void );
 
 private:
 	PropertyData		mData;

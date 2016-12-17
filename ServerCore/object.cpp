@@ -31,19 +31,22 @@ Object::~Object( void )
 
 void Object::verbAdd( const QString &pName, Verb &pVerb )
 {
+	pVerb.setObject( id() );
+	pVerb.setName( pName );
+
 	mData.mVerbs.insert( pName, pVerb );
 
-	ObjectManager::instance()->markObject( this );
+	ObjectManager::instance()->addVerb( this, pName );
 }
 
 void Object::verbDelete( const QString &pName )
 {
 	mData.mVerbs.remove( pName );
 
-	ObjectManager::instance()->markObject( this );
+	ObjectManager::instance()->deleteVerb( this, pName );
 }
 
-Property * Object::propParent( const QString &pName )
+Property * Object::propParent( const QString &pName ) const
 {
 	if( mData.mParent == -1 )
 	{
@@ -67,7 +70,7 @@ Property * Object::propParent( const QString &pName )
 	return( ParentObject->propParent( pName ) );
 }
 
-Verb * Object::verbParent( const QString &pName, ObjectId pDirectObjectId, const QString &pPreposition, ObjectId pIndirectObjectId )
+Verb * Object::verbParent( const QString &pName, ObjectId pDirectObjectId, const QString &pPreposition, ObjectId pIndirectObjectId ) const
 {
 	if( mData.mParent == -1 )
 	{
@@ -118,7 +121,7 @@ Verb *Object::verbMatch( const QString &pName )
 	return( 0 );
 }
 
-Verb *Object::verbParent( const QString &pName )
+Verb *Object::verbParent( const QString &pName ) const
 {
 	if( mData.mParent == -1 )
 	{
@@ -144,18 +147,21 @@ Verb *Object::verbParent( const QString &pName )
 
 void Object::propAdd( const QString &pName, Property &pProp )
 {
+	pProp.setObject( id() );
+	pProp.setName( pName );
+
 	mData.mProperties.insert( pName, pProp );
 
-	ObjectManager::instance()->markObject( this );
+	ObjectManager::instance()->addProperty( this, pName );
 }
 
-void Object::propDeleteRecurse(const QString &pName)
+void Object::propDeleteRecurse( const QString &pName )
 {
 	ObjectManager	&OM = *ObjectManager::instance();
 
 	if( mData.mProperties.remove( pName ) )
 	{
-		OM.markObject( this );
+		ObjectManager::instance()->deleteProperty( this, pName );
 	}
 
 	for( ObjectId id : mData.mChildren )
@@ -182,7 +188,7 @@ void Object::propDelete( const QString &pName )
 	{
 		if( mData.mProperties.remove( pName ) )
 		{
-			ObjectManager::instance()->markObject( this );
+			ObjectManager::instance()->deleteProperty( this, pName );
 		}
 	}
 	else
@@ -204,7 +210,7 @@ void Object::propClear( const QString &pName )
 	{
 		if( mData.mProperties.remove( pName ) )
 		{
-			ObjectManager::instance()->markObject( this );
+			ObjectManager::instance()->deleteProperty( this, pName );
 		}
 	}
 }
@@ -221,8 +227,6 @@ void Object::propSet( const QString &pName, const QVariant &pValue )
 		}
 
 		P->setValue( pValue );
-
-		ObjectManager::instance()->markObject( this );
 	}
 	else if( ( P = propParent( pName ) ) != 0 )
 	{
@@ -233,7 +237,8 @@ void Object::propSet( const QString &pName, const QVariant &pValue )
 
 		Property		C = *P;
 
-		C.setParent( parent() );
+		C.setParent( C.object() );
+		C.setObject( id() );
 
 		if( P->change() )
 		{
@@ -246,7 +251,7 @@ void Object::propSet( const QString &pName, const QVariant &pValue )
 
 			mData.mProperties.insert( pName, C );
 
-			ObjectManager::instance()->markObject( this );
+			ObjectManager::instance()->addProperty( this, pName );
 		}
 	}
 }
@@ -275,7 +280,7 @@ bool Object::propFindRecurse( const QString &pName, Property **pProp, Object **p
 	return( false );
 }
 
-void Object::ancestors( QList<ObjectId> &pList )
+void Object::ancestors( QList<ObjectId> &pList ) const
 {
 	ObjectManager	&OM = *ObjectManager::instance();
 	Object			*PO = OM.object( mData.mParent );
@@ -288,7 +293,7 @@ void Object::ancestors( QList<ObjectId> &pList )
 	}
 }
 
-void Object::descendants( QList<ObjectId> &pList )
+void Object::descendants( QList<ObjectId> &pList ) const
 {
 	ObjectManager	&OM = *ObjectManager::instance();
 
@@ -325,7 +330,7 @@ void Object::move( Object *pWhere )
 
 	mData.mLocation = ( pWhere == 0 ? -1 : pWhere->id() );
 
-	ObjectManager::instance()->markObject( this );
+	setUpdated();
 }
 
 void Object::setParent( ObjectId pNewParentId )
@@ -365,12 +370,24 @@ void Object::setParent( ObjectId pNewParentId )
 
 	mData.mParent = pNewParentId;
 
-	ObjectManager::instance()->markObject( this );
+	setUpdated();
 }
 
-void Object::propNames( QStringList &pList )
+void Object::propNames( QStringList &pList ) const
 {
 	pList = mData.mProperties.keys();
+}
+
+const Property *Object::prop( const QString &pName ) const
+{
+	QMap<QString,Property>::const_iterator	it = mData.mProperties.find( pName );
+
+	if( it == mData.mProperties.end() )
+	{
+		return( 0 );
+	}
+
+	return( &it.value() );
 }
 
 Property *Object::prop( const QString &pName )
@@ -401,16 +418,18 @@ void Object::setPermissions( quint16 pPerms )
 	mData.mRead    = ( pPerms & READ );
 	mData.mWrite   = ( pPerms & WRITE );
 	mData.mFertile = ( pPerms & FERTILE );
+
+	setUpdated();
 }
 
-bool Object::matchName( const QString &pName )
+bool Object::matchName( const QString &pName ) const
 {
 	if( mData.mName.startsWith( pName, Qt::CaseInsensitive ) )
 	{
 		return( true );
 	}
 
-	Property		*p = prop( "aliases" );
+	const Property		*p = prop( "aliases" );
 
 	if( p == 0 )
 	{
@@ -440,7 +459,7 @@ Verb * Object::verbMatch( const QString &pName, ObjectId DirectObjectId, const Q
 {
 	for( QMap<QString,Verb>::iterator it = mData.mVerbs.begin() ; it != mData.mVerbs.end() ; it++ )
 	{
-		Verb				&v = it.value();
+		const Verb				&v = it.value();
 
 		if( !v.matchArgs( id(), DirectObjectId, pPreposition, IndirectObjectId ) )
 		{
@@ -478,6 +497,21 @@ bool Object::verbFind( const QString &pName, Verb **pVerb, Object **pObject )
 	return( verbFindRecurse( pName, pVerb, pObject ) );
 }
 
+const Verb *Object::verb( const QString &pName ) const
+{
+	for( QMap<QString,Verb>::const_iterator it = mData.mVerbs.begin() ; it != mData.mVerbs.end() ; it++ )
+	{
+		if( pName.compare( it.key(), Qt::CaseInsensitive ) != 0 )
+		{
+			continue;
+		}
+
+		return( &it.value() );
+	}
+
+	return( 0 );
+}
+
 Verb *Object::verb( const QString &pName )
 {
 	for( QMap<QString,Verb>::iterator it = mData.mVerbs.begin() ; it != mData.mVerbs.end() ; it++ )
@@ -491,6 +525,108 @@ Verb *Object::verb( const QString &pName )
 	}
 
 	return( 0 );
+}
+
+void Object::setUpdated( void )
+{
+	mData.mLastUpdate = ObjectManager::timestamp();
+
+	ObjectManager::instance()->updateObject( this );
+}
+
+void Object::setOwner( ObjectId pOwner )
+{
+	if( mData.mOwner != pOwner )
+	{
+		mData.mOwner = pOwner;
+
+		setUpdated();
+	}
+}
+
+void Object::setPlayer(bool pPlayer)
+{
+	if( mData.mPlayer != pPlayer )
+	{
+		mData.mPlayer = pPlayer;
+
+		setUpdated();
+	}
+}
+
+void Object::setName(const QString &pName)
+{
+	if( mData.mName != pName )
+	{
+		mData.mName = pName;
+
+		setUpdated();
+	}
+}
+
+void Object::setProgrammer(bool pProgrammer)
+{
+	if( mData.mProgrammer != pProgrammer )
+	{
+		mData.mProgrammer = pProgrammer;
+
+		setUpdated();
+	}
+}
+
+void Object::setWizard(bool pWizard)
+{
+	if( mData.mWizard != pWizard )
+	{
+		mData.mWizard = pWizard;
+
+		setUpdated();
+	}
+}
+
+void Object::setRead(bool pRead)
+{
+	if( mData.mRead != pRead )
+	{
+		mData.mRead = pRead;
+
+		setUpdated();
+	}
+}
+
+void Object::setWrite(bool pWrite)
+{
+	if( mData.mWrite != pWrite )
+	{
+		mData.mWrite = pWrite;
+
+		setUpdated();
+	}
+}
+
+void Object::setFertile(bool pFertile)
+{
+	if( mData.mFertile != pFertile )
+	{
+		mData.mFertile = pFertile;
+
+		setUpdated();
+	}
+}
+
+void Object::setRecycle(bool pRecycle)
+{
+	mData.mRecycled = pRecycle;
+}
+
+void Object::setConnection(ConnectionId pConnectionId)
+{
+	if( mData.mConnection != pConnectionId )
+	{
+		mData.mConnection = pConnectionId;
+
+		setUpdated();
+	}
 }
 
 bool Object::verbFindRecurse( const QString &pName, Verb **pVerb, Object **pObject, ObjectId pDirectObjectId, const QString &pPreposition, ObjectId pIndirectObjectId )

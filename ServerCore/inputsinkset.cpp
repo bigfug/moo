@@ -22,8 +22,6 @@ bool InputSinkSet::input( const QString &pData )
 	{
 		mProperty->setValue( mData.join( "\n" ).toUtf8() );
 
-		ObjectManager::instance()->markObject( mObject );
-
 		return( false );
 	}
 

@@ -500,12 +500,7 @@ int lua_object::luaSet( lua_State *L )
 				throw( mooException( E_PERM, "programmer is not owner or wizard" ) );
 			}
 
-			if( O->name() != V )
-			{
-				O->setName( V );
-
-				ObjectManager::instance()->markObject( O );
-			}
+			O->setName( V );
 
 			return( 0 );
 		}
@@ -519,12 +514,7 @@ int lua_object::luaSet( lua_State *L )
 
 			Object				*V = argObj( L, 3 );
 
-			if( O->owner() != V->id() )
-			{
-				O->setOwner( V->id() );
-
-				ObjectManager::instance()->markObject( O );
-			}
+			O->setOwner( V->id() );
 
 			return( 0 );
 		}
@@ -538,12 +528,7 @@ int lua_object::luaSet( lua_State *L )
 
 			bool		V = lua_toboolean( L, 3 );
 
-			if( O->programmer() != V )
-			{
-				O->setProgrammer( V );
-
-				ObjectManager::instance()->markObject( O );
-			}
+			O->setProgrammer( V );
 
 			return( 0 );
 		}
@@ -557,12 +542,7 @@ int lua_object::luaSet( lua_State *L )
 
 			bool		V = lua_toboolean( L, 3 );
 
-			if( O->wizard() != V )
-			{
-				O->setWizard( V );
-
-				ObjectManager::instance()->markObject( O );
-			}
+			O->setWizard( V );
 
 			return( 0 );
 		}
@@ -576,12 +556,7 @@ int lua_object::luaSet( lua_State *L )
 
 			bool		V = lua_toboolean( L, 3 );
 
-			if( O->player() != V )
-			{
-				O->setPlayer( V );
-
-				ObjectManager::instance()->markObject( O );
-			}
+			O->setPlayer( V );
 
 			return( 0 );
 		}
@@ -595,12 +570,7 @@ int lua_object::luaSet( lua_State *L )
 
 			bool		V = lua_toboolean( L, 3 );
 
-			if( O->read() != V )
-			{
-				O->setRead( V );
-
-				ObjectManager::instance()->markObject( O );
-			}
+			O->setRead( V );
 
 			return( 0 );
 		}
@@ -614,12 +584,7 @@ int lua_object::luaSet( lua_State *L )
 
 			bool		V = lua_toboolean( L, 3 );
 
-			if( O->write() != V )
-			{
-				O->setWrite( V );
-
-				ObjectManager::instance()->markObject( O );
-			}
+			O->setWrite( V );
 
 			return( 0 );
 		}
@@ -633,12 +598,7 @@ int lua_object::luaSet( lua_State *L )
 
 			bool		V = lua_toboolean( L, 3 );
 
-			if( O->fertile() != V )
-			{
-				O->setFertile( V );
-
-				ObjectManager::instance()->markObject( O );
-			}
+			O->setFertile( V );
 
 			return( 0 );
 		}
@@ -669,8 +629,6 @@ int lua_object::luaSet( lua_State *L )
 			}
 
 			ObjectLogic::move( *Command, T.programmer(), O->id(), ObjWhereId );
-
-			ObjectManager::instance()->markObject( O );
 
 			return( 0 );
 		}
@@ -703,8 +661,6 @@ int lua_object::luaSet( lua_State *L )
 			}
 
 			ObjectLogic::chparent( *Command, T.programmer(), O->id(), NewParentId );
-
-			ObjectManager::instance()->markObject( O );
 
 			return( 0 );
 		}

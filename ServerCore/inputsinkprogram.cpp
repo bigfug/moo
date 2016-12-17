@@ -31,8 +31,6 @@ bool InputSinkProgram::input( const QString &pData )
 		if( Error == 0 )
 		{
 			mVerb->setScript( P );
-
-			ObjectManager::instance()->markObject( mObject );
 		}
 		else
 		{

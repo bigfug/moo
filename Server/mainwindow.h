@@ -5,6 +5,8 @@
 #include <QSystemTrayIcon>
 #include <QAbstractItemModel>
 
+#include "objectmanager.h"
+
 namespace Ui {
     class MainWindow;
 }
@@ -22,7 +24,7 @@ public:
 	void installModel( QAbstractItemModel *pModel );
 
 public slots:
-	void stats( int pTaskCount, int pObjectCount );
+	void stats( const ObjectManagerStats &pStats );
 
 private slots:
 	void trayActivated( QSystemTrayIcon::ActivationReason pReason );

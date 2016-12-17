@@ -37,9 +37,9 @@ void MainWindow::installModel( QAbstractItemModel *pModel )
 	//ui->treeView->setModel( pModel );
 }
 
-void MainWindow::stats(int pTaskCount, int pObjectCount)
+void MainWindow::stats( const ObjectManagerStats &pStats )
 {
-	ui->mStatusBar->showMessage( tr( "Tasks: %1 - Objects: %2" ).arg( pTaskCount ).arg( pObjectCount ) );
+	ui->mStatusBar->showMessage( tr( "Tasks: %1 - Objects: %2 - Reads: %3 - Writes: %4" ).arg( pStats.mTasks ).arg( pStats.mObjectCount ).arg( pStats.mReads ).arg( pStats.mWrites ) );
 }
 
 void MainWindow::trayActivated( QSystemTrayIcon::ActivationReason pReason )

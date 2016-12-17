@@ -23,11 +23,6 @@ public:
 	virtual void load( void ) Q_DECL_OVERRIDE;
 	virtual void save( void ) Q_DECL_OVERRIDE;
 
-	virtual void saveObject( Object *O ) Q_DECL_OVERRIDE
-	{
-		Q_UNUSED( O )
-	}
-
 	virtual Object *object( ObjectId pIndex ) const Q_DECL_OVERRIDE
 	{
 		Q_UNUSED( pIndex )
@@ -35,16 +30,62 @@ public:
 		return( 0 );
 	}
 
-	virtual void registerObject( const Object &pObject ) Q_DECL_OVERRIDE
+	virtual void addObject( Object &pObject ) Q_DECL_OVERRIDE
 	{
 		Q_UNUSED( pObject )
+	}
+
+	virtual void deleteObject( Object &pObject ) Q_DECL_OVERRIDE
+	{
+		Q_UNUSED( pObject )
+	}
+
+	virtual void updateObject( Object &pObject ) Q_DECL_OVERRIDE
+	{
+		Q_UNUSED( pObject )
+	}
+
+	virtual void addVerb( Object &pObject, QString pName ) Q_DECL_OVERRIDE
+	{
+		Q_UNUSED( pObject )
+		Q_UNUSED( pName )
+	}
+
+	virtual void deleteVerb( Object &pObject, QString pName ) Q_DECL_OVERRIDE
+	{
+		Q_UNUSED( pObject )
+		Q_UNUSED( pName )
+	}
+
+	virtual void updateVerb( Object &pObject, QString pName ) Q_DECL_OVERRIDE
+	{
+		Q_UNUSED( pObject )
+		Q_UNUSED( pName )
+	}
+
+	virtual void addProperty( Object &pObject, QString pName ) Q_DECL_OVERRIDE
+	{
+		Q_UNUSED( pObject )
+		Q_UNUSED( pName )
+	}
+
+	virtual void deleteProperty( Object &pObject, QString pName ) Q_DECL_OVERRIDE
+	{
+		Q_UNUSED( pObject )
+		Q_UNUSED( pName )
+	}
+
+	virtual void updateProperty( Object &pObject, QString pName ) Q_DECL_OVERRIDE
+	{
+		Q_UNUSED( pObject )
+		Q_UNUSED( pName )
 	}
 
 	virtual ObjectId findPlayer( QString pName ) const Q_DECL_OVERRIDE;
 
 private:
 	void loadObject( QDataStream &DS, Object &O );
-	void saveObject( QDataStream &DS, const Object &O );
+	void updateObject( QDataStream &DS, const Object &O );
 
 	void loadVerb( QDataStream &DS, Verb &V );
 	void saveVerb( QDataStream &DS, const Verb &V );

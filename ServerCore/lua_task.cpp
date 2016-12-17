@@ -513,8 +513,6 @@ int lua_task::executeLogin( void )
 
 		Player->setConnection( connectionid() );
 
-		ObjectManager::instance()->markObject( Player );
-
 		T.setPlayer( Player->id() );
 
 		if( OM.maxId() > MaxId )
@@ -616,31 +614,48 @@ int lua_task::execute( void )
 
 		QList<ObjectId>	ObjectIdList;
 
-		T.setDirectObjectId( OBJECT_NONE );
-		T.setIndirectObjectId( OBJECT_NONE );
-
-		T.findObject( T.directObjectName(), ObjectIdList );
-
-		if( ObjectIdList.size() > 1 )
+		if( T.directObjectName().isEmpty() )
 		{
-			return( 0 );
+			T.setDirectObjectId( OBJECT_NONE );
 		}
-		else if( !ObjectIdList.isEmpty() )
+		else
 		{
-			T.setDirectObjectId( ObjectIdList.at( 0 ) );
+			T.setDirectObjectId( OBJECT_FAILED_MATCH );
+
+			T.findObject( T.directObjectName(), ObjectIdList );
+
+			if( ObjectIdList.size() > 1 )
+			{
+				T.setDirectObjectId( OBJECT_AMBIGUOUS );
+			}
+			else if( !ObjectIdList.isEmpty() )
+			{
+				T.setDirectObjectId( ObjectIdList.at( 0 ) );
+			}
+
+			ObjectIdList.clear();
 		}
 
-		ObjectIdList.clear();
-
-		T.findObject( T.indirectObjectName(), ObjectIdList );
-
-		if( ObjectIdList.size() > 1 )
+		if( T.indirectObjectName().isEmpty() )
 		{
-			return( 0 );
+			T.setIndirectObjectId( OBJECT_NONE );
 		}
-		else if( !ObjectIdList.isEmpty() )
+		else
 		{
-			T.setIndirectObjectId( ObjectIdList.at( 0 ) );
+			T.setIndirectObjectId( OBJECT_FAILED_MATCH );
+
+			T.findObject( T.indirectObjectName(), ObjectIdList );
+
+			if( ObjectIdList.size() > 1 )
+			{
+				T.setDirectObjectId( OBJECT_AMBIGUOUS );
+			}
+			else if( !ObjectIdList.isEmpty() )
+			{
+				T.setIndirectObjectId( ObjectIdList.at( 0 ) );
+			}
+
+			ObjectIdList.clear();
 		}
 
 		// It then looks at each of the verbs defined on each of the following four objects, in order:

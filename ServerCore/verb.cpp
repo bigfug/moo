@@ -202,14 +202,14 @@ bool Verb::matchName( const QString &pPatternList, const QString &pMatch )
 	return( false );
 }
 
-bool Verb::matchPreposition( const QString &pPreposition )
+bool Verb::matchPreposition( const QString &pPreposition ) const
 {
 	const QStringList	PrpLst = mVerbData.mPreposition.split( "/" );
 
 	return( PrpLst.contains( pPreposition, Qt::CaseInsensitive ) );
 }
 
-bool Verb::matchArgs( ObjectId pObjectId, ObjectId DirectObjectId, const QString &pPreposition, ObjectId IndirectObjectId )
+bool Verb::matchArgs( ObjectId pObjectId, ObjectId DirectObjectId, const QString &pPreposition, ObjectId IndirectObjectId ) const
 {
 	if( mVerbData.mDirectObject == NONE )
 	{
@@ -267,6 +267,50 @@ bool Verb::matchArgs( ObjectId pObjectId, ObjectId DirectObjectId, const QString
 	return( true );
 }
 
+void Verb::setDirectObjectArgument(ArgObj pArg)
+{
+	if( mVerbData.mDirectObject != pArg )
+	{
+		mVerbData.mDirectObject = pArg;
+
+		setUpdated();
+	}
+}
+
+void Verb::setIndirectObjectArgument(ArgObj pArg)
+{
+	if( mVerbData.mIndirectObject != pArg )
+	{
+		mVerbData.mIndirectObject = pArg;
+
+		setUpdated();
+	}
+}
+
+void Verb::setPrepositionArgument(ArgObj pArg)
+{
+	Q_ASSERT( pArg == ArgObj::ANY || pArg == ArgObj::NONE );
+
+	if( mVerbData.mPrepositionType != pArg || !mVerbData.mPreposition.isEmpty() )
+	{
+		mVerbData.mPrepositionType = pArg;
+		mVerbData.mPreposition.clear();
+
+		setUpdated();
+	}
+}
+
+void Verb::setPrepositionArgument(const QString &pArg)
+{
+	if( mVerbData.mPrepositionType != THIS || mVerbData.mPreposition != pArg )
+	{
+		mVerbData.mPrepositionType = THIS;
+		mVerbData.mPreposition = pArg;
+
+		setUpdated();
+	}
+}
+
 void Verb::addAlias( const QString &pAlias )
 {
 	QStringList		AliasList = mVerbData.mAliases.split( ' ', QString::SkipEmptyParts );
@@ -276,6 +320,8 @@ void Verb::addAlias( const QString &pAlias )
 	AliasList.append( pAlias );
 
 	mVerbData.mAliases = AliasList.join( " " );
+
+	setUpdated();
 }
 
 void Verb::remAlias( const QString &pAlias )
@@ -285,5 +331,7 @@ void Verb::remAlias( const QString &pAlias )
 	AliasList.removeAll( pAlias );
 
 	mVerbData.mAliases = AliasList.join( " " );
+
+	setUpdated();
 }
 

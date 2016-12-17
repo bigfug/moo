@@ -21,14 +21,23 @@ public:
 	virtual void load( void ) = 0;
 	virtual void save( void ) = 0;
 
-	virtual void saveObject( Object *O ) = 0;
-
 	virtual ObjectId findPlayer( QString pName ) const = 0;
 
 	virtual Object *object( ObjectId pIndex ) const = 0;
 
-	virtual void registerObject( const Object &pObject ) = 0;
+	virtual void addObject( Object &pObject ) = 0;
+	virtual void deleteObject( Object &pObject ) = 0;
+	virtual void updateObject( Object &pObject ) = 0;
 
+	virtual void addVerb( Object &pObject, QString pName ) = 0;
+	virtual void deleteVerb( Object &pObject, QString pName ) = 0;
+	virtual void updateVerb( Object &pObject, QString pName ) = 0;
+
+	virtual void addProperty( Object &pObject, QString pName ) = 0;
+	virtual void deleteProperty( Object &pObject, QString pName ) = 0;
+	virtual void updateProperty( Object &pObject, QString pName ) = 0;
+
+protected:
 	Object *newObject( void ) const;
 
 	ObjectManagerData &data( ObjectManager &M ) const;

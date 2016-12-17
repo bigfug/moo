@@ -86,8 +86,6 @@ void InputSinkEditor::save()
 	{
 		mVerb->setScript( P );
 
-		ObjectManager::instance()->markObject( mObject );
-
 		mEditor.setQuit( true );
 	}
 	else

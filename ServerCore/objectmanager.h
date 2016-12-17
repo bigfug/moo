@@ -25,7 +25,6 @@ typedef struct ObjectManagerData
 {
 	ObjectId				 mObjNum;
 	ObjectMap				 mObjMap;
-	ObjectIdList			 mRecycled;
 
 	mutable QMutex			 mTaskMutex;
 
@@ -33,6 +32,14 @@ typedef struct ObjectManagerData
 	QList<TaskEntry>		 mTaskQueue;
 
 } ObjectManagerData;
+
+typedef struct ObjectManagerStats
+{
+	int			mObjectCount;
+	int			mTasks;
+	int			mReads;
+	int			mWrites;
+} ObjectManagerStats;
 
 class ObjectManager : public QObject
 {
@@ -50,34 +57,23 @@ public:
 		return( mTimeStamp );
 	}
 
-	ObjectId newObjectId( void );
-
-	Object *newObject( void );
-
-	void clear( void );
-
-	static void reset( void );
-
-	void markObject( ObjectId pIndex );
-	void markObject( Object *O );
-
-	ObjectId findPlayer( QString pName ) const;
-
-	void setODB( ODB *pODB )
-	{
-		mODB = pODB;
-	}
-
 	inline static Object *o( ObjectId pId )
 	{
 		return( instance()->object( pId ) );
 	}
 
+	static void reset( void );
+
+public:
+	ObjectId newObjectId( void );
+
+	Object *newObject( void );
+
 	Object *object( ObjectId pIndex );
 
-	void recycle( Object *pObject );
+	void clear( void );
 
-	void recycleObjects( void );
+	ObjectId findPlayer( QString pName ) const;
 
 	inline size_t objectCount( void ) const
 	{
@@ -94,7 +90,7 @@ public:
 	QList<Object *> connectedPlayers( void ) const;
 
 signals:
-	void stats( int pTaskCount, int pObjectCount );
+	void stats( const ObjectManagerStats &pStats );
 
 public slots:
 	void onFrame( qint64 pTimeStamp );
@@ -103,6 +99,34 @@ public slots:
 	bool killTask( TaskId pTaskId );
 
 	void checkpoint( void );
+
+	void setODB( ODB *pODB )
+	{
+		mODB = pODB;
+	}
+
+	void recycle( Object *pObject );
+
+	void recycleObjects( void );
+
+	void updateObject( Object *pObject );
+
+	void addVerb( Object *pObject, QString pName );
+	void deleteVerb( Object *pObject, QString pName );
+	void updateVerb( Object *pObject, QString pName );
+	void addProperty( Object *pObject, QString pName );
+	void deleteProperty( Object *pObject, QString pName );
+	void updateProperty( Object *pObject, QString pName );
+
+	void recordRead( void )
+	{
+		mStats.mReads++;
+	}
+
+	void recordWrite( void )
+	{
+		mStats.mWrites++;
+	}
 
 protected:
 	void timeoutObjects( void );
@@ -118,13 +142,25 @@ protected:
 	}
 
 private:
-	static ObjectManager	*mInstance;
-	static qint64			 mTimeStamp;
+	static ObjectManager		*mInstance;
+	static qint64				 mTimeStamp;
 
-	ODB						*mODB;
-	ObjectManagerData		 mData;
+	ODB							*mODB;
+	ObjectManagerData			 mData;
 
-	int						 mTaskCount;
+	ObjectManagerStats			 mStats;
+
+	ObjectIdList				 mAddedObjects;
+	ObjectIdList				 mDeletedObjects;
+	ObjectIdList				 mUpdatedObjects;
+
+	QMap<ObjectId,QStringList>	 mAddedVerbs;
+	QMap<ObjectId,QStringList>	 mDeletedVerbs;
+	QMap<ObjectId,QStringList>	 mUpdatedVerbs;
+
+	QMap<ObjectId,QStringList>	 mAddedProperties;
+	QMap<ObjectId,QStringList>	 mDeletedProperties;
+	QMap<ObjectId,QStringList>	 mUpdatedProperties;
 };
 
 #endif // OBJECTMANAGER_H

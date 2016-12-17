@@ -132,12 +132,16 @@ void ODBSQL::load()
 		Data.mObjNum = Q1.value( 0 ).toInt() + 1;
 	}
 
+	ObjectManager::instance()->recordRead();
+
 	// Load all the player objects that were previously connected
 
 	QSqlQuery	Q2 = mDB.exec( "SELECT id FROM object WHERE player AND connection != -1" );
 
 	while( Q2.next() )
 	{
+		ObjectManager::instance()->recordRead();
+
 		ObjectManager::instance()->object( Q2.value( 0 ).toInt() );
 	}
 }
@@ -152,21 +156,16 @@ void ODBSQL::save()
 		return;
 	}
 
-	for( const Object *O : Data.mObjMap.values() )
+	for( Object *O : Data.mObjMap.values() )
 	{
-		saveObject( *O );
+//		updateObject( *O );
 	}
-}
-
-void ODBSQL::saveObject( Object *O )
-{
-	saveObject( *O );
-
-	data( *O ).mLastWrite = ObjectManager::timestamp();
 }
 
 Object *ODBSQL::object( ObjectId pIndex ) const
 {
+	qDebug() << "Loading" << pIndex;
+
 	QSqlQuery	Q;
 
 	Q.prepare( "SELECT * FROM object WHERE id = :id" );
@@ -177,6 +176,8 @@ Object *ODBSQL::object( ObjectId pIndex ) const
 	{
 		return( 0 );
 	}
+
+	ObjectManager::instance()->recordRead();
 
 	if( !Q.next() )
 	{
@@ -219,6 +220,8 @@ Object *ODBSQL::object( ObjectId pIndex ) const
 		}
 	}
 
+	ObjectManager::instance()->recordRead();
+
 	Q.prepare( "SELECT id FROM object WHERE location = :id" );
 
 	Q.bindValue( ":id", pIndex );
@@ -231,6 +234,8 @@ Object *ODBSQL::object( ObjectId pIndex ) const
 		}
 	}
 
+	ObjectManager::instance()->recordRead();
+
 	Q.prepare( "SELECT * FROM verb WHERE object = :id" );
 
 	Q.bindValue( ":id", pIndex );
@@ -242,6 +247,9 @@ Object *ODBSQL::object( ObjectId pIndex ) const
 			Verb		V;
 			FuncData	&FD = funcdata( V );
 			VerbData	&VD = verbdata( V );
+
+			V.setObject( O->id() );
+			V.setName( Q.value( "name" ).toString() );
 
 			FD.mExecute = Q.value( "execute" ).toBool();
 			FD.mObject  = Q.value( "object" ).toInt();
@@ -256,9 +264,11 @@ Object *ODBSQL::object( ObjectId pIndex ) const
 			VD.mPrepositionType = Verb::argobj_from( Q.value( "preptype" ).toString().toLatin1() );
 			VD.mPreposition = Q.value( "prep" ).toString();
 
-			D.mVerbs.insert( Q.value( "name" ).toString(), V );
+			D.mVerbs.insert( V.name(), V );
 		}
 	}
+
+	ObjectManager::instance()->recordRead();
 
 	Q.prepare( "SELECT * FROM property WHERE object = :id" );
 
@@ -270,6 +280,9 @@ Object *ODBSQL::object( ObjectId pIndex ) const
 		{
 			Property		 P;
 			PropertyData	&PD = data( P );
+
+			P.setObject( O->id() );
+			P.setName( Q.value( "name" ).toString() );
 
 			PD.mChange = Q.value( "change" ).toBool();
 			PD.mOwner  = Q.value( "owner" ).toInt();
@@ -325,9 +338,11 @@ Object *ODBSQL::object( ObjectId pIndex ) const
 
 			}
 
-			D.mProperties.insert( Q.value( "name" ).toString(), P );
+			D.mProperties.insert( P.name(), P );
 		}
 	}
+
+	ObjectManager::instance()->recordRead();
 
 	return( O );
 }
@@ -350,6 +365,8 @@ void bindObject( const ObjectData &D, QSqlQuery &Q )
 
 void bindFunc( const FuncData &D, QSqlQuery &Q )
 {
+	Q.bindValue( ":object", D.mObject );
+	Q.bindValue( ":name",   D.mName );
 	Q.bindValue( ":owner", D.mOwner );
 	Q.bindValue( ":read", D.mRead );
 	Q.bindValue( ":write", D.mWrite );
@@ -366,10 +383,10 @@ void bindVerb( const VerbData &D, QSqlQuery &Q )
 	Q.bindValue( ":aliases", D.mAliases );
 }
 
-void bindProperty( const QString &pName, ObjectId pObjectId, const PropertyData &D, QSqlQuery &Q )
+void bindProperty( const PropertyData &D, QSqlQuery &Q )
 {
-	Q.bindValue( ":name", pName );
-	Q.bindValue( ":object", pObjectId );
+	Q.bindValue( ":name", D.mName );
+	Q.bindValue( ":object", D.mObject );
 	Q.bindValue( ":parent", D.mParent );
 	Q.bindValue( ":owner", D.mOwner );
 	Q.bindValue( ":read", D.mRead );
@@ -413,30 +430,269 @@ void bindProperty( const QString &pName, ObjectId pObjectId, const PropertyData 
 	}
 }
 
-void ODBSQL::registerObject( const Object &pObject )
+void ODBSQL::addObject( Object &pObject )
 {
-	const ObjectData	&D = data( pObject );
+	ObjectData	&D = data( pObject );
 
 	QSqlQuery			 Q;
 
-	Q.prepare( "INSERT OR IGNORE INTO object "
+	Q.prepare( "INSERT INTO object "
 			   "( id, parent, name, player, connection, owner, location, programmer, wizard, read, write, fertile ) "
 			   "VALUES "
 			   "( :id, :parent, :name, :player, :connection, :owner, :location, :programmer, :wizard, :read, :write, :fertile )" );
 
 	bindObject( D, Q );
 
-	if( Q.exec() )
+	Q.exec();
+
+	ObjectManager::instance()->recordWrite();
+
+	QSqlError		DBE = Q.lastError();
+
+	if( DBE.type() != QSqlError::NoError )
 	{
-		if( Q.lastInsertId().type() == QVariant::Invalid )
-		{
-			Q.prepare( "UPDATE object SET parent = :parent, name = :name, player = :player, connection = :connection, owner = :owner, location = :location, programmer = :programmer, wizard = :wizard, read = :read, write = :write, fertile = :fertile WHERE id = :id" );
-
-			bindObject( D, Q );
-
-			Q.exec();
-		}
+		qDebug() << DBE.databaseText() << DBE.driverText();
 	}
+
+	D.mLastWrite = ObjectManager::timestamp();
+}
+
+void ODBSQL::deleteObject( Object &pObject )
+{
+	QSqlQuery		Q;
+
+	Q.prepare( "DELETE FROM object WHERE id = :id" );
+
+	Q.bindValue( ":id", pObject.id() );
+
+	Q.exec();
+
+	ObjectManager::instance()->recordWrite();
+
+	QSqlError		DBE = Q.lastError();
+
+	if( DBE.type() != QSqlError::NoError )
+	{
+		qDebug() << DBE.databaseText() << DBE.driverText();
+	}
+}
+
+void ODBSQL::updateObject( Object &pObject )
+{
+	ObjectData	&D = data( pObject );
+
+	QSqlQuery			 Q;
+
+	Q.prepare( "UPDATE object SET parent = :parent, name = :name, player = :player, connection = :connection, owner = :owner, location = :location, programmer = :programmer, wizard = :wizard, read = :read, write = :write, fertile = :fertile WHERE id = :id" );
+
+	bindObject( D, Q );
+
+	Q.exec();
+
+	ObjectManager::instance()->recordWrite();
+
+	QSqlError		DBE = Q.lastError();
+
+	if( DBE.type() != QSqlError::NoError )
+	{
+		qDebug() << DBE.databaseText() << DBE.driverText();
+	}
+
+	D.mLastWrite = ObjectManager::timestamp();
+}
+
+void ODBSQL::addVerb( Object &pObject, QString pName )
+{
+	Verb		*V = pObject.verb( pName );
+
+	if( !V )
+	{
+		return;
+	}
+
+	FuncData	&FD = funcdata( *V );
+	VerbData	&VD = verbdata( *V );
+
+	static QSqlQuery			 Q;
+	static bool					 B = false;
+
+	if( !B )
+	{
+		B = Q.prepare( "INSERT INTO verb "
+					"( name, object, owner, read, write, execute, script, dobj, preptype, iobj, prep, aliases )"
+					"VALUES "
+					"( :name, :object, :owner, :read, :write, :execute, :script, :dobj, :preptype, :iobj, :prep, :aliases )"
+					);
+	}
+
+	bindFunc( FD, Q );
+	bindVerb( VD, Q );
+
+	Q.exec();
+
+	ObjectManager::instance()->recordWrite();
+
+	QSqlError		DBE = Q.lastError();
+
+	if( DBE.type() != QSqlError::NoError )
+	{
+		qDebug() << DBE.databaseText() << DBE.driverText();
+	}
+}
+
+void ODBSQL::deleteVerb( Object &pObject, QString pName )
+{
+	static QSqlQuery			 Q;
+	static bool					 B = false;
+
+	if( !B )
+	{
+		B = Q.prepare( "DELETE FROM verb WHERE object = :object AND name = :name" );
+	}
+
+	Q.bindValue( ":object", pObject.id() );
+	Q.bindValue( ":name",   pName );
+
+	Q.exec();
+
+	ObjectManager::instance()->recordWrite();
+
+	QSqlError		DBE = Q.lastError();
+
+	if( DBE.type() != QSqlError::NoError )
+	{
+		qDebug() << DBE.databaseText() << DBE.driverText();
+	}
+}
+
+void ODBSQL::updateVerb(Object &pObject, QString pName)
+{
+	Verb		*V = pObject.verb( pName );
+
+	if( !V )
+	{
+		return;
+	}
+
+	FuncData	&FD = funcdata( *V );
+	VerbData	&VD = verbdata( *V );
+
+	static QSqlQuery			 Q;
+	static bool					 B = false;
+
+	if( !B )
+	{
+		B = Q.prepare( "UPDATE verb SET "
+					"owner = :owner, read = :read, write = :write, execute = :execute, script = :script, dobj = :dobj, preptype = :preptype, iobj = :iobj, prep = :prep, aliases = :aliases "
+					"WHERE object = :object AND name = :name"
+					);
+	}
+
+	bindFunc( FD, Q );
+	bindVerb( VD, Q );
+
+	Q.exec();
+
+	ObjectManager::instance()->recordWrite();
+
+	QSqlError		DBE = Q.lastError();
+
+	if( DBE.type() != QSqlError::NoError )
+	{
+		qDebug() << DBE.databaseText() << DBE.driverText();
+	}
+}
+
+void ODBSQL::addProperty(Object &pObject, QString pName)
+{
+	Property		*P = pObject.prop( pName );
+
+	if( !P )
+	{
+		return;
+	}
+
+	PropertyData	&PD = data( *P );
+
+	static QSqlQuery			 Q;
+	static bool					 B = false;
+
+	if( !B )
+	{
+		B = Q.prepare( "INSERT INTO property "
+					   "( name, object, parent, owner, read, write, change, type, value )"
+					   "VALUES "
+					   "( :name, :object, :parent, :owner, :read, :write, :change, :type, :value )"
+					   );
+
+	}
+
+	bindProperty( PD, Q );
+
+	Q.exec();
+
+	ObjectManager::instance()->recordWrite();
+
+	QSqlError		DBE = Q.lastError();
+
+	if( DBE.type() != QSqlError::NoError )
+	{
+		qDebug() << DBE.databaseText() << DBE.driverText();
+	}
+}
+
+void ODBSQL::deleteProperty(Object &pObject, QString pName)
+{
+	static QSqlQuery			 Q;
+	static bool					 B = false;
+
+	if( !B )
+	{
+		B = Q.prepare( "DELETE FROM property WHERE object = :object AND name = :name" );
+	}
+
+	Q.bindValue( ":object", pObject.id() );
+	Q.bindValue( ":name",   pName );
+
+	Q.exec();
+
+	ObjectManager::instance()->recordWrite();
+
+	QSqlError		DBE = Q.lastError();
+
+	if( DBE.type() != QSqlError::NoError )
+	{
+		qDebug() << DBE.databaseText() << DBE.driverText();
+	}
+}
+
+void ODBSQL::updateProperty(Object &pObject, QString pName)
+{
+	Property		*P = pObject.prop( pName );
+
+	if( !P )
+	{
+		return;
+	}
+
+	PropertyData	&PD = data( *P );
+
+	static QSqlQuery			 Q;
+	static bool					 B = false;
+
+	if( !B )
+	{
+		B = Q.prepare( "UPDATE property SET "
+					   "parent = :parent, owner = :owner, read = :read, write = :write, change = :change, type = :type, value = :value "
+					   "WHERE name = :name AND object = :object"
+					   );
+	}
+
+	bindProperty( PD, Q );
+
+	Q.exec();
+
+	ObjectManager::instance()->recordWrite();
 
 	QSqlError		DBE = Q.lastError();
 
@@ -464,185 +720,12 @@ ObjectId ODBSQL::findPlayer( QString pName ) const
 		return( OBJECT_NONE );
 	}
 
+	ObjectManager::instance()->recordRead();
+
 	if( !Q1.next() )
 	{
 		return( OBJECT_NONE );
 	}
 
 	return( Q1.value( 0 ).toInt() );
-}
-
-void ODBSQL::saveObject( const Object &O )
-{
-	const ObjectData	&D = data( O );
-
-	QSqlError		DBE;
-
-	registerObject( O );
-
-	{
-		QSqlQuery			 Q1, Q2, Q3;
-
-		QStringList			 PrpLst1, PrpLst2, PrpLst3;
-
-		Q1.prepare( "SELECT name FROM property WHERE object = :object" );
-
-		Q1.bindValue( ":object", D.mId );
-
-		if( Q1.exec() )
-		{
-			while( Q1.next() )
-			{
-				PrpLst1 << Q1.value( 0 ).toString();
-			}
-		}
-
-		Q2.prepare( "INSERT INTO property "
-					"( name, object, parent, owner, read, write, change, type, value )"
-					"VALUES "
-					"( :name, :object, :parent, :owner, :read, :write, :change, :type, :value )"
-					);
-
-		Q3.prepare( "UPDATE property SET "
-					"parent = :parent, owner = :owner, read = :read, write = :write, change = :change, type = :type, value = :value "
-					"WHERE name = :name AND object = :object"
-					);
-
-		PrpLst2 = D.mProperties.keys();
-
-		PrpLst3.append( PrpLst1 );
-		PrpLst3.append( PrpLst2 );
-
-		qSort( PrpLst3 );
-
-		PrpLst3.removeDuplicates();
-
-		for( QString P3 : PrpLst3 )
-		{
-			bool		P1 = PrpLst1.contains( P3 );
-			bool		P2 = PrpLst2.contains( P3 );
-
-			if( P1 && P2 )
-			{
-				bindProperty( P3, D.mId, data( D.mProperties.value( P3 ) ), Q3 );
-
-				Q3.exec();
-
-				DBE = Q3.lastError();
-			}
-			else if( P1 && !P2 )
-			{
-				QSqlQuery	Q;
-
-				Q.prepare( "DELETE FROM property WHERE object = :object AND name = :name" );
-
-				Q.bindValue( ":object", D.mId );
-				Q.bindValue( ":name",   P3 );
-
-				Q.exec();
-
-				DBE = Q.lastError();
-			}
-			else
-			{
-				bindProperty( P3, D.mId, data( D.mProperties.value( P3 ) ), Q2 );
-
-				Q2.exec();
-
-				DBE = Q2.lastError();
-			}
-		}
-
-		if( DBE.type() != QSqlError::NoError )
-		{
-			qDebug() << DBE.databaseText() << DBE.driverText();
-		}
-	}
-
-	{
-		QSqlQuery			 Q1, Q2, Q3;
-
-		QStringList			 PrpLst1, PrpLst2, PrpLst3;
-
-		Q1.prepare( "SELECT name FROM verb WHERE object = :object" );
-
-		Q1.bindValue( ":object", D.mId );
-
-		if( Q1.exec() )
-		{
-			while( Q1.next() )
-			{
-				PrpLst1 << Q1.value( 0 ).toString();
-			}
-		}
-
-		Q2.prepare( "INSERT INTO verb "
-					"( name, object, owner, read, write, execute, script, dobj, preptype, iobj, prep, aliases )"
-					"VALUES "
-					"( :name, :object, :owner, :read, :write, :execute, :script, :dobj, :preptype, :iobj, :prep, :aliases )"
-					);
-
-		Q3.prepare( "UPDATE verb SET "
-					"owner = :owner, read = :read, write = :write, execute = :execute, script = :script, dobj = :dobj, preptype = :preptype, iobj = :iobj, prep = :prep, aliases = :aliases "
-					"WHERE object = :object AND name = :name"
-					);
-
-		PrpLst2 = D.mVerbs.keys();
-
-		PrpLst3.append( PrpLst1 );
-		PrpLst3.append( PrpLst2 );
-
-		qSort( PrpLst3 );
-
-		PrpLst3.removeDuplicates();
-
-		for( QString P3 : PrpLst3 )
-		{
-			bool		P1 = PrpLst1.contains( P3 );
-			bool		P2 = PrpLst2.contains( P3 );
-
-			if( P1 && P2 )
-			{
-				Q3.bindValue( ":object", D.mId );
-				Q3.bindValue( ":name", P3 );
-
-				bindFunc( funcdata( D.mVerbs.value( P3 ) ), Q3 );
-				bindVerb( verbdata( D.mVerbs.value( P3 ) ), Q3 );
-
-				Q3.exec();
-
-				DBE = Q3.lastError();
-			}
-			else if( P1 && !P2 )
-			{
-				QSqlQuery	Q;
-
-				Q.prepare( "DELETE FROM verb WHERE object = :object AND name = :name" );
-
-				Q.bindValue( ":object", D.mId );
-				Q.bindValue( ":name",   P3 );
-
-				Q.exec();
-
-				DBE = Q.lastError();
-			}
-			else
-			{
-				Q2.bindValue( ":object", D.mId );
-				Q2.bindValue( ":name", P3 );
-
-				bindFunc( funcdata( D.mVerbs.value( P3 ) ), Q2 );
-				bindVerb( verbdata( D.mVerbs.value( P3 ) ), Q2 );
-
-				Q2.exec();
-
-				DBE = Q2.lastError();
-			}
-		}
-
-		if( DBE.type() != QSqlError::NoError )
-		{
-			qDebug() << DBE.databaseText() << DBE.driverText();
-		}
-	}
 }

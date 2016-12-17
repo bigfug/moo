@@ -50,8 +50,6 @@ void InputSinkEditText::save()
 	if( Text != mProperty->value() )
 	{
 		mProperty->setValue( Text );
-
-		ObjectManager::instance()->markObject( mObject );
 	}
 
 	mEditor.setQuit( true );
