@@ -619,7 +619,7 @@ int lua_verb::luaProgram( lua_State *L )
 			throw( mooException( E_TYPE, "not allowed to read script" ) );
 		}
 
-		InputSinkProgram	*IS = new InputSinkProgram( C, O, V, *LV->mName );
+		InputSinkProgram	*IS = new InputSinkProgram( C, O->id(), *LV->mName );
 
 		if( IS == 0 )
 		{
@@ -674,7 +674,7 @@ int lua_verb::luaEdit( lua_State *L )
 
 		QStringList		Program = V->script().split( "\n" );
 
-		InputSinkEditor	*IS = new InputSinkEditor( C, O, V, *LV->mName, Program );
+		InputSinkEditor	*IS = new InputSinkEditor( C, O->id(), *LV->mName, Program );
 
 		if( !IS )
 		{

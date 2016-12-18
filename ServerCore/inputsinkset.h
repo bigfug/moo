@@ -4,6 +4,7 @@
 #include <QStringList>
 
 #include "inputsink.h"
+#include "mooglobal.h"
 
 class Connection;
 class Object;
@@ -12,14 +13,13 @@ class Property;
 class InputSinkSet : public InputSink
 {
 public:
-	InputSinkSet( Connection *C, Object *O, Property *P, const QString &pPropName );
+	InputSinkSet( Connection *C, ObjectId pObjectId, QString pPropName );
 
 	virtual bool input( const QString &pData );
 
 private:
 	Connection		*mConnection;
-	Object			*mObject;
-	Property		*mProperty;
+	ObjectId		 mObjectId;
 	QString			 mPropName;
 	QStringList		 mData;
 };

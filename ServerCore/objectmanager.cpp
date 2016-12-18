@@ -574,6 +574,10 @@ void ObjectManager::timeoutObjects()
 
 	//-------------------------------------------------------------------------
 
+	recycleObjects();
+
+	//-------------------------------------------------------------------------
+
 	ObjectList	IDS = mData.mObjMap.values();
 
 	for( Object *O : IDS )
@@ -583,12 +587,12 @@ void ObjectManager::timeoutObjects()
 			continue;
 		}
 
-		if( O->id() < 10 )
+		if( O->id() <= 5 )
 		{
 			continue;
 		}
 
-		if( mTimeStamp - O->data().mLastRead < 15000 )
+		if( mTimeStamp - O->data().mLastRead < 15 * 1000 )
 		{
 			continue;
 		}
@@ -597,6 +601,4 @@ void ObjectManager::timeoutObjects()
 
 		delete O;
 	}
-
-	recycleObjects();
 }

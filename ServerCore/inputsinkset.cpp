@@ -8,19 +8,22 @@
 
 #include <lua.hpp>
 
-InputSinkSet::InputSinkSet( Connection *C, Object *O, Property *P, const QString &pPropName )
+InputSinkSet::InputSinkSet( Connection *C, ObjectId pObjectId, QString pPropName )
+	: mConnection( C ), mObjectId( pObjectId ), mPropName( pPropName )
 {
-	mConnection = C;
-	mObject = O;
-	mProperty = P;
-	mPropName = pPropName;
 }
 
 bool InputSinkSet::input( const QString &pData )
 {
 	if( pData.compare( "." ) == 0 )
 	{
-		mProperty->setValue( mData.join( "\n" ).toUtf8() );
+		Object		*O = ObjectManager::o( mObjectId );
+		Property	*P = ( O ? O->prop( mPropName ) : nullptr );
+
+		if( P )
+		{
+			P->setValue( mData.join( "\n" ).toUtf8() );
+		}
 
 		return( false );
 	}

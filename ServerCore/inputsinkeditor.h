@@ -5,6 +5,8 @@
 
 #include <editor.h>
 
+#include "mooglobal.h"
+
 class Connection;
 class Object;
 class Verb;
@@ -14,7 +16,7 @@ class InputSinkEditor : public QObject, public InputSink
 	Q_OBJECT
 
 public:
-	InputSinkEditor( Connection *C, Object *O, Verb *V, const QString &pVerbName, QStringList pText );
+	InputSinkEditor( Connection *C, ObjectId pObjectId, QString pVerbName, QStringList pText );
 
 	virtual bool input( const QString &pData );
 
@@ -27,8 +29,7 @@ private slots:
 
 private:
 	Connection		*mConnection;
-	Object			*mObject;
-	Verb			*mVerb;
+	ObjectId		 mObjectId;
 	QString			 mVerbName;
 	Editor			 mEditor;
 };

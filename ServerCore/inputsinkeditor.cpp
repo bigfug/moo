@@ -10,8 +10,8 @@
 
 #include <lua.hpp>
 
-InputSinkEditor::InputSinkEditor(Connection *C, Object *O, Verb *V, const QString &pVerbName, QStringList pText )
-	: mConnection( C ), mObject( O ), mVerb( V ), mVerbName( pVerbName )
+InputSinkEditor::InputSinkEditor( Connection *C, ObjectId pObjectId, QString pVerbName, QStringList pText )
+	: mConnection( C ), mObjectId( pObjectId ), mVerbName( pVerbName )
 {
 	mConnection->setLineMode( Connection::REALTIME );
 
@@ -84,7 +84,13 @@ void InputSinkEditor::save()
 
 	if( Error == 0 )
 	{
-		mVerb->setScript( P );
+		Object		*O = ObjectManager::o( mObjectId );
+		Verb		*V = ( O ? O->verb( mVerbName ) : 0 );
+
+		if( V )
+		{
+			V->setScript( P );
+		}
 
 		mEditor.setQuit( true );
 	}

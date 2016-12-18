@@ -8,12 +8,9 @@
 
 #include <lua.hpp>
 
-InputSinkProgram::InputSinkProgram( Connection *C, Object *O, Verb *V, const QString &pVerbName )
+InputSinkProgram::InputSinkProgram( Connection *C, ObjectId pObjectId, QString pVerbName )
+	: mConnection( C ), mObjectId( pObjectId ), mVerbName( pVerbName )
 {
-	mConnection = C;
-	mObject = O;
-	mVerb   = V;
-	mVerbName = pVerbName;
 }
 
 bool InputSinkProgram::input( const QString &pData )
@@ -30,7 +27,13 @@ bool InputSinkProgram::input( const QString &pData )
 
 		if( Error == 0 )
 		{
-			mVerb->setScript( P );
+			Object		*O = ObjectManager::o( mObjectId );
+			Verb		*V = ( O ? O->verb( mVerbName ) : nullptr );
+
+			if( V )
+			{
+				V->setScript( P );
+			}
 		}
 		else
 		{

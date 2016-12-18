@@ -3,6 +3,8 @@
 
 #include <QStringList>
 
+#include "mooglobal.h"
+
 #include "inputsink.h"
 
 class Connection;
@@ -12,14 +14,13 @@ class Verb;
 class InputSinkProgram : public InputSink
 {
 public:
-	InputSinkProgram( Connection *C, Object *O, Verb *V, const QString &pVerbName );
+	InputSinkProgram( Connection *C, ObjectId pObjectId, QString pVerbName );
 
 	virtual bool input( const QString &pData );
 
 private:
 	Connection		*mConnection;
-	Object			*mObject;
-	Verb			*mVerb;
+	ObjectId		 mObjectId;
 	QString			 mVerbName;
 	QStringList		 mProgram;
 };

@@ -8,8 +8,8 @@
 
 #include <lua.hpp>
 
-InputSinkEditText::InputSinkEditText( Connection *C, Object *O, Property *P, QStringList pText )
-	: mConnection( C ), mObject( O ), mProperty( P )
+InputSinkEditText::InputSinkEditText(Connection *C, ObjectId pObjectId, QString pPropName, QStringList pText )
+	: mConnection( C ), mObjectId( pObjectId ), mPropName( pPropName )
 {
 	mConnection->setLineMode( Connection::REALTIME );
 
@@ -47,9 +47,12 @@ void InputSinkEditText::save()
 {
 	const QString		Text = mEditor.text().join( "\n" );
 
-	if( Text != mProperty->value() )
+	Object			*O = ObjectManager::o( mObjectId );
+	Property		*P = ( O ? O->prop( mPropName ) : nullptr );
+
+	if( P )
 	{
-		mProperty->setValue( Text );
+		P->setValue( Text );
 	}
 
 	mEditor.setQuit( true );

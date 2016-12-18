@@ -608,7 +608,7 @@ int lua_prop::luaProgram( lua_State *L )
 			throw( mooException( E_TYPE, "can only dump string types" ) );
 		}
 
-		InputSinkSet	*IS = new InputSinkSet( C, O, P, *LP->mName );
+		InputSinkSet	*IS = new InputSinkSet( C, O->id(), *LP->mName );
 
 		if( IS == 0 )
 		{
@@ -672,7 +672,7 @@ int lua_prop::luaEdit(lua_State *L)
 
 		QStringList		Text = P->value().toString().split( "\n" );
 
-		InputSinkEditText	*IS = new InputSinkEditText( C, O, P, Text );
+		InputSinkEditText	*IS = new InputSinkEditText( C, O->id(), P->name(), Text );
 
 		if( !IS )
 		{
