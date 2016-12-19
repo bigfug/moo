@@ -99,8 +99,11 @@ public:
 		return( mODB );
 	}
 
+	qint64 timeToNextTask( void ) const;
+
 signals:
 	void stats( const ObjectManagerStats &pStats );
+	void taskReady( void );
 
 public slots:
 	void onFrame( qint64 pTimeStamp );

@@ -112,6 +112,18 @@ QList<Object *> ObjectManager::connectedPlayers() const
 	return( ObjLst );
 }
 
+qint64 ObjectManager::timeToNextTask() const
+{
+	QMutexLocker	Lock( &mData.mTaskMutex );
+
+	if( mData.mTaskQueue.isEmpty() )
+	{
+		return( -1 );
+	}
+
+	return( mData.mTaskQueue.first().timestamp() - QDateTime::currentMSecsSinceEpoch() );
+}
+
 void ObjectManager::reset( void )
 {
 	if( mInstance == 0 )
@@ -433,6 +445,8 @@ void ObjectManager::doTask( TaskEntry &pTask )
 	QMutexLocker		L( &mData.mTaskMutex );
 
 	mData.mTaskList.push_back( pTask );
+
+	emit taskReady();
 }
 
 void ObjectManager::queueTask( TaskEntry &pTask )
@@ -445,11 +459,15 @@ void ObjectManager::queueTask( TaskEntry &pTask )
 		{
 			mData.mTaskQueue.insert( it, pTask );
 
+			emit taskReady();
+
 			return;
 		}
 	}
 
 	mData.mTaskQueue.append( pTask );
+
+	emit taskReady();
 }
 
 bool ObjectManager::killTask(TaskId pTaskId)

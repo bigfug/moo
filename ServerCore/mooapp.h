@@ -4,6 +4,7 @@
 #include <QList>
 #include <QMutex>
 #include <QObject>
+#include <QTimer>
 
 #include <lua.hpp>
 
@@ -34,9 +35,12 @@ public slots:
 private slots:
 	void doOutput( const QString &pText );
 
+	void taskReady( void );
+
 private:
 	int					 mTimerId;
 	const QString		 mDataFileName;
+	QTimer				 mTimer;
 
 	static void streamCallback( const QString &pText, void *pUserData );
 

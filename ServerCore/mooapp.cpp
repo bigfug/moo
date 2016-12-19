@@ -1,5 +1,6 @@
 #include <QDateTime>
 #include <QFileInfo>
+#include <QtGlobal>
 
 #include "mooapp.h"
 #include "object.h"
@@ -16,6 +17,7 @@
 #include <iostream>
 #include <algorithm>
 #include <QDateTime>
+#include <QTimer>
 
 #include "osc.h"
 
@@ -85,7 +87,15 @@ mooApp::mooApp( const QString &pDataFileName, QObject *pParent )
 		}
 	}
 
-	mTimerId = startTimer( 40 );
+	qDebug() << OM.timeToNextTask();
+
+	connect( &mTimer, SIGNAL(timeout()), this, SLOT(taskReady()) );
+
+	mTimer.setSingleShot( true );
+
+	connect( &OM, SIGNAL(taskReady()), this, SLOT(taskReady()), Qt::QueuedConnection );
+
+	taskReady();
 }
 
 void mooApp::cleanup( QObject *pObject )
@@ -115,6 +125,40 @@ mooApp::~mooApp()
 void mooApp::doOutput( const QString &pText )
 {
 	emit textOutput( pText );
+}
+
+void mooApp::taskReady()
+{
+	ObjectManager		&OM = *ObjectManager::instance();
+
+//	mTimer.stop();
+
+	qint64	TimeStamp = QDateTime::currentMSecsSinceEpoch();
+
+	OSC::devicePacketStart( TimeStamp );
+
+	emit frameStart();
+	emit frameStart( TimeStamp );
+
+	OM.onFrame( TimeStamp );
+
+	emit frameEnd();
+	emit frameEnd( TimeStamp );
+
+	OSC::devicePacketEnd( TimeStamp );
+
+	qint64		TimeToNext = OM.timeToNextTask();
+
+	if( TimeToNext > 0 )
+	{
+		mTimer.setInterval( qMin( 1000LL, TimeToNext ) );
+		mTimer.start();
+	}
+	else
+	{
+		mTimer.setInterval( 1000 );
+		mTimer.start();
+	}
 }
 
 void mooApp::streamCallback( const QString &pText, void *pUserData )
