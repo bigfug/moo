@@ -753,7 +753,7 @@ int lua_task::verbCall( ObjectId pObjectId, Verb *V, int pArgCnt )
 {
 	Task		T = task();
 
-	T.setProgrammer( V->owner() );
+//	T.setProgrammer( V->owner() );
 	T.setCaller( T.object() );
 	T.setObject( pObjectId );
 
