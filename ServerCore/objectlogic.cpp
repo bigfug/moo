@@ -491,19 +491,19 @@ void ObjectLogic::move( lua_task &pTask, ObjectId pUserId, ObjectId pObjectId, O
 	{
 		if( !objWhere->verbFind( "accept", &FndVrb, &FndObj ) )
 		{
-			throw( mooException( E_NACC, "" ) );
+			throw( mooException( E_NACC, "where doesn't have an accept verb" ) );
 		}
 
 		lua_object::lua_pushobject( L, objObject );
 
 		int		Results  = pTask.verbCall( objWhere->id(), FndVrb, 1 );
-		bool	Accepted = ( Results == 1 && lua_isboolean( L, 1 ) && !lua_toboolean( L, 1 ) );
+		bool	Accepted = ( Results == 1 && lua_isboolean( L, -1 ) && lua_toboolean( L, -1 ) );
 
 		lua_pop( L, Results );
 
 		if( !Accepted )
 		{
-			throw( mooException( E_NACC, "" ) );
+			throw( mooException( E_NACC, "where would not accept object" ) );
 		}
 	}
 
@@ -529,7 +529,7 @@ void ObjectLogic::move( lua_task &pTask, ObjectId pUserId, ObjectId pObjectId, O
 
 	// If old-where is a valid object, then the verb-call
 	//
-	//   old-where:exitfunc(what)
+	//   old-where:exitfunc(what,to)
 	//
 	// is performed and its result is ignored;
 	// it is not an error if old-where does not define a verb named
@@ -538,8 +538,9 @@ void ObjectLogic::move( lua_task &pTask, ObjectId pUserId, ObjectId pObjectId, O
 	if( FromIsValid && objFrom->verbFind( "exitfunc", &FndVrb, &FndObj ) )
 	{
 		lua_object::lua_pushobject( L, objObject );
+		lua_object::lua_pushobjectid( L, objWhere ? objWhere->id() : OBJECT_NONE );
 
-		int		Results  = pTask.verbCall( objFrom->id(), FndVrb, 1 );
+		int		Results  = pTask.verbCall( objFrom->id(), FndVrb, 2 );
 
 		lua_pop( L, Results );
 	}
@@ -547,7 +548,7 @@ void ObjectLogic::move( lua_task &pTask, ObjectId pUserId, ObjectId pObjectId, O
 	// Finally, if where and what are still valid objects,
 	// and where is still the location of what, then the verb-call
 	//
-	//   where:enterfunc(what)
+	//   where:enterfunc(what,from)
 	//
 	// is performed and its result is ignored; again, it is not an
 	//   error if where does not define a verb named `enterfunc'.
@@ -555,8 +556,9 @@ void ObjectLogic::move( lua_task &pTask, ObjectId pUserId, ObjectId pObjectId, O
 	if( WhereIsValid && objWhere->verbFind( "enterfunc", &FndVrb, &FndObj ) )
 	{
 		lua_object::lua_pushobject( L, objObject );
+		lua_object::lua_pushobjectid( L, objFrom ? objFrom->id() : OBJECT_NONE );
 
-		int		Results  = pTask.verbCall( objWhere->id(), FndVrb, 1 );
+		int		Results  = pTask.verbCall( objWhere->id(), FndVrb, 2 );
 
 		lua_pop( L, Results );
 	}
