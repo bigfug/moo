@@ -1,5 +1,8 @@
 #include <QDebug>
 #include <QCryptographicHash>
+#include <QUrl>
+#include <QNetworkRequest>
+#include <QNetworkReply>
 
 #include "lua_moo.h"
 #include "lua_object.h"
@@ -12,12 +15,15 @@
 #include "lua_prop.h"
 #include "lua_verb.h"
 #include "lua_osc.h"
+#include "lua_json.h"
 
 #include "connectionmanager.h"
 
 LuaMap		lua_moo::mLuaFun;
 LuaMap		lua_moo::mLuaGet;
 LuaMap		lua_moo::mLuaSet;
+
+QNetworkAccessManager	lua_moo::mNAM;
 
 const luaL_Reg lua_moo::mLuaGlobal[] =
 {
@@ -40,6 +46,7 @@ const luaL_Reg lua_moo::mLuaStatic[] =
 	{ "debug", lua_moo::luaDebug },
 	{ "hash", lua_moo::luaHash },
 	{ "findPlayer", lua_moo::luaFindPlayer },
+	{ "get", lua_moo::luaNetworkGet },
 	{ 0, 0 }
 };
 
@@ -47,6 +54,7 @@ const luaL_Reg lua_moo::mLuaGetFunc[] =
 {
 	{ "root", lua_moo::luaRoot },
 	{ "last", lua_moo::luaLastObject },
+	{ "timestamp", lua_moo::luaTimestamp },
 	{ 0, 0 }
 };
 
@@ -107,6 +115,7 @@ void lua_moo::initialiseAll()
 	lua_prop::initialise();
 	lua_verb::initialise();
 	lua_osc::initialise();
+	lua_json::initialise();
 }
 
 void lua_moo::luaRegisterAllStates(lua_State *L)
@@ -132,6 +141,9 @@ void lua_moo::luaRegisterAllStates(lua_State *L)
 	Q_ASSERT( lua_gettop( L ) == 0 );
 
 	lua_osc::luaRegisterState( L );
+	Q_ASSERT( lua_gettop( L ) == 0 );
+
+	lua_json::luaRegisterState( L );
 	Q_ASSERT( lua_gettop( L ) == 0 );
 }
 
@@ -570,6 +582,13 @@ int lua_moo::luaFindPlayer( lua_State *L )
 	return( 1 );
 }
 
+int lua_moo::luaTimestamp(lua_State *L)
+{
+	lua_pushnumber( L, lua_Number( ObjectManager::timestamp() ) / 1000.0 );
+
+	return( 1 );
+}
+
 int lua_moo::luaCheckPoint( lua_State *L )
 {
 	bool				 LuaErr = false;
@@ -622,6 +641,73 @@ int lua_moo::luaLastObject(lua_State *L)
 		lua_object::lua_pushobject( L, O );
 
 		return( 1 );
+	}
+	catch( mooException e )
+	{
+		e.lua_pushexception( L );
+
+		LuaErr = true;
+	}
+	catch( ... )
+	{
+
+	}
+
+	return( LuaErr ? lua_error( L ) : 0 );
+}
+
+int lua_moo::luaNetworkGet( lua_State *L )
+{
+	bool				 LuaErr = false;
+
+	try
+	{
+		lua_task			*Command = lua_task::luaGetTask( L );
+		const Task			&T = Command->task();
+		const char			*R = luaL_checkstring( L, 1 );
+		Object				*O = lua_object::argObj( L, 2 );
+		const char			*V = luaL_checkstring( L, 3 );
+
+		Object				*PRG = ObjectManager::o( T.programmer() );
+
+		if( !PRG || !PRG->wizard() )
+		{
+			throw mooException( E_PERM, "only wizards can make network requests" );
+		}
+
+		if( !O )
+		{
+			throw( mooException( E_INVARG, "no object" ) );
+		}
+
+		if( !O->verb( V ) )
+		{
+			throw( mooException( E_INVARG, "no verb on object" ) );
+		}
+
+		QUrl			 NetUrl( R );
+
+		if( !NetUrl.isValid() )
+		{
+			throw( mooException( E_INVARG, "invalid URL" ) );
+		}
+
+		QNetworkRequest	 NetReq( NetUrl );
+
+		QNetworkReply	*NetRep = mNAM.get( NetReq );
+
+		if( !NetRep )
+		{
+			throw( mooException( E_MEMORY, "can't make network request" ) );
+		}
+
+		NetRep->setProperty( "oid", O->id() );
+		NetRep->setProperty( "verb", QString::fromLatin1( V ) );
+
+		QObject::connect( NetRep, SIGNAL(readyRead()), ObjectManager::instance(), SLOT(networkRequestReadyRead()) );
+		QObject::connect( NetRep, SIGNAL(finished()), ObjectManager::instance(), SLOT(networkRequestFinished()) );
+
+		return( 0 );
 	}
 	catch( mooException e )
 	{

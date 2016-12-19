@@ -5,6 +5,7 @@
 #include <iostream>
 
 #include <QVector>
+#include <QNetworkAccessManager>
 
 #include "mooglobal.h"
 #include "lua_utilities.h"
@@ -20,6 +21,8 @@ private:
 	static LuaMap						mLuaFun;
 	static LuaMap						mLuaGet;
 	static LuaMap						mLuaSet;
+
+	static QNetworkAccessManager		mNAM;
 
 	static void luaRegisterAllStates( lua_State *L );
 
@@ -38,9 +41,13 @@ private:
 	static int luaDebug( lua_State *L );
 	static int luaFindPlayer( lua_State *L );
 
+	static int luaTimestamp( lua_State *L );
+
 	static int luaCheckPoint( lua_State *L );
 
 	static int luaLastObject( lua_State *L );
+
+	static int luaNetworkGet( lua_State *L );
 
 	static int luaPanic( lua_State *L );
 

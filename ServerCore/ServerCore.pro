@@ -45,7 +45,8 @@ SOURCES += \
 	inputsinkedittext.cpp \
 	odb_file.cpp \
 	odb.cpp \
-	odb_sql.cpp
+	odb_sql.cpp \
+    lua_json.cpp
 
 HEADERS += \
 	verb.h \
@@ -80,7 +81,8 @@ HEADERS += \
 	inputsinkedittext.h \
 	odb_file.h \
 	odb.h \
-	odb_sql.h
+	odb_sql.h \
+    lua_json.h
 
 unix:!symbian {
 	maemo5 {

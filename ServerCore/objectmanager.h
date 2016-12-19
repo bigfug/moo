@@ -128,6 +128,9 @@ public slots:
 		mStats.mWrites++;
 	}
 
+	void networkRequestFinished( void );
+	void networkRequestReadyRead( void );
+
 protected:
 	void timeoutObjects( void );
 
@@ -144,6 +147,15 @@ protected:
 private:
 	static ObjectManager		*mInstance;
 	static qint64				 mTimeStamp;
+
+	typedef struct NetRepEnt
+	{
+		ObjectId				 mObjectId;
+		QString					 mVerb;
+		QByteArray				 mData;
+	} NetRepEnt;
+
+	QList<NetRepEnt>			 mNetRepLst;
 
 	ODB							*mODB;
 	ObjectManagerData			 mData;

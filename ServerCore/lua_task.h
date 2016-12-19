@@ -33,6 +33,8 @@ public:
 		return( mL );
 	}
 
+	lua_State *L( void );
+
 	int execute( qint64 pTimeStamp );
 
 	int eval( void );

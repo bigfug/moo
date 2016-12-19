@@ -6,6 +6,7 @@
 #include <QDir>
 #include <QDateTime>
 #include <QModelIndex>
+#include <QNetworkReply>
 
 #include "lua_moo.h"
 #include "lua_object.h"
@@ -320,16 +321,57 @@ void ObjectManager::updateProperty(Object *pObject, QString pName)
 	mUpdatedProperties.insert( pObject->id(), StrLst );
 }
 
+void ObjectManager::networkRequestFinished()
+{
+	QNetworkReply		*NetRep = qobject_cast<QNetworkReply *>( sender() );
+
+	if( NetRep )
+	{
+		NetRepEnt		NRE;
+
+		NRE.mObjectId = NetRep->property( "oid" ).toInt();
+		NRE.mVerb     = NetRep->property( "verb" ).toString();
+		NRE.mData     = NetRep->readAll();
+
+		mNetRepLst.append( NRE );
+	}
+
+	NetRep->deleteLater();
+}
+
+void ObjectManager::networkRequestReadyRead()
+{
+
+}
+
 void ObjectManager::onFrame( qint64 pTimeStamp )
 {
 	mTimeStamp = QDateTime::currentMSecsSinceEpoch();
 
 	static quint64		LastTime = mTimeStamp;
 
-	if( mTimeStamp - LastTime > 1000 )
+	for( const NetRepEnt &NRE : mNetRepLst )
 	{
+		Object		*O = object( NRE.mObjectId );
+		Verb		*V = ( O ? O->verb( NRE.mVerb ) : nullptr );
 
+		if( !V )
+		{
+			continue;
+		}
+
+		lua_task	 L( 0, Task() );
+
+		lua_pushlstring( L.L(), NRE.mData.constData(), NRE.mData.size() );
+
+		lua_task::luaSetTask( L.L(), &L );
+
+		L.verbCall( NRE.mObjectId, V, 1 );
+
+		mStats.mTasks++;
 	}
+
+	mNetRepLst.clear();
 
 	QList<TaskEntry>		TaskList;
 

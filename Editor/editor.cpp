@@ -266,7 +266,7 @@ void Editor::processCTRL( QChar pC )
 
 				if( mCursorTextPosition.x() == TmpTxt.size() )
 				{
-					if( mCursorTextPosition.y() == mText.size() )
+					if( mCursorTextPosition.y() + 1 >= mText.size() )
 					{
 						return;
 					}

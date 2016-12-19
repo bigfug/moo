@@ -250,6 +250,23 @@ lua_task::~lua_task( void )
 	}
 }
 
+lua_State *lua_task::L()
+{
+	if( mL == 0 )
+	{
+		if( ( mL = lua_newstate( lua_task::luaAlloc, this ) ) == 0 )
+		{
+			return( 0 );
+		}
+
+		lua_moo::luaNewState( mL );
+
+		lua_sethook( mL, &lua_task::luaHook, LUA_MASKCOUNT, 10 );
+	}
+
+	return( mL );
+}
+
 static const char	 TaskLuaKey = 'k';
 
 lua_task *lua_task::luaGetTask( lua_State *L )
@@ -809,7 +826,7 @@ int lua_task::verbCallCode( Verb *V, int pArgCnt )
 
 	//lua_moo::stackDump( mL );	std::cout.flush();
 
-	return( c2 - c1  );
+	return( c2 - c1 );
 }
 
 
