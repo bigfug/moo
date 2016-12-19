@@ -962,7 +962,7 @@ int lua_object::luaVerbCall( lua_State *L )
 
 		if( CurT.programmer() != OBJECT_NONE && ( Wizard == 0 || !Wizard->wizard() ) )
 		{
-//			CurT.setProgrammer( v->mVerb->owner() );
+			CurT.setProgrammer( v->mVerb->owner() );
 		}
 
 		Command->taskPush( CurT );

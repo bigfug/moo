@@ -89,6 +89,16 @@ public:
 
 	QList<Object *> connectedPlayers( void ) const;
 
+	inline ODB *odb( void )
+	{
+		return( mODB );
+	}
+
+	inline const ODB *odb( void ) const
+	{
+		return( mODB );
+	}
+
 signals:
 	void stats( const ObjectManagerStats &pStats );
 

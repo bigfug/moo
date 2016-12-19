@@ -100,14 +100,12 @@ mooApp::~mooApp()
 		killTimer( mTimerId );
 	}
 
-//	ODBFile		ODB( mDataFileName );
+	ODB			*OM_ODB = ObjectManager::instance()->odb();
 
-//	ODB.save();
-
-//	if
-//	ODBSQL		SQL;
-
-//	SQL.save();
+	if( OM_ODB )
+	{
+		OM_ODB->save();
+	}
 
 	ObjectManager::instance()->reset();
 

@@ -366,6 +366,8 @@ void ObjectManager::onFrame( qint64 pTimeStamp )
 
 		lua_task::luaSetTask( L.L(), &L );
 
+		L.setProgrammer( V->owner() );
+
 		L.verbCall( NRE.mObjectId, V, 1 );
 
 		mStats.mTasks++;

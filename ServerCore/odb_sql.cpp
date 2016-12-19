@@ -144,6 +144,24 @@ void ODBSQL::load()
 
 		ObjectManager::instance()->object( Q2.value( 0 ).toInt() );
 	}
+
+	QMutexLocker	Lock( &Data.mTaskMutex );
+
+	QSqlQuery	Q3 = mDB.exec( "SELECT * FROM task ORDER BY timestamp ASC" );
+
+	while( Q3.next() )
+	{
+		TaskEntry		TE;
+		TaskEntryData	&TD = data( TE );
+
+		TD.mId        = Q3.value( "id" ).toInt();
+		TD.mTimeStamp = Q3.value( "timestamp" ).toInt();
+		TD.mCommand   = Q3.value( "command" ).toString();
+		TD.mPlayerId  = Q3.value( "player" ).toInt();
+		TD.mConnectionId = Q3.value( "connection" ).toInt();
+
+		Data.mTaskQueue << TE;
+	}
 }
 
 void ODBSQL::save()
@@ -156,9 +174,31 @@ void ODBSQL::save()
 		return;
 	}
 
-	for( Object *O : Data.mObjMap.values() )
+	mDB.exec( "TRUNCATE TABLE task" );
+
+	static QSqlQuery			 Q;
+	static bool					 B = false;
+
+	if( !B )
 	{
-//		updateObject( *O );
+		B = Q.prepare( "INSERT INTO task "
+					"( id, timestamp, command, player, connection )"
+					"VALUES "
+					"( :id, :timestamp, :command, :player, :connection )"
+					);
+	}
+
+	QMutexLocker	Lock( &Data.mTaskMutex );
+
+	for( const TaskEntry &TE : Data.mTaskQueue )
+	{
+		Q.bindValue( ":id", TE.id() );
+		Q.bindValue( ":timestamp", TE.timestamp() );
+		Q.bindValue( ":command", TE.command() );
+		Q.bindValue( ":player", TE.playerid() );
+		Q.bindValue( ":connection", TE.connectionid() );
+
+		Q.exec();
 	}
 }
 

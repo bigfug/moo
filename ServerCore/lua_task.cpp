@@ -219,7 +219,7 @@ int lua_task::luaGetProgrammer( lua_State *L )
 int lua_task::luaSetProgrammer( lua_State *L )
 {
 	lua_task			*LT = lua_task::luaGetTask( L );
-	ObjectId			 WID = lua_object::argId( L );
+	ObjectId			 WID = lua_object::argId( L, -1 );
 	Object				*PRG = ObjectManager::o( LT->programmer() );
 
 	if( PRG->id() == WID || PRG->wizard() )
@@ -462,7 +462,7 @@ int lua_task::executeLogin( void )
 		Task			&T				= mTasks.front();
 		ObjectManager	&OM				= *ObjectManager::instance();
 		Object			*Root			= OM.object( 0 );
-		Verb			*LoginCommand	= ( Root != 0 ? Root->verbMatch( "do_login_command", Root->id(), "", Root->id() ) : 0 );
+		Verb			*LoginCommand	= ( Root != 0 ? Root->verbMatch( "do_login_command" ) : 0 );
 		ObjectId		 MaxId			= OM.maxId();
 		Verb			*V;
 
@@ -721,18 +721,24 @@ int lua_task::execute( void )
 		}
 
 		/*
-	player    an object, the player who typed the command
-	this      an object, the object on which this verb was found
-	caller    an object, the same as `player'
-	verb      a string, the first word of the command
-	argstr    a string, everything after the first word of the command
-	args      a list of strings, the words in `argstr'
-	dobjstr   a string, the direct object string found during parsing
-	dobj      an object, the direct object value found during matching
-	prepstr   a string, the prepositional phrase found during parsing
-	iobjstr   a string, the indirect object string
-	iobj      an object, the indirect object value
-	*/
+		player    an object, the player who typed the command
+		this      an object, the object on which this verb was found
+		caller    an object, the same as `player'
+		verb      a string, the first word of the command
+		argstr    a string, everything after the first word of the command
+		args      a list of strings, the words in `argstr'
+		dobjstr   a string, the direct object string found during parsing
+		dobj      an object, the direct object value found during matching
+		prepstr   a string, the prepositional phrase found during parsing
+		iobjstr   a string, the indirect object string
+		iobj      an object, the indirect object value
+		*/
+
+		// The owner of a verb also determines the permissions with which that
+		// verb runs; that is, the program in a verb can do whatever operations
+		// the owner of that verb is allowed to do and no others.
+
+		T.setProgrammer( FndVrb->owner() );
 
 		return( verbCallCode( FndVrb ) );
 	}

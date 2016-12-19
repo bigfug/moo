@@ -54,7 +54,7 @@ parsing, above.
 /*
 Functions are always called by the program for some verb; that program is running with
 the permissions of some player, usually the owner of the verb in question (it is not
-always the owner, though; wizards can use set_task_perms() to change the permissions
+always the owner, though; wizards can use set_task_pperms() to change the permissions
 `on the fly'). In the function descriptions below, we refer to the player whose
 permissions are being used as the programmer.
 
