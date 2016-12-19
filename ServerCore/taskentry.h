@@ -9,6 +9,8 @@ class QDataStream;
 
 typedef struct TaskEntryData
 {
+	static TaskId		 TID;
+
 	TaskId				 mId;					// the task id
 	qint64				 mTimeStamp;			// when the task was created
 	QString				 mCommand;				// the command

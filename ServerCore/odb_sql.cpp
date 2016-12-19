@@ -4,6 +4,7 @@
 #include <QBuffer>
 #include <QDataStream>
 #include <QStringList>
+#include <QDateTime>
 
 #include "objectmanager.h"
 #include "object.h"
@@ -155,10 +156,12 @@ void ODBSQL::load()
 		TaskEntryData	&TD = data( TE );
 
 		TD.mId        = Q3.value( "id" ).toInt();
-		TD.mTimeStamp = Q3.value( "timestamp" ).toInt();
+		TD.mTimeStamp = Q3.value( "timestamp" ).toLongLong();
 		TD.mCommand   = Q3.value( "command" ).toString();
 		TD.mPlayerId  = Q3.value( "player" ).toInt();
 		TD.mConnectionId = Q3.value( "connection" ).toInt();
+
+		TD.TID = qMax( TD.TID, TD.mId + 1 );
 
 		Data.mTaskQueue << TE;
 	}
@@ -174,7 +177,7 @@ void ODBSQL::save()
 		return;
 	}
 
-	mDB.exec( "TRUNCATE TABLE task" );
+	mDB.exec( "DELETE FROM task" );
 
 	static QSqlQuery			 Q;
 	static bool					 B = false;
