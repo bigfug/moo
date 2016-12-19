@@ -71,6 +71,8 @@ mooApp::mooApp( const QString &pDataFileName, QObject *pParent )
 			lua_task		 Com( 0, TE );
 
 			Com.eval();
+
+			O->setConnection( -1 );
 		}
 
 		if( true )
