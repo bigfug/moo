@@ -436,7 +436,7 @@ void ListenerSocket::inputTimeout( void )
 {
 	TaskEntry		 E( "", mConnectionId );
 
-	ObjectManager::instance()->queueTask( E );
+	ObjectManager::instance()->doTask( E );
 }
 
 void ListenerSocket::setLineMode( Connection::LineMode pLineMode )

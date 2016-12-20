@@ -438,12 +438,14 @@ int lua_task::eval( void )
 
 		Connection	*CON = ConnectionManager::instance()->connection( connectionid() );
 
-		if( CON != 0 )
+		if( CON )
 		{
 			CON->notify( Err );
 		}
-
-		//qDebug() << Err;
+		else
+		{
+			qDebug() << Err;
+		}
 
 		lua_pop( mL, 1 );
 	}

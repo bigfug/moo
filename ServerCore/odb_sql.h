@@ -44,6 +44,14 @@ public:
 
 	virtual ObjectId findPlayer( QString pName ) const Q_DECL_OVERRIDE;
 
+	virtual void addTask( TaskEntry &TE ) Q_DECL_OVERRIDE;
+
+	virtual QList<TaskEntry> tasks( qint64 pTimeStamp ) Q_DECL_OVERRIDE;
+
+	virtual qint64 nextTaskTime( void ) Q_DECL_OVERRIDE;
+
+	virtual void killTask( TaskId pTaskId ) Q_DECL_OVERRIDE;
+
 private:
 	//void updateObject( const Object &O );
 

@@ -37,6 +37,14 @@ public:
 	virtual void deleteProperty( Object &pObject, QString pName ) = 0;
 	virtual void updateProperty( Object &pObject, QString pName ) = 0;
 
+	virtual void addTask( TaskEntry &TE ) = 0;
+
+	virtual QList<TaskEntry> tasks( qint64 pTimeStamp ) = 0;
+
+	virtual qint64 nextTaskTime( void ) = 0;
+
+	virtual void killTask( TaskId pTaskId ) = 0;
+
 protected:
 	Object *newObject( void ) const;
 

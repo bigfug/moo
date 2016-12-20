@@ -83,6 +83,43 @@ public:
 
 	virtual ObjectId findPlayer( QString pName ) const Q_DECL_OVERRIDE;
 
+	virtual void addTask(TaskEntry &TE) Q_DECL_OVERRIDE
+	{
+		mTaskQueue << TE;
+
+		qSort( mTaskQueue.begin(), mTaskQueue.end(), TaskEntry::lessThan );
+	}
+
+	virtual QList<TaskEntry> tasks(qint64 pTimeStamp) Q_DECL_OVERRIDE
+	{
+		QList<TaskEntry>		TskLst;
+
+		while( !mTaskQueue.isEmpty() && mTaskQueue.first().timestamp() <= pTimeStamp )
+		{
+			TskLst << mTaskQueue.takeFirst();
+		}
+
+		return( TskLst );
+	}
+
+	virtual qint64 nextTaskTime( void ) Q_DECL_OVERRIDE
+	{
+		return( mTaskQueue.isEmpty() ? -1 : mTaskQueue.first().timestamp() );
+	}
+
+	virtual void killTask( TaskId pTaskId ) Q_DECL_OVERRIDE
+	{
+		for( QList<TaskEntry>::iterator it = mTaskQueue.begin() ; it != mTaskQueue.end() ; it++ )
+		{
+			if( it->id() == pTaskId )
+			{
+				mTaskQueue.erase( it );
+
+				break;
+			}
+		}
+	}
+
 private:
 	void loadObject( QDataStream &DS, Object &O );
 	void updateObject( QDataStream &DS, const Object &O );
@@ -97,8 +134,9 @@ private:
 	void saveTask( QDataStream &DS, const TaskEntry &TE );
 
 private:
-	QString			 mFileName;
-	ObjectList		 mPlayers;
+	QString					 mFileName;
+	ObjectList				 mPlayers;
+	QList<TaskEntry>		 mTaskQueue;
 };
 
 #endif // ODBFILE_H

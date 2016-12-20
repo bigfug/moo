@@ -29,7 +29,6 @@ typedef struct ObjectManagerData
 	mutable QMutex			 mTaskMutex;
 
 	QList<TaskEntry>		 mTaskList;
-	QList<TaskEntry>		 mTaskQueue;
 
 } ObjectManagerData;
 

@@ -84,7 +84,7 @@ void ODBFile::load()
 
 		loadTask( DS, E );
 
-		Data.mTaskQueue << E;
+		mTaskQueue << E;
 	}
 }
 
@@ -131,11 +131,11 @@ void ODBFile::save()
 		saveTask( DS, TE );
 	}
 
-	qint32			QueueCount = Data.mTaskQueue.size();
+	qint32			QueueCount = mTaskQueue.size();
 
 	DS << QueueCount;
 
-	for( const TaskEntry &TE : Data.mTaskQueue )
+	for( const TaskEntry &TE : mTaskQueue )
 	{
 		saveTask( DS, TE );
 	}

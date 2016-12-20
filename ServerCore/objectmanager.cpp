@@ -114,14 +114,14 @@ QList<Object *> ObjectManager::connectedPlayers() const
 
 qint64 ObjectManager::timeToNextTask() const
 {
-	QMutexLocker	Lock( &mData.mTaskMutex );
+	qint64			NextTaskTime = ( mODB ? mODB->nextTaskTime() : -1 );
 
-	if( mData.mTaskQueue.isEmpty() )
+	if( NextTaskTime != -1 )
 	{
-		return( -1 );
+		NextTaskTime = NextTaskTime - QDateTime::currentMSecsSinceEpoch();
 	}
 
-	return( mData.mTaskQueue.first().timestamp() - QDateTime::currentMSecsSinceEpoch() );
+	return( NextTaskTime );
 }
 
 void ObjectManager::reset( void )
@@ -197,7 +197,6 @@ void ObjectManager::clear()
 	mData.mTaskMutex.lock();
 
 	mData.mTaskList.clear();
-	mData.mTaskQueue.clear();
 
 	mData.mTaskMutex.unlock();
 
@@ -391,21 +390,11 @@ void ObjectManager::onFrame( qint64 pTimeStamp )
 
 	mData.mTaskMutex.lock();
 
-	TaskList.swap( mData.mTaskList );
-
-	// Take all the queued tasks that are due to be executed and put them
-	// on the current task queue
-
-	while( !mData.mTaskQueue.empty() && mData.mTaskQueue.front().timestamp() <= pTimeStamp )
-	{
-		TaskList.append( mData.mTaskQueue.takeFirst() );
-	}
-
 	// Switch over the current task list
 
-	mData.mTaskMutex.unlock();
+	TaskList.swap( mData.mTaskList );
 
-	// Execute the current tasks
+	mData.mTaskMutex.unlock();
 
 	for( const TaskEntry &TE : TaskList )
 	{
@@ -421,6 +410,29 @@ void ObjectManager::onFrame( qint64 pTimeStamp )
 	}
 
 	TaskList.clear();
+
+	// Take all the queued tasks that are due to be executed and put them
+	// on the current task queue
+
+	if( mODB )
+	{
+		// Execute the current tasks
+
+		for( const TaskEntry &TE : mODB->tasks( pTimeStamp ) )
+		{
+			Task				 T( TE );
+
+			qDebug() << TE.connectionid() << T.command();
+
+			T.setObject( T.player() );
+
+			lua_task			 L( TE.connectionid(), T );
+
+			L.eval();
+
+			mStats.mTasks++;
+		}
+	}
 
 	// Process closed connections
 
@@ -451,38 +463,22 @@ void ObjectManager::doTask( TaskEntry &pTask )
 
 void ObjectManager::queueTask( TaskEntry &pTask )
 {
-	QMutexLocker		L( &mData.mTaskMutex );
-
-	for( QList<TaskEntry>::iterator it = mData.mTaskQueue.begin() ; it != mData.mTaskQueue.end() ; it++ )
+	if( mODB )
 	{
-		if( pTask.timestamp() < it->timestamp() )
-		{
-			mData.mTaskQueue.insert( it, pTask );
-
-			emit taskReady();
-
-			return;
-		}
+		mODB->addTask( pTask );
 	}
-
-	mData.mTaskQueue.append( pTask );
 
 	emit taskReady();
 }
 
 bool ObjectManager::killTask(TaskId pTaskId)
 {
-	QMutexLocker		L( &mData.mTaskMutex );
-
-	for( QList<TaskEntry>::iterator it = mData.mTaskQueue.begin() ; it != mData.mTaskQueue.end() ; it++ )
+	if( mODB )
 	{
-		if( it->id() == pTaskId )
-		{
-			mData.mTaskQueue.erase( it );
-
-			return( true );
-		}
+		mODB->killTask( pTaskId );
 	}
+
+	QMutexLocker		L( &mData.mTaskMutex );
 
 	for( QList<TaskEntry>::iterator it = mData.mTaskList.begin() ; it != mData.mTaskList.end() ; it++ )
 	{
