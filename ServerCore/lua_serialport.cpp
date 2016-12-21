@@ -163,47 +163,103 @@ lua_serialport::luaSerialPort * lua_serialport::arg( lua_State *L, int pIndex )
 
 int lua_serialport::luaOpenSerialPort( lua_State *L )
 {
-	const char		*s = luaL_checkstring( L, 1 );
-	QString			 P = QString::fromLatin1( s );
+	bool		LuaErr = false;
 
-	for( QMap<int,QSerialPort *>::iterator it = mSerialPortMap.begin() ; it != mSerialPortMap.end() ; it++ )
+	try
 	{
-		if( it.value()->portName() == P )
-		{
-			lua_pushserialport( L, it.key() );
+		ObjectManager		&OM = *ObjectManager::instance();
+		lua_task			*Command = lua_task::luaGetTask( L );
+		const Task			&T = Command->task();
+		Object				*objUser       = OM.object( T.programmer() );
+		const bool			 UserIsValid    = ( T.programmer() == OBJECT_NONE || ( objUser != 0 && objUser->valid() ) );
+		const bool			 UserIsWizard   = ( UserIsValid && ( objUser == 0 || objUser->wizard() ) );
 
-			return( 1 );
+		if( !UserIsWizard )
+		{
+			throw( mooException( E_NACC, "programmer is not wizard" ) );
 		}
+
+		const char		*s = luaL_checkstring( L, 1 );
+		QString			 P = QString::fromLatin1( s );
+
+		for( QMap<int,QSerialPort *>::iterator it = mSerialPortMap.begin() ; it != mSerialPortMap.end() ; it++ )
+		{
+			if( it.value()->portName() == P )
+			{
+				lua_pushserialport( L, it.key() );
+
+				return( 1 );
+			}
+		}
+
+		static int	SPID = 0;
+
+		mSerialPortMap.insert( ++SPID, new QSerialPort( P ) );
+
+		QSerialPort		&SP = *mSerialPortMap.value( SPID );
+
+		SP.setProperty( "sid", SPID );
+
+		lua_pushserialport( L, SPID );
+
+		return( 1 );
+	}
+	catch( mooException e )
+	{
+		e.lua_pushexception( L );
+
+		LuaErr = true;
+	}
+	catch( ... )
+	{
+
 	}
 
-	static int	SPID = 0;
-
-	mSerialPortMap.insert( ++SPID, new QSerialPort( P ) );
-
-	QSerialPort		&SP = *mSerialPortMap.value( SPID );
-
-	SP.setProperty( "sid", SPID );
-
-	lua_pushserialport( L, SPID );
-
-	return( 1 );
+	return( LuaErr ? lua_error( L ) : 0 );
 }
 
 int lua_serialport::luaPort( lua_State *L )
 {
-	int				 ID = luaL_checkinteger( L, 1 );
+	bool		LuaErr = false;
 
-	if( mSerialPortMap.contains( ID ) )
+	try
 	{
-		lua_pushserialport( L, ID );
+		ObjectManager		&OM = *ObjectManager::instance();
+		lua_task			*Command = lua_task::luaGetTask( L );
+		const Task			&T = Command->task();
+		Object				*objUser       = OM.object( T.programmer() );
+		const bool			 UserIsValid    = ( T.programmer() == OBJECT_NONE || ( objUser != 0 && objUser->valid() ) );
+		const bool			 UserIsWizard   = ( UserIsValid && ( objUser == 0 || objUser->wizard() ) );
 
-		return( 1 );
+		if( !UserIsWizard )
+		{
+			throw( mooException( E_NACC, "programmer is not wizard" ) );
+		}
+
+		int				 ID = luaL_checkinteger( L, 1 );
+
+		if( mSerialPortMap.contains( ID ) )
+		{
+			lua_pushserialport( L, ID );
+
+			return( 1 );
+		}
+	}
+	catch( mooException e )
+	{
+		e.lua_pushexception( L );
+
+		LuaErr = true;
+	}
+	catch( ... )
+	{
+
 	}
 
-	return( 0 );
+	return( LuaErr ? lua_error( L ) : 0 );
 }
 
-int lua_serialport::luaSetBaudRate(lua_State *L)
+int lua_serialport::luaSetBaudRate( lua_State *L )
 {
 	luaSerialPort		*UD = arg( L );
 
