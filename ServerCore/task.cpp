@@ -1,6 +1,7 @@
 #include "task.h"
 #include "lua_moo.h"
 #include "objectmanager.h"
+#include "lua_object.h"
 #include <QDateTime>
 
 const char		*Task::mPrepositionList[] =
@@ -75,6 +76,36 @@ void Task::findObject( const QString &pName, QList<ObjectId> &pId ) const
 			pId.append( id );
 
 			return;
+		}
+
+		return;
+	}
+
+	if( pName.startsWith( "$" ) )
+	{
+		Object		*R = ObjectManager::o( 0 );
+
+		if( R )
+		{
+			Property	*P = R->prop( pName.mid( 1 ) );
+
+			if( P )
+			{
+				ObjectId			OID = OBJECT_NONE;
+
+				if( P->value().type() == QVariant::Int )
+				{
+					OID = P->value().toInt();
+				}
+				else
+				{
+					lua_object::luaHandle H = P->value().value<lua_object::luaHandle>();
+
+					OID = H.O;
+				}
+
+				pId.append( OID );
+			}
 		}
 
 		return;
