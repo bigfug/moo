@@ -16,6 +16,7 @@
 #include "lua_verb.h"
 #include "lua_osc.h"
 #include "lua_json.h"
+#include "lua_serialport.h"
 
 #include "connectionmanager.h"
 
@@ -116,6 +117,7 @@ void lua_moo::initialiseAll()
 	lua_verb::initialise();
 	lua_osc::initialise();
 	lua_json::initialise();
+	lua_serialport::initialise();
 }
 
 void lua_moo::luaRegisterAllStates(lua_State *L)
@@ -144,6 +146,9 @@ void lua_moo::luaRegisterAllStates(lua_State *L)
 	Q_ASSERT( lua_gettop( L ) == 0 );
 
 	lua_json::luaRegisterState( L );
+	Q_ASSERT( lua_gettop( L ) == 0 );
+
+	lua_serialport::luaRegisterState( L );
 	Q_ASSERT( lua_gettop( L ) == 0 );
 }
 

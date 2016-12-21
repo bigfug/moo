@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 QT       -= gui
-QT       += network sql
+QT       += network sql serialport
 
 TARGET = ServerCore
 TEMPLATE = lib
@@ -46,7 +46,9 @@ SOURCES += \
 	odb_file.cpp \
 	odb.cpp \
 	odb_sql.cpp \
-    lua_json.cpp
+    lua_json.cpp \
+    serialport.cpp \
+    lua_serialport.cpp
 
 HEADERS += \
 	verb.h \
@@ -82,7 +84,9 @@ HEADERS += \
 	odb_file.h \
 	odb.h \
 	odb_sql.h \
-    lua_json.h
+    lua_json.h \
+    serialport.h \
+    lua_serialport.h
 
 unix:!symbian {
 	maemo5 {
