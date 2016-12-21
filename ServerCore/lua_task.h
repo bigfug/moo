@@ -86,6 +86,7 @@ private:
 	static int luaDirectObjectString( lua_State *L );
 	static int luaIndirectObject( lua_State *L );
 	static int luaIndirectObjectString( lua_State *L );
+	static int luaPreposition( lua_State *L );
 
 	static int luaGetProgrammer( lua_State *L );
 	static int luaSetProgrammer( lua_State *L );

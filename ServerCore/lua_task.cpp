@@ -38,6 +38,7 @@ const luaL_Reg lua_task::mLuaGet[] =
 	{ "dobjstr", lua_task::luaDirectObjectString },
 	{ "iobj", lua_task::luaIndirectObject },
 	{ "iobjstr", lua_task::luaIndirectObjectString },
+	{ "prepstr", lua_task::luaPreposition },
 	{ "programmer", lua_task::luaGetProgrammer },
 	{ 0, 0 }
 };
@@ -203,6 +204,15 @@ int lua_task::luaIndirectObjectString(lua_State *L)
 	const Task			&T = lua_task::luaGetTask( L )->task();
 
 	lua_pushstring( L, T.indirectObjectName().toUtf8() );
+
+	return( 1 );
+}
+
+int lua_task::luaPreposition( lua_State *L )
+{
+	const Task			&T = lua_task::luaGetTask( L )->task();
+
+	lua_pushstring( L, T.preposition().toUtf8() );
 
 	return( 1 );
 }
