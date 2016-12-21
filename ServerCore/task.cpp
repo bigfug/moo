@@ -20,6 +20,7 @@ const char		*Task::mPrepositionList[] =
 	"is",
 	"as",
 	"off/off of",
+	"up",
 	0
 };
 
