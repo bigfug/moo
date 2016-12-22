@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 QT       -= gui
-QT       += network sql serialport
+QT       += network sql serialport websockets
 
 TARGET = ServerCore
 TEMPLATE = lib
@@ -28,7 +28,6 @@ SOURCES += \
 	lua_object.cpp \
 	lua_moo.cpp \
 	lua_connection.cpp \
-	listener.cpp \
 	connection.cpp \
 	lua_utilities.cpp \
 	mooexception.cpp \
@@ -48,7 +47,13 @@ SOURCES += \
 	odb_sql.cpp \
     lua_json.cpp \
     serialport.cpp \
-    lua_serialport.cpp
+    lua_serialport.cpp \
+    listenertelnet.cpp \
+    listenertelnetsocket.cpp \
+    listenerwebsocket.cpp \
+    listenerserver.cpp \
+    listenersocket.cpp \
+    listenerwebsocketsocket.cpp
 
 HEADERS += \
 	verb.h \
@@ -64,7 +69,6 @@ HEADERS += \
 	lua_object.h \
 	lua_moo.h \
 	lua_connection.h \
-	listener.h \
 	connection.h \
 	stdafx.h \
 	lua_utilities.h \
@@ -86,7 +90,13 @@ HEADERS += \
 	odb_sql.h \
     lua_json.h \
     serialport.h \
-    lua_serialport.h
+    lua_serialport.h \
+    listenertelnet.h \
+    listenertelnetsocket.h \
+    listenerwebsocket.h \
+    listenerserver.h \
+    listenersocket.h \
+    listenerwebsocketsocket.h
 
 unix:!symbian {
 	maemo5 {

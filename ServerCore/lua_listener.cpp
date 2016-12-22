@@ -37,7 +37,7 @@ void lua_listener::luaRegisterState( lua_State *L )
 	luaL_openlib( L, NULL, lua_listener::mLuaInstance, 0 );
 }
 
-void lua_listener::lua_pushlistener( lua_State *L, Listener *O )
+void lua_listener::lua_pushlistener( lua_State *L, ListenerServer *O )
 {
 	luaListener			*H = (luaListener *)lua_newuserdata( L, sizeof( luaListener ) );
 

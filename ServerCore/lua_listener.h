@@ -3,17 +3,17 @@
 
 #include <lua.hpp>
 
-class Listener;
+class ListenerServer;
 
 class lua_listener
 {
 public:
 	typedef struct luaListener
 	{
-		Listener		*mListener;
+		ListenerServer		*mListener;
 	} luaListener;
 
-	static void lua_pushlistener( lua_State *L, Listener *O );
+	static void lua_pushlistener( lua_State *L, ListenerServer *O );
 
 private:
 	static void initialise( void );

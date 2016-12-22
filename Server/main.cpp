@@ -2,7 +2,8 @@
 #include "mainwindow.h"
 #include "connectionmanager.h"
 #include "connection.h"
-#include "listener.h"
+#include "listenertelnet.h"
+#include "listenerwebsocket.h"
 #include "taskentry.h"
 #include <QApplication>
 #include <lua.hpp>
@@ -117,7 +118,7 @@ int main( int argc, char *argv[] )
 
 			if( CM != 0 )
 			{
-				Listener	*L = new Listener( 0, ServerPort, CM );
+				ListenerServer	*L = new ListenerTelnet( 0, ServerPort, CM );
 
 				if( L != 0 )
 				{

@@ -1,4 +1,4 @@
-QT += core network
+QT += core network serialport websockets
 QT -= gui
 
 CONFIG += c++11
@@ -10,6 +10,10 @@ CONFIG -= app_bundle
 TEMPLATE = app
 
 SOURCES += main.cpp
+
+daemon.path  = /usr/local/bin/moo
+
+INSTALL += daemon
 
 #----------------------------------------------------------------------------
 

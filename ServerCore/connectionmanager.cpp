@@ -1,8 +1,9 @@
 #include "connectionmanager.h"
 #include "mooexception.h"
 #include "connection.h"
-#include "listener.h"
+#include "listenerserver.h"
 #include "lua_task.h"
+#include "listenersocket.h"
 
 ConnectionManager	*ConnectionManager::mInstance = 0;
 

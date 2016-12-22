@@ -1,4 +1,4 @@
-QT += network widgets
+QT += network widgets serialport websockets
 
 HEADERS += \
 	mainwindow.h
