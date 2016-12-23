@@ -45,6 +45,8 @@ private:
 	static int luaSet( lua_State *L );
 	static int luaToString( lua_State *L );
 
+	static int luaEQ( lua_State *L );
+
 	static int luaCreate( lua_State *L );
 	static int luaObject( lua_State *L );
 

@@ -34,6 +34,7 @@ const luaL_reg lua_object::mLuaInstance[] =
 	{ "__index", lua_object::luaGet },
 	{ "__newindex", lua_object::luaSet },
 	{ "__gc", lua_object::luaGC },
+	{ "__eq", lua_object::luaEQ },
 	{ "__tostring", lua_object::luaToString },
 	{ 0, 0 }
 };
@@ -719,6 +720,16 @@ int lua_object::luaToString( lua_State *L )
 	}
 
 	return( LuaErr ? lua_error( L ) : 0 );
+}
+
+int lua_object::luaEQ(lua_State *L)
+{
+	ObjectId	ID1 = argId( L, 1 );
+	ObjectId	ID2 = argId( L, 2 );
+
+	lua_pushboolean( L, ID1 == ID2 );
+
+	return( 1 );
 }
 
 int lua_object::luaObject( lua_State *L )
