@@ -38,6 +38,8 @@ ListenerTelnetSocket::ListenerTelnetSocket( QObject *pParent, QTcpSocket *pSocke
 	connect( &mTimer, SIGNAL(timeout()), this, SLOT(inputTimeout()) );
 
 	mTimer.singleShot( 1000, this, SLOT(inputTimeout()) );
+
+	mTelnet = telnet_init( mOptions.constData(), &ListenerTelnetSocket::telnetEventHandlerStatic, 0, this );
 }
 
 bool ListenerTelnetSocket::echo() const
@@ -138,7 +140,7 @@ void ListenerTelnetSocket::processInput( const QByteArray &pData )
 //						}
 //					}
 
-					mTelnet = telnet_init( mOptions.constData(), &ListenerTelnetSocket::telnetEventHandlerStatic, 0, this );
+//					mTelnet = telnet_init( mOptions.constData(), &ListenerTelnetSocket::telnetEventHandlerStatic, 0, this );
 
 					telnet_negotiate( mTelnet, TELNET_DO, TELNET_TELOPT_NAWS );
 					telnet_negotiate( mTelnet, TELNET_DO, TELNET_TELOPT_TTYPE );
@@ -347,22 +349,17 @@ void ListenerTelnetSocket::processInput( const QByteArray &pData )
 
 void ListenerTelnetSocket::inputTimeout( void )
 {
-	TaskEntry		 E( "", mConnectionId );
-
-	ObjectManager::instance()->doTask( E );
-
 	if( !mWebSocketActive )
 	{
-		if( !mTelnet )
-		{
-			mTelnet = telnet_init( mOptions.constData(), &ListenerTelnetSocket::telnetEventHandlerStatic, 0, this );
-		}
-
 		telnet_negotiate( mTelnet, TELNET_DO, TELNET_TELOPT_NAWS );
 		telnet_negotiate( mTelnet, TELNET_DO, TELNET_TELOPT_TTYPE );
 
 		setLineMode( Connection::EDIT );
 	}
+
+	TaskEntry		 E( "", mConnectionId );
+
+	ObjectManager::instance()->doTask( E );
 }
 
 void ListenerTelnetSocket::setLineMode( Connection::LineMode pLineMode )
