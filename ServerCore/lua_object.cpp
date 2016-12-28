@@ -154,7 +154,7 @@ int lua_object::luaCreate( lua_State *L )
 			{
 				if( ( objParent = argObj( L, 1 ) ) == 0 )
 				{
-					throw( mooException( E_VARNF, QString( "unknown parent object id: %1" ).arg( ParentId ) ) );
+					throw( mooException( E_VARNF, QString( "unknown parent object" ) ) );
 				}
 
 				ParentId  = objParent->id();
@@ -179,7 +179,11 @@ int lua_object::luaCreate( lua_State *L )
 			}
 			else if( lua_isuserdata( L, 2 ) )
 			{
-				objOwner = argObj( L, 2 );
+				if( ( objOwner = argObj( L, 2 ) ) == 0 )
+				{
+					throw( mooException( E_VARNF, QString( "unknown owner object" ) ) );
+				}
+
 				OwnerId  = objOwner->id();
 			}
 			else
@@ -621,7 +625,11 @@ int lua_object::luaSet( lua_State *L )
 			}
 			else if( lua_isuserdata( L, 3 ) )
 			{
-				ObjWhere   = argObj( L, 3 );
+				if( ( ObjWhere = argObj( L, 3 ) ) == 0 )
+				{
+					throw( mooException( E_VARNF, QString( "unknown location object" ) ) );
+				}
+
 				ObjWhereId = ObjWhere->id();
 			}
 			else
@@ -653,7 +661,11 @@ int lua_object::luaSet( lua_State *L )
 			}
 			else if( lua_isuserdata( L, 3 ) )
 			{
-				NewParent   = argObj( L, 3 );
+				if( ( NewParent = argObj( L, 3 ) ) == 0 )
+				{
+					throw( mooException( E_VARNF, QString( "unknown parent object" ) ) );
+				}
+
 				NewParentId = NewParent->id();
 			}
 			else
