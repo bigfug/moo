@@ -5,6 +5,8 @@
 #include <QDataStream>
 #include <QStringList>
 #include <QDateTime>
+#include <QJsonDocument>
+#include "lua_object.h"
 
 #include "objectmanager.h"
 #include "object.h"
@@ -158,6 +160,38 @@ void ODBSQL::save()
 //	}
 }
 
+void stringsToObjects( QVariantMap &PrpDat )
+{
+	for( QVariantMap::iterator it = PrpDat.begin() ; it != PrpDat.end() ; it++ )
+	{
+		if( QMetaType::Type( it.value().type() ) == QMetaType::QString )
+		{
+			QString					ST = it.value().toString();
+
+			if( ST.startsWith( "##" ) )
+			{
+				ST.remove( 0, 1 );
+
+				it.value() = ST;
+			}
+			else if( ST.startsWith( '#' ) )
+			{
+				ST.remove( 0, 1 );
+
+				lua_object::luaHandle	LH;
+
+				LH.O = ST.toInt();
+
+				it.value() = QVariant::fromValue( LH );
+			}
+		}
+		else if( QMetaType::Type( it.value().type() ) == QMetaType::QVariantMap )
+		{
+			stringsToObjects( it.value().toMap() );
+		}
+	}
+}
+
 Object *ODBSQL::object( ObjectId pIndex ) const
 {
 	QSqlQuery	Q;
@@ -284,52 +318,76 @@ Object *ODBSQL::object( ObjectId pIndex ) const
 			PD.mRead   = Q.value( "read" ).toBool();
 			PD.mWrite  = Q.value( "write" ).toBool();
 
-			QMetaType::Type	 PT = QMetaType::Type( QMetaType::type( Q.value( "type" ).toString().toLatin1() ) );
+			QString			 PropType = Q.value( "type" ).toString();
 
-			switch( PT )
+			if( PropType == "object" )
 			{
-				case QMetaType::QString:
-					PD.mValue = Q.value( "value" ).toString();
-					break;
+				lua_object::luaHandle		LH;
 
-				case QMetaType::Bool:
-					PD.mValue = Q.value( "value" ).toBool();
-					break;
+				LH.O = Q.value( "value" ).toInt();
 
-				case QMetaType::Double:
-					PD.mValue = Q.value( "value" ).toDouble();
-					break;
+				PD.mValue = QVariant::fromValue( LH );
+			}
+			else if( PropType == "json" )
+			{
+				QJsonDocument		JSON = QJsonDocument::fromJson( Q.value( "value" ).toByteArray() );
 
-				case QMetaType::Int:
-					PD.mValue = Q.value( "value" ).toInt();
-					break;
+				PD.mValue = JSON.toVariant();
 
-				case QMetaType::Float:
-					PD.mValue = Q.value( "value" ).toFloat();
-					break;
+				if( QMetaType::Type( PD.mValue.type() ) == QMetaType::QVariantMap )
+				{
+					stringsToObjects( PD.mValue.toMap() );
+				}
+			}
+			else
+			{
+				QMetaType::Type	 PT = QMetaType::Type( QMetaType::type( PropType.toLatin1() ) );
 
-				case QMetaType::Long:
-					PD.mValue = Q.value( "value" ).toInt();
-					break;
+				switch( PT )
+				{
+					case QMetaType::QString:
+						PD.mValue = Q.value( "value" ).toString();
+						break;
 
-				case QMetaType::LongLong:
-					PD.mValue = Q.value( "value" ).toLongLong();
-					break;
+					case QMetaType::Bool:
+						PD.mValue = Q.value( "value" ).toBool();
+						break;
 
-				default:
-					{
-						QByteArray		Buffer = QByteArray::fromBase64( Q.value( "value" ).toString().toLatin1() );
+					case QMetaType::Double:
+						PD.mValue = Q.value( "value" ).toDouble();
+						break;
 
-						QBuffer		ReadBuffer( &Buffer );
+					case QMetaType::Int:
+						PD.mValue = Q.value( "value" ).toInt();
+						break;
 
-						ReadBuffer.open( QIODevice::ReadOnly );
+					case QMetaType::Float:
+						PD.mValue = Q.value( "value" ).toFloat();
+						break;
 
-						QDataStream	ReadStream( &ReadBuffer );
+					case QMetaType::Long:
+						PD.mValue = Q.value( "value" ).toInt();
+						break;
 
-						ReadStream >> PD.mValue;
-					}
-					break;
+					case QMetaType::LongLong:
+						PD.mValue = Q.value( "value" ).toLongLong();
+						break;
 
+					default:
+						{
+							QByteArray		Buffer = QByteArray::fromBase64( Q.value( "value" ).toString().toLatin1() );
+
+							QBuffer		ReadBuffer( &Buffer );
+
+							ReadBuffer.open( QIODevice::ReadOnly );
+
+							QDataStream	ReadStream( &ReadBuffer );
+
+							ReadStream >> PD.mValue;
+						}
+						break;
+
+				}
 			}
 
 			D.mProperties.insert( P.name(), P );
@@ -377,6 +435,34 @@ void bindVerb( const VerbData &D, QSqlQuery &Q )
 	Q.bindValue( ":aliases", D.mAliases );
 }
 
+void objectsToStrings( QVariantMap &PrpDat )
+{
+	for( QVariantMap::iterator it = PrpDat.begin() ; it != PrpDat.end() ; it++ )
+	{
+		if( it.value().canConvert<lua_object::luaHandle>() )
+		{
+			lua_object::luaHandle	LH = it.value().value<lua_object::luaHandle>();
+
+			it.value() = QString( "#%1" ).arg( LH.O );
+		}
+		else if( QMetaType::Type( it.value().type() ) == QMetaType::QString )
+		{
+			QString					ST = it.value().toString();
+
+			if( ST.startsWith( '#' ) )
+			{
+				ST.prepend( '#' );
+
+				it.value() = ST;
+			}
+		}
+		else if( QMetaType::Type( it.value().type() ) == QMetaType::QVariantMap )
+		{
+			objectsToStrings( it.value().toMap() );
+		}
+	}
+}
+
 void bindProperty( const PropertyData &D, QSqlQuery &Q )
 {
 	Q.bindValue( ":name", D.mName );
@@ -386,41 +472,74 @@ void bindProperty( const PropertyData &D, QSqlQuery &Q )
 	Q.bindValue( ":read", D.mRead );
 	Q.bindValue( ":write", D.mWrite );
 	Q.bindValue( ":change", D.mChange );
-	Q.bindValue( ":type", D.mValue.typeName() );
 
-	switch( QMetaType::Type( D.mValue.type() ) )
+	if( D.mValue.canConvert<lua_object::luaHandle>() )
 	{
-		case QMetaType::QString:
-		case QMetaType::Char:
-			Q.bindValue( ":value", D.mValue );
-			break;
+		lua_object::luaHandle	LH = D.mValue.value<lua_object::luaHandle>();
 
-		case QMetaType::Bool:
-		case QMetaType::Double:
-		case QMetaType::Int:
-		case QMetaType::Float:
-		case QMetaType::Long:
-		case QMetaType::LongLong:
-			Q.bindValue( ":value", D.mValue.toString() );
-			break;
+		Q.bindValue( ":type", "object" );
+		Q.bindValue( ":value", LH.O );
+	}
+	else
+	{
+		switch( QMetaType::Type( D.mValue.type() ) )
+		{
+			case QMetaType::QString:
+			case QMetaType::Char:
+			case QMetaType::UChar:
+				Q.bindValue( ":type", D.mValue.typeName() );
+				Q.bindValue( ":value", D.mValue );
+				break;
 
-		default:
-			{
-				QByteArray		Buffer;
+			case QMetaType::Bool:
+			case QMetaType::Double:
+			case QMetaType::Int:
+			case QMetaType::Float:
+			case QMetaType::Long:
+			case QMetaType::LongLong:
+			case QMetaType::UInt:
+			case QMetaType::ULong:
+			case QMetaType::ULongLong:
+			case QMetaType::UShort:
+			case QMetaType::Short:
+				Q.bindValue( ":type", D.mValue.typeName() );
+				Q.bindValue( ":value", D.mValue.toString() );
+				break;
 
+			default:
+#if 0
 				{
-					QBuffer		WriteBuffer( &Buffer );
+					QByteArray		Buffer;
 
-					WriteBuffer.open( QIODevice::WriteOnly );
+					{
+						QBuffer		WriteBuffer( &Buffer );
 
-					QDataStream	WriteStream( &WriteBuffer );
+						WriteBuffer.open( QIODevice::WriteOnly );
 
-					WriteStream << D.mValue;
+						QDataStream	WriteStream( &WriteBuffer );
+
+						WriteStream << D.mValue;
+					}
+
+					Q.bindValue( ":value", Buffer.toBase64() );
 				}
+#else
+				{
+					Q.bindValue( ":type", "json" );
 
-				Q.bindValue( ":value", Buffer.toBase64() );
-			}
-			break;
+					QVariantMap		PrpDat = D.mValue.toMap();
+
+					objectsToStrings( PrpDat );
+
+					QJsonDocument	Json = QJsonDocument::fromVariant( PrpDat );
+
+					Q.bindValue( ":value", Json.toJson( QJsonDocument::Compact ) );
+
+					qDebug() << Json.toJson( QJsonDocument::Compact );
+				}
+#endif
+				break;
+		}
 	}
 }
 
