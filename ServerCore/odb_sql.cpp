@@ -187,7 +187,11 @@ void stringsToObjects( QVariantMap &PrpDat )
 		}
 		else if( QMetaType::Type( it.value().type() ) == QMetaType::QVariantMap )
 		{
-			stringsToObjects( it.value().toMap() );
+			QVariantMap		VM = it.value().toMap();
+
+			stringsToObjects( VM );
+
+			it.value() = VM;
 		}
 	}
 }
@@ -336,7 +340,11 @@ Object *ODBSQL::object( ObjectId pIndex ) const
 
 				if( QMetaType::Type( PD.mValue.type() ) == QMetaType::QVariantMap )
 				{
-					stringsToObjects( PD.mValue.toMap() );
+					QVariantMap		VM = PD.mValue.toMap();
+
+					stringsToObjects( VM );
+
+					PD.mValue = VM;
 				}
 			}
 			else
@@ -458,7 +466,11 @@ void objectsToStrings( QVariantMap &PrpDat )
 		}
 		else if( QMetaType::Type( it.value().type() ) == QMetaType::QVariantMap )
 		{
-			objectsToStrings( it.value().toMap() );
+			QVariantMap		VM = it.value().toMap();
+
+			objectsToStrings( VM );
+
+			it.value() = VM;
 		}
 	}
 }
