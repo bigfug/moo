@@ -33,10 +33,7 @@ public:
 private:
 	void sendData( const QByteArray &pData );
 	void processInput( const QByteArray &pData );
-//	void processTelnetSequence( const QByteArray &pData );
 	void processAnsiSequence( const QByteArray &pData );
-
-	static void appendTelnetSequence( QByteArray &pA, const quint8 p1, const quint8 p2 );
 
 	static void telnetEventHandlerStatic( telnet_t *telnet, telnet_event_t *event, void *user_data );
 
@@ -68,6 +65,7 @@ private:
 	Connection::LineMode		 mLineMode;
 	bool						 mTelnetOptionsSent;
 	bool						 mTelnetOptionsReceived;
+	bool						 mLocalEcho;
 
 	bool						 mDataReceived;
 	bool						 mWebSocketActive;

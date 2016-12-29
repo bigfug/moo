@@ -7,7 +7,7 @@
 #include "listenerserver.h"
 #include "objectmanager.h"
 
-#define DEBUG_LISTENER
+//#define DEBUG_LISTENER
 
 ListenerTelnetSocket::ListenerTelnetSocket( QObject *pParent, QTcpSocket *pSocket ) :
 	ListenerSocket( pParent ), mSocket( pSocket ), mTelnet( nullptr ), mLineMode( Connection::EDIT )
@@ -19,6 +19,8 @@ ListenerTelnetSocket::ListenerTelnetSocket( QObject *pParent, QTcpSocket *pSocke
 	mLastChar  = 0;
 	mAnsiEsc = 0;
 	mAnsiPos = 0;
+
+	mLocalEcho = false;
 
 	qDebug() << "Connection established from" << mSocket->peerAddress();
 
@@ -46,7 +48,7 @@ ListenerTelnetSocket::ListenerTelnetSocket( QObject *pParent, QTcpSocket *pSocke
 
 bool ListenerTelnetSocket::echo() const
 {
-	return( false ); //option( TELNET_ECHO ) );
+	return( mLocalEcho );
 }
 
 void ListenerTelnetSocket::sendData( const QByteArray &pData )
@@ -124,13 +126,15 @@ void ListenerTelnetSocket::processInput( const QByteArray &pData )
 
 					Reply << QStringLiteral( "\r\n" );
 
+#if defined( DEBUG_LISTENER )
 					qDebug() << Reply.join( "\r\n" );
+#endif
 
 					mSocket->write( Reply.join( "\r\n" ).toLatin1() );
 
 					mWebSocketHeader = false;
 					mWebSocketActive = true;
-					//mLocalEcho = true;
+					mLocalEcho = true;
 
 //					if( pData.size() > i + 1 )
 //					{
@@ -142,12 +146,14 @@ void ListenerTelnetSocket::processInput( const QByteArray &pData )
 //						}
 //					}
 
-//					mTelnet = telnet_init( mOptions.constData(), &ListenerTelnetSocket::telnetEventHandlerStatic, 0, this );
-
 					telnet_negotiate( mTelnet, TELNET_DO, TELNET_TELOPT_NAWS );
 					telnet_negotiate( mTelnet, TELNET_DO, TELNET_TELOPT_TTYPE );
+
+					telnet_negotiate( mTelnet, TELNET_DO, TELNET_TELOPT_ECHO );
 					telnet_negotiate( mTelnet, TELNET_WONT, TELNET_TELOPT_ECHO );
-					telnet_negotiate( mTelnet, TELNET_WONT, TELNET_TELOPT_SGA );
+
+					telnet_negotiate( mTelnet, TELNET_DONT, TELNET_TELOPT_SGA );
+//					telnet_negotiate( mTelnet, TELNET_DONT, TELNET_TELOPT_SGA );
 
 //					setLineMode( Connection::EDIT );
 
@@ -215,7 +221,7 @@ void ListenerTelnetSocket::processInput( const QByteArray &pData )
 					if( mBuffer.startsWith( "GET /" ) && mBuffer.endsWith( " HTTP/1.1" ) )
 					{
 						mWebSocketHeader = true;
-						//mLocalEcho = false;
+						mLocalEcho = false;
 						mWebSocketProtocol = "chat";
 					}
 					else
@@ -267,8 +273,10 @@ void ListenerTelnetSocket::processInput( const QByteArray &pData )
 				mAnsiEsc = 0;
 			}
 		}
-		else if( ch < 0x20 && ch != 0x09 )
+		else
 		{
+			QByteArray	Tmp;
+
 			switch( ch )
 			{
 				case 0x08:	// BACKSPACE
@@ -278,13 +286,9 @@ void ListenerTelnetSocket::processInput( const QByteArray &pData )
 
 						if( echo() )
 						{
-							QByteArray	Tmp;
-
 							Tmp.append( "\x1b[D" );
 							Tmp.append( mBuffer.mid( mAnsiPos ) );
 							Tmp.append( QString( " \x1b[%1D" ).arg( mBuffer.size() + 1 - mAnsiPos ) );
-
-							sendData( Tmp );
 						}
 					}
 					break;
@@ -302,42 +306,41 @@ void ListenerTelnetSocket::processInput( const QByteArray &pData )
 					mAnsiEsc++;
 					break;
 
+				case 0x7f:	// DELETE
+					if( mAnsiPos < mBuffer.size() )
+					{
+						mBuffer.remove( mAnsiPos, 1 );
+
+						if( echo() )
+						{
+							Tmp.append( mBuffer.mid( mAnsiPos ) );
+							Tmp.append( QString( " \x1b[%1D" ).arg( mBuffer.size() + 1 - mAnsiPos ) );
+						}
+					}
+					break;
+
+				default:
+					if( ch >= 0x20 && ch < 0x7f )
+					{
+						mBuffer.insert( mAnsiPos++, ch );
+
+						if( echo() )
+						{
+							if( mAnsiPos < mBuffer.size() )
+							{
+								Tmp.append( mBuffer.mid( mAnsiPos - 1 ).append( QString( "\x1b[%1D" ).arg( mBuffer.size() - mAnsiPos ) ) );
+							}
+							else
+							{
+								Tmp.append( ch );
+							}
+						}
+					}
+					break;
 			}
-		}
-		else if( ch == 0x7f )	// DELETE
-		{
-			if( mAnsiPos < mBuffer.size() )
+
+			if( !Tmp.isEmpty() )
 			{
-				mBuffer.remove( mAnsiPos, 1 );
-
-				if( echo() )
-				{
-					QByteArray	Tmp;
-
-					Tmp.append( mBuffer.mid( mAnsiPos ) );
-					Tmp.append( QString( " \x1b[%1D" ).arg( mBuffer.size() + 1 - mAnsiPos ) );
-
-					sendData( Tmp );
-				}
-			}
-		}
-		else
-		{
-			mBuffer.insert( mAnsiPos++, ch );
-
-			if( echo() )
-			{
-				QByteArray	Tmp;
-
-				if( mAnsiPos < mBuffer.size() )
-				{
-					Tmp.append( mBuffer.mid( mAnsiPos - 1 ).append( QString( "\x1b[%1D" ).arg( mBuffer.size() - mAnsiPos ) ) );
-				}
-				else
-				{
-					Tmp.append( ch );
-				}
-
 				sendData( Tmp );
 			}
 		}
@@ -347,10 +350,10 @@ void ListenerTelnetSocket::processInput( const QByteArray &pData )
 
 	// echo the data back to the client
 
-	if( echo() )
-	{
-		sendData( pData );
-	}
+//	if( echo() )
+//	{
+//		sendData( pData );
+//	}
 }
 
 void ListenerTelnetSocket::inputTimeout( void )
@@ -590,13 +593,6 @@ void ListenerTelnetSocket::processAnsiSequence( const QByteArray &pData )
 	}
 }
 
-void ListenerTelnetSocket::appendTelnetSequence( QByteArray &pA, const quint8 p1, const quint8 p2)
-{
-	pA.append( TELNET_IAC );
-	pA.append( p1 );
-	pA.append( p2 );
-}
-
 void ListenerTelnetSocket::telnetEventHandlerStatic(telnet_t *telnet, telnet_event_t *event, void *user_data)
 {
 	Q_UNUSED( telnet )
@@ -653,10 +649,16 @@ void ListenerTelnetSocket::telnetEventHandler(telnet_event_t *event)
 
 		case TELNET_EV_WILL:
 			{
+#if defined( DEBUG_LISTENER )
 				qDebug() << "WILL" << event->neg.telopt;
+#endif
 
 				switch( event->neg.telopt )
 				{
+					case TELNET_TELOPT_ECHO:
+						mLocalEcho = false;
+						break;
+
 					case TELNET_TELOPT_TTYPE:
 						telnet_subnegotiation( mTelnet, TELNET_TELOPT_TTYPE, "\1", 1 );
 						break;
@@ -665,15 +667,30 @@ void ListenerTelnetSocket::telnetEventHandler(telnet_event_t *event)
 			break;
 
 		case TELNET_EV_WONT:
-			qDebug() << "WONT" << event->neg.telopt;
+			{
+#if defined( DEBUG_LISTENER )
+				qDebug() << "WONT" << event->neg.telopt;
+#endif
+
+				switch( event->neg.telopt )
+				{
+					case TELNET_TELOPT_ECHO:
+						mLocalEcho = true;
+						break;
+				}
+			}
 			break;
 
 		case TELNET_EV_DO:
+#if defined( DEBUG_LISTENER )
 			qDebug() << "DO" << event->neg.telopt;
+#endif
 			break;
 
 		case TELNET_EV_DONT:
+#if defined( DEBUG_LISTENER )
 			qDebug() << "DONT" << event->neg.telopt;
+#endif
 			break;
 
 		case TELNET_EV_SUBNEGOTIATION:
@@ -689,7 +706,9 @@ void ListenerTelnetSocket::telnetEventHandler(telnet_event_t *event)
 							quint16	w = ( event->sub.buffer[ 0 ] << 8 ) | event->sub.buffer[ 1 ];
 							quint16	h = ( event->sub.buffer[ 2 ] << 8 ) | event->sub.buffer[ 3 ];
 
+#if defined( DEBUG_LISTENER )
 							qDebug() << "TERMINAL_NAWS" << w << h;
+#endif
 
 							Connection		*CON = ConnectionManager::instance()->connection( mConnectionId );
 
@@ -701,14 +720,18 @@ void ListenerTelnetSocket::telnetEventHandler(telnet_event_t *event)
 						break;
 
 					default:
+#if defined( DEBUG_LISTENER )
 						qDebug() << "Unhandled Telnet subnegotiation:" << event->sub.telopt;
+#endif
 						break;
 				}
 			}
 			break;
 
 		case TELNET_EV_TTYPE:
+#if defined( DEBUG_LISTENER )
 			qDebug() << "Telnet Terminal Type:" << event->ttype.cmd << event->ttype.name;
+#endif
 			break;
 
 		default:

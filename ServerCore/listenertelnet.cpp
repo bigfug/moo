@@ -10,9 +10,9 @@ ListenerTelnet::ListenerTelnet( ObjectId pObjectId, quint16 pPort, QObject *pPar
 	mServer.listen( QHostAddress::Any, pPort );
 
 	static const telnet_telopt_t my_telopts[] = {
-		{ TELNET_TELOPT_ECHO,		TELNET_WONT, TELNET_DO },
+		{ TELNET_TELOPT_ECHO,		TELNET_WILL, TELNET_DO },
 		{ TELNET_TELOPT_TTYPE,		TELNET_WILL, TELNET_DO },
-		{ TELNET_TELOPT_SGA,		TELNET_WONT, TELNET_DONT },
+		{ TELNET_TELOPT_SGA,		TELNET_WILL, TELNET_DO },
 //		{ TELNET_TELOPT_COMPRESS2, TELNET_WONT, TELNET_DO   },
 //		{ TELNET_TELOPT_ZMP,       TELNET_WONT, TELNET_DO   },
 //		{ TELNET_TELOPT_MSSP,      TELNET_WONT, TELNET_DO   },
