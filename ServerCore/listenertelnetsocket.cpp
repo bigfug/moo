@@ -7,6 +7,8 @@
 #include "listenerserver.h"
 #include "objectmanager.h"
 
+#define DEBUG_LISTENER
+
 ListenerTelnetSocket::ListenerTelnetSocket( QObject *pParent, QTcpSocket *pSocket ) :
 	ListenerSocket( pParent ), mSocket( pSocket ), mTelnet( nullptr ), mLineMode( Connection::EDIT )
 {
@@ -49,7 +51,7 @@ bool ListenerTelnetSocket::echo() const
 
 void ListenerTelnetSocket::sendData( const QByteArray &pData )
 {
-#if defined( DEBUG_LISTERNER )
+#if defined( DEBUG_LISTENER )
 	qDebug() << "ListenerTelnetSocket::sendData" << pData;
 #endif
 
@@ -58,7 +60,7 @@ void ListenerTelnetSocket::sendData( const QByteArray &pData )
 
 void ListenerTelnetSocket::processInput( const QByteArray &pData )
 {
-#if defined( DEBUG_LISTERNER )
+#if defined( DEBUG_LISTENER )
 	qDebug() << "processInput" << pData;
 #endif
 
@@ -144,10 +146,14 @@ void ListenerTelnetSocket::processInput( const QByteArray &pData )
 
 					telnet_negotiate( mTelnet, TELNET_DO, TELNET_TELOPT_NAWS );
 					telnet_negotiate( mTelnet, TELNET_DO, TELNET_TELOPT_TTYPE );
-					telnet_negotiate( mTelnet, TELNET_DO, TELNET_TELOPT_ECHO );
-					telnet_negotiate( mTelnet, TELNET_DO, TELNET_TELOPT_SGA );
+					telnet_negotiate( mTelnet, TELNET_WONT, TELNET_TELOPT_ECHO );
+					telnet_negotiate( mTelnet, TELNET_WONT, TELNET_TELOPT_SGA );
 
-					setLineMode( Connection::EDIT );
+//					setLineMode( Connection::EDIT );
+
+//					TaskEntry		 E( "", mConnectionId );
+
+//					ObjectManager::instance()->doTask( E );
 
 					return;
 				}
@@ -600,101 +606,115 @@ void ListenerTelnetSocket::telnetEventHandlerStatic(telnet_t *telnet, telnet_eve
 
 void ListenerTelnetSocket::telnetEventHandler(telnet_event_t *event)
 {
-	if( event->type == TELNET_EV_DATA )
+	switch( event->type )
 	{
-		//qDebug() << "DATA" << QByteArray::fromRawData( event->data.buffer, event->data.size );
+		case TELNET_EV_DATA:
+			processInput( QByteArray::fromRawData( event->data.buffer, event->data.size ) );
+			break;
 
-		processInput( QByteArray::fromRawData( event->data.buffer, event->data.size ) );
-	}
-	else if( event->type == TELNET_EV_SEND )
-	{
-		//qDebug() << "SEND" << QByteArray::fromRawData( event->data.buffer, event->data.size );
-
-		if( mWebSocketActive )
-		{
-			QByteArray     Pkt;
-			int            S = event->data.size;
-
-			if( mWebSocketProtocol == "binary" )
+		case TELNET_EV_SEND:
 			{
-				Pkt.append( quint8( 0x80 + 0x02 ) );    // FIN + BINARY
-			}
-			else
-			{
-				Pkt.append( quint8( 0x80 + 0x01 ) );    // FIN + TEXT
-			}
-
-			if( S <= 125 )
-			{
-				Pkt.append( quint8( S ) );
-			}
-			else if( S <= 0xffff )
-			{
-				Pkt.append( quint8( 126 ) );
-				Pkt.append( quint8( ( S >> 8 ) & 0xff ) );
-				Pkt.append( quint8( ( S >> 0 ) & 0xff ) );
-			}
-
-			Pkt.append( QByteArray::fromRawData( event->data.buffer, event->data.size ) );
-
-			mSocket->write( Pkt );
-		}
-		else
-		{
-			mSocket->write( event->data.buffer, event->data.size );
-		}
-
-	}
-	else if( event->type == TELNET_EV_WILL )
-	{
-		qDebug() << "WILL" << event->neg.telopt;
-
-		switch( event->neg.telopt )
-		{
-			case TELNET_TELOPT_TTYPE:
-				telnet_subnegotiation( mTelnet, TELNET_TELOPT_TTYPE, "\1", 1 );
-				break;
-		}
-	}
-	else if( event->type == TELNET_EV_WONT )
-	{
-		qDebug() << "WONT" << event->neg.telopt;
-	}
-	else if( event->type == TELNET_EV_DO )
-	{
-		qDebug() << "DO" << event->neg.telopt;
-	}
-	else if( event->type == TELNET_EV_DONT )
-	{
-		qDebug() << "DONT" << event->neg.telopt;
-	}
-	else if( event->type == TELNET_EV_SUBNEGOTIATION )
-	{
-		switch( event->sub.telopt )
-		{
-			case TELNET_TELOPT_TTYPE:
-				//qDebug() << "TTYPE" << QByteArray::fromRawData( event->sub.buffer, event->sub.size );
-				break;
-
-			case TELNET_TELOPT_NAWS:
+				if( mWebSocketActive )
 				{
-					quint16	w = ( event->sub.buffer[ 0 ] << 8 ) | event->sub.buffer[ 1 ];
-					quint16	h = ( event->sub.buffer[ 2 ] << 8 ) | event->sub.buffer[ 3 ];
+					QByteArray     Pkt;
+					int            S = event->data.size;
 
-					qDebug() << "TERMINAL_NAWS" << w << h;
-
-					Connection		*CON = ConnectionManager::instance()->connection( mConnectionId );
-
-					if( CON )
+					if( mWebSocketProtocol == "binary" )
 					{
-						CON->setTerminalSize( QSize( w, h ) );
+						Pkt.append( quint8( 0x80 + 0x02 ) );    // FIN + BINARY
 					}
+					else
+					{
+						Pkt.append( quint8( 0x80 + 0x01 ) );    // FIN + TEXT
+					}
+
+					if( S <= 125 )
+					{
+						Pkt.append( quint8( S ) );
+					}
+					else if( S <= 0xffff )
+					{
+						Pkt.append( quint8( 126 ) );
+						Pkt.append( quint8( ( S >> 8 ) & 0xff ) );
+						Pkt.append( quint8( ( S >> 0 ) & 0xff ) );
+					}
+
+					Pkt.append( QByteArray::fromRawData( event->data.buffer, event->data.size ) );
+
+					mSocket->write( Pkt );
 				}
-				break;
-		}
-	}
-	else
-	{
-		//qDebug() << event->type;
+				else
+				{
+					mSocket->write( event->data.buffer, event->data.size );
+				}
+
+			}
+			break;
+
+		case TELNET_EV_WILL:
+			{
+				qDebug() << "WILL" << event->neg.telopt;
+
+				switch( event->neg.telopt )
+				{
+					case TELNET_TELOPT_TTYPE:
+						telnet_subnegotiation( mTelnet, TELNET_TELOPT_TTYPE, "\1", 1 );
+						break;
+				}
+			}
+			break;
+
+		case TELNET_EV_WONT:
+			qDebug() << "WONT" << event->neg.telopt;
+			break;
+
+		case TELNET_EV_DO:
+			qDebug() << "DO" << event->neg.telopt;
+			break;
+
+		case TELNET_EV_DONT:
+			qDebug() << "DONT" << event->neg.telopt;
+			break;
+
+		case TELNET_EV_SUBNEGOTIATION:
+			{
+				switch( event->sub.telopt )
+				{
+					case TELNET_TELOPT_TTYPE:
+						//qDebug() << "TTYPE" << QByteArray::fromRawData( event->sub.buffer, event->sub.size );
+						break;
+
+					case TELNET_TELOPT_NAWS:
+						{
+							quint16	w = ( event->sub.buffer[ 0 ] << 8 ) | event->sub.buffer[ 1 ];
+							quint16	h = ( event->sub.buffer[ 2 ] << 8 ) | event->sub.buffer[ 3 ];
+
+							qDebug() << "TERMINAL_NAWS" << w << h;
+
+							Connection		*CON = ConnectionManager::instance()->connection( mConnectionId );
+
+							if( CON )
+							{
+								CON->setTerminalSize( QSize( w, h ) );
+							}
+						}
+						break;
+
+					default:
+						qDebug() << "Unhandled Telnet subnegotiation:" << event->sub.telopt;
+						break;
+				}
+			}
+			break;
+
+		case TELNET_EV_TTYPE:
+			qDebug() << "Telnet Terminal Type:" << event->ttype.cmd << event->ttype.name;
+			break;
+
+		default:
+#if defined( DEBUG_LISTENER )
+			qDebug() << "Unhandled Telnet event type:" << event->type;
+#endif
+			break;
 	}
 }
