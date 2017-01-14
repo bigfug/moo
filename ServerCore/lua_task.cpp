@@ -732,6 +732,8 @@ int lua_task::execute( void )
 			return( 0 );
 		}
 
+		T.setObject( FndVrb->object() );
+
 		/*
 		player    an object, the player who typed the command
 		this      an object, the object on which this verb was found
