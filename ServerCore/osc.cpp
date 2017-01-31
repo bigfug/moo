@@ -696,34 +696,53 @@ void OSC::processInput( qint64 pTimeStamp )
 
 		for( auto it = OSCData.begin() ; it != OSCData.end() ; it++ )
 		{
-			QStringList		Path = it.key().split( '/', QString::SkipEmptyParts );
+			QStringList		 Path = it.key().split( '/', QString::SkipEmptyParts );
 
-			if( Path.size() != 2 )
+			Object			*O = ObjectManager::o( 0 );
+
+			while( O && !Path.isEmpty() )
 			{
-				continue;
-			}
-
-			ObjectId		 ObjId = Path.at( 0 ).toInt();
-			Object			*Obj   = ObjectManager::o( ObjId );
-
-			if( Obj )
-			{
-				if( Property *P = Obj->prop( Path.at( 1 ) ) )
+				if( Path.size() == 1 )
 				{
-					P->setValue( it.value() );
+					// TODO: Security
+
+					if( Property *P = O->prop( Path.at( 1 ) ) )
+					{
+						P->setValue( it.value() );
+					}
+					else
+					{
+						Task		T;
+
+						T.setObject( *O );
+						T.setTimeStamp( pTimeStamp );
+						T.setArgStr( it.value().toString() );
+
+						lua_task		L( -1, T );
+
+						L.execute( pTimeStamp );
+					}
 				}
 				else
 				{
-					Task		T;
+					Object	*C = nullptr;
 
-					T.setObject( ObjId );
-					T.setTimeStamp( pTimeStamp );
-					T.setArgStr( it.value().toString() );
+					for( ObjectId OID : O->children() )
+					{
+						Object	*T = ObjectManager::o( OID );
 
-					lua_task		L( -1, T );
+						if( T && T->name() == Path.first() )
+						{
+							C = T;
 
-					L.execute( pTimeStamp );
+							break;
+						}
+					}
+
+					O = C;
 				}
+
+			   Path.removeFirst();
 			}
 		}
 	}
