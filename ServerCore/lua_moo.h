@@ -1,6 +1,8 @@
 #ifndef LUA_MOO_H
 #define LUA_MOO_H
 
+#include <QSettings>
+
 #include <cstdio>
 #include <iostream>
 
@@ -9,6 +11,8 @@
 
 #include "mooglobal.h"
 #include "lua_utilities.h"
+
+#define MOO_SETTINGS	"moo.ini", QSettings::IniFormat
 
 class lua_moo
 {
@@ -40,6 +44,7 @@ private:
 	static int luaHash( lua_State *L );
 	static int luaDebug( lua_State *L );
 	static int luaFindPlayer( lua_State *L );
+	static int luaEmail( lua_State *L );
 
 	static int luaTimestamp( lua_State *L );
 

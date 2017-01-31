@@ -5,7 +5,8 @@ SUBDIRS += \
 	ServerCoreTests \
 	Server \
 	Editor \
-	Daemon
+	Daemon \
+	libs
 
 ServerCoreTests.depends += ServerCore
 Server.depends += ServerCore

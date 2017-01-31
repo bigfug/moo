@@ -17,6 +17,7 @@
 #include "lua_osc.h"
 #include "lua_json.h"
 #include "lua_serialport.h"
+#include "lua_smtp.h"
 
 #include "connectionmanager.h"
 
@@ -118,6 +119,7 @@ void lua_moo::initialiseAll()
 	lua_osc::initialise();
 	lua_json::initialise();
 	lua_serialport::initialise();
+	lua_smtp::initialise();
 }
 
 void lua_moo::luaRegisterAllStates(lua_State *L)
@@ -149,6 +151,9 @@ void lua_moo::luaRegisterAllStates(lua_State *L)
 	Q_ASSERT( lua_gettop( L ) == 0 );
 
 	lua_serialport::luaRegisterState( L );
+	Q_ASSERT( lua_gettop( L ) == 0 );
+
+	lua_smtp::luaRegisterState( L );
 	Q_ASSERT( lua_gettop( L ) == 0 );
 }
 

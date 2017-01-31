@@ -53,7 +53,8 @@ SOURCES += \
     listenerwebsocket.cpp \
     listenerserver.cpp \
     listenersocket.cpp \
-    listenerwebsocketsocket.cpp
+	listenerwebsocketsocket.cpp \
+    lua_smtp.cpp
 
 HEADERS += \
 	verb.h \
@@ -96,16 +97,8 @@ HEADERS += \
     listenerwebsocket.h \
     listenerserver.h \
     listenersocket.h \
-    listenerwebsocketsocket.h
-
-unix:!symbian {
-	maemo5 {
-		target.path = /opt/usr/lib
-	} else {
-		target.path = /usr/lib
-	}
-	INSTALLS += target
-}
+	listenerwebsocketsocket.h \
+    lua_smtp.h
 
 macx {
 	INCLUDEPATH += /usr/local/opt/lua51/include/lua-5.1
@@ -149,3 +142,12 @@ SOURCES += ../libtelnet/libtelnet.c
 HEADERS += ../libtelnet/libtelnet.h
 INCLUDEPATH += ../libtelnet
 
+#----------------------------------------------------------------------------
+# SMTPEmail
+
+win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../libs/SMTPEmail/release/ -lSMTPEmail
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../libs/SMTPEmail/debug/ -lSMTPEmail
+else:unix: LIBS += -L$$OUT_PWD/../libs/SMTPEmail/ -lSMTPEmail
+
+INCLUDEPATH += $$PWD/../libs/SMTPEmail/src
+DEPENDPATH += $$PWD/../libs/SMTPEmail

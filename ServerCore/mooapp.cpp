@@ -1,6 +1,7 @@
 #include <QDateTime>
 #include <QFileInfo>
 #include <QtGlobal>
+#include <QSettings>
 
 #include "mooapp.h"
 #include "object.h"
@@ -27,6 +28,8 @@
 mooApp::mooApp( const QString &pDataFileName, QObject *pParent )
 	: QObject( pParent ), mTimerId( 0 ), mDataFileName( pDataFileName )
 {
+	QSettings::setDefaultFormat( QSettings::IniFormat );
+
 	connect( this, SIGNAL(destroyed(QObject*)), this, SLOT(cleanup(QObject*)));
 
 	lua_moo::initialiseAll();

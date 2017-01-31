@@ -59,7 +59,7 @@ int main( int argc, char *argv[] )
 
 	a.setApplicationName( "ArtMOO" );
 	a.setOrganizationName( "Alex May" );
-	a.setOrganizationDomain( "http://www.bigfug.com" );
+	a.setOrganizationDomain( "bigfug.com" );
 	a.setApplicationVersion( "0.1" );
 
 	MainWindow		w;
