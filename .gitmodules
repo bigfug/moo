@@ -1,3 +1,6 @@
 [submodule "libtelnet"]
 	path = libtelnet
 	url = https://github.com/seanmiddleditch/libtelnet.git
+[submodule "libs/SmtpClient"]
+	path = libs/SmtpClient
+	url = https://github.com/bigfug/SmtpClient.git
