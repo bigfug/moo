@@ -54,7 +54,8 @@ SOURCES += \
     listenerserver.cpp \
     listenersocket.cpp \
 	listenerwebsocketsocket.cpp \
-    lua_smtp.cpp
+    lua_smtp.cpp \
+    inputsinkread.cpp
 
 HEADERS += \
 	verb.h \
@@ -98,7 +99,8 @@ HEADERS += \
     listenerserver.h \
     listenersocket.h \
 	listenerwebsocketsocket.h \
-    lua_smtp.h
+    lua_smtp.h \
+    inputsinkread.h
 
 macx {
 	INCLUDEPATH += /usr/local/opt/lua51/include/lua-5.1

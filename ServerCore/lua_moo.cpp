@@ -19,6 +19,8 @@
 #include "lua_serialport.h"
 #include "lua_smtp.h"
 
+#include "inputsinkread.h"
+
 #include "connectionmanager.h"
 
 LuaMap		lua_moo::mLuaFun;
@@ -49,6 +51,7 @@ const luaL_Reg lua_moo::mLuaStatic[] =
 	{ "hash", lua_moo::luaHash },
 	{ "findPlayer", lua_moo::luaFindPlayer },
 	{ "get", lua_moo::luaNetworkGet },
+	{ "read", lua_moo::luaRead },
 	{ 0, 0 }
 };
 
@@ -740,4 +743,36 @@ int lua_moo::luaPanic( lua_State *L )
 	qDebug() << "**** LUA PANIC ****";
 
 	return( 0 );
+}
+
+int lua_moo::luaRead( lua_State *L )
+{
+	bool				 LuaErr = false;
+
+	try
+	{
+		lua_task			*Command = lua_task::luaGetTask( L );
+		Connection			*C = ConnectionManager::instance()->connection( Command->connectionid() );
+		Object				*O = lua_object::argObj( L, 1 );
+		const char			*V = luaL_checkstring( L, 2 );
+
+		InputSinkRead	*IS = new InputSinkRead( C, O->id(), V );
+
+		if( IS )
+		{
+			C->pushInputSink( IS );
+		}
+	}
+	catch( mooException e )
+	{
+		e.lua_pushexception( L );
+
+		LuaErr = true;
+	}
+	catch( ... )
+	{
+
+	}
+
+	return( LuaErr ? lua_error( L ) : 0 );
 }
