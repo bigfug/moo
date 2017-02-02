@@ -22,14 +22,14 @@ bool Connection::processInput( const QString &pData )
 
 	InputSink		*IS = mInputSinkList.first();
 
-	if( IS == 0 )
+	if( !IS )
 	{
 		return( false );
 	}
 
 	if( !IS->input( pData ) )
 	{
-		mInputSinkList.removeFirst();
+		mInputSinkList.removeAll( IS );
 
 		delete( IS );
 	}
