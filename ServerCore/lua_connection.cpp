@@ -21,6 +21,7 @@ const luaL_Reg lua_connection::mLuaStatic[] =
 const luaL_Reg lua_connection::mLuaInstance[] =
 {
 	{ "__index", lua_connection::luaGet },
+	{ "__newindex", lua_connection::luaSet },
 	{ 0, 0 }
 };
 
@@ -222,6 +223,68 @@ int lua_connection::luaGet( lua_State *L )
 			lua_object::lua_pushobjectid( L, C->player() );
 
 			return( 1 );
+		}
+
+		// Nothing found
+
+		throw( mooException( E_PROPNF, QString( "property '%1' is not defined" ).arg( QString( s ) ) ) );
+	}
+	catch( mooException e )
+	{
+		e.lua_pushexception( L );
+
+		LuaErr = true;
+	}
+	catch( ... )
+	{
+
+	}
+
+	return( LuaErr ? lua_error( L ) : 0 );
+}
+
+int lua_connection::luaSet(lua_State *L)
+{
+	bool		LuaErr = false;
+
+	try
+	{
+		lua_task			*Command = lua_task::luaGetTask( L );
+		const Task			&T = Command->task();
+		luaConnection		*LC = arg( L );
+		Connection			*C = LC->mConnection;
+		const char			*s = luaL_checkstring( L, 2 );
+
+		luaL_checkany( L, 3 );
+
+		if( !C )
+		{
+			throw( mooException( E_TYPE, "invalid connection" ) );
+		}
+
+		if( strcmp( s, "player" ) == 0 )
+		{
+			Object				*PRG = ObjectManager::o( T.programmer() );
+
+			if( !PRG || !PRG->wizard() )
+			{
+				throw mooException( E_PERM, "only wizards can do that" );
+			}
+
+			Object	*Player = lua_object::argObj( L, 3 );
+
+			if( !Player || !Player->player() )
+			{
+				throw mooException( E_INVARG, "object is not valid, or not a player" );
+			}
+
+			ConnectionManager			&CM = *ConnectionManager::instance();
+
+			CM.logon( C->id(), Player->id() );
+
+			Player->setConnection( C->id() );
+
+			return( 0 );
 		}
 
 		// Nothing found

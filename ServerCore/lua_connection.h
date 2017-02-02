@@ -30,6 +30,7 @@ private:
 	static int luaCon( lua_State *L );
 
 	static int luaGet( lua_State *L );
+	static int luaSet( lua_State *L );
 
 	static luaConnection *arg( lua_State *L, int pIndex = 1 );
 
