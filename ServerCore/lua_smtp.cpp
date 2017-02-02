@@ -3,7 +3,9 @@
 #include <QSettings>
 
 #include "lua_moo.h"
+#include "lua_task.h"
 #include "mooexception.h"
+#include "objectmanager.h"
 
 #include "smtpclient.h"
 #include "mimetext.h"
@@ -206,13 +208,37 @@ int lua_smtp::luaAddText( lua_State *L )
 
 int lua_smtp::luaSend( lua_State *L )
 {
-	luaMimeMessage		*UD = message( L );
+	bool		LuaErr = false;
 
-	SmtpWorkerThread	*Worker = new SmtpWorkerThread( UD->mMimeMessage );
+	try
+	{
+		lua_task			*Command = lua_task::luaGetTask( L );
+		const Task			&T = Command->task();
+		Object				*PRG = ObjectManager::o( T.programmer() );
 
-	QObject::connect( Worker, &SmtpWorkerThread::finished, Worker, &QObject::deleteLater );
+		if( !PRG || !PRG->wizard() )
+		{
+			throw mooException( E_PERM, "only wizards can send email" );
+		}
 
-	Worker->start();
+		luaMimeMessage		*UD = message( L );
+
+		SmtpWorkerThread	*Worker = new SmtpWorkerThread( UD->mMimeMessage );
+
+		QObject::connect( Worker, &SmtpWorkerThread::finished, Worker, &QObject::deleteLater );
+
+		Worker->start();
+	}
+	catch( mooException e )
+	{
+		e.lua_pushexception( L );
+
+		LuaErr = true;
+	}
+	catch( ... )
+	{
+
+	}
 
 	return( 0 );
 }
