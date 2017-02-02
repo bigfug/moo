@@ -497,7 +497,7 @@ void ObjectManager::checkpoint()
 {
 	QString		DatStr = QDateTime::currentDateTime().toString( "yyyy-MM-dd.hh-mm-ss" );
 
-	QFile( "moo.sql" ).copy( QString( "%1.sql" ).arg( DatStr ) );
+	QFile( "moo.db" ).copy( QString( "%1.db" ).arg( DatStr ) );
 }
 
 void ObjectManager::timeoutObjects()

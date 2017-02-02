@@ -20,7 +20,7 @@ ODBSQL::ODBSQL()
 {
 	mDB = QSqlDatabase::addDatabase( "QSQLITE" );
 
-	mDB.setDatabaseName( "moo.sql" );
+	mDB.setDatabaseName( "moo.db" );
 
 	if( !mDB.open() )
 	{

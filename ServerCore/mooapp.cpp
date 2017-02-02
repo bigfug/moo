@@ -38,7 +38,7 @@ mooApp::mooApp( const QString &pDataFileName, QObject *pParent )
 
 	OSC::deviceInitialise();
 
-	bool LoadFromFile = !QFileInfo( "moo.sql" ).exists();
+	bool LoadFromFile = !QFileInfo( "moo.db" ).exists();
 
 	ODBSQL		*SQL = new ODBSQL();
 
