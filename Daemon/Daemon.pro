@@ -55,3 +55,8 @@ linux:!macx:exists( /usr/include/lua5.1 ) {
 # libtelnet
 
 INCLUDEPATH += ../libtelnet
+
+#----------------------------------------------------------------------------
+# SMTPEmail
+
+DEFINES += SMTP_BUILD
