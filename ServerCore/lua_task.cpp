@@ -468,7 +468,7 @@ int lua_task::eval( void )
 
 int lua_task::executeLogin( void )
 {
-//	bool		LuaErr = false;
+	bool		LuaErr = false;
 
 	try
 	{
@@ -583,12 +583,12 @@ int lua_task::executeLogin( void )
 	{
 	}
 
-	return( lua_gettop( mL ) );
+	return( LuaErr ? lua_error( mL ) : lua_gettop( mL ) );
 }
 
 int lua_task::execute( void )
 {
-//	bool		LuaErr = false;
+	bool		LuaErr = false;
 
 	try
 	{
@@ -767,7 +767,7 @@ int lua_task::execute( void )
 	{
 	}
 
-	return( lua_gettop( mL ) );
+	return( LuaErr ? lua_error( mL ) : lua_gettop( mL ) );
 }
 
 int lua_task::verbCall( ObjectId pObjectId, Verb *V, int pArgCnt )
