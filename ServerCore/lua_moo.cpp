@@ -832,17 +832,6 @@ int lua_moo::luaRead( lua_State *L )
 		Object				*O = lua_object::argObj( L, 1 );
 		const char			*V = luaL_checkstring( L, 2 );
 
-		qDebug() << V << lua_gettop( L );
-
-		for( int i = 1 ; i <= lua_gettop( L ) ; i++ )
-		{
-			lua_pushvalue( L, i );
-
-			qDebug() << i << lua_typename( L, lua_type( L, -1 ) );
-
-			lua_pop( L, 1 );
-		}
-
 		if( lua_gettop( L ) > 2 )
 		{
 			luaL_checktype( L, 3, LUA_TTABLE );
@@ -952,7 +941,7 @@ int lua_moo::luaRead( lua_State *L )
 						size_t		 StrLen;
 						const char	*StrDat = lua_tolstring( L, -1, &StrLen );
 
-						if( StrDat && StrLen >= 0 )
+						if( StrDat )
 						{
 							VerbArgs.append( QString::fromLatin1( StrDat, StrLen ) );
 						}

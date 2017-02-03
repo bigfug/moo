@@ -388,7 +388,9 @@ int lua_json::luaArrayIPairs( lua_State *L )
 
 int lua_json::luaObjectPairs( lua_State *L )
 {
-	luaJsonObject		*UD = object( L, 1 );
+	Q_UNUSED( L )
+
+//	luaJsonObject		*UD = object( L, 1 );
 
 	return( 0 );
 }

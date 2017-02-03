@@ -240,7 +240,7 @@ int lua_smtp::luaSend( lua_State *L )
 
 	}
 
-	return( 0 );
+	return( LuaErr ? lua_error( L ) : 0 );
 }
 
 lua_smtp::luaMimeMessage *lua_smtp::message( lua_State *L, int pIndex )

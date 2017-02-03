@@ -90,7 +90,7 @@ mooApp::mooApp( const QString &pDataFileName, QObject *pParent )
 		}
 	}
 
-	qDebug() << OM.timeToNextTask();
+	qDebug() << "Time to next task:" << OM.timeToNextTask();
 
 	connect( &mTimer, SIGNAL(timeout()), this, SLOT(taskReady()) );
 
