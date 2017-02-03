@@ -144,6 +144,10 @@ SOURCES += ../libtelnet/libtelnet.c
 HEADERS += ../libtelnet/libtelnet.h
 INCLUDEPATH += ../libtelnet
 
+# Required to build libtelnet under Visual Studio 2015
+
+windows:DEFINES += __STDC__=1
+
 #----------------------------------------------------------------------------
 # SMTPEmail
 
