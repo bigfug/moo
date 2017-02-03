@@ -144,13 +144,14 @@ int lua_task::luaMe( lua_State *L )
 
 int lua_task::luaTask( lua_State *L )
 {
-//	ObjectManager	&OM = *ObjectManager::instance();
 	const Task			&T = lua_task::luaGetTask( L )->task();
 
 	luaL_checkinteger( L, 1 );
 	luaL_checkstring( L, 2 );
 
-	TaskEntry			E( QString( lua_tostring( L, 2 ) ), 0, T.programmer() );
+	lua_task			*lt = lua_task::luaGetTask( L );
+
+	TaskEntry			E( QString( lua_tostring( L, 2 ) ), lt->connectionid(), T.programmer() );
 
 	E.setTimeStamp( E.timestamp() + ( lua_tonumber( L, 1 ) * 1000.0 ) );
 

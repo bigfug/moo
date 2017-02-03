@@ -433,7 +433,7 @@ int lua_object::luaGet( lua_State *L )
 		if( O->verbFind( s, &FndVrb, &FndObj ) )
 		{
 			lua_pushstring( L, s );
-			lua_verb::lua_pushverb( L, FndVrb, s, O->id() );
+			lua_verb::lua_pushverb( L, FndVrb );
 			lua_pushcclosure( L, lua_object::luaVerbCall, 2 );
 
 			return( 1 );
@@ -801,7 +801,7 @@ int lua_object::luaVerb( lua_State *L )
 			throw mooException( E_PERM, "bad verb" );
 		}
 
-		lua_verb::lua_pushverb( L, V, VerbName, O->id() );
+		lua_verb::lua_pushverb( L, V );
 
 		return( 1 );
 	}
@@ -857,7 +857,9 @@ int lua_object::luaVerbAdd( lua_State *L )
 
 		O->verbAdd( VerbName, V );
 
-		return( 0 );
+		lua_verb::lua_pushverb( L, O->verb( VerbName ) );
+
+		return( 1 );
 	}
 	catch( mooException e )
 	{
@@ -1361,7 +1363,7 @@ int lua_object::luaVerbs( lua_State *L )
 		for( QMap<QString,Verb>::iterator it = C.begin() ; it != C.end() ; it++, i++ )
 		{
 			lua_pushinteger( L, i );
-			lua_verb::lua_pushverb( L, &it.value(), it.key(), O->id() );
+			lua_verb::lua_pushverb( L, &it.value() );
 			lua_settable( L, -3 );
 		}
 
