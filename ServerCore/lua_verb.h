@@ -12,12 +12,12 @@ class lua_verb
 public:
 	typedef struct luaVerb
 	{
-		QString		*mName;
-		ObjectId	 mObjectId;
+//		QString		*mName;
+//		ObjectId	 mObjectId;
 		Verb		*mVerb;
 	} luaVerb;
 
-	static void lua_pushverb( lua_State *L, Verb *V, const QString &pName = "", ObjectId pObjectId = OBJECT_NONE );
+	static void lua_pushverb(lua_State *L, Verb *V );
 
 	static luaVerb *arg( lua_State *L, int pIndex = 1 );
 

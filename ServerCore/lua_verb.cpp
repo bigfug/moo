@@ -73,7 +73,7 @@ void lua_verb::luaRegisterState( lua_State *L )
 	Q_ASSERT( lua_gettop( L ) == 0 );
 }
 
-void lua_verb::lua_pushverb( lua_State *L, Verb *V, const QString &pName, ObjectId pObjectId )
+void lua_verb::lua_pushverb( lua_State *L, Verb *V )
 {
 	luaVerb			*H = (luaVerb *)lua_newuserdata( L, sizeof( luaVerb ) );
 
@@ -84,8 +84,8 @@ void lua_verb::lua_pushverb( lua_State *L, Verb *V, const QString &pName, Object
 		return;
 	}
 
-	H->mName     = new QString( pName );
-	H->mObjectId = pObjectId;
+//	H->mName     = new QString( pName );
+//	H->mObjectId = pObjectId;
 	H->mVerb     = V;
 
 	luaL_getmetatable( L, mLuaName );
@@ -105,18 +105,18 @@ int lua_verb::luaGC( lua_State *L )
 {
 	luaVerb		*V = arg( L );
 
-	if( V->mObjectId == OBJECT_NONE )
+	if( V->mVerb->object() == OBJECT_NONE )
 	{
 		delete( V->mVerb );
 	}
 
-	V->mObjectId = OBJECT_NONE;
+//	V->mObjectId = OBJECT_NONE;
 	V->mVerb     = 0;
 
-	if( V->mName != 0 )
-	{
-		delete( V->mName );
-	}
+//	if( V->mName != 0 )
+//	{
+//		delete( V->mName );
+//	}
 
 	return( 0 );
 }
@@ -131,7 +131,7 @@ int lua_verb::luaGet( lua_State *L )
 		luaVerb				*LV = arg( L );
 		Verb				*V = LV->mVerb;
 		const char			*s = luaL_checkstring( L, 2 );
-		Object				*O = ObjectManager::o( LV->mObjectId );
+		Object				*O = ObjectManager::o( V->object() );
 		Object				*Player = ObjectManager::instance()->object( T.player() );
 		const bool			 isOwner  = ( Player != 0 && O != 0 ? Player->id() == O->owner() : false );
 		const bool			 isWizard = ( Player != 0 ? Player->wizard() : false );
@@ -154,7 +154,7 @@ int lua_verb::luaGet( lua_State *L )
 
 		if( strcmp( s, "name" ) == 0 )
 		{
-			lua_pushstring( L, LV->mName->toLatin1() );
+			lua_pushstring( L, V->name().toLatin1() );
 
 			return( 1 );
 		}
@@ -277,7 +277,7 @@ int lua_verb::luaSet( lua_State *L )
 		}
 
 		Verb				*V = LV->mVerb;
-		Object				*O = ObjectManager::o( LV->mObjectId );
+		Object				*O = ObjectManager::o( V->object() );
 		const char			*N = luaL_checkstring( L, 2 );
 		const bool			 isOwner  = ( Player != 0 && O != 0 ? Player->id() == O->owner() : false );
 		const bool			 isWizard = ( Player != 0 ? Player->wizard() : false );
@@ -555,7 +555,7 @@ int lua_verb::luaDump( lua_State *L )
 		const Task			&T = lua_task::luaGetTask( L )->task();
 		luaVerb				*LV = arg( L );
 		Verb				*V = LV->mVerb;
-		Object				*O = ObjectManager::o( LV->mObjectId );
+		Object				*O = ObjectManager::o( V->object() );
 		Object				*Player = ObjectManager::instance()->object( T.player() );
 		const bool			 isOwner  = ( Player != 0 && O != 0 ? Player->id() == O->owner() : false );
 		const bool			 isWizard = ( Player != 0 ? Player->wizard() : false );
@@ -603,7 +603,7 @@ int lua_verb::luaProgram( lua_State *L )
 		const Task			&T = lua_task::luaGetTask( L )->task();
 		luaVerb				*LV = arg( L );
 		Verb				*V = LV->mVerb;
-		Object				*O = ObjectManager::o( LV->mObjectId );
+		Object				*O = ObjectManager::o( V->object() );
 		Object				*Player = ObjectManager::instance()->object( T.player() );
 		const bool			 isOwner  = ( Player != 0 && O != 0 ? Player->id() == O->owner() : false );
 		const bool			 isWizard = ( Player != 0 ? Player->wizard() : false );
@@ -619,7 +619,7 @@ int lua_verb::luaProgram( lua_State *L )
 			throw( mooException( E_TYPE, "not allowed to read script" ) );
 		}
 
-		InputSinkProgram	*IS = new InputSinkProgram( C, O->id(), *LV->mName );
+		InputSinkProgram	*IS = new InputSinkProgram( C, O->id(), V->name() );
 
 		if( IS == 0 )
 		{
@@ -651,7 +651,7 @@ int lua_verb::luaEdit( lua_State *L )
 		const Task			&T = lua_task::luaGetTask( L )->task();
 		luaVerb				*LV = arg( L );
 		Verb				*V = LV->mVerb;
-		Object				*O = ObjectManager::o( LV->mObjectId );
+		Object				*O = ObjectManager::o( V->object() );
 		Object				*Player = ObjectManager::instance()->object( T.player() );
 		const bool			 isOwner  = ( Player != 0 && O != 0 ? Player->id() == O->owner() : false );
 		const bool			 isWizard = ( Player != 0 ? Player->wizard() : false );
@@ -674,7 +674,7 @@ int lua_verb::luaEdit( lua_State *L )
 
 		QStringList		Program = V->script().split( "\n" );
 
-		InputSinkEditor	*IS = new InputSinkEditor( C, O->id(), *LV->mName, Program );
+		InputSinkEditor	*IS = new InputSinkEditor( C, O->id(), V->name(), Program );
 
 		if( !IS )
 		{
