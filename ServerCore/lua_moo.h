@@ -45,6 +45,7 @@ private:
 	static int luaDebug( lua_State *L );
 	static int luaFindPlayer( lua_State *L );
 	static int luaRead( lua_State *L );
+	static int luaFind( lua_State *L );
 
 	static int luaTimestamp( lua_State *L );
 

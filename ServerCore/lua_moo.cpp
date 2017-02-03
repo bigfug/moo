@@ -52,6 +52,7 @@ const luaL_Reg lua_moo::mLuaStatic[] =
 	{ "findPlayer", lua_moo::luaFindPlayer },
 	{ "get", lua_moo::luaNetworkGet },
 	{ "read", lua_moo::luaRead },
+	{ "find", lua_moo::luaFind },
 	{ 0, 0 }
 };
 
@@ -582,6 +583,78 @@ int lua_moo::luaFindPlayer( lua_State *L )
 
 	ObjectManager			&OM = *ObjectManager::instance();
 	ObjectId				 PID = OM.findPlayer( QString::fromLatin1( S ) );
+
+	if( PID == OBJECT_NONE )
+	{
+		lua_pushnil( L );
+	}
+	else
+	{
+		lua_object::lua_pushobjectid( L, PID );
+	}
+
+	return( 1 );
+}
+
+int lua_moo::luaFind( lua_State *L )
+{
+	size_t					 StrLen;
+	const char				*StrDat = luaL_checklstring( L, -1, &StrLen );
+	ObjectId				 PID = OBJECT_NONE;
+
+	if( StrDat && StrLen > 0 )
+	{
+		const QString			 S = QString::fromLatin1( StrDat, StrLen );
+
+		ObjectManager			&OM  = *ObjectManager::instance();
+
+		lua_task				*Command = lua_task::luaGetTask( L );
+		const Task				&T = Command->task();
+
+		if( S == QStringLiteral( "me" ) )
+		{
+			PID = T.player();
+		}
+		else if( S == QStringLiteral( "here" ) )
+		{
+			Object				*O = OM.object( T.player() );
+
+			PID = !O ? OBJECT_NONE : O->location();
+		}
+		else if( S.startsWith( '#' ) )
+		{
+			bool		OK;
+			int			Int;
+
+			Int = S.mid( 1 ).toInt( &OK );
+
+			if( OK && Int >= 0 )
+			{
+				PID = Int;
+			}
+		}
+		else if( S.startsWith( '$' ) )
+		{
+			Object				*R = OM.object( 0 );
+
+			if( R )
+			{
+				const Property	*P = R->prop( S.mid( 1 ) );
+
+				if( P )
+				{
+					const QVariant			V = P->value();
+
+					if( V.typeName() == QStringLiteral( "lua_object::luaHandle" ) )
+					{
+						lua_object::luaHandle	H = V.value<lua_object::luaHandle>();
+
+						PID = H.O;
+					}
+				}
+			}
+		}
+	}
 
 	if( PID == OBJECT_NONE )
 	{
