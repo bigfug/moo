@@ -60,6 +60,10 @@ linux:!macx:exists( /usr/include/lua5.1 ) {
 
 INCLUDEPATH += ../libtelnet
 
+# Required to build libtelnet under Visual Studio 2015
+
+windows:DEFINES += __STDC__=1
+
 #----------------------------------------------------------------------------
 # SMTPEmail
 
