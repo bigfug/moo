@@ -86,9 +86,9 @@ void ObjectManager::luaMinimal( void )
 
 	Eval.initialise();
 
-	Eval.setOwner( FirstRoom->id() );
+	Eval.setOwner( Wizard->id() );
 	Eval.setObject( FirstRoom->id() );
-	Eval.setScript( "moo.notify( moo.eval( moo.argstr ) );" );
+	Eval.setScript( "moo.programmer = moo.player;\n\nmoo.notify( moo.eval( moo.argstr ) );" );
 
 	FirstRoom->verbAdd( "eval", Eval );
 }
