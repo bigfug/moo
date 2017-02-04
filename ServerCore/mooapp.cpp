@@ -125,6 +125,20 @@ mooApp::~mooApp()
 		killTimer( mTimerId );
 	}
 
+	Object		*Root = ObjectManager::o( 0 );
+
+	if( Root )
+	{
+		if( Root->verb( "server_closing" ) )
+		{
+			QString			 CMD = QString( "moo.root:server_closing()" );
+			TaskEntry		 TE( CMD, 0, 0 );
+			lua_task		 Com( 0, TE );
+
+			Com.eval();
+		}
+	}
+
 	ODB			*OM_ODB = ObjectManager::instance()->odb();
 
 	if( OM_ODB )
