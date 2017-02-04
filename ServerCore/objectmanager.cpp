@@ -404,7 +404,43 @@ void ObjectManager::onFrame( qint64 pTimeStamp )
 
 		lua_task			 L( TE.connectionid(), T );
 
-		L.execute( pTimeStamp );
+		int		RetCnt = L.execute( pTimeStamp );
+
+		// If we have any results from the task, print them to the connection
+
+		if( RetCnt > 0 && TE.connectionid() )
+		{
+			Connection			*C = ConnectionManager::instance()->connection( TE.connectionid() );
+
+			if( C )
+			{
+				for( int i = 0 ; i < RetCnt ; i++ )
+				{
+					QString			S;
+
+					if( lua_isstring( L.L(), -1 ) )
+					{
+						size_t				 StrLen;
+						const char			*StrDat = lua_tolstring( L.L(), -1, &StrLen );
+
+						S = QString::fromLatin1( StrDat, StrLen );
+					}
+					else if( lua_isnumber( L.L(), -1 ) )
+					{
+						lua_Number			 N = lua_tonumber( L.L(), -1 );
+
+						S = QString::number( N );
+					}
+
+					if( !S.isEmpty() )
+					{
+						C->notify( S );
+					}
+
+					lua_pop( L.L(), 1 );
+				}
+			}
+		}
 
 		mStats.mTasks++;
 	}
