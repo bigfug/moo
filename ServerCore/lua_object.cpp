@@ -941,25 +941,23 @@ int lua_object::luaVerbCall( lua_State *L )
 		int					 Error = 0;
 		int					 ArgCnt = lua_gettop( L ) - 1;
 
-		lua_newtable( L );
-
-		for( int i = 0 ; i < ArgCnt ; i++ )
-		{
-			lua_pushinteger( L, i + 1 );
-			lua_pushvalue( L, -2 - ArgCnt + i );
-			lua_settable( L, -3 );
-		}
-
-		lua_setglobal( L, "args" );
-
-		lua_pop( L, ArgCnt );
-
 		const int			 c = lua_gettop( L );
+
+		lua_moo::stackDump( L );
 
 		if( ( Error = v->mVerb->lua_pushverb( L ) ) != 0 )
 		{
 			return( 1 );
 		}
+
+		lua_moo::stackDump( L );
+
+		for( int i = 0 ; i < ArgCnt ; i++ )
+		{
+			lua_pushvalue( L, 2 + i );
+		}
+
+		lua_moo::stackDump( L );
 
 		/*
 			this
@@ -992,7 +990,7 @@ int lua_object::luaVerbCall( lua_State *L )
 
 		Command->taskPush( CurT );
 
-		if( ( Error = lua_pcall( L, 0, LUA_MULTRET, 0 ) ) != 0 )
+		if( ( Error = lua_pcall( L, ArgCnt, LUA_MULTRET, 0 ) ) != 0 )
 		{
 			QString		ErrMsg = QString( lua_tostring( L, -1 ) );
 
@@ -1006,13 +1004,9 @@ int lua_object::luaVerbCall( lua_State *L )
 			lua_pop( L, 1 );
 		}
 
+		lua_moo::stackDump( L );
+
 		Command->taskPop();
-
-		// Clear the args variable
-
-		lua_pushnil( L );
-
-		lua_setglobal( L, "args" );
 
 		// and return any results
 

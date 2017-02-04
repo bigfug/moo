@@ -801,31 +801,9 @@ int lua_task::verbCallCode( Verb *V, int pArgCnt )
 	int				c1 = lua_gettop( mL );
 	int				Error;
 
-	//lua_moo::stackDump( mL );
-
 	if( ( Error = V->lua_pushverb( mL ) ) == 0 )
 	{
-		//lua_moo::luaSetEnv( mL );
-
-		lua_getfenv( mL, -1 );
-
-		lua_newtable( mL );
-
-		for( int i = 0 ; i < pArgCnt ; i++ )
-		{
-			lua_pushinteger( mL, i + 1 );
-			lua_pushvalue( mL, -4 - pArgCnt + i );
-			//lua_moo::stackDump( mL );
-			lua_settable( mL, -3 );
-		}
-
-		lua_setfield( mL, -2, "args" );
-
-		lua_pop( mL, 1 );	// remove environment
-
-		//lua_moo::stackDump( mL );
-
-		if( ( Error = lua_pcall( mL, 0, LUA_MULTRET, 0 ) ) == 0 )
+		if( ( Error = lua_pcall( mL, pArgCnt, LUA_MULTRET, 0 ) ) == 0 )
 		{
 
 		}
@@ -833,8 +811,6 @@ int lua_task::verbCallCode( Verb *V, int pArgCnt )
 
 	if( Error != 0 )
 	{
-		//qDebug() << lua_tostring( mL, -1 );
-
 		if( C != 0 )
 		{
 			C->notify( lua_tostring( mL, -1 ) );
