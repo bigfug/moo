@@ -65,22 +65,29 @@ mooApp::mooApp( const QString &pDataFileName, QObject *pParent )
 		OM.luaMinimal();
 	}
 
-	if( OM.object( 0 ) != 0 )
+	Object		*Root = OM.object( 0 );
+
+	if( Root )
 	{
 		QList<Object *>		ObjLst = ObjectManager::instance()->connectedPlayers();
 
+		bool		HasVerb = Root->verb( "user_disconnected" );
+
 		for( Object *O : ObjLst )
 		{
-			QString			 CMD = QString( "moo.root:user_disconnected( o( %1 ) )" ).arg( O->id() );
-			TaskEntry		 TE( CMD, 0, 0 );
-			lua_task		 Com( 0, TE );
+			if( HasVerb )
+			{
+				QString			 CMD = QString( "moo.root:user_disconnected( o( %1 ) )" ).arg( O->id() );
+				TaskEntry		 TE( CMD, 0, 0 );
+				lua_task		 Com( 0, TE );
 
-			Com.eval();
+				Com.eval();
+			}
 
 			O->setConnection( -1 );
 		}
 
-		if( true )
+		if( Root->verb( "server_started" ) )
 		{
 			QString			 CMD = QString( "moo.root:server_started()" );
 			TaskEntry		 TE( CMD, 0, 0 );
@@ -90,7 +97,12 @@ mooApp::mooApp( const QString &pDataFileName, QObject *pParent )
 		}
 	}
 
-	qDebug() << "Time to next task:" << OM.timeToNextTask();
+	qint64		TimeToNextTask = OM.timeToNextTask();
+
+	if( TimeToNextTask >= 0 )
+	{
+		qDebug() << "Time to next task:" << TimeToNextTask;
+	}
 
 	connect( &mTimer, SIGNAL(timeout()), this, SLOT(taskReady()) );
 
