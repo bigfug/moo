@@ -798,22 +798,41 @@ int lua_task::verbCallCode( Verb *V, int pArgCnt )
 {
 	Connection		*C = ConnectionManager::instance()->connection( connectionid() );
 
-	int				c1 = lua_gettop( mL );
+	int				c1 = lua_gettop( mL ) - pArgCnt;
 	int				Error;
 
 	if( ( Error = V->lua_pushverb( mL ) ) == 0 )
 	{
+//		qDebug() << "verbCallCode " << V->name() << "with" << pArgCnt << " args (before args):";
+
+//		lua_moo::stackReverseDump( mL );
+
+		if( pArgCnt )
+		{
+			lua_insert( mL, -1 - pArgCnt );
+		}
+
+		//qDebug() << "verbCallCode " << V->name() << "with" << pArgCnt << " args (before):";
+
+		lua_moo::stackReverseDump( mL );
+
 		if( ( Error = lua_pcall( mL, pArgCnt, LUA_MULTRET, 0 ) ) == 0 )
 		{
 
 		}
 	}
 
-	if( Error != 0 )
+	if( Error )
 	{
-		if( C != 0 )
+		QString		S = QString::fromLatin1( lua_tostring( mL, -1 ) );
+
+		if( C )
 		{
-			C->notify( lua_tostring( mL, -1 ) );
+			C->notify( S );
+		}
+		else
+		{
+			qDebug() << S;
 		}
 
 		lua_pop( mL, 1 );
@@ -821,9 +840,13 @@ int lua_task::verbCallCode( Verb *V, int pArgCnt )
 
 	int				c2 = lua_gettop( mL );
 
-	//lua_moo::stackDump( mL );	std::cout.flush();
+	int				ResCnt = c2 - c1;
 
-	return( c2 - c1 );
+	//qDebug() << "verbCallCode " << V->name() << "with" << ResCnt << "results (after):";
+
+	lua_moo::stackReverseDump( mL );
+
+	return( ResCnt );
 }
 
 

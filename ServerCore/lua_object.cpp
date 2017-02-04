@@ -432,6 +432,10 @@ int lua_object::luaGet( lua_State *L )
 		//if( O->verbFind( s, &FndVrb, &FndObj, O->id(), QString(), O->id() ) )
 		if( O->verbFind( s, &FndVrb, &FndObj ) )
 		{
+			qDebug() << "lua_object::luaGet" << s;
+
+			lua_moo::stackReverseDump( L );
+
 			lua_pushstring( L, s );
 			lua_verb::lua_pushverb( L, FndVrb );
 			lua_pushcclosure( L, lua_object::luaVerbCall, 2 );
@@ -941,23 +945,21 @@ int lua_object::luaVerbCall( lua_State *L )
 		int					 Error = 0;
 		int					 ArgCnt = lua_gettop( L ) - 1;
 
-		const int			 c = lua_gettop( L );
+		const int			 c1 = lua_gettop( L ) - ArgCnt;
 
-		lua_moo::stackDump( L );
+		//qDebug() << "lua_object::luaVerbCall" << n << ArgCnt << "args:";
 
 		if( ( Error = v->mVerb->lua_pushverb( L ) ) != 0 )
 		{
 			return( 1 );
 		}
 
-		lua_moo::stackDump( L );
-
-		for( int i = 0 ; i < ArgCnt ; i++ )
+		if( ArgCnt )
 		{
-			lua_pushvalue( L, 2 + i );
+			lua_insert( L, -1 - ArgCnt );
 		}
 
-		lua_moo::stackDump( L );
+		//lua_moo::stackReverseDump( L );
 
 		/*
 			this
@@ -1004,13 +1006,19 @@ int lua_object::luaVerbCall( lua_State *L )
 			lua_pop( L, 1 );
 		}
 
-		lua_moo::stackDump( L );
+		int				c2 = lua_gettop( L );
+
+		int				ResCnt = c2 - c1;
+
+		//qDebug() << "lua_object::luaVerbCall" << n << ResCnt << "results:";
+
+		//lua_moo::stackReverseDump( L );
 
 		Command->taskPop();
 
 		// and return any results
 
-		return( lua_gettop( L ) - c );
+		return( ResCnt );
 	}
 	catch( mooException e )
 	{

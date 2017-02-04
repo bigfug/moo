@@ -64,7 +64,7 @@ private:
 		switch (t)
 		{
 			case LUA_TSTRING:  /* strings */
-				printf( "%d: `%s'", i, lua_tostring(L, i));
+				printf( "%d: \"%s\"", i, lua_tostring(L, i));
 				break;
 
 			case LUA_TBOOLEAN:  /* booleans */
@@ -131,6 +131,23 @@ public:
 		for (i = 1; i <= top; i++) /* repeat for each level */
 		{
 			typeDump( L, i );
+
+			printf("  ");  /* put a separator */
+		}
+
+		printf("\n");  /* end the listing */
+
+		std::cout.flush();
+	}
+
+	static void stackReverseDump (lua_State *L)
+	{
+		int i;
+		int top = lua_gettop(L);
+
+		for (i = 1; i <= top; i++) /* repeat for each level */
+		{
+			typeDump( L, -i );
 
 			printf("  ");  /* put a separator */
 		}
