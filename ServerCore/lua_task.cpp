@@ -812,9 +812,9 @@ int lua_task::verbCallCode( Verb *V, int pArgCnt )
 			lua_insert( mL, -1 - pArgCnt );
 		}
 
-		//qDebug() << "verbCallCode " << V->name() << "with" << pArgCnt << " args (before):";
+//		qDebug() << "verbCallCode " << V->name() << "with" << pArgCnt << " args (before):";
 
-		lua_moo::stackReverseDump( mL );
+//		lua_moo::stackReverseDump( mL );
 
 		if( ( Error = lua_pcall( mL, pArgCnt, LUA_MULTRET, 0 ) ) == 0 )
 		{
@@ -842,9 +842,9 @@ int lua_task::verbCallCode( Verb *V, int pArgCnt )
 
 	int				ResCnt = c2 - c1;
 
-	//qDebug() << "verbCallCode " << V->name() << "with" << ResCnt << "results (after):";
+//	qDebug() << "verbCallCode " << V->name() << "with" << ResCnt << "results (after):";
 
-	lua_moo::stackReverseDump( mL );
+//	lua_moo::stackReverseDump( mL );
 
 	return( ResCnt );
 }

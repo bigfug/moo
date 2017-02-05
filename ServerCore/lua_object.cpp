@@ -432,9 +432,9 @@ int lua_object::luaGet( lua_State *L )
 		//if( O->verbFind( s, &FndVrb, &FndObj, O->id(), QString(), O->id() ) )
 		if( O->verbFind( s, &FndVrb, &FndObj ) )
 		{
-			qDebug() << "lua_object::luaGet" << s;
+//			qDebug() << "lua_object::luaGet" << s;
 
-			lua_moo::stackReverseDump( L );
+//			lua_moo::stackReverseDump( L );
 
 			lua_pushstring( L, s );
 			lua_verb::lua_pushverb( L, FndVrb );
