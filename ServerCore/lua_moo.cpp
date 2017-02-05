@@ -478,37 +478,59 @@ int lua_moo::luaRoot( lua_State *L )
 
 int lua_moo::luaPass( lua_State *L )
 {
-	Q_UNUSED( L )
+	bool				 LuaErr = false;
 
-	//	Task			*T = lua_task::luaGetTask( L );
-	//	ObjectManager	&OM = *ObjectManager::instance();
-	//	ObjectId		 id = T.object();
+	try
+	{
+		lua_task			*Command = lua_task::luaGetTask( L );
+		const Task			&T = Command->task();
+		ObjectManager		&OM = *ObjectManager::instance();
+		ObjectId			 id = T.object();
 
-	//	while( id != -1 )
-	//	{
-	//		Object			*O = OM.object( id );
+		while( id != OBJECT_NONE )
+		{
+			Object			*O = OM.object( id );
 
-	//		if( O == 0 )
-	//		{
-	//			return( 0 );
-	//		}
+			if( !O )
+			{
+				return( 0 );
+			}
 
-	//		Object			*P = OM.object( O->parent() );
+			Object			*P = OM.object( O->parent() );
 
-	//		if( P == 0 )
-	//		{
-	//			return( 0 );
-	//		}
+			if( !P )
+			{
+				return( 0 );
+			}
 
-	//		if( P->verb( T.string() ) != 0 )
-	//		{
-	//			return( lua_object::verbCall( T, P, T.string(), lua_gettop( L ) - 1 ) );
-	//		}
+			Verb			*V = P->verb( T.verb() );
 
-	//		id = O->parent();
-	//	}
+			if( V )
+			{
+				Task		T2 = Command->task();
 
-	return( 0 );
+				T2.setObject( P->id() );
+
+				lua_moo::stackReverseDump( L );
+
+				return( Command->verbCall( T2, V, 0 ) );
+			}
+
+			id = O->parent();
+		}
+	}
+	catch( mooException e )
+	{
+		e.lua_pushexception( L );
+
+		LuaErr = true;
+	}
+	catch( ... )
+	{
+
+	}
+
+	return( LuaErr ? lua_error( L ) : 0 );
 }
 
 int lua_moo::luaEval( lua_State *L )
