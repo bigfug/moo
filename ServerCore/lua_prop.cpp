@@ -36,6 +36,7 @@ const luaL_Reg lua_prop::mLuaInstanceFunctions[] =
 	{ "dump", lua_prop::luaDump },
 	{ "program", lua_prop::luaProgram },
 	{ "edit", lua_prop::luaEdit },
+	{ "value", lua_prop::luaValue },
 	{ 0, 0 }
 };
 
@@ -680,6 +681,56 @@ int lua_prop::luaEdit(lua_State *L)
 		}
 
 		C->pushInputSink( IS );
+	}
+	catch( mooException e )
+	{
+		e.lua_pushexception( L );
+
+		LuaErr = true;
+	}
+	catch( ... )
+	{
+
+	}
+
+	return( LuaErr ? lua_error( L ) : 0 );
+}
+
+int lua_prop::luaValue( lua_State *L )
+{
+	bool		LuaErr = false;
+
+	try
+	{
+		luaProp				*LP = arg( L );
+
+		if( LP == 0 )
+		{
+			throw( mooException( E_PERM, "property is invalid" ) );
+		}
+
+		lua_task			*Command = lua_task::luaGetTask( L );
+		const Task			&T = Command->task();
+		Object				*Player = ObjectManager::instance()->object( T.player() );
+
+		Property			*P = LP->mProperty;
+		Object				*O = ObjectManager::o( LP->mObjectId );
+		const bool			 isOwner  = ( Player != 0 && O != 0 ? Player->id() == O->owner() : false );
+		const bool			 isWizard = ( Player != 0 ? Player->wizard() : false );
+
+		if( P == 0 )
+		{
+			throw( mooException( E_TYPE, "invalid property" ) );
+		}
+
+		if( !isWizard && !isOwner && !P->read() )
+		{
+			throw( mooException( E_TYPE, "not allowed to read property" ) );
+		}
+
+		luaL_pushvariant( L, P->value() );
+
+		return( 1 );
 	}
 	catch( mooException e )
 	{
