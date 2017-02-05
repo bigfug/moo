@@ -284,7 +284,7 @@ int lua_verb::luaSet( lua_State *L )
 
 		if( strcmp( N, "name" ) == 0 )
 		{
-			throw( mooException( E_PERM, "can't set object id" ) );
+			throw( mooException( E_PERM, "can't set verb name" ) );
 		}
 
 		if( strcmp( N, "owner" ) == 0 )
