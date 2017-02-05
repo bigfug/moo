@@ -606,53 +606,19 @@ int lua_moo::luaFind( lua_State *L )
 	{
 		const QString			 S = QString::fromLatin1( StrDat, StrLen );
 
-		ObjectManager			&OM  = *ObjectManager::instance();
-
 		lua_task				*Command = lua_task::luaGetTask( L );
 		const Task				&T = Command->task();
+		QList<ObjectId>			 ObjLst;
 
-		if( S == QStringLiteral( "me" ) )
+		T.findObject( S, ObjLst );
+
+		if( ObjLst.size() == 1 )
 		{
-			PID = T.player();
+			PID = ObjLst.first();
 		}
-		else if( S == QStringLiteral( "here" ) )
+		else if( ObjLst.size() > 1 )
 		{
-			Object				*O = OM.object( T.player() );
-
-			PID = !O ? OBJECT_NONE : O->location();
-		}
-		else if( S.startsWith( '#' ) )
-		{
-			bool		OK;
-			int			Int;
-
-			Int = S.mid( 1 ).toInt( &OK );
-
-			if( OK && Int >= 0 )
-			{
-				PID = Int;
-			}
-		}
-		else if( S.startsWith( '$' ) )
-		{
-			Object				*R = OM.object( 0 );
-
-			if( R )
-			{
-				const Property	*P = R->prop( S.mid( 1 ) );
-
-				if( P )
-				{
-					const QVariant			V = P->value();
-
-					if( V.typeName() == QStringLiteral( "lua_object::luaHandle" ) )
-					{
-						lua_object::luaHandle	H = V.value<lua_object::luaHandle>();
-
-						PID = H.O;
-					}
-				}
-			}
+			PID = OBJECT_AMBIGUOUS;
 		}
 	}
 
