@@ -8,13 +8,23 @@
 
 Connection::Connection( ConnectionId pConnectionId, QObject *pParent ) :
 	QObject( pParent ), mConnectionId( pConnectionId ), mObjectId( 0 ), mPlayerId( OBJECT_NONE ), mConnectionTime( 0 ), mLastActiveTime( 0 ),
-	mLineModeSupport( true ), mLastCreatedObjectId( OBJECT_NONE ), mTerminalSize( 80, 24 )
+	mLineModeSupport( true ), mLastCreatedObjectId( OBJECT_NONE ), mTerminalSize( 80, 24 ), mLineMode( EDIT )
 {
 	mConnectionTime = mLastActiveTime = QDateTime::currentMSecsSinceEpoch();
 }
 
 bool Connection::processInput( const QString &pData )
 {
+	if( mLineMode == EDIT )
+	{
+		mLineBuffer << pData;
+
+		while( mLineBuffer.size() > mTerminalSize.height() )
+		{
+			mLineBuffer.removeFirst();
+		}
+	}
+
 	if( mInputSinkList.isEmpty() )
 	{
 		return( false );
@@ -44,7 +54,15 @@ bool Connection::supportsLineMode() const
 
 void Connection::notify( const QString &pText )
 {
-	//qDebug() << pText;
+	if( mLineMode == EDIT )
+	{
+		mLineBuffer << pText;
+
+		while( mLineBuffer.size() > mTerminalSize.height() )
+		{
+			mLineBuffer.removeFirst();
+		}
+	}
 
 	emit textOutput( pText );
 }
@@ -60,13 +78,25 @@ void Connection::dataInput( const QString &pText )
 	emit taskOutput( T );
 }
 
+void Connection::redrawBuffer()
+{
+	emit textOutput( "\x1b[2J\x1b[1;1H" );
+
+	for( const QString &S : mLineBuffer )
+	{
+		emit textOutput( S );
+	}
+}
+
 void Connection::setLineModeSupport( bool pLineModeSupport )
 {
 	mLineModeSupport = pLineModeSupport;
 }
 
-void Connection::setLineMode(Connection::LineMode pLineMode)
+void Connection::setLineMode( Connection::LineMode pLineMode )
 {
+	mLineMode = pLineMode;
+
 	if( mLineModeSupport )
 	{
 		emit lineMode( pLineMode );

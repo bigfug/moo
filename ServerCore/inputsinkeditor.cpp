@@ -33,9 +33,9 @@ bool InputSinkEditor::input( const QString &pData )
 
 	if( mEditor.hasQuit() )
 	{
-		mConnection->notify( "\x1b[2J\x1b[1;1H" );
-
 		mConnection->setLineMode( Connection::EDIT );
+
+		mConnection->redrawBuffer();
 	}
 
 	return( !mEditor.hasQuit() );

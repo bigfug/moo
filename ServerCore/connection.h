@@ -102,6 +102,8 @@ public slots:
 	void notify( const QString &pText );
 	void dataInput( const QString &pText );
 
+	void redrawBuffer( void );
+
 	void setLineModeSupport( bool pLineModeSupport );
 	void setLineMode( LineMode pLineMode );
 
@@ -128,6 +130,8 @@ private:
 	bool				mLineModeSupport;
 	ObjectId			mLastCreatedObjectId;
 	QSize				mTerminalSize;
+	QStringList			mLineBuffer;
+	LineMode			mLineMode;
 };
 
 #endif // CONNECTION_H
