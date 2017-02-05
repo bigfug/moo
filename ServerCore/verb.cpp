@@ -151,49 +151,65 @@ As a special case, if the verb-name is `*' (i.e., a single star all by itself),
 then it matches anything at all.
 */
 
+bool Verb::matchPattern( const QString &Pattern, const QString &pMatch )
+{
+	const int	StarIndex = Pattern.indexOf( '*' );
+
+	// match name without wildcard
+
+	if( StarIndex < 0 )
+	{
+		if( Pattern.compare( pMatch, Qt::CaseInsensitive ) == 0 )
+		{
+			return( true );
+		}
+
+		return( false );
+	}
+
+	// match '*'
+
+	if( Pattern.size() == 1 )
+	{
+		return( true );
+	}
+
+	// match wildcard
+
+	const QString	Prefix = Pattern.left( StarIndex );
+	const QString	Suffix = Pattern.mid( StarIndex + 1 );
+
+	//qDebug() << "Match:" << pMatch << "Index:" << StarIndex << "Prefix:" << Prefix << " Suffix:" << Suffix;
+
+	if( !Prefix.isEmpty() && !pMatch.startsWith( Prefix, Qt::CaseInsensitive ) )
+	{
+		return( false );
+	}
+
+	if( Suffix.isEmpty() )
+	{
+		return( true );
+	}
+
+	const QString	MatchSuffix = pMatch.mid( Prefix.size() );
+
+	//qDebug() << MatchSuffix;
+
+	if( MatchSuffix.isEmpty() || Suffix.startsWith( MatchSuffix, Qt::CaseInsensitive ) )
+	{
+		return( true );
+	}
+
+	return( false );
+}
+
 bool Verb::matchName( const QString &pPatternList, const QString &pMatch )
 {
-	QStringList		Patterns = pPatternList.split( ' ' );
+	const QStringList		Patterns = pPatternList.split( ' ' );
 
-	foreach( const QString &Pattern, Patterns )
+	for( const QString &Pattern : Patterns )
 	{
-		const int	StarIndex = Pattern.indexOf( '*' );
-
-		if( StarIndex < 0 )
-		{
-			if( Pattern.compare( pMatch, Qt::CaseInsensitive ) == 0 )
-			{
-				return( true );
-			}
-
-			continue;
-		}
-
-		if( Pattern.size() == 1 )
-		{
-			return( true );
-		}
-
-		const QString	Prefix = Pattern.left( StarIndex );
-		const QString	Suffix = Pattern.mid( StarIndex + 1 );
-
-		//qDebug() << "Match:" << pMatch << "Index:" << StarIndex << "Prefix:" << Prefix << " Suffix:" << Suffix;
-
-		if( !Prefix.isEmpty() && !pMatch.startsWith( Prefix, Qt::CaseInsensitive ) )
-		{
-			continue;
-		}
-
-		if( Suffix.isEmpty() )
-		{
-			return( true );
-		}
-
-		const QString	MatchSuffix = pMatch.mid( Prefix.size() );
-
-		//qDebug() << MatchSuffix;
-
-		if( MatchSuffix.isEmpty() || Suffix.startsWith( MatchSuffix, Qt::CaseInsensitive ) )
+		if( matchPattern( Pattern, pMatch ) )
 		{
 			return( true );
 		}

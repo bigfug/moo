@@ -35,6 +35,8 @@ public:
 
 	static QStringList parse( const QString &pInput, QString &pArgStr );
 
+	static bool matchPattern( const QString &Pattern, const QString &pMatch);
+
 	static bool matchName( const QString &pPattern, const QString &pMatch );
 
 	bool matchPreposition( const QString &pPreposition ) const;

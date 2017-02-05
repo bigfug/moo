@@ -100,7 +100,7 @@ Verb *Object::verbMatch( const QString &pName )
 	{
 		Verb				&v = it.value();
 
-		if( pName.compare( it.key(), Qt::CaseInsensitive ) != 0 )
+		if( !Verb::matchPattern( v.name(), pName ) )
 		{
 			const QString		&a = v.aliases();
 
@@ -466,7 +466,7 @@ Verb * Object::verbMatch( const QString &pName, ObjectId DirectObjectId, const Q
 			continue;
 		}
 
-		if( pName.compare( it.key(), Qt::CaseInsensitive ) != 0 )
+		if( !Verb::matchPattern( v.name(), pName ) )
 		{
 			const QString		&a = v.aliases();
 

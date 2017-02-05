@@ -1675,11 +1675,12 @@ int lua_object::luaProperty( lua_State *L )
 		//const Task			&T = Command->task();
 		Object				*O = argObj( L );
 		const char			*N = luaL_checkstring( L, 2 );
-		Property			*P = O->prop( N );
+		Object				*FO;
+		Property			*FP;
 
-		if( P != 0 )
+		if( O->propFind( N, &FP, &FO ) )
 		{
-			lua_prop::lua_pushproperty( L, O->id(), QString( N ), P );
+			lua_prop::lua_pushproperty( L, FO->id(), QString( N ), FP );
 
 			return( 1 );
 		}
