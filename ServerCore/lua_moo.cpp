@@ -509,10 +509,6 @@ int lua_moo::luaPass( lua_State *L )
 			{
 				Task		T2 = Command->task();
 
-				T2.setObject( P->id() );
-
-//				lua_moo::stackReverseDump( L );
-
 				return( Command->verbCall( T2, V, lua_gettop( L ) ) );
 			}
 
