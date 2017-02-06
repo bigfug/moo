@@ -429,27 +429,35 @@ bool Object::matchName( const QString &pName ) const
 		return( true );
 	}
 
-	const Property		*p = prop( "aliases" );
+	const Object			*O = this;
 
-	if( p == 0 )
+	while( O )
 	{
-		return( false );
-	}
+		const Property		*P = O->prop( "aliases" );
 
-	if( p->value().type() == QVariant::String )
-	{
-		return( p->value().toString().startsWith( pName, Qt::CaseInsensitive ) );
-	}
-
-	if( p->value().type() == QVariant::Map )
-	{
-		for( const QVariant &V : p->value().toMap().values() )
+		if( P )
 		{
-			if( V.type() == QVariant::String && V.toString().startsWith( pName, Qt::CaseInsensitive ) )
+			if( P->value().type() == QVariant::String )
 			{
-				return( true );
+				if( P->value().toString().startsWith( pName, Qt::CaseInsensitive ) )
+				{
+					return( true );
+				}
+			}
+
+			if( P->value().type() == QVariant::Map )
+			{
+				for( const QVariant &V : P->value().toMap().values() )
+				{
+					if( V.type() == QVariant::String && V.toString().startsWith( pName, Qt::CaseInsensitive ) )
+					{
+						return( true );
+					}
+				}
 			}
 		}
+
+		O = ObjectManager::o( O->parent() );
 	}
 
 	return( false );
