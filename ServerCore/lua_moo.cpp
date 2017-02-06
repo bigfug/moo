@@ -486,6 +486,8 @@ int lua_moo::luaPass( lua_State *L )
 		const Task			&T = Command->task();
 		ObjectManager		&OM = *ObjectManager::instance();
 		ObjectId			 id = T.object();
+		bool				 VrbFnd = false;
+		Verb				*V;
 
 		while( id != OBJECT_NONE )
 		{
@@ -496,6 +498,11 @@ int lua_moo::luaPass( lua_State *L )
 				return( 0 );
 			}
 
+			if( !VrbFnd && O->verb( T.verb() ) )
+			{
+				VrbFnd = true;
+			}
+
 			Object			*P = OM.object( O->parent() );
 
 			if( !P )
@@ -503,16 +510,25 @@ int lua_moo::luaPass( lua_State *L )
 				return( 0 );
 			}
 
-			Verb			*V = P->verb( T.verb() );
+			V = P->verb( T.verb() );
 
 			if( V )
 			{
-				Task		T2 = Command->task();
+				if( !VrbFnd )
+				{
+					VrbFnd = true;
+				}
+				else
+				{
+					Task		T2 = Command->task();
 
-				return( Command->verbCall( T2, V, lua_gettop( L ) ) );
+					T2.setObject( P->id() );
+
+					return( Command->verbCall( T2, V, lua_gettop( L ) ) );
+				}
 			}
 
-			id = O->parent();
+			id = P->id();
 		}
 	}
 	catch( mooException e )
