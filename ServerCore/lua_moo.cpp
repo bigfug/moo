@@ -511,9 +511,9 @@ int lua_moo::luaPass( lua_State *L )
 
 				T2.setObject( P->id() );
 
-				lua_moo::stackReverseDump( L );
+//				lua_moo::stackReverseDump( L );
 
-				return( Command->verbCall( T2, V, 0 ) );
+				return( Command->verbCall( T2, V, lua_gettop( L ) ) );
 			}
 
 			id = O->parent();
