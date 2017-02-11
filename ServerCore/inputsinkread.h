@@ -20,12 +20,19 @@ public:
 	virtual bool input( const QString &pData );
 
 private:
+	void processAnsiSequence( const QByteArray &pData );
+
+private:
 	Connection		*mConnection;
 	ObjectId		 mObjectId;
 	QString			 mVerbName;
 	QString			 mInput;
 	QVariantMap		 mReadArgs;
 	QVariantList	 mVerbArgs;
+
+	int				 mAnsiEsc;
+	QByteArray		 mAnsiSeq;
+	int				 mAnsiPos;
 };
 
 
