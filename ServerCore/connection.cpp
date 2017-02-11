@@ -52,6 +52,11 @@ bool Connection::supportsLineMode() const
 	return( mLineModeSupport );
 }
 
+void Connection::write( const QString &pText )
+{
+	emit textOutput( pText );
+}
+
 void Connection::notify( const QString &pText )
 {
 	if( mLineMode == EDIT )
@@ -99,6 +104,6 @@ void Connection::setLineMode( Connection::LineMode pLineMode )
 
 	if( mLineModeSupport )
 	{
-		emit lineMode( pLineMode );
+		emit lineModeChanged( pLineMode );
 	}
 }

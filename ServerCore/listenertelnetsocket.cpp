@@ -33,7 +33,7 @@ ListenerTelnetSocket::ListenerTelnetSocket( QObject *pParent, QTcpSocket *pSocke
 
 	connect( CON, SIGNAL(taskOutput(TaskEntry&)), ObjectManager::instance(), SLOT(doTask(TaskEntry&)));
 
-	connect( CON, SIGNAL(lineMode(Connection::LineMode)), this, SLOT(setLineMode(Connection::LineMode)) );
+	connect( CON, SIGNAL(lineModeChanged(Connection::LineMode)), this, SLOT(setLineMode(Connection::LineMode)) );
 	connect( this, SIGNAL(lineModeSupported(bool)), CON, SLOT(setLineModeSupport(bool)) );
 
 	connect( mSocket, SIGNAL(disconnected()), this, SLOT(disconnected()) );

@@ -93,12 +93,18 @@ public:
 		return( mTerminalSize );
 	}
 
+	inline LineMode lineMode( void ) const
+	{
+		return( mLineMode );
+	}
+
 signals:
 	void taskOutput( TaskEntry &pTask );
 	void textOutput( const QString &pText );
-	void lineMode( Connection::LineMode pLineMode );
+	void lineModeChanged( Connection::LineMode pLineMode );
 
 public slots:
+	void write( const QString &pText );
 	void notify( const QString &pText );
 	void dataInput( const QString &pText );
 
