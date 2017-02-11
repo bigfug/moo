@@ -32,7 +32,8 @@ SOURCES += tst_servertest.cpp \
 	tst_lua_prop_security.cpp \
 	permissionstest.cpp \
     tst_lua_prop_inheritance.cpp \
-    tst_lua_verb_call.cpp
+    tst_lua_verb_call.cpp \
+    tst_lua_pass.cpp
 
 HEADERS += tst_servertest.h \
 	stdafx.h \

@@ -98,6 +98,13 @@ private Q_SLOTS:
 	void luaCallValueCallerThirdWizard( void );
 	void luaCallValueProgrammerThirdWizard( void );
 
+	void luaPass1( void );
+	void luaPass2( void );
+	void luaPass3( void );
+	void luaPass4( void );
+	void luaPass5( void );
+	void luaPass6( void );
+
 	void luaPropAddSecurityPass( void );
 	void luaPropAddSecurityFail( void );
 	void luaPropAddSecurityWizardOwner( void );

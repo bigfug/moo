@@ -1217,7 +1217,7 @@ void ServerTest::luaCallValueProgrammerThirdWizard()
 	V1.setOwner( O1->id() );
 	V1.setScript( QString( "o( %1 ):test()" ).arg( O2->id() ) );
 
-	O1->verbAdd( "test", V1);
+	O1->verbAdd( "test", V1 );
 
 	// Add verb
 
