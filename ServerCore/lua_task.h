@@ -67,6 +67,8 @@ public:
 		mTasks.first().setProgrammer( pObjectId );
 	}
 
+	QStringList taskVerbStack( void ) const;
+
 private:
 	static void initialise( void );
 

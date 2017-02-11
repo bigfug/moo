@@ -887,3 +887,20 @@ int lua_task::throwError( mooError pError, const QString pMessage )
 
 	return( 0 );
 }
+
+QStringList lua_task::taskVerbStack() const
+{
+	QStringList		VrbLst;
+
+	for( QList<Task>::const_reverse_iterator it = mTasks.rbegin() ; it != mTasks.rend() ; it++ )
+	{
+		QString		VrbStr = (*it).verb();
+
+		if( !VrbStr.isNull() )
+		{
+			VrbLst << VrbStr;
+		}
+	}
+
+	return( VrbLst );
+}
