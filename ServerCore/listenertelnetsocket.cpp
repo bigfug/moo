@@ -17,9 +17,6 @@ ListenerTelnetSocket::ListenerTelnetSocket( QObject *pParent, QTcpSocket *pSocke
 	mWebSocketActive = false;
 
 	mLastChar  = 0;
-	mAnsiEsc = 0;
-	mAnsiPos = 0;
-
 	mLocalEcho = false;
 
 	qDebug() << "Connection established from" << mSocket->peerAddress();
@@ -165,13 +162,6 @@ void ListenerTelnetSocket::processInput( const QByteArray &pData )
 				}
 				else
 				{
-					// preserve empty lines
-
-					if( echo() )
-					{
-						sendData( "\r\n" );
-					}
-
 					emit textOutput( mBuffer );
 				}
 			}
@@ -236,124 +226,19 @@ void ListenerTelnetSocket::processInput( const QByteArray &pData )
 					emit textOutput( mBuffer );
 				}
 
-				if( echo() )
-				{
-					sendData( "\r\n" );
-				}
-
-				mAnsiPos = 0;
-
 				mBuffer.clear();
-			}
-		}
-		else if( mAnsiEsc == 1 )
-		{
-			if( ch == '[' )
-			{
-				mAnsiEsc++;
-
-				mAnsiSeq.append( ch );
-			}
-			else
-			{
-				mBuffer.append( 0x1B );
-				mBuffer.append( ch );
-
-				mAnsiEsc = 0;
-			}
-		}
-		else if( mAnsiEsc == 2 )
-		{
-			mAnsiSeq.append( ch );
-
-			if( ch >= 64 && ch <= 126 )
-			{
-				processAnsiSequence( mAnsiSeq );
-
-				mAnsiEsc = 0;
 			}
 		}
 		else
 		{
-			QByteArray	Tmp;
-
-			switch( ch )
+			if( ch >= 0x20 && ch < 0x7f )
 			{
-				case 0x08:	// BACKSPACE
-					if( mAnsiPos > 0 )
-					{
-						mBuffer.remove( --mAnsiPos, 1 );
-
-						if( echo() )
-						{
-							Tmp.append( "\x1b[D" );
-							Tmp.append( mBuffer.mid( mAnsiPos ) );
-							Tmp.append( QString( " \x1b[%1D" ).arg( mBuffer.size() + 1 - mAnsiPos ) );
-						}
-					}
-					break;
-
-				case 0x09:
-					break;
-
-				case 0x0e:	// SHIFT OUT
-				case 0x0f:	// SHIFT IN
-					break;
-
-				case 0x1b:	// ESCAPE
-					mAnsiSeq.clear();
-					mAnsiSeq.append( ch );
-					mAnsiEsc++;
-					break;
-
-				case 0x7f:	// DELETE
-					if( mAnsiPos < mBuffer.size() )
-					{
-						mBuffer.remove( mAnsiPos, 1 );
-
-						if( echo() )
-						{
-							Tmp.append( mBuffer.mid( mAnsiPos ) );
-							Tmp.append( QString( " \x1b[%1D" ).arg( mBuffer.size() + 1 - mAnsiPos ) );
-						}
-					}
-					break;
-
-				default:
-					if( ch >= 0x20 && ch < 0x7f )
-					{
-						mBuffer.insert( mAnsiPos++, ch );
-
-						if( echo() )
-						{
-							if( mAnsiPos < mBuffer.size() )
-							{
-								Tmp.append( mBuffer.mid( mAnsiPos - 1 ).append( QString( "\x1b[%1D" ).arg( mBuffer.size() - mAnsiPos ) ) );
-							}
-							else
-							{
-								Tmp.append( ch );
-							}
-						}
-					}
-					break;
-			}
-
-			if( !Tmp.isEmpty() )
-			{
-				sendData( Tmp );
+				mBuffer.append( ch );
 			}
 		}
 
 		mLastChar = ch;
 	}
-
-	// echo the data back to the client
-
-//	if( echo() )
-//	{
-//		sendData( pData );
-//	}
 }
 
 void ListenerTelnetSocket::inputTimeout( void )
@@ -563,34 +448,6 @@ void ListenerTelnetSocket::textInput( const QString &pText )
 	}
 
 	sendData( Buff );
-}
-
-void ListenerTelnetSocket::processAnsiSequence( const QByteArray &pData )
-{
-	if( pData.size() == 3 )
-	{
-		switch( static_cast<quint8>( pData.at( 2 ) ) )
-		{
-			case 'C':	// CURSOR FORWARD
-				if( mAnsiPos < mBuffer.size() )
-				{
-					mAnsiPos++;
-
-					sendData( "\x1b[C" );
-				}
-				break;
-
-			case 'D':	// CURSOR BACK
-				if( mAnsiPos > 0 )
-				{
-					mAnsiPos--;
-
-					sendData( "\x1b[D" );
-				}
-				break;
-
-		}
-	}
 }
 
 void ListenerTelnetSocket::telnetEventHandlerStatic(telnet_t *telnet, telnet_event_t *event, void *user_data)

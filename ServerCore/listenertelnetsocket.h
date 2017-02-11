@@ -33,7 +33,6 @@ public:
 private:
 	void sendData( const QByteArray &pData );
 	void processInput( const QByteArray &pData );
-	void processAnsiSequence( const QByteArray &pData );
 
 	static void telnetEventHandlerStatic( telnet_t *telnet, telnet_event_t *event, void *user_data );
 
@@ -57,9 +56,6 @@ private:
 	quint8						 mLastChar;
 	QByteArray					 mTelnetSequence;
 	QTimer						 mTimer;
-	int							 mAnsiEsc;
-	QByteArray					 mAnsiSeq;
-	int							 mAnsiPos;
 	telnet_t					*mTelnet;
 	QVector<telnet_telopt_t>	 mOptions;
 	Connection::LineMode		 mLineMode;
