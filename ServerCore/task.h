@@ -30,6 +30,10 @@ private:
 	QString				 mPreposition;			// the prepositional phrase found during parsing
 	ObjectId			 mProgrammerId;
 
+	ObjectId			 mPassObject;
+	ObjectId			 mPassVerbObject;
+	QString				 mPassVerb;
+
 	const static char	*mPrepositionList[];
 
 	friend class lua_task;
@@ -40,6 +44,8 @@ public:
 	Task( const TaskEntry &pEntry );
 
 	virtual ~Task( void );
+
+	Task &operator =( const Task &T );
 
 	inline TaskId id( void ) const
 	{
@@ -184,6 +190,36 @@ public:
 	inline void setProgrammer( ObjectId pObjectId )
 	{
 		mProgrammerId = pObjectId;
+	}
+
+	inline ObjectId passObject( void ) const
+	{
+		return( mPassObject );
+	}
+
+	inline void setPassObject( ObjectId pObjectId )
+	{
+		mPassObject = pObjectId;
+	}
+
+	inline ObjectId passVerbObject( void ) const
+	{
+		return( mPassVerbObject );
+	}
+
+	inline void setPassVerbObject( ObjectId pObjectId )
+	{
+		mPassVerbObject = pObjectId;
+	}
+
+	inline QString passVerb( void ) const
+	{
+		return( mPassVerb );
+	}
+
+	inline void setPassVerb( const QString &pVerb )
+	{
+		mPassVerb = pVerb;
 	}
 
 	void findObject( const QString &pName, QList<ObjectId> &pId ) const;

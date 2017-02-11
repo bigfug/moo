@@ -489,6 +489,11 @@ int lua_moo::luaPass( lua_State *L )
 		bool				 VrbFnd = false;
 		Verb				*V;
 
+		if( T.passObject() == id && T.passVerb() == T.verb() )
+		{
+			id = T.passVerbObject();
+		}
+
 		while( id != OBJECT_NONE )
 		{
 			Object			*O = OM.object( id );
@@ -522,7 +527,9 @@ int lua_moo::luaPass( lua_State *L )
 				{
 					Task		T2 = Command->task();
 
-					T2.setObject( P->id() );
+					T2.setPassObject( T.object() );
+					T2.setPassVerbObject( P->id() );
+					T2.setPassVerb( T.verb() );
 
 					return( Command->verbCall( T2, V, lua_gettop( L ) ) );
 				}
