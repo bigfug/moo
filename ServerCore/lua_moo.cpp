@@ -384,7 +384,14 @@ int lua_moo::luaNotify( lua_State *L )
 		switch( lua_type( L, ArgIdx ) )
 		{
 			case LUA_TSTRING:
-				Msg.append( lua_tostring( L, ArgIdx ) );
+				{
+					size_t		 StrLen;
+					const char	*StrDat = lua_tolstring( L, ArgIdx, &StrLen );
+					QString		 StrSrc = QString::fromLatin1( StrDat, StrLen );
+					QStringList	 StrLst = StrSrc.split( QRegExp( "[\r\n]+" ) );
+
+					Msg.append( StrLst.join( "\r\n" ) );
+				}
 				break;
 
 			case LUA_TNIL:
