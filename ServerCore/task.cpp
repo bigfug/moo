@@ -126,6 +126,8 @@ void Task::findObject( const QString &pName, QList<ObjectId> &pId ) const
 		{
 			pId.append( Player->location() );
 		}
+
+		return;
 	}
 
 	// Otherwise, the server considers all of the objects whose location is either the player
