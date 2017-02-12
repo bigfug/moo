@@ -203,11 +203,9 @@ bool Verb::matchPattern( const QString &Pattern, const QString &pMatch )
 	return( false );
 }
 
-bool Verb::matchName( const QString &pPatternList, const QString &pMatch )
+bool Verb::matchName( const QStringList &pPatternList, const QString &pMatch )
 {
-	const QStringList		Patterns = pPatternList.split( ' ' );
-
-	for( const QString &Pattern : Patterns )
+	for( const QString &Pattern : pPatternList )
 	{
 		if( matchPattern( Pattern, pMatch ) )
 		{
@@ -329,25 +327,31 @@ void Verb::setPrepositionArgument(const QString &pArg)
 
 void Verb::addAlias( const QString &pAlias )
 {
-	QStringList		AliasList = mVerbData.mAliases.split( ' ', QString::SkipEmptyParts );
+	int		l1 = mVerbData.mAliases.size();
 
-	AliasList.removeAll( pAlias );
+	mVerbData.mAliases.removeAll( pAlias );
 
-	AliasList.append( pAlias );
+	mVerbData.mAliases.append( pAlias );
 
-	mVerbData.mAliases = AliasList.join( " " );
+	int		l2 = mVerbData.mAliases.size();
 
-	setUpdated();
+	if( l1 != l2 )
+	{
+		setUpdated();
+	}
 }
 
 void Verb::remAlias( const QString &pAlias )
 {
-	QStringList		AliasList = mVerbData.mAliases.split( ' ', QString::SkipEmptyParts );
+	int		l1 = mVerbData.mAliases.size();
 
-	AliasList.removeAll( pAlias );
+	mVerbData.mAliases.removeAll( pAlias );
 
-	mVerbData.mAliases = AliasList.join( " " );
+	int		l2 = mVerbData.mAliases.size();
 
-	setUpdated();
+	if( l1 != l2 )
+	{
+		setUpdated();
+	}
 }
 

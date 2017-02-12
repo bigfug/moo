@@ -41,6 +41,8 @@ const luaL_reg lua_object::mLuaInstance[] =
 
 const luaL_Reg lua_object::mLuaInstanceFunctions[] =
 {
+	{ "aliasadd", lua_object::luaAliasAdd },
+	{ "aliasdel", lua_object::luaAliasDel },
 	{ "child", lua_object::luaChild },
 	{ "children", lua_object::luaChildren },
 	{ "verb", lua_object::luaVerb },
@@ -316,6 +318,22 @@ int lua_object::luaGet( lua_State *L )
 		if( strcmp( s, "id" ) == 0 )
 		{
 			lua_pushinteger( L, O->id() );
+
+			return( 1 );
+		}
+
+		if( strcmp( s, "aliases" ) == 0 )
+		{
+			const QStringList    AliasList = O->aliases();
+
+			lua_newtable( L );
+
+			for( int i = 0 ; i < AliasList.size() ; i++ )
+			{
+				lua_pushstring( L, AliasList[ i ].toLatin1() );
+
+				lua_rawseti( L, -2, i + 1 );
+			}
 
 			return( 1 );
 		}
@@ -1645,12 +1663,14 @@ Object * lua_object::argObj( lua_State *L, int pIndex )
 	return( ObjectManager::o( argId( L, pIndex ) ) );
 }
 
-void lua_object::lua_pushobject( lua_State *L, Object *O )
+int lua_object::lua_pushobject( lua_State *L, Object *O )
 {
 	lua_pushobjectid( L, O->id() );
+
+	return( 1 );
 }
 
-void lua_object::lua_pushobjectid( lua_State *L, ObjectId I )
+int lua_object::lua_pushobjectid( lua_State *L, ObjectId I )
 {
 	luaHandle			*H = (luaHandle *)lua_newuserdata( L, sizeof( luaHandle ) );
 
@@ -1663,6 +1683,8 @@ void lua_object::lua_pushobjectid( lua_State *L, ObjectId I )
 
 	luaL_getmetatable( L, "moo.object" );
 	lua_setmetatable( L, -2 );
+
+	return( 1 );
 }
 
 int lua_object::luaProperty( lua_State *L )
@@ -1684,6 +1706,82 @@ int lua_object::luaProperty( lua_State *L )
 
 			return( 1 );
 		}
+	}
+	catch( mooException e )
+	{
+		e.lua_pushexception( L );
+
+		LuaErr = true;
+	}
+	catch( ... )
+	{
+
+	}
+
+	return( LuaErr ? lua_error( L ) : 0 );
+}
+
+int lua_object::luaAliasAdd(lua_State *L)
+{
+	bool		LuaErr = false;
+
+	try
+	{
+		const Task			&T = lua_task::luaGetTask( L )->task();
+		Object				*O = argObj( L );
+		Object				*Player = ObjectManager::o( T.programmer() );
+
+		if( Player == 0 )
+		{
+			throw mooException( E_PERM, "programmer is invalid" );
+		}
+
+		const char			*N = luaL_checkstring( L, -1 );
+
+		if( Player->id() != O->owner() && !Player->wizard() )
+		{
+			throw mooException( E_PERM, "programmer has no access" );
+		}
+
+		O->aliasAdd( N );
+	}
+	catch( mooException e )
+	{
+		e.lua_pushexception( L );
+
+		LuaErr = true;
+	}
+	catch( ... )
+	{
+
+	}
+
+	return( LuaErr ? lua_error( L ) : 0 );
+}
+
+int lua_object::luaAliasDel(lua_State *L)
+{
+	bool		LuaErr = false;
+
+	try
+	{
+		const Task			&T = lua_task::luaGetTask( L )->task();
+		Object				*O = argObj( L );
+		Object				*Player = ObjectManager::o( T.programmer() );
+
+		if( Player == 0 )
+		{
+			throw mooException( E_PERM, "programmer is invalid" );
+		}
+
+		const char			*N = luaL_checkstring( L, -1 );
+
+		if( Player->id() != O->owner() && !Player->wizard() )
+		{
+			throw mooException( E_PERM, "programmer has no access" );
+		}
+
+		O->aliasDelete( N );
 	}
 	catch( mooException e )
 	{

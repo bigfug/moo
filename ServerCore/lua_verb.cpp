@@ -161,7 +161,16 @@ int lua_verb::luaGet( lua_State *L )
 
 		if( strcmp( s, "aliases" ) == 0 )
 		{
-			lua_pushstring( L, V->aliases().toLatin1() );
+			const QStringList	AliasList = V->aliases();
+
+			lua_newtable( L );
+
+			for( int i = 0 ; i < AliasList.size() ; i++ )
+			{
+				lua_pushstring( L, AliasList[ i ].toLatin1() );
+
+				lua_rawseti( L, -2, i + 1 );
+			}
 
 			return( 1 );
 		}

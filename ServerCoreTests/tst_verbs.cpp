@@ -227,42 +227,52 @@ then it matches anything at all.
 
 void ServerTest::verbMatch( void )
 {
-	QVERIFY( Verb::matchName( "test_verb", "test_verb" ) == true );
-	QVERIFY( Verb::matchName( "test_verb", "test_verb2" ) == false );
+	QStringList		T1 = { "test_verb" };
 
-	QVERIFY( Verb::matchName( "foo*bar", "fo" ) == false );
-	QVERIFY( Verb::matchName( "foo*bar", "foo" ) == true );
-	QVERIFY( Verb::matchName( "foo*bar", "foob" ) == true );
-	QVERIFY( Verb::matchName( "foo*bar", "fooba" ) == true );
-	QVERIFY( Verb::matchName( "foo*bar", "foobar" ) == true );
-	QVERIFY( Verb::matchName( "foo*bar", "foobar2" ) == false );
+	QVERIFY( Verb::matchName( T1, "test_verb" ) == true );
+	QVERIFY( Verb::matchName( T1, "test_verb2" ) == false );
 
-	QVERIFY( Verb::matchName( "foo*", "fo" ) == false );
-	QVERIFY( Verb::matchName( "foo*", "foo" ) == true );
-	QVERIFY( Verb::matchName( "foo*", "foobar" ) == true );
-	QVERIFY( Verb::matchName( "foo*", "food" ) == true );
-	QVERIFY( Verb::matchName( "foo*", "foogleman" ) == true );
-	QVERIFY( Verb::matchName( "foo*", "no_match" ) == false );
+	QStringList		T2 = { "foo*bar" };
 
-	QVERIFY( Verb::matchName( "*", "fo" ) == true );
-	QVERIFY( Verb::matchName( "*", "foo" ) == true );
-	QVERIFY( Verb::matchName( "*", "foob" ) == true );
-	QVERIFY( Verb::matchName( "*", "fooba" ) == true );
-	QVERIFY( Verb::matchName( "*", "foobar" ) == true );
-	QVERIFY( Verb::matchName( "*", "foobar2" ) == true );
+	QVERIFY( Verb::matchName( T2, "fo" ) == false );
+	QVERIFY( Verb::matchName( T2, "foo" ) == true );
+	QVERIFY( Verb::matchName( T2, "foob" ) == true );
+	QVERIFY( Verb::matchName( T2, "fooba" ) == true );
+	QVERIFY( Verb::matchName( T2, "foobar" ) == true );
+	QVERIFY( Verb::matchName( T2, "foobar2" ) == false );
 
-	QVERIFY( Verb::matchName( "g*et t*ake", "abc" ) == false );
+	QStringList		T3 = { "foo*" };
 
-	QVERIFY( Verb::matchName( "g*et t*ake", "g" ) == true );
-	QVERIFY( Verb::matchName( "g*et t*ake", "ge" ) == true );
-	QVERIFY( Verb::matchName( "g*et t*ake", "get" ) == true );
-	QVERIFY( Verb::matchName( "g*et t*ake", "get2" ) == false );
+	QVERIFY( Verb::matchName( T3, "fo" ) == false );
+	QVERIFY( Verb::matchName( T3, "foo" ) == true );
+	QVERIFY( Verb::matchName( T3, "foobar" ) == true );
+	QVERIFY( Verb::matchName( T3, "food" ) == true );
+	QVERIFY( Verb::matchName( T3, "foogleman" ) == true );
+	QVERIFY( Verb::matchName( T3, "no_match" ) == false );
 
-	QVERIFY( Verb::matchName( "g*et t*ake", "t" ) == true );
-	QVERIFY( Verb::matchName( "g*et t*ake", "ta" ) == true );
-	QVERIFY( Verb::matchName( "g*et t*ake", "tak" ) == true );
-	QVERIFY( Verb::matchName( "g*et t*ake", "take" ) == true );
-	QVERIFY( Verb::matchName( "g*et t*ake", "take2" ) == false );
+	QStringList		T4 = { "*" };
+
+	QVERIFY( Verb::matchName( T4, "fo" ) == true );
+	QVERIFY( Verb::matchName( T4, "foo" ) == true );
+	QVERIFY( Verb::matchName( T4, "foob" ) == true );
+	QVERIFY( Verb::matchName( T4, "fooba" ) == true );
+	QVERIFY( Verb::matchName( T4, "foobar" ) == true );
+	QVERIFY( Verb::matchName( T4, "foobar2" ) == true );
+
+	QStringList		T5 = { "g*et", "t*ake" };
+
+	QVERIFY( Verb::matchName( T5, "abc" ) == false );
+
+	QVERIFY( Verb::matchName( T5, "g" ) == true );
+	QVERIFY( Verb::matchName( T5, "ge" ) == true );
+	QVERIFY( Verb::matchName( T5, "get" ) == true );
+	QVERIFY( Verb::matchName( T5, "get2" ) == false );
+
+	QVERIFY( Verb::matchName( T5, "t" ) == true );
+	QVERIFY( Verb::matchName( T5, "ta" ) == true );
+	QVERIFY( Verb::matchName( T5, "tak" ) == true );
+	QVERIFY( Verb::matchName( T5, "take" ) == true );
+	QVERIFY( Verb::matchName( T5, "take2" ) == false );
 }
 
 

@@ -102,7 +102,7 @@ Verb *Object::verbMatch( const QString &pName )
 
 		if( !Verb::matchPattern( v.name(), pName ) )
 		{
-			const QString		&a = v.aliases();
+			const QStringList		&a = v.aliases();
 
 			if( a.isEmpty() )
 			{
@@ -422,6 +422,36 @@ void Object::setPermissions( quint16 pPerms )
 	setUpdated();
 }
 
+void Object::aliasAdd(const QString &pName)
+{
+	int		l1 = mData.mAliases.size();
+
+	mData.mAliases.removeAll( pName );
+
+	mData.mAliases.append( pName );
+
+	int		l2 = mData.mAliases.size();
+
+	if( l1 != l2 )
+	{
+		setUpdated();
+	}
+}
+
+void Object::aliasDelete(const QString &pName)
+{
+	int		l1 = mData.mAliases.size();
+
+	mData.mAliases.removeAll( pName );
+
+	int		l2 = mData.mAliases.size();
+
+	if( l1 != l2 )
+	{
+		setUpdated();
+	}
+}
+
 bool Object::matchName( const QString &pName ) const
 {
 	if( mData.mName.startsWith( pName, Qt::CaseInsensitive ) )
@@ -474,19 +504,9 @@ Verb * Object::verbMatch( const QString &pName, ObjectId DirectObjectId, const Q
 			continue;
 		}
 
-		if( !Verb::matchPattern( v.name(), pName ) )
+		if( !Verb::matchPattern( v.name(), pName ) && !Verb::matchName( v.aliases(), pName ) )
 		{
-			const QString		&a = v.aliases();
-
-			if( a.isEmpty() )
-			{
-				continue;
-			}
-
-			if( !Verb::matchName( a, pName ) )
-			{
-				continue;
-			}
+			continue;
 		}
 
 		return( &it.value() );

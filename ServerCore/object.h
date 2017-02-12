@@ -29,6 +29,7 @@ typedef struct ObjectData
 	// Built-in Properties
 
 	QString				mName;			// the usual name for this object
+	QStringList			mAliases;
 	ObjectId			mOwner;			// the player who controls access to it
 	ObjectId			mLocation;		// where the object is in virtual reality
 	QList<ObjectId>		mContents;		// a list of objects, the inverse of `location'
@@ -98,6 +99,9 @@ public:
 
 	quint16 permissions( void ) const;
 	void setPermissions( quint16 pPerms );
+
+	void aliasAdd( const QString &pName );
+	void aliasDelete( const QString &pName );
 
 	//
 
@@ -225,6 +229,11 @@ public:
 	inline ConnectionId connection( void ) const
 	{
 		return( mData.mConnection );
+	}
+
+	inline const QStringList &aliases( void ) const
+	{
+		return( mData.mAliases );
 	}
 
 	void setOwner( ObjectId pOwner );

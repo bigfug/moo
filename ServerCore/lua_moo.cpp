@@ -60,6 +60,7 @@ const luaL_Reg lua_moo::mLuaGetFunc[] =
 {
 	{ "root", lua_moo::luaRoot },
 	{ "last", lua_moo::luaLastObject },
+	{ "system", lua_moo::luaSystem },
 	{ "timestamp", lua_moo::luaTimestamp },
 	{ 0, 0 }
 };
@@ -251,7 +252,75 @@ void lua_moo::luaSetEnv( lua_State *L )
 
 	//--------------------------------------------------
 
+	lua_pushinteger( L, OBJECT_NONE );
+	lua_setfield( L, -2, "O_NONE" );
+
+	lua_pushinteger( L, OBJECT_AMBIGUOUS );
+	lua_setfield( L, -2, "O_AMBIGUOUS" );
+
+	lua_pushinteger( L, OBJECT_FAILED_MATCH );
+	lua_setfield( L, -2, "O_FAILED_MATCH" );
+
+	lua_pushinteger( L, OBJECT_UNSPECIFIED );
+	lua_setfield( L, -2, "O_UNSPECIFIED" );
+
+	//--------------------------------------------------
+
+	lua_pushinteger( L, E_NONE );
+	lua_setfield( L, -2, "E_NONE" );
+
+	lua_pushinteger( L, E_TYPE );
+	lua_setfield( L, -2, "E_TYPE" );
+
+	lua_pushinteger( L, E_DIV );
+	lua_setfield( L, -2, "E_DIV" );
+
+	lua_pushinteger( L, E_PERM );
+	lua_setfield( L, -2, "E_PERM" );
+
+	lua_pushinteger( L, E_PROPNF );
+	lua_setfield( L, -2, "E_PROPNF" );
+
+	lua_pushinteger( L, E_VERBNF );
+	lua_setfield( L, -2, "E_VERBNF" );
+
+	lua_pushinteger( L, E_VARNF );
+	lua_setfield( L, -2, "E_VARNF" );
+
+	lua_pushinteger( L, E_INVIND );
+	lua_setfield( L, -2, "E_INVIND" );
+
+	lua_pushinteger( L, E_RECMOVE );
+	lua_setfield( L, -2, "E_RECMOVE" );
+
+	lua_pushinteger( L, E_MAXREC );
+	lua_setfield( L, -2, "E_MAXREC" );
+
+	lua_pushinteger( L, E_RANGE );
+	lua_setfield( L, -2, "E_RANGE" );
+
+	lua_pushinteger( L, E_ARGS );
+	lua_setfield( L, -2, "E_ARGS" );
+
+	lua_pushinteger( L, E_NACC );
+	lua_setfield( L, -2, "E_NACC" );
+
+	lua_pushinteger( L, E_VERBNF );
+	lua_setfield( L, -2, "E_VERBNF" );
+
+	lua_pushinteger( L, E_INVARG );
+	lua_setfield( L, -2, "E_INVARG" );
+
+	lua_pushinteger( L, E_QUOTA );
+	lua_setfield( L, -2, "E_QUOTA" );
+
+	lua_pushinteger( L, E_FLOAT );
+	lua_setfield( L, -2, "E_FLOAT" );
+
+	//--------------------------------------------------
+
 	lua_newtable( L );
+
 	lua_pushcfunction( L, lua_moo::luaGlobalIndex );
 	lua_setfield( L, -2, "__index" );
 
@@ -428,7 +497,7 @@ int lua_moo::luaNotify( lua_State *L )
 		lua_task			*Command = lua_task::luaGetTask( L );
 		Connection			*C = ConnectionManager::instance()->connection( Command->connectionid() );
 
-		if( C != 0 )
+		if( C )
 		{
 			C->notify( Msg );
 		}
@@ -455,7 +524,7 @@ int lua_moo::luaRoot( lua_State *L )
 
 	try
 	{
-		Object		*O = ObjectManager::instance()->object( 0 );
+		Object		*O = ObjectManager::instance()->object( 1 );
 
 		if( O == 0 )
 		{
@@ -465,6 +534,35 @@ int lua_moo::luaRoot( lua_State *L )
 		lua_object::lua_pushobject( L, O );
 
 		return( 1 );
+	}
+	catch( mooException e )
+	{
+		e.lua_pushexception( L );
+
+		LuaErr = true;
+	}
+	catch( ... )
+	{
+
+	}
+
+	return( LuaErr ? lua_error( L ) : 0 );
+}
+
+int lua_moo::luaSystem( lua_State *L )
+{
+	bool				 LuaErr = false;
+
+	try
+	{
+		Object		*O = ObjectManager::instance()->object( 0 );
+
+		if( !O )
+		{
+			throw( mooException( E_INVARG, "system object has not been defined yet" ) );
+		}
+
+		return( lua_object::lua_pushobject( L, O ) );
 	}
 	catch( mooException e )
 	{
@@ -963,6 +1061,11 @@ int lua_moo::luaRead( lua_State *L )
 					break;
 
 				case LUA_TTABLE:
+					{
+						QVariantMap		V;
+
+						VerbArgs.append( V );
+					}
 					break;
 			}
 

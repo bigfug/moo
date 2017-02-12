@@ -39,6 +39,7 @@ private:
 
 	static int luaNotify( lua_State *L );
 	static int luaRoot( lua_State *L );
+	static int luaSystem( lua_State *L );
 	static int luaPass( lua_State *L );
 	static int luaEval( lua_State *L );
 	static int luaHash( lua_State *L );

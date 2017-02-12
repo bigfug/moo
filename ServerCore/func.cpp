@@ -15,7 +15,7 @@ void Func::initialise( void )
 	mData.mDirty = false;
 }
 
-int Func::writerStatic(lua_State *L, const void *p, size_t sz, void *ud)
+int Func::writerStatic( lua_State *L, const void *p, size_t sz, void *ud )
 {
 	return( reinterpret_cast<Func *>( ud )->writer( L, p, sz ) );
 }
@@ -31,6 +31,8 @@ int Func::writer( lua_State *L, const void* p, size_t sz )
 
 int Func::compile()
 {
+	qDebug() << "Compiling" << mData.mName;
+
 	lua_State		*L = luaL_newstate();
 
 	if( L == 0 )
@@ -98,7 +100,7 @@ void Func::setOwner(ObjectId pOwner)
 	}
 }
 
-void Func::setRead(bool pRead)
+void Func::setRead( bool pRead )
 {
 	if( mData.mRead != pRead )
 	{
@@ -108,7 +110,7 @@ void Func::setRead(bool pRead)
 	}
 }
 
-void Func::setWrite(bool pWrite)
+void Func::setWrite( bool pWrite )
 {
 	if( mData.mWrite != pWrite )
 	{
@@ -118,7 +120,7 @@ void Func::setWrite(bool pWrite)
 	}
 }
 
-void Func::setExecute(bool pExecute)
+void Func::setExecute( bool pExecute )
 {
 	if( mData.mExecute != pExecute )
 	{
@@ -128,12 +130,17 @@ void Func::setExecute(bool pExecute)
 	}
 }
 
-void Func::setScript(const QString &pScript)
+void Func::setScript( const QString &pScript )
 {
 	if( mData.mScript != pScript )
 	{
 		mData.mScript = pScript;
 		mData.mDirty  = true;
+
+		if( compile() == 0 )
+		{
+			mData.mDirty = false;
+		}
 
 		setUpdated();
 	}

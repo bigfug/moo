@@ -21,7 +21,7 @@ typedef struct VerbData
 	ArgObj			mIndirectObject;
 	ArgObj			mPrepositionType;
 	QString			mPreposition;
-	QString			mAliases;
+	QStringList		mAliases;
 } VerbData;
 
 class Verb : public Func
@@ -37,7 +37,7 @@ public:
 
 	static bool matchPattern( const QString &Pattern, const QString &pMatch);
 
-	static bool matchName( const QString &pPattern, const QString &pMatch );
+	static bool matchName( const QStringList &pPattern, const QString &pMatch );
 
 	bool matchPreposition( const QString &pPreposition ) const;
 
@@ -117,7 +117,7 @@ public:
 
 	void setPrepositionArgument( const QString &pArg );
 
-	const QString &aliases( void ) const
+	const QStringList &aliases( void ) const
 	{
 		return( mVerbData.mAliases );
 	}

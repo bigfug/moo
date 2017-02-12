@@ -32,6 +32,7 @@ ODBSQL::ODBSQL()
 		mDB.exec( "CREATE TABLE object ( "
 				  "id INTEGER PRIMARY KEY,"
 				  "name VARCHAR(255),"
+				  "aliases TEXT,"
 				  "parent INTEGER DEFAULT -1,"
 				  "player BOOLEAN DEFAULT false,"
 				  "connection INTEGER DEFAULT -1,"
@@ -66,7 +67,8 @@ ODBSQL::ODBSQL()
 				  "preptype VARCHAR(20),"
 				  "iobj VARCHAR(20),"
 				  "prep VARCHAR(255),"
-				  "aliases VARCHAR(255)"
+				  "aliases TEXT,"
+				  "code BLOB"
 				  ")" );
 
 		QSqlError		DBE = mDB.lastError();
@@ -228,6 +230,7 @@ Object *ODBSQL::object( ObjectId pIndex ) const
 	D.mId = Q.value( "id" ).toInt();
 	D.mLocation = Q.value( "location" ).toInt();
 	D.mName = Q.value( "name" ).toString();
+	D.mAliases = Q.value( "aliases" ).toString().split( ',', QString::SkipEmptyParts );
 	D.mFertile = Q.value( "fertile" ).toBool();
 	D.mOwner = Q.value( "owner" ).toInt();
 	D.mParent = Q.value( "parent" ).toInt();
@@ -290,11 +293,21 @@ Object *ODBSQL::object( ObjectId pIndex ) const
 			FD.mScript  = Q.value( "script" ).toString();
 			FD.mWrite   = Q.value( "write" ).toBool();
 
-			VD.mAliases = Q.value( "aliases" ).toString();
+			FD.mCompiled = Q.value( "code" ).toByteArray();
+			FD.mDirty    = FD.mCompiled.isEmpty();
+
+			VD.mAliases = Q.value( "aliases" ).toString().split( ',', QString::SkipEmptyParts );
 			VD.mDirectObject = Verb::argobj_from( Q.value( "dobj" ).toString().toLatin1() );
 			VD.mIndirectObject = Verb::argobj_from( Q.value( "iobj" ).toString().toLatin1() );
 			VD.mPrepositionType = Verb::argobj_from( Q.value( "preptype" ).toString().toLatin1() );
 			VD.mPreposition = Q.value( "prep" ).toString();
+
+			if( FD.mDirty && !V.compile() )
+			{
+				FD.mDirty = false;
+
+				ObjectManager::instance()->updateVerb( O, FD.mName );
+			}
 
 			D.mVerbs.insert( V.name(), V );
 		}
@@ -412,6 +425,7 @@ void bindObject( const ObjectData &D, QSqlQuery &Q )
 	Q.bindValue( ":id", D.mId );
 	Q.bindValue( ":parent", D.mParent );
 	Q.bindValue( ":name", D.mName );
+	Q.bindValue( ":aliases", D.mAliases.join( ',' ) );
 	Q.bindValue( ":player", D.mPlayer );
 	Q.bindValue( ":connection", D.mConnection );
 	Q.bindValue( ":owner", D.mOwner );
@@ -432,6 +446,7 @@ void bindFunc( const FuncData &D, QSqlQuery &Q )
 	Q.bindValue( ":write", D.mWrite );
 	Q.bindValue( ":execute", D.mExecute );
 	Q.bindValue( ":script", D.mScript );
+	Q.bindValue( ":code", D.mCompiled );
 }
 
 void bindVerb( const VerbData &D, QSqlQuery &Q )
@@ -440,7 +455,7 @@ void bindVerb( const VerbData &D, QSqlQuery &Q )
 	Q.bindValue( ":iobj", Verb::argobj_name( D.mIndirectObject ) );
 	Q.bindValue( ":preptype", Verb::argobj_name( D.mPrepositionType ) );
 	Q.bindValue( ":prep", D.mPreposition );
-	Q.bindValue( ":aliases", D.mAliases );
+	Q.bindValue( ":aliases", D.mAliases.join( ',' ) );
 }
 
 void objectsToStrings( QVariantMap &PrpDat )
@@ -562,9 +577,9 @@ void ODBSQL::addObject( Object &pObject )
 	QSqlQuery			 Q;
 
 	Q.prepare( "INSERT INTO object "
-			   "( id, parent, name, player, connection, owner, location, programmer, wizard, read, write, fertile ) "
+			   "( id, parent, name, aliases, player, connection, owner, location, programmer, wizard, read, write, fertile ) "
 			   "VALUES "
-			   "( :id, :parent, :name, :player, :connection, :owner, :location, :programmer, :wizard, :read, :write, :fertile )" );
+			   "( :id, :parent, :name, :aliases, :player, :connection, :owner, :location, :programmer, :wizard, :read, :write, :fertile )" );
 
 	bindObject( D, Q );
 
@@ -608,7 +623,7 @@ void ODBSQL::updateObject( Object &pObject )
 
 	QSqlQuery			 Q;
 
-	Q.prepare( "UPDATE object SET parent = :parent, name = :name, player = :player, connection = :connection, owner = :owner, location = :location, programmer = :programmer, wizard = :wizard, read = :read, write = :write, fertile = :fertile WHERE id = :id" );
+	Q.prepare( "UPDATE object SET parent = :parent, name = :name, aliases = :aliases, player = :player, connection = :connection, owner = :owner, location = :location, programmer = :programmer, wizard = :wizard, read = :read, write = :write, fertile = :fertile WHERE id = :id" );
 
 	bindObject( D, Q );
 
@@ -644,9 +659,9 @@ void ODBSQL::addVerb( Object &pObject, QString pName )
 	if( !B )
 	{
 		B = Q.prepare( "INSERT INTO verb "
-					"( name, object, owner, read, write, execute, script, dobj, preptype, iobj, prep, aliases )"
+					"( name, object, owner, read, write, execute, script, dobj, preptype, iobj, prep, aliases, code )"
 					"VALUES "
-					"( :name, :object, :owner, :read, :write, :execute, :script, :dobj, :preptype, :iobj, :prep, :aliases )"
+					"( :name, :object, :owner, :read, :write, :execute, :script, :dobj, :preptype, :iobj, :prep, :aliases, :code )"
 					);
 	}
 
@@ -708,7 +723,7 @@ void ODBSQL::updateVerb(Object &pObject, QString pName)
 	if( !B )
 	{
 		B = Q.prepare( "UPDATE verb SET "
-					"owner = :owner, read = :read, write = :write, execute = :execute, script = :script, dobj = :dobj, preptype = :preptype, iobj = :iobj, prep = :prep, aliases = :aliases "
+					"owner = :owner, read = :read, write = :write, execute = :execute, script = :script, dobj = :dobj, preptype = :preptype, iobj = :iobj, prep = :prep, aliases = :aliases, code = :code "
 					"WHERE object = :object AND name = :name"
 					);
 	}
@@ -766,7 +781,7 @@ void ODBSQL::addProperty(Object &pObject, QString pName)
 	}
 }
 
-void ODBSQL::deleteProperty(Object &pObject, QString pName)
+void ODBSQL::deleteProperty( Object &pObject, QString pName )
 {
 	static QSqlQuery			 Q;
 	static bool					 B = false;
@@ -791,7 +806,7 @@ void ODBSQL::deleteProperty(Object &pObject, QString pName)
 	}
 }
 
-void ODBSQL::updateProperty(Object &pObject, QString pName)
+void ODBSQL::updateProperty( Object &pObject, QString pName )
 {
 	Property		*P = pObject.prop( pName );
 

@@ -10,8 +10,8 @@ class lua_object
 public:
 	static ObjectId argId( lua_State *L, int pIndex = 1 );
 	static Object *argObj( lua_State *L, int pIndex = 1 );
-	static void lua_pushobject( lua_State *L, Object *O );
-	static void lua_pushobjectid( lua_State *L, ObjectId I );
+	static int lua_pushobject( lua_State *L, Object *O );
+	static int lua_pushobjectid( lua_State *L, ObjectId I );
 
 	typedef struct luaHandle
 	{
@@ -59,6 +59,9 @@ private:
 
 	static int luaVerb( lua_State *L );
 	static int luaProperty( lua_State *L );
+
+	static int luaAliasAdd( lua_State *L );
+	static int luaAliasDel( lua_State *L );
 
 	static int luaVerbAdd( lua_State *L );
 	static int luaVerbDel( lua_State *L );
