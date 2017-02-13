@@ -65,6 +65,66 @@ const luaL_Reg lua_moo::mLuaGetFunc[] =
 	{ 0, 0 }
 };
 
+int luaTableIndexOf( lua_State *L )
+{
+	luaL_checktype( L, 1, LUA_TTABLE );
+	luaL_checkany( L, 2 );
+
+	lua_pushvalue( L, 2 );
+
+	size_t				 SrcLen;
+	const char			*SrcDat = lua_tolstring( L, -1, &SrcLen );
+
+	const QString		 SrcStr( SrcDat );
+
+	lua_pop( L, 1 );
+
+	// iterate over table
+
+	QVariant			 DstKey;
+
+	lua_pushvalue( L, 1 );		// stack now contains: -1 => table
+
+	lua_pushnil( L );			// stack now contains: -1 => nil; -2 => table
+
+	while( DstKey.isNull() && lua_next( L, -2 ) )
+	{
+		// stack now contains: -1 => value; -2 => key; -3 => table
+
+		lua_pushvalue( L, -1 );	// stack now contains: -1 => value; -2 => value; -3 => key; -4 => table
+
+		const char *value = lua_tostring( L, -2 );	// may convert
+
+		if( !SrcStr.compare( QString( value ) ) )
+		{
+			switch( lua_type( L, -3 ) )
+			{
+				case LUA_TSTRING:
+					DstKey = QString( luaL_optstring( L, -3, NULL ) );
+					break;
+
+				case LUA_TNUMBER:
+					DstKey = luaL_optint( L, -3, 0 );
+					break;
+			}
+		}
+
+		lua_pop( L, 2 );		// stack now contains: -1 => key; -2 => table
+	}
+
+	lua_pop( L, 1 );			// pop table
+
+	luaL_pushvariant( L, DstKey );
+
+	return( 1 );
+}
+
+const luaL_Reg luaTableFuncs[] =
+{
+	{ "indexOf", luaTableIndexOf },
+	{ 0, 0 }
+};
+
 void lua_moo::initialise()
 {
 	addFunctions( mLuaStatic );
@@ -234,6 +294,9 @@ void lua_moo::luaSetEnv( lua_State *L )
 	//--------------------------------------------------
 
 	lua_getglobal( L, "table" );
+
+	luaL_register( L, NULL, luaTableFuncs );	// leaves table on stack
+
 	lua_setfield( L, -2, "table" );
 
 	lua_getglobal( L, "string" );
