@@ -93,9 +93,11 @@ private:
 
 		printf( "table\n{\n" );
 
+		lua_pushvalue( L, t );
+
 		lua_pushnil( L );		// first key
 
-		while( lua_next( L, t ) != 0 )
+		while( lua_next( L, -2 ) != 0 )
 		{
 			typeDump( L, -2 );
 
@@ -113,6 +115,8 @@ private:
 		printf( "}\n" );
 
 		//printf( "exit: %d\n", lua_gettop( L ) );
+
+		lua_pop( L, 1 );
 	}
 
 	static void initialise( void );
