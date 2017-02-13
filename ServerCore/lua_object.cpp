@@ -1432,31 +1432,13 @@ int lua_object::luaFind( lua_State *L )
 				continue;
 			}
 
-			Property				*P = F->prop( "aliases" );
-
-			if( !P )
+			for( const QString &S : F->aliases() )
 			{
-				continue;
-			}
-
-			if( P->value().type() == QVariant::String )
-			{
-				if( P->value().toString().startsWith( N, Qt::CaseInsensitive ) )
+				if( S.startsWith( N, Qt::CaseInsensitive ) )
 				{
 					ObjLst << F;
-				}
-			}
 
-			if( P->value().type() == QVariant::Map )
-			{
-				for( const QVariant &V : P->value().toMap().values() )
-				{
-					if( V.type() == QVariant::String && V.toString().startsWith( N, Qt::CaseInsensitive ) )
-					{
-						ObjLst << F;
-
-						break;
-					}
+					break;
 				}
 			}
 		}

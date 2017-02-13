@@ -463,27 +463,11 @@ bool Object::matchName( const QString &pName ) const
 
 	while( O )
 	{
-		const Property		*P = O->prop( "aliases" );
-
-		if( P )
+		for( const QString &S : O->aliases() )
 		{
-			if( P->value().type() == QVariant::String )
+			if( S.startsWith( pName, Qt::CaseInsensitive ) )
 			{
-				if( P->value().toString().startsWith( pName, Qt::CaseInsensitive ) )
-				{
-					return( true );
-				}
-			}
-
-			if( P->value().type() == QVariant::Map )
-			{
-				for( const QVariant &V : P->value().toMap().values() )
-				{
-					if( V.type() == QVariant::String && V.toString().startsWith( pName, Qt::CaseInsensitive ) )
-					{
-						return( true );
-					}
-				}
+				return( true );
 			}
 		}
 
