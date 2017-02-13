@@ -79,8 +79,9 @@ int luaL_pushvariant( lua_State *L, const QVariant &pV )
 			}
 
 		default:
+			lua_pushnil( L );
 			break;
 	}
 
-	return( 0 );
+	return( 1 );
 }
