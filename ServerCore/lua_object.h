@@ -31,6 +31,8 @@ public:
 		}
 
 		ObjectId		O;
+
+		static const char		*mLuaName;
 	} luaHandle;
 
 private:

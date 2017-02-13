@@ -21,6 +21,8 @@
 // Lua state
 //-----------------------------------------------------------------------------
 
+const char	*lua_object::luaHandle::mLuaName    = "moo.object";
+
 LuaMap		lua_object::mLuaMap;
 
 const luaL_Reg lua_object::mLuaStatic[] =
@@ -70,7 +72,7 @@ void lua_object::luaRegisterState( lua_State *L )
 
 	// Create the moo.object metatables that is used for all objects
 
-	luaL_newmetatable( L, "moo.object" );
+	luaL_newmetatable( L, lua_object::luaHandle::mLuaName );
 
 	lua_pushstring( L, "__index" );
 	lua_pushvalue( L, -2 );  /* pushes the metatable */
@@ -736,7 +738,7 @@ int lua_object::luaToString( lua_State *L )
 	try
 	{
 		Object				*O = argObj( L );
-		QString				 N = QString( "%1: %2" ).arg( O->id() ).arg( O->name() );
+		QString				 N = QString( "#%1" ).arg( O->id() );
 
 		lua_pushstring( L, N.toLatin1() );
 
@@ -1630,7 +1632,7 @@ int lua_object::luaRecycle( lua_State *L )
 
 ObjectId lua_object::argId( lua_State *L, int pIndex )
 {
-	luaHandle *H = (luaHandle *)luaL_testudata( L, pIndex, "moo.object" );
+	luaHandle *H = (luaHandle *)luaL_testudata( L, pIndex, lua_object::luaHandle::mLuaName );
 
 	if( H == 0 )
 	{
@@ -1663,7 +1665,7 @@ int lua_object::lua_pushobjectid( lua_State *L, ObjectId I )
 
 	H->O = I;
 
-	luaL_getmetatable( L, "moo.object" );
+	luaL_getmetatable( L, lua_object::luaHandle::mLuaName );
 	lua_setmetatable( L, -2 );
 
 	return( 1 );

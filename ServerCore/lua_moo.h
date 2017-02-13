@@ -47,6 +47,7 @@ private:
 	static int luaFindPlayer( lua_State *L );
 	static int luaRead( lua_State *L );
 	static int luaFind( lua_State *L );
+	static int luaIsValidObject( lua_State *L );
 
 	static int luaTimestamp( lua_State *L );
 

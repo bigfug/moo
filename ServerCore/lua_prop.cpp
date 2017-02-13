@@ -449,10 +449,10 @@ void lua_prop::luaNewRecurse( lua_State *L, int pIdx, QVariant &pVariant )
 
 		case LUA_TUSERDATA:
 			{
-				if( luaL_testudata( L, pIdx, "moo.object" ) )
-				{
-					lua_object::luaHandle	*H = (lua_object::luaHandle *)luaL_checkudata( L, pIdx, "moo.object" );
+				lua_object::luaHandle	*H = (lua_object::luaHandle *)luaL_testudata( L, pIdx, lua_object::luaHandle::mLuaName );
 
+				if( H )
+				{
 					QVariant		V;
 
 					V.setValue( *H );

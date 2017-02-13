@@ -53,6 +53,7 @@ const luaL_Reg lua_moo::mLuaStatic[] =
 	{ "get", lua_moo::luaNetworkGet },
 	{ "read", lua_moo::luaRead },
 	{ "find", lua_moo::luaFind },
+	{ "isValidObject", lua_moo::luaIsValidObject },
 	{ 0, 0 }
 };
 
@@ -511,7 +512,7 @@ int lua_moo::luaNotify( lua_State *L )
 
 	for( int i = 0 ; i < ArgCnt ; i++ )
 	{
-		int		ArgIdx = -1 - i;
+		int		ArgIdx = 1 + i;
 
 		switch( lua_type( L, ArgIdx ) )
 		{
@@ -546,6 +547,23 @@ int lua_moo::luaNotify( lua_State *L )
 				break;
 
 			case LUA_TUSERDATA:
+				Msg.append( "<userdata>" );
+				break;
+
+			case LUA_TFUNCTION:
+				Msg.append( "<function>" );
+				break;
+
+			case LUA_TLIGHTUSERDATA:
+				Msg.append( "<lightuserdata>" );
+				break;
+
+			case LUA_TTABLE:
+				Msg.append( "<table>" );
+				break;
+
+			default:
+				Msg.append( "<unknown>" );
 				break;
 		}
 	}
@@ -843,6 +861,17 @@ int lua_moo::luaFind( lua_State *L )
 	return( 1 );
 }
 
+int lua_moo::luaIsValidObject( lua_State *L )
+{
+	luaL_checkany( L, 1 );
+
+	lua_object::luaHandle	*H = (lua_object::luaHandle *)luaL_testudata( L, 1, lua_object::luaHandle::mLuaName );
+
+	lua_pushboolean( L, H && H->O >= 0 );
+
+	return( 1 );
+}
+
 int lua_moo::luaTimestamp(lua_State *L)
 {
 	lua_pushnumber( L, lua_Number( ObjectManager::timestamp() ) / 1000.0 );
@@ -1084,10 +1113,10 @@ int lua_moo::luaRead( lua_State *L )
 
 				case LUA_TUSERDATA:
 					{
-						if( luaL_testudata( L, -1, "moo.object" ) )
-						{
-							lua_object::luaHandle	*H = (lua_object::luaHandle *)luaL_checkudata( L, -1, "moo.object" );
+						lua_object::luaHandle	*H = (lua_object::luaHandle *)luaL_testudata( L, -1, lua_object::luaHandle::mLuaName );
 
+						if( H )
+						{
 							QVariant		V;
 
 							V.setValue( *H );

@@ -137,10 +137,10 @@ void Func::setScript( const QString &pScript )
 		mData.mScript = pScript;
 		mData.mDirty  = true;
 
-		if( compile() == 0 )
-		{
-			mData.mDirty = false;
-		}
+//		if( compile() == 0 )
+//		{
+//			mData.mDirty = false;
+//		}
 
 		setUpdated();
 	}
