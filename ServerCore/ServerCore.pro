@@ -103,9 +103,9 @@ HEADERS += \
     inputsinkread.h
 
 macx {
-	INCLUDEPATH += /usr/local/opt/lua51/include/lua-5.1
+	INCLUDEPATH += /usr/local/opt/lua@5.1/include/lua-5.1
 
-	LIBS += -L/usr/local/opt/lua51/lib -llua5.1
+	LIBS += -L/usr/local/opt/lua@5.1/lib -llua5.1
 }
 
 windows {
