@@ -119,12 +119,12 @@ int lua_connection::luaNotify( lua_State *L )
 		luaConnection	*Con = arg( L );
 		const char		*Msg = lua_tolstring( L, 2, 0 );
 
-		if( Msg == 0 )
+		if( Msg )
 		{
 			throw( mooException( E_INVARG, "expected string" ) );
 		}
 
-		if( Con != 0 && Con->mConnection != 0 )
+		if( Con && Con->mConnection )
 		{
 			Con->mConnection->notify( QString( Msg ) );
 		}

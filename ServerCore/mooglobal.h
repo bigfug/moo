@@ -30,7 +30,8 @@ typedef enum mooError
 	E_INVARG,    // Invalid argument
 	E_QUOTA,     // Resource limit exceeded
 	E_FLOAT,     // Floating-point arithmetic error
-	E_MEMORY	 // Out of memory
+	E_MEMORY,	 // Out of memory
+	E_EXCEPTION  // Other C++ exception
 } mooError;
 
 #endif // MOOGLOBAL_H

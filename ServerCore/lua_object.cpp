@@ -1018,7 +1018,7 @@ int lua_object::luaVerbCall( lua_State *L )
 
 			Connection	*CON = ConnectionManager::instance()->connection( Command->connectionid() );
 
-			if( CON != 0 )
+			if( CON )
 			{
 				CON->notify( ErrMsg );
 			}

@@ -168,7 +168,7 @@ Object *ObjectManager::object( ObjectId pIndex )
 
 ObjectManager *ObjectManager::instance( void )
 {
-	if( mInstance != 0 )
+	if( mInstance )
 	{
 		return( mInstance );
 	}
