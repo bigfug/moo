@@ -49,6 +49,10 @@ private:
 	static int luaFind( lua_State *L );
 	static int luaIsValidObject( lua_State *L );
 
+	static int luaSetCookie( lua_State *L );
+	static int luaCookie( lua_State *L );
+	static int luaClearCookie( lua_State *L );
+
 	static int luaTimestamp( lua_State *L );
 
 	static int luaCheckPoint( lua_State *L );

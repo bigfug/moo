@@ -98,6 +98,8 @@ public:
 		return( mLineMode );
 	}
 
+	QVariant cookie( const QString &pName );
+
 signals:
 	void taskOutput( TaskEntry &pTask );
 	void textOutput( const QString &pText );
@@ -123,6 +125,10 @@ public slots:
 		mTerminalSize = pSize;
 	}
 
+	void setCookie( const QString &pName, QVariant pValue );
+
+	void clearCookie( const QString &pName );
+
 private:
 	ConnectionId		mConnectionId;
 	ObjectId			mObjectId;
@@ -138,6 +144,7 @@ private:
 	QSize				mTerminalSize;
 	QStringList			mLineBuffer;
 	LineMode			mLineMode;
+	QMap<QString,QVariant>	 mCookies;
 };
 
 #endif // CONNECTION_H
