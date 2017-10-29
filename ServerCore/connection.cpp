@@ -53,7 +53,7 @@ bool Connection::supportsLineMode() const
 	return( mLineModeSupport );
 }
 
-QVariant Connection::cookie(const QString &pName)
+QVariant Connection::cookie( const QString &pName )
 {
 	return( mCookies.value( pName ) );
 }

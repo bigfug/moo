@@ -1232,11 +1232,15 @@ int lua_moo::luaCookie( lua_State *L )
 		lua_task			*Command = lua_task::luaGetTask( L );
 		Connection			*C = ConnectionManager::instance()->connection( Command->connectionid() );
 
-		QVariant			 V = C->cookie( QString::fromLatin1( S ) );
+		QString				 N = QString::fromLatin1( S );
+		QVariant			 V = C->cookie( N );
 
-		luaL_pushvariant( L, V );
+		if( V.isValid() )
+		{
+			luaL_pushvariant( L, V );
 
-		return( 1 );
+			return( 1 );
+		}
 	}
 	catch( mooException e )
 	{
