@@ -10,7 +10,7 @@ SUBDIRS += \
 
 ServerCoreTests.depends += ServerCore
 Server.depends += ServerCore
-ServerCore.depends += Editor
+ServerCore.depends += Editor libs
 Daemon.depends += ServerCore
 
 linux {
