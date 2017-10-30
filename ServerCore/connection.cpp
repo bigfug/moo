@@ -5,6 +5,7 @@
 
 #include <QDebug>
 #include <QDateTime>
+#include <QMap>
 
 Connection::Connection( ConnectionId pConnectionId, QObject *pParent ) :
 	QObject( pParent ), mConnectionId( pConnectionId ), mObjectId( 0 ), mPlayerId( OBJECT_NONE ), mConnectionTime( 0 ), mLastActiveTime( 0 ),
@@ -50,6 +51,11 @@ bool Connection::processInput( const QString &pData )
 bool Connection::supportsLineMode() const
 {
 	return( mLineModeSupport );
+}
+
+QVariant Connection::cookie( const QString &pName )
+{
+	return( mCookies.value( pName ) );
 }
 
 void Connection::write( const QString &pText )
@@ -106,4 +112,14 @@ void Connection::setLineMode( Connection::LineMode pLineMode )
 	{
 		emit lineModeChanged( pLineMode );
 	}
+}
+
+void Connection::setCookie(const QString &pName, QVariant pValue)
+{
+	mCookies.insert( pName, pValue );
+}
+
+void Connection::clearCookie(const QString &pName)
+{
+	mCookies.remove( pName );
 }

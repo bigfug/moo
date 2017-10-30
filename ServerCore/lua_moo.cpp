@@ -53,6 +53,9 @@ const luaL_Reg lua_moo::mLuaStatic[] =
 	{ "get", lua_moo::luaNetworkGet },
 	{ "read", lua_moo::luaRead },
 	{ "find", lua_moo::luaFind },
+	{ "cookie", lua_moo::luaCookie },
+	{ "setCookie", lua_moo::luaSetCookie },
+	{ "clear", lua_moo::luaClearCookie },
 	{ "isValidObject", lua_moo::luaIsValidObject },
 	{ 0, 0 }
 };
@@ -1170,6 +1173,101 @@ int lua_moo::luaRead( lua_State *L )
 		{
 			C->pushInputSink( IS );
 		}
+	}
+	catch( mooException e )
+	{
+		e.lua_pushexception( L );
+
+		LuaErr = true;
+	}
+	catch( ... )
+	{
+
+	}
+
+	return( LuaErr ? lua_error( L ) : 0 );
+}
+
+int lua_moo::luaSetCookie( lua_State *L )
+{
+	const char				*S = luaL_checkstring( L, -1 );
+
+	luaL_checkany( L, -2 );
+
+	lua_task			*Command = lua_task::luaGetTask( L );
+	Connection			*C = ConnectionManager::instance()->connection( Command->connectionid() );
+	QVariant			 V;
+
+	switch( lua_type( L, -2 ) )
+	{
+		case LUA_TBOOLEAN:
+			V = lua_toboolean( L, -2 );
+			break;
+
+		case LUA_TNUMBER:
+			V = lua_tonumber( L, -2 );
+			break;
+
+		case LUA_TSTRING:
+			V = QString::fromLatin1( lua_tostring( L, -2 ) );
+			break;
+
+		default:
+			break;
+	}
+
+	C->setCookie( QString::fromLatin1( S ), V );
+
+	return( 0 );
+}
+
+int lua_moo::luaCookie( lua_State *L )
+{
+	bool				 LuaErr = false;
+
+	const char				*S = luaL_checkstring( L, -1 );
+
+	try
+	{
+		lua_task			*Command = lua_task::luaGetTask( L );
+		Connection			*C = ConnectionManager::instance()->connection( Command->connectionid() );
+
+		QString				 N = QString::fromLatin1( S );
+		QVariant			 V = C->cookie( N );
+
+		if( V.isValid() )
+		{
+			luaL_pushvariant( L, V );
+
+			return( 1 );
+		}
+	}
+	catch( mooException e )
+	{
+		e.lua_pushexception( L );
+
+		LuaErr = true;
+	}
+	catch( ... )
+	{
+
+	}
+
+	return( LuaErr ? lua_error( L ) : 0 );
+}
+
+int lua_moo::luaClearCookie( lua_State *L )
+{
+	bool					 LuaErr = false;
+
+	const char				*S = luaL_checkstring( L, -1 );
+
+	try
+	{
+		lua_task			*Command = lua_task::luaGetTask( L );
+		Connection			*C = ConnectionManager::instance()->connection( Command->connectionid() );
+
+		C->clearCookie( QString::fromLatin1( S ) );
 	}
 	catch( mooException e )
 	{

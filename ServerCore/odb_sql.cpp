@@ -57,6 +57,7 @@ ODBSQL::ODBSQL()
 	{
 		mDB.exec( "CREATE TABLE verb ( "
 				  "name VARCHAR(255),"
+				  "aliases TEXT,"
 				  "object INTEGER,"
 				  "owner INTEGER DEFAULT -1,"
 				  "read BOOLEAN DEFAULT true,"
@@ -67,8 +68,8 @@ ODBSQL::ODBSQL()
 				  "preptype VARCHAR(20),"
 				  "iobj VARCHAR(20),"
 				  "prep VARCHAR(255),"
-				  "aliases TEXT,"
-				  "code BLOB"
+				  "code BLOB,"
+				  "FOREIGN KEY(`object`) REFERENCES `object`(`id`)"
 				  ")" );
 
 		QSqlError		DBE = mDB.lastError();
@@ -90,7 +91,8 @@ ODBSQL::ODBSQL()
 				  "write BOOLEAN DEFAULT false,"
 				  "change BOOLEAN DEFAULT false,"
 				  "type VARCHAR(255),"
-				  "value BLOB"
+				  "value BLOB,"
+				  "FOREIGN KEY(`object`) REFERENCES `object`(`id`)"
 				  ")" );
 
 		QSqlError		DBE = mDB.lastError();
