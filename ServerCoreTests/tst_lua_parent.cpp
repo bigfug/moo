@@ -197,3 +197,355 @@ void ServerTest::luaParentLoopTest( void )
 
 	ObjectManager::reset();
 }
+
+void ServerTest::luaParentTestIsParentOf( void )
+{
+	ObjectManager		&OM = *ObjectManager::instance();
+	ConnectionManager	&CM = *ConnectionManager::instance();
+	qint64				 TimeStamp = QDateTime::currentMSecsSinceEpoch();
+	ConnectionId		 CID = initLua( TimeStamp );
+	Connection			&Con = *CM.connection( CID );
+
+	Object				*Programmer = OM.object( Con.player() );
+	Object				*O[ 3 ];
+
+	for( int i = 0 ; i < 3 ; i++ )
+	{
+		O[ i ] = OM.newObject();
+
+		O[ i ]->setOwner( Programmer->id() );
+
+		if( i > 0 )
+		{
+			O[ i ]->setParent( O[ i - 1 ]->id() );
+		}
+	}
+
+	QCOMPARE( O[ 0 ]->children().size(), 1 );
+	QCOMPARE( O[ 1 ]->children().size(), 1 );
+	QCOMPARE( O[ 2 ]->children().size(), 0 );
+
+	QCOMPARE( O[ 0 ]->parent(), OBJECT_NONE );
+	QCOMPARE( O[ 1 ]->parent(), O[ 0 ]->id() );
+	QCOMPARE( O[ 2 ]->parent(), O[ 1 ]->id() );
+
+	if( true )
+	{
+		QString			 CMD = QString( "return( o( %1 ):isParentOf( o( %2 ) ) )" ).arg( O[ 0 ]->id() ).arg( O[ 0 ]->id() );
+		TaskEntry		 TE( CMD, CID, Programmer->id() );
+		lua_task		 Com( CID, TE );
+
+		int				 R = Com.eval();
+
+		QCOMPARE( R, 1 );
+
+		bool			B = lua_toboolean( Com.L(), -1 );
+
+		QCOMPARE( B, false );
+	}
+
+	if( true )
+	{
+		QString			 CMD = QString( "return( o( %1 ):isParentOf( o( %2 ) ) )" ).arg( O[ 0 ]->id() ).arg( O[ 1 ]->id() );
+		TaskEntry		 TE( CMD, CID, Programmer->id() );
+		lua_task		 Com( CID, TE );
+
+		int				 R = Com.eval();
+
+		QCOMPARE( R, 1 );
+
+		bool			B = lua_toboolean( Com.L(), -1 );
+
+		QCOMPARE( B, true );
+	}
+
+	if( true )
+	{
+		QString			 CMD = QString( "return( o( %1 ):isParentOf( o( %2 ) ) )" ).arg( O[ 0 ]->id() ).arg( O[ 2 ]->id() );
+		TaskEntry		 TE( CMD, CID, Programmer->id() );
+		lua_task		 Com( CID, TE );
+
+		int				 R = Com.eval();
+
+		QCOMPARE( R, 1 );
+
+		bool			B = lua_toboolean( Com.L(), -1 );
+
+		QCOMPARE( B, true );
+	}
+
+	if( true )
+	{
+		QString			 CMD = QString( "return( o( %1 ):isParentOf( o( %2 ) ) )" ).arg( O[ 1 ]->id() ).arg( O[ 0 ]->id() );
+		TaskEntry		 TE( CMD, CID, Programmer->id() );
+		lua_task		 Com( CID, TE );
+
+		int				 R = Com.eval();
+
+		QCOMPARE( R, 1 );
+
+		bool			B = lua_toboolean( Com.L(), -1 );
+
+		QCOMPARE( B, false );
+	}
+
+	if( true )
+	{
+		QString			 CMD = QString( "return( o( %1 ):isParentOf( o( %2 ) ) )" ).arg( O[ 1 ]->id() ).arg( O[ 1 ]->id() );
+		TaskEntry		 TE( CMD, CID, Programmer->id() );
+		lua_task		 Com( CID, TE );
+
+		int				 R = Com.eval();
+
+		QCOMPARE( R, 1 );
+
+		bool			B = lua_toboolean( Com.L(), -1 );
+
+		QCOMPARE( B, false );
+	}
+
+	if( true )
+	{
+		QString			 CMD = QString( "return( o( %1 ):isParentOf( o( %2 ) ) )" ).arg( O[ 1 ]->id() ).arg( O[ 2 ]->id() );
+		TaskEntry		 TE( CMD, CID, Programmer->id() );
+		lua_task		 Com( CID, TE );
+
+		int				 R = Com.eval();
+
+		QCOMPARE( R, 1 );
+
+		bool			B = lua_toboolean( Com.L(), -1 );
+
+		QCOMPARE( B, true );
+	}
+
+	if( true )
+	{
+		QString			 CMD = QString( "return( o( %1 ):isParentOf( o( %2 ) ) )" ).arg( O[ 2 ]->id() ).arg( O[ 0 ]->id() );
+		TaskEntry		 TE( CMD, CID, Programmer->id() );
+		lua_task		 Com( CID, TE );
+
+		int				 R = Com.eval();
+
+		QCOMPARE( R, 1 );
+
+		bool			B = lua_toboolean( Com.L(), -1 );
+
+		QCOMPARE( B, false );
+	}
+
+	if( true )
+	{
+		QString			 CMD = QString( "return( o( %1 ):isParentOf( o( %2 ) ) )" ).arg( O[ 2 ]->id() ).arg( O[ 1 ]->id() );
+		TaskEntry		 TE( CMD, CID, Programmer->id() );
+		lua_task		 Com( CID, TE );
+
+		int				 R = Com.eval();
+
+		QCOMPARE( R, 1 );
+
+		bool			B = lua_toboolean( Com.L(), -1 );
+
+		QCOMPARE( B, false );
+	}
+
+	if( true )
+	{
+		QString			 CMD = QString( "return( o( %1 ):isParentOf( o( %2 ) ) )" ).arg( O[ 2 ]->id() ).arg( O[ 2 ]->id() );
+		TaskEntry		 TE( CMD, CID, Programmer->id() );
+		lua_task		 Com( CID, TE );
+
+		int				 R = Com.eval();
+
+		QCOMPARE( R, 1 );
+
+		bool			B = lua_toboolean( Com.L(), -1 );
+
+		QCOMPARE( B, false );
+	}
+
+	for( int i = 0 ; i < 3 ; i++ )
+	{
+		O[ i ]->setParent( OBJECT_NONE );
+
+		OM.recycle( O[ i ] );
+	}
+
+	ObjectManager::reset();
+}
+
+void ServerTest::luaParentTestIsChildOf( void )
+{
+	ObjectManager		&OM = *ObjectManager::instance();
+	ConnectionManager	&CM = *ConnectionManager::instance();
+	qint64				 TimeStamp = QDateTime::currentMSecsSinceEpoch();
+	ConnectionId		 CID = initLua( TimeStamp );
+	Connection			&Con = *CM.connection( CID );
+
+	Object				*Programmer = OM.object( Con.player() );
+	Object				*O[ 3 ];
+
+	for( int i = 0 ; i < 3 ; i++ )
+	{
+		O[ i ] = OM.newObject();
+
+		O[ i ]->setOwner( Programmer->id() );
+
+		if( i > 0 )
+		{
+			O[ i ]->setParent( O[ i - 1 ]->id() );
+		}
+	}
+
+	QCOMPARE( O[ 0 ]->children().size(), 1 );
+	QCOMPARE( O[ 1 ]->children().size(), 1 );
+	QCOMPARE( O[ 2 ]->children().size(), 0 );
+
+	QCOMPARE( O[ 0 ]->parent(), OBJECT_NONE );
+	QCOMPARE( O[ 1 ]->parent(), O[ 0 ]->id() );
+	QCOMPARE( O[ 2 ]->parent(), O[ 1 ]->id() );
+
+	if( true )
+	{
+		QString			 CMD = QString( "return( o( %1 ):isChildOf( o( %2 ) ) )" ).arg( O[ 0 ]->id() ).arg( O[ 0 ]->id() );
+		TaskEntry		 TE( CMD, CID, Programmer->id() );
+		lua_task		 Com( CID, TE );
+
+		int				 R = Com.eval();
+
+		QCOMPARE( R, 1 );
+
+		bool			B = lua_toboolean( Com.L(), -1 );
+
+		QCOMPARE( B, false );
+	}
+
+	if( true )
+	{
+		QString			 CMD = QString( "return( o( %1 ):isChildOf( o( %2 ) ) )" ).arg( O[ 0 ]->id() ).arg( O[ 1 ]->id() );
+		TaskEntry		 TE( CMD, CID, Programmer->id() );
+		lua_task		 Com( CID, TE );
+
+		int				 R = Com.eval();
+
+		QCOMPARE( R, 1 );
+
+		bool			B = lua_toboolean( Com.L(), -1 );
+
+		QCOMPARE( B, false );
+	}
+
+	if( true )
+	{
+		QString			 CMD = QString( "return( o( %1 ):isChildOf( o( %2 ) ) )" ).arg( O[ 0 ]->id() ).arg( O[ 2 ]->id() );
+		TaskEntry		 TE( CMD, CID, Programmer->id() );
+		lua_task		 Com( CID, TE );
+
+		int				 R = Com.eval();
+
+		QCOMPARE( R, 1 );
+
+		bool			B = lua_toboolean( Com.L(), -1 );
+
+		QCOMPARE( B, false );
+	}
+
+	if( true )
+	{
+		QString			 CMD = QString( "return( o( %1 ):isChildOf( o( %2 ) ) )" ).arg( O[ 1 ]->id() ).arg( O[ 0 ]->id() );
+		TaskEntry		 TE( CMD, CID, Programmer->id() );
+		lua_task		 Com( CID, TE );
+
+		int				 R = Com.eval();
+
+		QCOMPARE( R, 1 );
+
+		bool			B = lua_toboolean( Com.L(), -1 );
+
+		QCOMPARE( B, true );
+	}
+
+	if( true )
+	{
+		QString			 CMD = QString( "return( o( %1 ):isChildOf( o( %2 ) ) )" ).arg( O[ 1 ]->id() ).arg( O[ 1 ]->id() );
+		TaskEntry		 TE( CMD, CID, Programmer->id() );
+		lua_task		 Com( CID, TE );
+
+		int				 R = Com.eval();
+
+		QCOMPARE( R, 1 );
+
+		bool			B = lua_toboolean( Com.L(), -1 );
+
+		QCOMPARE( B, false );
+	}
+
+	if( true )
+	{
+		QString			 CMD = QString( "return( o( %1 ):isChildOf( o( %2 ) ) )" ).arg( O[ 1 ]->id() ).arg( O[ 2 ]->id() );
+		TaskEntry		 TE( CMD, CID, Programmer->id() );
+		lua_task		 Com( CID, TE );
+
+		int				 R = Com.eval();
+
+		QCOMPARE( R, 1 );
+
+		bool			B = lua_toboolean( Com.L(), -1 );
+
+		QCOMPARE( B, false );
+	}
+
+	if( true )
+	{
+		QString			 CMD = QString( "return( o( %1 ):isChildOf( o( %2 ) ) )" ).arg( O[ 2 ]->id() ).arg( O[ 0 ]->id() );
+		TaskEntry		 TE( CMD, CID, Programmer->id() );
+		lua_task		 Com( CID, TE );
+
+		int				 R = Com.eval();
+
+		QCOMPARE( R, 1 );
+
+		bool			B = lua_toboolean( Com.L(), -1 );
+
+		QCOMPARE( B, true );
+	}
+
+	if( true )
+	{
+		QString			 CMD = QString( "return( o( %1 ):isChildOf( o( %2 ) ) )" ).arg( O[ 2 ]->id() ).arg( O[ 1 ]->id() );
+		TaskEntry		 TE( CMD, CID, Programmer->id() );
+		lua_task		 Com( CID, TE );
+
+		int				 R = Com.eval();
+
+		QCOMPARE( R, 1 );
+
+		bool			B = lua_toboolean( Com.L(), -1 );
+
+		QCOMPARE( B, true );
+	}
+
+	if( true )
+	{
+		QString			 CMD = QString( "return( o( %1 ):isChildOf( o( %2 ) ) )" ).arg( O[ 2 ]->id() ).arg( O[ 2 ]->id() );
+		TaskEntry		 TE( CMD, CID, Programmer->id() );
+		lua_task		 Com( CID, TE );
+
+		int				 R = Com.eval();
+
+		QCOMPARE( R, 1 );
+
+		bool			B = lua_toboolean( Com.L(), -1 );
+
+		QCOMPARE( B, false );
+	}
+
+	for( int i = 0 ; i < 3 ; i++ )
+	{
+		O[ i ]->setParent( OBJECT_NONE );
+
+		OM.recycle( O[ i ] );
+	}
+
+	ObjectManager::reset();
+}

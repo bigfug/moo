@@ -53,6 +53,8 @@ private Q_SLOTS:
 	void luaParentBasic( void );
 	void luaParentBasicReparent( void );
 	void luaParentLoopTest( void );
+	void luaParentTestIsParentOf( void );
+	void luaParentTestIsChildOf( void );
 
 	void luaCreate( void );
 	void luaRecycle( void );

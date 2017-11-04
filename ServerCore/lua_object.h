@@ -80,6 +80,9 @@ private:
 
 	static int luaFind( lua_State *L );
 
+	static int luaIsChildOf( lua_State *L );
+	static int luaIsParentOf( lua_State *L );
+
 //	static int luaPushVariant( lua_State *L, const QVariant &pV );
 
 	static LuaMap				 mLuaMap;

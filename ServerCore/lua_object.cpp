@@ -60,6 +60,8 @@ const luaL_Reg lua_object::mLuaInstanceFunctions[] =
 	{ "props", lua_object::luaProps },
 	{ "verbs", lua_object::luaVerbs },
 	{ "find", lua_object::luaFind },
+	{ "isChildOf", lua_object::luaIsChildOf },
+	{ "isParentOf", lua_object::luaIsParentOf },
 	{ 0, 0 }
 };
 
@@ -1465,6 +1467,83 @@ int lua_object::luaFind( lua_State *L )
 			lua_pushobject( L, *it );
 			lua_settable( L, -3 );
 		}
+
+		return( 1 );
+	}
+	catch( mooException e )
+	{
+		e.lua_pushexception( L );
+
+		LuaErr = true;
+	}
+	catch( ... )
+	{
+
+	}
+
+	return( LuaErr ? lua_error( L ) : 0 );
+}
+
+int lua_object::luaIsChildOf( lua_State *L )
+{
+	bool				 LuaErr = false;
+
+	try
+	{
+		Object						*O = argObj( L, 1 );
+		const ObjectId				 P = argId( L, 2 );
+
+		if( !O || O->id() == P )
+		{
+			lua_pushboolean( L, false );
+
+			return( 1 );
+		}
+
+		while( O && O->id() != P )
+		{
+			O = ObjectManager::o( O->parent() );
+		}
+
+		lua_pushboolean( L, bool( O ) );
+
+		return( 1 );
+	}
+	catch( mooException e )
+	{
+		e.lua_pushexception( L );
+
+		LuaErr = true;
+	}
+	catch( ... )
+	{
+
+	}
+
+	return( LuaErr ? lua_error( L ) : 0 );}
+
+int lua_object::luaIsParentOf( lua_State *L )
+{
+	bool				 LuaErr = false;
+
+	try
+	{
+		const ObjectId				 P = argId( L, 1 );
+		Object						*O = argObj( L, 2 );
+
+		if( !O || O->id() == P )
+		{
+			lua_pushboolean( L, false );
+
+			return( 1 );
+		}
+
+		while( O && O->id() != P )
+		{
+			O = ObjectManager::o( O->parent() );
+		}
+
+		lua_pushboolean( L, bool( O ) );
 
 		return( 1 );
 	}
