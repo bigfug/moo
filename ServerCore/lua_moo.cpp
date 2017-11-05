@@ -1043,6 +1043,8 @@ int lua_moo::luaPronounSubstitution(lua_State *L)
 		Object				*O = nullptr;
 		Object				*Player = nullptr;
 		Object				*Location = nullptr;
+		Object				*Direct = nullptr;
+		Object				*Indirect = nullptr;
 
 		while( *S )
 		{
@@ -1080,45 +1082,85 @@ int lua_moo::luaPronounSubstitution(lua_State *L)
 
 				if( !E && !SubStr.isEmpty() )
 				{
-					QString				 SubLwr = SubStr.toLower();
 					QString				 SubRes;
 
-					if( SubLwr == QStringLiteral( "n" ) )
+					if( SubStr.size() == 1 )
 					{
-						if( ( Player = ( Player ? Player : ObjectManager::o( Command->task().player() ) ) ) )
-						{
-							SubRes = Player->name();
-						}
-					}
-					else if( SubLwr == QStringLiteral( "o" ) )
-					{
-						if( ( O = ( O ? O : ObjectManager::o( Command->task().object() ) ) ) )
-						{
-							SubRes = O->name();
-						}
-					}
-					else if( SubLwr == QStringLiteral( "d" ) )
-					{
-						SubRes = Command->task().directObjectName();
-					}
-					else if( SubLwr == QStringLiteral( "i" ) )
-					{
-						SubRes = Command->task().indirectObjectName();
-					}
-					else if( SubLwr == QStringLiteral( "l" ) )
-					{
-						if( !Location )
+						QString				 SubLwr = SubStr.toLower();
+
+						if( SubLwr == QStringLiteral( "n" ) )
 						{
 							if( ( Player = ( Player ? Player : ObjectManager::o( Command->task().player() ) ) ) )
 							{
-								Location = ObjectManager::o( Player->location() );
+								SubRes = Player->name();
 							}
 						}
-
-						if( Location )
+						else if( SubLwr == QStringLiteral( "o" ) )
 						{
-							SubRes = Location->name();
+							if( ( O = ( O ? O : ObjectManager::o( Command->task().object() ) ) ) )
+							{
+								SubRes = O->name();
+							}
 						}
+						else if( SubLwr == QStringLiteral( "d" ) )
+						{
+							if( Command->task().directObjectId() != OBJECT_NONE )
+							{
+								if( ( Direct = ( Direct ? Direct : ObjectManager::o( Command->task().directObjectId() ) ) ) )
+								{
+									SubRes = Direct->name();
+								}
+							}
+							else
+							{
+								SubRes = Command->task().directObjectName();
+							}
+						}
+						else if( SubLwr == QStringLiteral( "i" ) )
+						{
+							if( Command->task().indirectObjectId() != OBJECT_NONE )
+							{
+								if( ( Indirect = ( Indirect ? Indirect : ObjectManager::o( Command->task().indirectObjectId() ) ) ) )
+								{
+									SubRes = Indirect->name();
+								}
+							}
+							else
+							{
+								SubRes = Command->task().indirectObjectName();
+							}
+						}
+						else if( SubLwr == QStringLiteral( "l" ) )
+						{
+							if( !Location )
+							{
+								if( ( Player = ( Player ? Player : ObjectManager::o( Command->task().player() ) ) ) )
+								{
+									Location = ObjectManager::o( Player->location() );
+								}
+							}
+
+							if( Location )
+							{
+								SubRes = Location->name();
+							}
+						}
+						else
+						{
+							D += "%" + SubStr;
+						}
+					}
+					else if( SubStr.startsWith( '[' ) && SubStr.endsWith( ']' ) )
+					{
+
+					}
+					else if( SubStr.startsWith( '(' ) && SubStr.endsWith( ')' ) )
+					{
+
+					}
+					else
+					{
+						D += "%" + SubStr;
 					}
 
 					D += SubRes;
@@ -1141,6 +1183,11 @@ int lua_moo::luaPronounSubstitution(lua_State *L)
 			{
 				D += c;
 			}
+		}
+
+		if( !SubStr.isEmpty() )
+		{
+			D += "%" + SubStr;
 		}
 
 		lua_pushstring( L, D.toLatin1().constData() );
