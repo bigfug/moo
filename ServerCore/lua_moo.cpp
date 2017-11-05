@@ -57,6 +57,7 @@ const luaL_Reg lua_moo::mLuaStatic[] =
 	{ "setCookie", lua_moo::luaSetCookie },
 	{ "clear", lua_moo::luaClearCookie },
 	{ "isValidObject", lua_moo::luaIsValidObject },
+	{ "s", lua_moo::luaPronounSubstitution },
 	{ 0, 0 }
 };
 
@@ -1023,6 +1024,141 @@ int lua_moo::luaPanic( lua_State *L )
 	qDebug() << "**** LUA PANIC ****";
 
 	return( 0 );
+}
+
+int lua_moo::luaPronounSubstitution(lua_State *L)
+{
+	bool				 LuaErr = false;
+
+	try
+	{
+		lua_task			*Command = lua_task::luaGetTask( L );
+		//Connection			*C = ConnectionManager::instance()->connection( Command->connectionid() );
+		const char			*S = luaL_checkstring( L, 1 );
+
+		QString				 D;
+		bool				 E = false;
+		QString				 SubStr;
+
+		Object				*O = nullptr;
+		Object				*Player = nullptr;
+		Object				*Location = nullptr;
+
+		while( *S )
+		{
+			const char		 c = *S++;
+
+			if( E )
+			{
+				if( SubStr.isEmpty() )
+				{
+					SubStr += c;
+
+					if( c != '(' && c != '[' )
+					{
+						E = false;
+					}
+				}
+				else if( SubStr.startsWith( '(' ) )
+				{
+					SubStr += c;
+
+					if( c == ')' )
+					{
+						E = false;
+					}
+				}
+				else if( SubStr.startsWith( '[' ) )
+				{
+					SubStr += c;
+
+					if( c == ']' )
+					{
+						E = false;
+					}
+				}
+
+				if( !E && !SubStr.isEmpty() )
+				{
+					QString				 SubLwr = SubStr.toLower();
+					QString				 SubRes;
+
+					if( SubLwr == QStringLiteral( "n" ) )
+					{
+						if( ( Player = ( Player ? Player : ObjectManager::o( Command->task().player() ) ) ) )
+						{
+							SubRes = Player->name();
+						}
+					}
+					else if( SubLwr == QStringLiteral( "o" ) )
+					{
+						if( ( O = ( O ? O : ObjectManager::o( Command->task().object() ) ) ) )
+						{
+							SubRes = O->name();
+						}
+					}
+					else if( SubLwr == QStringLiteral( "d" ) )
+					{
+						SubRes = Command->task().directObjectName();
+					}
+					else if( SubLwr == QStringLiteral( "i" ) )
+					{
+						SubRes = Command->task().indirectObjectName();
+					}
+					else if( SubLwr == QStringLiteral( "l" ) )
+					{
+						if( !Location )
+						{
+							if( ( Player = ( Player ? Player : ObjectManager::o( Command->task().player() ) ) ) )
+							{
+								Location = ObjectManager::o( Player->location() );
+							}
+						}
+
+						if( Location )
+						{
+							SubRes = Location->name();
+						}
+					}
+
+					D += SubRes;
+
+					SubStr.clear();
+				}
+			}
+			else if( c == '%' )
+			{
+				if( E )
+				{
+					D += '%';
+				}
+				else
+				{
+					E = true;
+				}
+			}
+			else
+			{
+				D += c;
+			}
+		}
+
+		lua_pushstring( L, D.toLatin1().constData() );
+
+		return( 1 );
+	}
+	catch( mooException e )
+	{
+		e.lua_pushexception( L );
+
+		LuaErr = true;
+	}
+	catch( ... )
+	{
+
+	}
+
+	return( LuaErr ? lua_error( L ) : 0 );
 }
 
 int lua_moo::luaRead( lua_State *L )
