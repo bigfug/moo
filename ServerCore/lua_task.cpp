@@ -892,13 +892,13 @@ QStringList lua_task::taskVerbStack() const
 {
 	QStringList		VrbLst;
 
-	for( QList<Task>::const_reverse_iterator it = mTasks.rbegin() ; it != mTasks.rend() ; it++ )
+	for( const Task &T : mTasks )
 	{
-		QString		VrbStr = (*it).verb();
+		QString		VrbStr = T.verb();
 
 		if( !VrbStr.isNull() )
 		{
-			VrbLst << VrbStr;
+			VrbLst.prepend( VrbStr );
 		}
 	}
 
