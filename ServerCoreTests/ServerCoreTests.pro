@@ -7,9 +7,10 @@
 QT       += gui testlib network serialport websockets
 
 TARGET = tst_servertest
-CONFIG   += console
-CONFIG   -= app_bundle
-CONFIG   += link_prl
+CONFIG += console
+CONFIG -= app_bundle
+CONFIG += link_prl
+CONFIG += c++11
 
 TEMPLATE = app
 

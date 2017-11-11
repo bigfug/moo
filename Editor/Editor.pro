@@ -8,6 +8,7 @@ QT       -= gui
 
 TARGET = Editor
 TEMPLATE = lib
+CONFIG += c++11
 CONFIG += staticlib
 
 SOURCES += editor.cpp

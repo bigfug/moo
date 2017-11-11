@@ -1,5 +1,7 @@
 QT += network widgets serialport websockets
 
+CONFIG += c++11
+
 HEADERS += \
 	mainwindow.h
 
