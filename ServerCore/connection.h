@@ -4,6 +4,9 @@
 #include <QObject>
 #include <QByteArray>
 #include <QSize>
+#include <QMap>
+#include <QVariant>
+#include <QString>
 
 #include "mooglobal.h"
 #include "taskentry.h"
