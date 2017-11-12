@@ -150,6 +150,7 @@ private:
 	LineMode			mLineMode;
 	QMap<QString,QVariant>	 mCookies;
 	QString				mXML;
+	QStringList			mStyles;
 
 	// QXmlContentHandler interface
 public:

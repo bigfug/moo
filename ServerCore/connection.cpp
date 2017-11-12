@@ -7,6 +7,7 @@
 #include <QDateTime>
 #include <QMap>
 #include <QXmlInputSource>
+#include <QSettings>
 
 Connection::Connection( ConnectionId pConnectionId, QObject *pParent ) :
 	QObject( pParent ), mConnectionId( pConnectionId ), mObjectId( 0 ), mPlayerId( OBJECT_NONE ), mConnectionTime( 0 ), mLastActiveTime( 0 ),
@@ -144,23 +145,160 @@ void Connection::clearCookie(const QString &pName)
 	mCookies.remove( pName );
 }
 
+QString preprocessString( const QString &S )
+{
+	QString		O;
+	QString		E;
+	bool		Escaped = false;
+
+	for( QChar C : S )
+	{
+		if( Escaped )
+		{
+			if( E.isEmpty() )
+			{
+				if( C == 'a' )
+				{
+					O.append( '\a' ); Escaped = false; continue;
+				}
+
+				if( C == 'b' )
+				{
+					O.append( '\b' ); Escaped = false; continue;
+				}
+
+				if( C == 'e' )
+				{
+					O.append( '\e' ); Escaped = false; continue;
+				}
+
+				if( C == 'f' )
+				{
+					O.append( '\f' ); Escaped = false; continue;
+				}
+
+				if( C == 'n' )
+				{
+					O.append( '\n' ); Escaped = false; continue;
+				}
+
+				if( C == 'r' )
+				{
+					O.append( '\r' ); Escaped = false; continue;
+				}
+
+				if( C == 't' )
+				{
+					O.append( '\t' ); Escaped = false; continue;
+				}
+
+				if( C == '\'' )
+				{
+					O.append( '\'' ); Escaped = false; continue;
+				}
+
+				if( C == '\\' )
+				{
+					O.append( '\\' ); Escaped = false; continue;
+				}
+
+				if( C == '"' )
+				{
+					O.append( '"' ); Escaped = false; continue;
+				}
+
+				if( C == 'x' )
+				{
+					E = C; continue;
+				}
+
+				if( C.isDigit() )
+				{
+					E = C; continue;
+				}
+
+				O.append( '\\' );
+				O.append( C );
+
+				Escaped = false;
+
+				continue;
+			}
+
+			if( E[ 0 ] == 'x' )
+			{
+				QChar	c = C.toLower();
+
+				if( c >= 'a' && c <= 'f' )
+				{
+					E.append( c ); continue;
+				}
+				else
+				{
+					QChar	V;
+					bool	ok;
+
+					E.remove( 0, 1 );
+
+					V = E.toUInt( &ok, 16 );
+
+					if( ok )
+					{
+						O.append( V );
+					}
+				}
+			}
+			else if( E[ 0 ].isDigit() )
+			{
+				if( C.isDigit() )
+				{
+					E.append( C ); continue;
+				}
+				else
+				{
+					QChar	V;
+					bool	ok;
+
+					V = E.toUInt( &ok, 8 );
+
+					if( ok )
+					{
+						O.append( V );
+					}
+				}
+			}
+		}
+
+		if( C == '\\' )
+		{
+			Escaped = true;
+
+			E.clear();
+		}
+		else
+		{
+			O.append( C );
+		}
+	}
+
+	return( O );
+}
+
 bool Connection::startElement( const QString &namespaceURI, const QString &localName, const QString &qName, const QXmlAttributes &atts )
 {
 	Q_UNUSED( namespaceURI )
 	Q_UNUSED( qName )
 	Q_UNUSED( atts )
 
-	if( localName == "b" )
+	if( localName != "moo" )
 	{
-		mXML.append( "\x1b[1m" );
-	}
-	else if( localName == "u" )
-	{
-		mXML.append( "\x1b[4m" );
-	}
-	else if( localName == "red" )
-	{
-		mXML.append( "\x1b[31m" );
+		QString			Style = QSettings( MOO_SETTINGS ).value( QString( "style/%1" ).arg( qName ) ).toString();
+
+		//Style = preprocessString( Style );
+
+		mXML.append( Style );
+
+		mStyles.append( Style );
 	}
 
 	return( true );
@@ -169,19 +307,24 @@ bool Connection::startElement( const QString &namespaceURI, const QString &local
 bool Connection::endElement( const QString &namespaceURI, const QString &localName, const QString &qName )
 {
 	Q_UNUSED( namespaceURI )
+	Q_UNUSED( localName )
 	Q_UNUSED( qName )
 
-	if( localName == "b" )
+	if( localName != "moo" )
 	{
-		mXML.append( "\x1b[0m" );
-	}
-	else if( localName == "u" )
-	{
-		mXML.append( "\x1b[0m" );
-	}
-	else if( localName == "red" )
-	{
-		mXML.append( "\x1b[0m" );
+		if( !mStyles.isEmpty() )
+		{
+			mStyles.removeLast();
+		}
+
+		if( !mStyles.isEmpty() )
+		{
+			mXML.append( mStyles.last() );
+		}
+		else
+		{
+			mXML.append( "\x1b[0m" );
+		}
 	}
 
 	return( true );
