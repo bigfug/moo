@@ -108,6 +108,7 @@ signals:
 	void taskOutput( TaskEntry &pTask );
 	void textOutput( const QString &pText );
 	void lineModeChanged( Connection::LineMode pLineMode );
+	void gmcpOutput( const QByteArray &pGMCP );
 
 public slots:
 	void write( const QString &pText );
@@ -132,6 +133,8 @@ public slots:
 	void setCookie( const QString &pName, QVariant pValue );
 
 	void clearCookie( const QString &pName );
+
+	void sendGMCP( const QByteArray &pGMCP );
 
 private:
 	ConnectionId		mConnectionId;

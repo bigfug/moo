@@ -145,6 +145,11 @@ void Connection::clearCookie(const QString &pName)
 	mCookies.remove( pName );
 }
 
+void Connection::sendGMCP( const QByteArray &pGMCP )
+{
+	emit gmcpOutput( pGMCP );
+}
+
 QString preprocessString( const QString &S )
 {
 	QString		O;
