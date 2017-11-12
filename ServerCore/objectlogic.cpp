@@ -252,7 +252,7 @@ void ObjectLogic::chparent( lua_task &pTask, ObjectId pUserId, ObjectId pObjectI
 
 		QList<QString>		IntPrp;
 
-		std::set_intersection( NewParPrp.begin(), NewParPrp.end(), ObjDscPrp.begin(), ObjDscPrp.end(), IntPrp.begin() );
+		std::set_intersection( NewParPrp.begin(), NewParPrp.end(), ObjDscPrp.begin(), ObjDscPrp.end(), std::back_inserter( IntPrp ) );
 
 		// If there are any props shared, return an error
 
