@@ -319,8 +319,14 @@ void lua_moo::luaSetEnv( lua_State *L )
 	lua_getfield( L, -1, "time" );
 	lua_setfield( L, -3, "time" );
 
+	lua_getfield( L, -1, "date" );
+	lua_setfield( L, -3, "date" );
+
 	lua_getfield( L, -1, "clock" );
 	lua_setfield( L, -3, "clock" );
+
+	lua_getfield( L, -1, "difftime" );
+	lua_setfield( L, -3, "difftime" );
 
 	lua_pop( L, 1 );
 
