@@ -1373,26 +1373,26 @@ int lua_moo::luaRead( lua_State *L )
 
 int lua_moo::luaSetCookie( lua_State *L )
 {
-	const char				*S = luaL_checkstring( L, -1 );
+	const char				*S = luaL_checkstring( L, 1 );
 
-	luaL_checkany( L, -2 );
+	luaL_checkany( L, 2 );
 
 	lua_task			*Command = lua_task::luaGetTask( L );
 	Connection			*C = ConnectionManager::instance()->connection( Command->connectionid() );
 	QVariant			 V;
 
-	switch( lua_type( L, -2 ) )
+	switch( lua_type( L, 2 ) )
 	{
 		case LUA_TBOOLEAN:
-			V = lua_toboolean( L, -2 );
+			V = lua_toboolean( L, 2 );
 			break;
 
 		case LUA_TNUMBER:
-			V = lua_tonumber( L, -2 );
+			V = lua_tonumber( L, 2 );
 			break;
 
 		case LUA_TSTRING:
-			V = QString::fromLatin1( lua_tostring( L, -2 ) );
+			V = QString::fromLatin1( lua_tostring( L, 2 ) );
 			break;
 
 		default:
@@ -1408,7 +1408,7 @@ int lua_moo::luaCookie( lua_State *L )
 {
 	bool				 LuaErr = false;
 
-	const char				*S = luaL_checkstring( L, -1 );
+	const char				*S = luaL_checkstring( L, 1 );
 
 	try
 	{
@@ -1443,7 +1443,7 @@ int lua_moo::luaClearCookie( lua_State *L )
 {
 	bool					 LuaErr = false;
 
-	const char				*S = luaL_checkstring( L, -1 );
+	const char				*S = luaL_checkstring( L, 1 );
 
 	try
 	{
