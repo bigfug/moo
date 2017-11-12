@@ -50,6 +50,7 @@ const luaL_Reg lua_moo::mLuaStatic[] =
 	{ "debug", lua_moo::luaDebug },
 	{ "hash", lua_moo::luaHash },
 	{ "findPlayer", lua_moo::luaFindPlayer },
+	{ "findByProp", lua_moo::luaFindByProp },
 	{ "get", lua_moo::luaNetworkGet },
 	{ "read", lua_moo::luaRead },
 	{ "find", lua_moo::luaFind },
@@ -814,6 +815,44 @@ int lua_moo::luaFindPlayer( lua_State *L )
 
 	ObjectManager			&OM = *ObjectManager::instance();
 	ObjectId				 PID = OM.findPlayer( QString::fromLatin1( S ) );
+
+	if( PID == OBJECT_NONE )
+	{
+		lua_pushnil( L );
+	}
+	else
+	{
+		lua_object::lua_pushobjectid( L, PID );
+	}
+
+	return( 1 );
+}
+
+int lua_moo::luaFindByProp( lua_State *L )
+{
+	const char				*S = luaL_checkstring( L, 1 );
+
+	luaL_checkany( L, 2 );
+
+	ObjectManager			&OM = *ObjectManager::instance();
+	QVariant				 V;
+
+	switch( lua_type( L, 2 ) )
+	{
+		case LUA_TBOOLEAN:
+			V = lua_toboolean( L, 2 );
+			break;
+
+		case LUA_TNUMBER:
+			V = lua_tonumber( L, 2 );
+			break;
+
+		case LUA_TSTRING:
+			V = QString::fromLatin1( lua_tostring( L, 2 ) );
+			break;
+	}
+
+	ObjectId				 PID = OM.findByProp( QString::fromLatin1( S ), V );
 
 	if( PID == OBJECT_NONE )
 	{
