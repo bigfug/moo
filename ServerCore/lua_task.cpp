@@ -776,6 +776,11 @@ int lua_task::verbCall( ObjectId pObjectId, Verb *V, int pArgCnt )
 	T.setCaller( T.object() );
 	T.setObject( pObjectId );
 
+	if( T.verb().isEmpty() )
+	{
+		T.setVerb( V->name() );
+	}
+
 	return( verbCall( T, V, pArgCnt ) );
 }
 
