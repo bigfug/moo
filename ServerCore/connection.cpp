@@ -6,6 +6,7 @@
 #include <QDebug>
 #include <QDateTime>
 #include <QMap>
+#include <QXmlInputSource>
 
 Connection::Connection( ConnectionId pConnectionId, QObject *pParent ) :
 	QObject( pParent ), mConnectionId( pConnectionId ), mObjectId( 0 ), mPlayerId( OBJECT_NONE ), mConnectionTime( 0 ), mLastActiveTime( 0 ),
@@ -67,15 +68,34 @@ void Connection::notify( const QString &pText )
 {
 	if( mLineMode == EDIT )
 	{
-		mLineBuffer << pText;
+		mXML.clear();
+
+		QXmlInputSource		XmlSrc;
+
+		XmlSrc.setData( "<moo>" + pText + "</moo>" );
+
+		QXmlSimpleReader	Reader;
+
+		Reader.setContentHandler( this );
+		Reader.setEntityResolver( this );
+
+		Reader.parse( XmlSrc );
+
+		mLineBuffer << mXML;
 
 		while( mLineBuffer.size() > mTerminalSize.height() )
 		{
 			mLineBuffer.removeFirst();
 		}
-	}
 
-	emit textOutput( pText );
+//		qDebug() << mXML;
+
+		emit textOutput( mXML );
+	}
+	else
+	{
+		emit textOutput( pText );
+	}
 }
 
 void Connection::dataInput( const QString &pText )
@@ -122,4 +142,71 @@ void Connection::setCookie(const QString &pName, QVariant pValue)
 void Connection::clearCookie(const QString &pName)
 {
 	mCookies.remove( pName );
+}
+
+bool Connection::startElement( const QString &namespaceURI, const QString &localName, const QString &qName, const QXmlAttributes &atts )
+{
+	Q_UNUSED( namespaceURI )
+	Q_UNUSED( qName )
+	Q_UNUSED( atts )
+
+	if( localName == "b" )
+	{
+		mXML.append( "\x1b[1m" );
+	}
+	else if( localName == "u" )
+	{
+		mXML.append( "\x1b[4m" );
+	}
+	else if( localName == "red" )
+	{
+		mXML.append( "\x1b[31m" );
+	}
+
+	return( true );
+}
+
+bool Connection::endElement( const QString &namespaceURI, const QString &localName, const QString &qName )
+{
+	Q_UNUSED( namespaceURI )
+	Q_UNUSED( qName )
+
+	if( localName == "b" )
+	{
+		mXML.append( "\x1b[0m" );
+	}
+	else if( localName == "u" )
+	{
+		mXML.append( "\x1b[0m" );
+	}
+	else if( localName == "red" )
+	{
+		mXML.append( "\x1b[0m" );
+	}
+
+	return( true );
+}
+
+QString Connection::errorString() const
+{
+	return( QString() );
+}
+
+bool Connection::characters(const QString &ch)
+{
+//	qDebug() << "characters" << ch;
+
+	mXML.append( ch );
+
+	return( true );
+}
+
+
+bool Connection::skippedEntity(const QString &name)
+{
+//	qDebug() << "skippedEntity" << name;
+
+	mXML.append( name );
+
+	return( true );
 }

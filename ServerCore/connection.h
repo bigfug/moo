@@ -7,12 +7,13 @@
 #include <QMap>
 #include <QVariant>
 #include <QString>
+#include <QXmlDefaultHandler>
 
 #include "mooglobal.h"
 #include "taskentry.h"
 #include "inputsink.h"
 
-class Connection : public QObject
+class Connection : public QObject, private QXmlDefaultHandler
 {
 	Q_OBJECT
 
@@ -148,6 +149,18 @@ private:
 	QStringList			mLineBuffer;
 	LineMode			mLineMode;
 	QMap<QString,QVariant>	 mCookies;
+	QString				mXML;
+
+	// QXmlContentHandler interface
+public:
+	virtual bool startElement(const QString &namespaceURI, const QString &localName, const QString &qName, const QXmlAttributes &atts) Q_DECL_OVERRIDE;
+	virtual bool endElement(const QString &namespaceURI, const QString &localName, const QString &qName) Q_DECL_OVERRIDE;
+	virtual QString errorString() const Q_DECL_OVERRIDE;
+	virtual bool characters(const QString &ch) Q_DECL_OVERRIDE;
+
+	// QXmlContentHandler interface
+public:
+	virtual bool skippedEntity(const QString &name) Q_DECL_OVERRIDE;
 };
 
 #endif // CONNECTION_H
