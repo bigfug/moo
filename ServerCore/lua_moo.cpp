@@ -313,6 +313,21 @@ void lua_moo::luaSetEnv( lua_State *L )
 
 	//--------------------------------------------------
 
+	lua_newtable( L );
+	lua_getglobal( L, "os" );
+
+	lua_getfield( L, -1, "time" );
+	lua_setfield( L, -3, "time" );
+
+	lua_getfield( L, -1, "clock" );
+	lua_setfield( L, -3, "clock" );
+
+	lua_pop( L, 1 );
+
+	lua_setfield( L, -2, "os" );
+
+	//--------------------------------------------------
+
 	lua_getglobal( L, "moo" );
 	lua_setfield( L, -2, "moo" );
 
