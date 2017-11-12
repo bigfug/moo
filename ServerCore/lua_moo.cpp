@@ -1247,6 +1247,61 @@ int lua_moo::luaPronounSubstitution(lua_State *L)
 	return( LuaErr ? lua_error( L ) : 0 );
 }
 
+QVariantMap lua_moo::parseReadArgs( lua_State *L, int pIndex )
+{
+	QVariantMap ReadOpts;
+
+	luaL_checktype( L, pIndex, LUA_TTABLE );
+
+	lua_pushvalue( L, pIndex );
+
+	lua_pushnil( L );
+
+	// stack now contains: -1 => nil; -2 => table
+
+	while( lua_next( L, -2 ) )
+	{
+		// stack now contains: -1 => value; -2 => key; -3 => table
+
+		// copy the key so that lua_tostring does not modify the original
+		lua_pushvalue( L, -2 );
+
+		// stack now contains: -1 => key; -2 => value; -3 => key; -4 => table
+		const char *key = lua_tostring( L, -1 );
+
+		switch( lua_type( L, -2 ) )
+		{
+			case LUA_TBOOLEAN:
+				{
+					ReadOpts.insert( QString::fromLatin1( key ), lua_toboolean( L, -2 ) );
+				}
+				break;
+
+			case LUA_TNUMBER:
+				{
+					ReadOpts.insert( QString::fromLatin1( key ), double( lua_tonumber( L, -2 ) ) );
+				}
+				break;
+
+			case LUA_TSTRING:
+				{
+					ReadOpts.insert( QString::fromLatin1( key ), QString::fromLatin1( lua_tostring( L, -2 ) ) );
+				}
+				break;
+		}
+
+		// pop value + copy of key, leaving original key
+		lua_pop( L, 2 );
+
+		// stack now contains: -1 => key; -2 => table
+	}
+
+	// stack now contains: -1 => table
+	lua_pop( L, 1 );
+
+	return( ReadOpts );
+}
+
 int lua_moo::luaRead( lua_State *L )
 {
 	bool				 LuaErr = false;
@@ -1258,142 +1313,124 @@ int lua_moo::luaRead( lua_State *L )
 	{
 		lua_task			*Command = lua_task::luaGetTask( L );
 		Connection			*C = ConnectionManager::instance()->connection( Command->connectionid() );
-		Object				*O = lua_object::argObj( L, 1 );
-		const char			*V = luaL_checkstring( L, 2 );
 
-		if( lua_gettop( L ) > 2 )
+		if( !lua_gettop( L ) )
 		{
-			luaL_checktype( L, 3, LUA_TTABLE );
+			const Task			&T = lua_task::luaGetTask( L )->task();
 
-			lua_pushvalue( L, 3 );
+			InputSinkRead		*IS = new InputSinkRead( C, T.object(), T.verb(), ReadOpts, VerbArgs );
 
-			lua_pushnil( L );
-
-			// stack now contains: -1 => nil; -2 => table
-
-			while( lua_next( L, -2 ) )
+			if( IS )
 			{
-				// stack now contains: -1 => value; -2 => key; -3 => table
+				C->pushInputSink( IS );
+			}
+		}
+		else if( lua_gettop( L ) == 1 )
+		{
+			ReadOpts = parseReadArgs( L, 1 );
 
-				// copy the key so that lua_tostring does not modify the original
-				lua_pushvalue( L, -2 );
+			const Task			&T = lua_task::luaGetTask( L )->task();
 
-				// stack now contains: -1 => key; -2 => value; -3 => key; -4 => table
-				const char *key = lua_tostring( L, -1 );
+			InputSinkRead		*IS = new InputSinkRead( C, T.object(), T.verb(), ReadOpts, VerbArgs );
 
-				switch( lua_type( L, -2 ) )
+			if( IS )
+			{
+				C->pushInputSink( IS );
+			}
+		}
+		else
+		{
+			Object				*O = lua_object::argObj( L, 1 );
+			const char			*V = luaL_checkstring( L, 2 );
+
+			if( lua_gettop( L ) > 2 )
+			{
+				ReadOpts = parseReadArgs( L, 3 );
+			}
+
+			for( int i = 4 ; i <= lua_gettop( L ) ; i++ )
+			{
+				lua_pushvalue( L, i );
+
+				switch( lua_type( L, -1 ) )
 				{
 					case LUA_TBOOLEAN:
 						{
-							ReadOpts.insert( QString::fromLatin1( key ), lua_toboolean( L, -2 ) );
+							VerbArgs.append( lua_toboolean( L, -1 ) );
 						}
+						break;
+
+					case LUA_TFUNCTION:
+						{
+							throw mooException( E_INVARG, "Can't pass a function" );
+						}
+						break;
+
+					case LUA_TLIGHTUSERDATA:
+						{
+							throw mooException( E_INVARG, "Can't pass light userdata" );
+						}
+						break;
+
+					case LUA_TUSERDATA:
+						{
+							lua_object::luaHandle	*H = (lua_object::luaHandle *)luaL_testudata( L, -1, lua_object::luaHandle::mLuaName );
+
+							if( H )
+							{
+								QVariant		V;
+
+								V.setValue( *H );
+
+								VerbArgs.append( V );
+							}
+							else
+							{
+								throw mooException( E_INVARG, "Unknown userdata type" );
+							}
+						}
+						break;
+
+					case LUA_TNIL:
+						VerbArgs.append( QVariant() );
 						break;
 
 					case LUA_TNUMBER:
 						{
-							ReadOpts.insert( QString::fromLatin1( key ), double( lua_tonumber( L, -2 ) ) );
+							VerbArgs.append( double( lua_tonumber( L, -1 ) ) );
 						}
 						break;
 
 					case LUA_TSTRING:
 						{
-							ReadOpts.insert( QString::fromLatin1( key ), QString::fromLatin1( lua_tostring( L, -2 ) ) );
+							size_t		 StrLen;
+							const char	*StrDat = lua_tolstring( L, -1, &StrLen );
+
+							if( StrDat )
+							{
+								VerbArgs.append( QString::fromLatin1( StrDat, StrLen ) );
+							}
+						}
+						break;
+
+					case LUA_TTABLE:
+						{
+							QVariantMap		V;
+
+							VerbArgs.append( V );
 						}
 						break;
 				}
 
-				// pop value + copy of key, leaving original key
-				lua_pop( L, 2 );
-
-				// stack now contains: -1 => key; -2 => table
+				lua_pop( L, 1 );
 			}
 
-			// stack now contains: -1 => table
-			lua_pop( L, 1 );
-		}
+			InputSinkRead	*IS = new InputSinkRead( C, O->id(), V, ReadOpts, VerbArgs );
 
-		for( int i = 4 ; i <= lua_gettop( L ) ; i++ )
-		{
-			lua_pushvalue( L, i );
-
-			switch( lua_type( L, -1 ) )
+			if( IS )
 			{
-				case LUA_TBOOLEAN:
-					{
-						VerbArgs.append( lua_toboolean( L, -1 ) );
-					}
-					break;
-
-				case LUA_TFUNCTION:
-					{
-						throw mooException( E_INVARG, "Can't pass a function" );
-					}
-					break;
-
-				case LUA_TLIGHTUSERDATA:
-					{
-						throw mooException( E_INVARG, "Can't pass light userdata" );
-					}
-					break;
-
-				case LUA_TUSERDATA:
-					{
-						lua_object::luaHandle	*H = (lua_object::luaHandle *)luaL_testudata( L, -1, lua_object::luaHandle::mLuaName );
-
-						if( H )
-						{
-							QVariant		V;
-
-							V.setValue( *H );
-
-							VerbArgs.append( V );
-						}
-						else
-						{
-							throw mooException( E_INVARG, "Unknown userdata type" );
-						}
-					}
-					break;
-
-				case LUA_TNIL:
-					VerbArgs.append( QVariant() );
-					break;
-
-				case LUA_TNUMBER:
-					{
-						VerbArgs.append( double( lua_tonumber( L, -1 ) ) );
-					}
-					break;
-
-				case LUA_TSTRING:
-					{
-						size_t		 StrLen;
-						const char	*StrDat = lua_tolstring( L, -1, &StrLen );
-
-						if( StrDat )
-						{
-							VerbArgs.append( QString::fromLatin1( StrDat, StrLen ) );
-						}
-					}
-					break;
-
-				case LUA_TTABLE:
-					{
-						QVariantMap		V;
-
-						VerbArgs.append( V );
-					}
-					break;
+				C->pushInputSink( IS );
 			}
-
-			lua_pop( L, 1 );
-		}
-
-		InputSinkRead	*IS = new InputSinkRead( C, O->id(), V, ReadOpts, VerbArgs );
-
-		if( IS )
-		{
-			C->pushInputSink( IS );
 		}
 	}
 	catch( mooException e )

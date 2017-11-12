@@ -45,6 +45,7 @@ private:
 	static int luaHash( lua_State *L );
 	static int luaDebug( lua_State *L );
 	static int luaFindPlayer( lua_State *L );
+	static int luaFindByProp( lua_State *L );
 	static int luaRead( lua_State *L );
 	static int luaFind( lua_State *L );
 	static int luaIsValidObject( lua_State *L );
@@ -172,6 +173,8 @@ public:
 	static void addFunctions( const luaL_Reg *pFuncs );
 	static void addGet( const luaL_Reg *pFuncs );
 	static void addSet( const luaL_Reg *pFuncs );
+protected:
+	static QVariantMap parseReadArgs( lua_State *L, int pIndex );
 };
 
 #endif // LUA_MOO_H
