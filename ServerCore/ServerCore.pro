@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 QT       -= gui
-QT       += network sql serialport websockets
+QT       += network sql serialport websockets xml
 
 TARGET = ServerCore
 TEMPLATE = lib

@@ -1,4 +1,4 @@
-QT += network widgets serialport websockets
+QT += network widgets serialport websockets xml
 
 CONFIG += c++11
 

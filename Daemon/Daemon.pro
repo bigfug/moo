@@ -1,4 +1,4 @@
-QT += core network serialport websockets
+QT += core network serialport websockets xml
 QT -= gui
 
 CONFIG += c++11

@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += gui testlib network serialport websockets
+QT       += gui testlib network serialport websockets xml
 
 TARGET = tst_servertest
 CONFIG += console
