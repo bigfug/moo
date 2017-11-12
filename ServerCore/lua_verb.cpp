@@ -435,7 +435,19 @@ int lua_verb::luaSet( lua_State *L )
 
 			if( PrepTypeOK )
 			{
-				V->setPrepositionArgument( PrepType );
+				if( PrepType == ANY )
+				{
+					V->setPrepositionArgument( ANY );
+				}
+				else if( PrepType == NONE )
+				{
+					V->setPrepositionArgument( NONE );
+				}
+				else
+				{
+					throw( mooException( E_INVARG, QString( "bad prep type: %1" ).arg( Prep ) ) );
+				}
+				//V->setPrepositionArgument( PrepType );
 			}
 			else
 			{
