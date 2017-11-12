@@ -46,6 +46,8 @@ private slots:
 
 	void setLineMode( Connection::LineMode pLineMode );
 
+	void sendGMCP( const QByteArray &pGMCP );
+
 signals:
 	void textOutput( const QString &pText );
 	void lineModeSupported( bool pLineModeSupport );

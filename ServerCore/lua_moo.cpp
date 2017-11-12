@@ -59,6 +59,7 @@ const luaL_Reg lua_moo::mLuaStatic[] =
 	{ "clear", lua_moo::luaClearCookie },
 	{ "isValidObject", lua_moo::luaIsValidObject },
 	{ "s", lua_moo::luaPronounSubstitution },
+	{ "gmcp", lua_moo::luaGMCP },
 	{ 0, 0 }
 };
 
@@ -1266,6 +1267,105 @@ int lua_moo::luaPronounSubstitution(lua_State *L)
 	}
 
 	return( LuaErr ? lua_error( L ) : 0 );
+}
+
+int lua_moo::luaGMCP( lua_State *L )
+{
+	lua_task			*Command = lua_task::luaGetTask( L );
+	Connection			*C = ConnectionManager::instance()->connection( Command->connectionid() );
+
+	size_t		 PkgSze  = 0;
+	const char	*Package = luaL_checklstring( L, 1, &PkgSze );
+
+	luaL_checkany( L, 2 );
+
+	QString		 Data;
+
+	switch( lua_type( L, 2 ) )
+	{
+		case LUA_TBOOLEAN:
+			{
+				Data = lua_toboolean( L, 2 ) ? "true" : "false";
+			}
+			break;
+
+		case LUA_TNUMBER:
+			{
+				Data = QString::number( lua_tonumber( L, 2 ) );
+			}
+			break;
+
+		case LUA_TSTRING:
+			{
+				Data = QString::fromLatin1( lua_tostring( L, 2 ) );
+			}
+			break;
+
+		case LUA_TTABLE:
+			{
+				QVariantMap		ValMap;
+
+				lua_pushvalue( L, 2 );
+				lua_pushnil( L );
+
+				while( lua_next( L, -2 ) )
+				{
+					lua_pushvalue( L, -2 );
+
+					const char *key = lua_tostring(L, -1);
+
+					QVariant	V;
+
+					switch( lua_type( L, -2 ) )
+					{
+						case LUA_TBOOLEAN:
+							{
+								V = lua_toboolean( L, -2 );
+							}
+							break;
+
+						case LUA_TNUMBER:
+							{
+								V = lua_tonumber( L, -2 );
+							}
+							break;
+
+						case LUA_TSTRING:
+							{
+								V = QString::fromLatin1( lua_tostring( L, -2 ) );
+							}
+							break;
+					}
+
+					ValMap.insert( QString::fromLatin1( key ), V );
+
+					lua_pop( L, 2 );
+				}
+
+				lua_pop( L, 1 );
+
+
+				if( true )
+				{
+					QJsonDocument	D( QJsonObject::fromVariantMap( ValMap ) );
+
+					Data = D.toJson( QJsonDocument::Compact );
+				}
+			}
+			break;
+	}
+
+	QByteArray		A = QByteArray::fromRawData( Package, PkgSze );
+
+	if( !Data.isEmpty() )
+	{
+		A.append( ' ' );
+		A.append( Data );
+	}
+
+	C->gmcpOutput( A );
+
+	return( 0 );
 }
 
 QVariantMap lua_moo::parseReadArgs( lua_State *L, int pIndex )

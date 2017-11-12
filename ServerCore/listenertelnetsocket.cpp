@@ -2,6 +2,7 @@
 
 #include <QCryptographicHash>
 #include <QtEndian>
+#include <QJsonDocument>
 
 #include "connectionmanager.h"
 #include "listenerserver.h"
@@ -9,8 +10,10 @@
 
 //#define DEBUG_LISTENER
 
+#define TELNET_TELOPT_GMCP (0xc9)
+
 ListenerTelnetSocket::ListenerTelnetSocket( QObject *pParent, QTcpSocket *pSocket ) :
-	ListenerSocket( pParent ), mSocket( pSocket ), mTelnet( nullptr ), mLineMode( Connection::EDIT )
+	ListenerSocket( pParent ), mSocket( pSocket ), mCursorPosition( 0 ), mTelnet( nullptr ), mLineMode( Connection::EDIT )
 {
 	mDataReceived    = false;
 	mWebSocketHeader = false;
@@ -35,6 +38,8 @@ ListenerTelnetSocket::ListenerTelnetSocket( QObject *pParent, QTcpSocket *pSocke
 
 	connect( mSocket, SIGNAL(disconnected()), this, SLOT(disconnected()) );
 	connect( mSocket, SIGNAL(readyRead()), this, SLOT(readyRead()) );
+
+	connect( CON, SIGNAL(gmcpOutput(QByteArray)), this, SLOT(sendGMCP(QByteArray)) );
 
 	connect( &mTimer, SIGNAL(timeout()), this, SLOT(inputTimeout()) );
 
@@ -151,6 +156,9 @@ void ListenerTelnetSocket::processInput( const QByteArray &pData )
 
 					telnet_negotiate( mTelnet, TELNET_DONT, TELNET_TELOPT_SGA );
 //					telnet_negotiate( mTelnet, TELNET_DONT, TELNET_TELOPT_SGA );
+
+
+					telnet_negotiate( mTelnet, TELNET_WILL, TELNET_TELOPT_GMCP );
 
 //					setLineMode( Connection::EDIT );
 
@@ -270,6 +278,11 @@ void ListenerTelnetSocket::setLineMode( Connection::LineMode pLineMode )
 	}
 
 	mLineMode = pLineMode;
+}
+
+void ListenerTelnetSocket::sendGMCP( const QByteArray &pGMCP )
+{
+	telnet_subnegotiation( mTelnet, TELNET_TELOPT_GMCP, pGMCP.constData(), pGMCP.size() );
 }
 
 void ListenerTelnetSocket::disconnected( void )
@@ -542,12 +555,24 @@ void ListenerTelnetSocket::telnetEventHandler(telnet_event_t *event)
 #if defined( DEBUG_LISTENER )
 			qDebug() << "DO" << event->neg.telopt;
 #endif
+			switch( event->sub.telopt )
+			{
+				case TELNET_TELOPT_GMCP:
+					qDebug() << "GMCP enabled";
+					break;
+			}
 			break;
 
 		case TELNET_EV_DONT:
 #if defined( DEBUG_LISTENER )
 			qDebug() << "DONT" << event->neg.telopt;
 #endif
+			switch( event->sub.telopt )
+			{
+				case TELNET_TELOPT_GMCP:
+					qDebug() << "GMCP disabled";
+					break;
+			}
 			break;
 
 		case TELNET_EV_SUBNEGOTIATION:
@@ -573,6 +598,31 @@ void ListenerTelnetSocket::telnetEventHandler(telnet_event_t *event)
 							{
 								CON->setTerminalSize( QSize( w, h ) );
 							}
+						}
+						break;
+
+					case TELNET_TELOPT_GMCP:
+						{
+							QByteArray		A( event->sub.buffer, event->sub.size );
+							QString			P;
+							QJsonDocument	JSON;
+
+							while( !A.isEmpty() && A[ 0 ] != ' ' )
+							{
+								P.append( QChar( A[ 0 ] ) );
+
+								A.remove( 0, 1 );
+							}
+
+							if( !A.isEmpty() )
+							{
+								A.remove( 0, 1 );
+
+								JSON = QJsonDocument::fromJson( A );
+
+							}
+
+							qDebug() << P << A << JSON.toJson();
 						}
 						break;
 
