@@ -73,6 +73,7 @@ public:
 	void clear( void );
 
 	ObjectId findPlayer( QString pName ) const;
+	ObjectId findByProp( QString pName, QVariant pValue ) const;
 
 	inline size_t objectCount( void ) const
 	{

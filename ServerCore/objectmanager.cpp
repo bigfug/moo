@@ -141,6 +141,11 @@ ObjectId ObjectManager::findPlayer( QString pName ) const
 	return( mODB ? mODB->findPlayer( pName ) : OBJECT_NONE );
 }
 
+ObjectId ObjectManager::findByProp( QString pName, QVariant pValue ) const
+{
+	return( mODB ? mODB->findByProp( pName, pValue ) : OBJECT_NONE );
+}
+
 Object *ObjectManager::object( ObjectId pIndex )
 {
 	if( pIndex < 0 )

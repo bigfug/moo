@@ -43,6 +43,7 @@ public:
 	virtual void updateProperty( Object &pObject, QString pName ) Q_DECL_OVERRIDE;
 
 	virtual ObjectId findPlayer( QString pName ) const Q_DECL_OVERRIDE;
+	virtual ObjectId findByProp( QString pName, const QVariant &pValue ) const Q_DECL_OVERRIDE;
 
 	virtual void addTask( TaskEntry &TE ) Q_DECL_OVERRIDE;
 

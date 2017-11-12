@@ -22,6 +22,7 @@ public:
 	virtual void save( void ) = 0;
 
 	virtual ObjectId findPlayer( QString pName ) const = 0;
+	virtual ObjectId findByProp( QString pName, const QVariant &pValue ) const = 0;
 
 	virtual Object *object( ObjectId pIndex ) const = 0;
 

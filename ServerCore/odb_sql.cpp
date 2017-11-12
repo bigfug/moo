@@ -853,9 +853,38 @@ ObjectId ODBSQL::findPlayer( QString pName ) const
 
 	QSqlQuery	Q1;
 
-	Q1.prepare( "SELECT id FROM object WHERE name = :name" );
+	Q1.prepare( "SELECT id FROM object WHERE lower( name ) = lower( :name ) AND player" );
 
 	Q1.bindValue( ":name", pName );
+
+	if( !Q1.exec() )
+	{
+		return( OBJECT_NONE );
+	}
+
+	ObjectManager::instance()->recordRead();
+
+	if( !Q1.next() )
+	{
+		return( OBJECT_NONE );
+	}
+
+	return( Q1.value( 0 ).toInt() );
+}
+
+ObjectId ODBSQL::findByProp( QString pName, const QVariant &pValue ) const
+{
+	if( !mDB.isOpen() )
+	{
+		return( OBJECT_NONE );
+	}
+
+	QSqlQuery	Q1;
+
+	Q1.prepare( "SELECT object FROM property WHERE name = :name AND value = :value" );
+
+	Q1.bindValue( ":name", pName );
+	Q1.bindValue( ":value", pValue );
 
 	if( !Q1.exec() )
 	{

@@ -159,6 +159,11 @@ ObjectId ODBFile::findPlayer( QString pName ) const
 	return( OBJECT_NONE );
 }
 
+ObjectId ODBFile::findByProp(QString pName, const QVariant &pValue) const
+{
+	return( OBJECT_NONE );
+}
+
 void ODBFile::loadObject( QDataStream &DS, Object &O )
 {
 	ObjectData			&Data = data( O );
