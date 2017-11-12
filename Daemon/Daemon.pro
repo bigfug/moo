@@ -11,9 +11,11 @@ TEMPLATE = app
 
 SOURCES += main.cpp
 
-daemon.path  = /usr/local/bin/moo
+linux {
+	daemon.path  = /usr/local/bin/moo
 
-INSTALL += daemon
+	INSTALL += daemon
+}
 
 #----------------------------------------------------------------------------
 
