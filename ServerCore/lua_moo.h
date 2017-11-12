@@ -99,7 +99,7 @@ private:
 	{
 		//printf( "enter: %d\n", lua_gettop( L ) );
 
-		printf( "table\n{\n" );
+		printf( "%d: table\n{\n", t );
 
 		lua_pushvalue( L, t );
 
@@ -155,6 +155,8 @@ public:
 
 	static void stackReverseDump (lua_State *L)
 	{
+		printf( "stackReverseDump:\n" );
+
 		int i;
 		int top = lua_gettop(L);
 
