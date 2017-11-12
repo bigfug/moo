@@ -25,9 +25,28 @@ void myMessageOutput( QtMsgType type, const QMessageLogContext &context, const Q
 
 	switch( type )
 	{
+		case QtDebugMsg:
+			LogMsg = "[DBUG]";
+			break;
+
+		case QtInfoMsg:
+			LogMsg = "[INFO]";
+			break;
+
+		case QtWarningMsg:
+			LogMsg = "[WARN]";
+			break;
+
+		case QtCriticalMsg:
+			LogMsg = "[CRIT]";
+			break;
+
 		default:
-			LogMsg = QString( "%1 - %2" ).arg( DateTime ).arg( msg );
+			LogMsg = "[----]";
+			break;
 	}
+
+	LogMsg = QString( "%1 - %2: %3" ).arg( DateTime ).arg( LogMsg ).arg( msg );
 
 	if( LogFil.open( QIODevice::Append | QIODevice::Text ) )
 	{
