@@ -55,6 +55,7 @@ signals:
 private:
 	QTcpSocket					*mSocket;
 	QString						 mBuffer;
+	int							 mCursorPosition;
 	quint8						 mLastChar;
 	QByteArray					 mTelnetSequence;
 	QTimer						 mTimer;

@@ -148,15 +148,18 @@ void ListenerTelnetSocket::processInput( const QByteArray &pData )
 //						}
 //					}
 
-					telnet_negotiate( mTelnet, TELNET_DO, TELNET_TELOPT_NAWS );
-					telnet_negotiate( mTelnet, TELNET_DO, TELNET_TELOPT_TTYPE );
+					telnet_negotiate( mTelnet, TELNET_DO,   TELNET_TELOPT_BINARY );
 
-					telnet_negotiate( mTelnet, TELNET_DO, TELNET_TELOPT_ECHO );
+					telnet_negotiate( mTelnet, TELNET_DO,   TELNET_TELOPT_NAWS );
+					telnet_negotiate( mTelnet, TELNET_DO,   TELNET_TELOPT_TTYPE );
+
+					telnet_negotiate( mTelnet, TELNET_DO,   TELNET_TELOPT_ECHO );
 					telnet_negotiate( mTelnet, TELNET_WONT, TELNET_TELOPT_ECHO );
 
 					telnet_negotiate( mTelnet, TELNET_DONT, TELNET_TELOPT_SGA );
 //					telnet_negotiate( mTelnet, TELNET_DONT, TELNET_TELOPT_SGA );
 
+					telnet_negotiate( mTelnet, TELNET_DO,   TELNET_TELOPT_LINEMODE );
 
 					telnet_negotiate( mTelnet, TELNET_WILL, TELNET_TELOPT_GMCP );
 
@@ -235,13 +238,31 @@ void ListenerTelnetSocket::processInput( const QByteArray &pData )
 				}
 
 				mBuffer.clear();
+
+				mCursorPosition = 0;
 			}
 		}
 		else
 		{
-			if( ch >= 0x20 && ch < 0x7f )
+			//qDebug() << QString::number( ch, 16 );
+
+			if( ch == '\b' )
 			{
-				mBuffer.append( ch );
+				if( mCursorPosition > 0 )
+				{
+					mBuffer.remove( mCursorPosition - 1, 1 );
+
+					mCursorPosition--;
+				}
+			}
+			else
+			{
+				if( ch >= 0x20 && ch < 0x7f )
+				{
+					mBuffer.insert( mCursorPosition, ch );
+
+					mCursorPosition++;
+				}
 			}
 		}
 
@@ -255,6 +276,17 @@ void ListenerTelnetSocket::inputTimeout( void )
 	{
 		telnet_negotiate( mTelnet, TELNET_DO, TELNET_TELOPT_NAWS );
 		telnet_negotiate( mTelnet, TELNET_DO, TELNET_TELOPT_TTYPE );
+
+		telnet_negotiate( mTelnet, TELNET_DO,   TELNET_TELOPT_BINARY );
+
+//		telnet_negotiate( mTelnet, TELNET_DO,   TELNET_TELOPT_ECHO );
+//		telnet_negotiate( mTelnet, TELNET_WONT, TELNET_TELOPT_ECHO );
+
+//		telnet_negotiate( mTelnet, TELNET_DONT, TELNET_TELOPT_SGA );
+
+//		telnet_negotiate( mTelnet, TELNET_DO,   TELNET_TELOPT_LINEMODE );
+
+		telnet_negotiate( mTelnet, TELNET_WILL, TELNET_TELOPT_GMCP );
 
 		setLineMode( Connection::EDIT );
 	}
