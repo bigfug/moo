@@ -95,13 +95,14 @@ add_library( ${PROJECT_NAME} STATIC ${SOURCE_FILES} ${HEADER_FILES} )
 
 add_dependencies( ${PROJECT_NAME} SMTPEmail telnet Editor )
 
-find_package( Qt5 COMPONENTS Core Network Sql SerialPort WebSockets REQUIRED )
+find_package( Qt5 COMPONENTS Core Network Sql SerialPort Xml WebSockets REQUIRED )
 
 target_link_libraries( ${PROJECT_NAME}
 	Qt5::Core
 	Qt5::Network
 	Qt5::Sql
 	Qt5::SerialPort
+	Qt5::Xml
 	Qt5::WebSockets
 )
 
