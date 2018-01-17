@@ -2,8 +2,8 @@
 project( Editor )
 
 add_library( ${PROJECT_NAME} STATIC
-	Editor.cpp
-	Editor.h
+	editor.cpp
+	editor.h
 )
 
 find_package( Qt5 COMPONENTS Core REQUIRED )
