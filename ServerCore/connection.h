@@ -13,6 +13,41 @@
 #include "taskentry.h"
 #include "inputsink.h"
 
+class XmlParser : private QXmlDefaultHandler
+{
+public:
+	XmlParser( const QString &pText )
+	{
+		QXmlInputSource		XmlSrc;
+
+		XmlSrc.setData( "<moo>" + pText + "</moo>" );
+
+		QXmlSimpleReader	Reader;
+
+		Reader.setContentHandler( this );
+		Reader.setEntityResolver( this );
+
+		Reader.parse( XmlSrc );
+	}
+
+	QString result( void ) const
+	{
+		return( mXML );
+	}
+
+	// QXmlContentHandler interface
+public:
+	virtual bool startElement(const QString &namespaceURI, const QString &localName, const QString &qName, const QXmlAttributes &atts) Q_DECL_OVERRIDE;
+	virtual bool endElement(const QString &namespaceURI, const QString &localName, const QString &qName) Q_DECL_OVERRIDE;
+	virtual QString errorString() const Q_DECL_OVERRIDE;
+	virtual bool characters(const QString &ch) Q_DECL_OVERRIDE;
+	virtual bool skippedEntity(const QString &name) Q_DECL_OVERRIDE;
+
+private:
+	QString				mXML;
+	QStringList			mStyles;
+};
+
 class Connection : public QObject, private QXmlDefaultHandler
 {
 	Q_OBJECT
@@ -152,19 +187,6 @@ private:
 	QStringList			mLineBuffer;
 	LineMode			mLineMode;
 	QMap<QString,QVariant>	 mCookies;
-	QString				mXML;
-	QStringList			mStyles;
-
-	// QXmlContentHandler interface
-public:
-	virtual bool startElement(const QString &namespaceURI, const QString &localName, const QString &qName, const QXmlAttributes &atts) Q_DECL_OVERRIDE;
-	virtual bool endElement(const QString &namespaceURI, const QString &localName, const QString &qName) Q_DECL_OVERRIDE;
-	virtual QString errorString() const Q_DECL_OVERRIDE;
-	virtual bool characters(const QString &ch) Q_DECL_OVERRIDE;
-
-	// QXmlContentHandler interface
-public:
-	virtual bool skippedEntity(const QString &name) Q_DECL_OVERRIDE;
 };
 
 #endif // CONNECTION_H

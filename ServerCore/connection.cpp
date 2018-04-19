@@ -69,20 +69,9 @@ void Connection::notify( const QString &pText )
 {
 	if( mLineMode == EDIT )
 	{
-		mXML.clear();
+		XmlParser	XP( pText );
 
-		QXmlInputSource		XmlSrc;
-
-		XmlSrc.setData( "<moo>" + pText + "</moo>" );
-
-		QXmlSimpleReader	Reader;
-
-		Reader.setContentHandler( this );
-		Reader.setEntityResolver( this );
-
-		Reader.parse( XmlSrc );
-
-		mLineBuffer << mXML;
+		mLineBuffer << XP.result();
 
 		while( mLineBuffer.size() > mTerminalSize.height() )
 		{
@@ -91,7 +80,7 @@ void Connection::notify( const QString &pText )
 
 //		qDebug() << mXML;
 
-		emit textOutput( mXML );
+		emit textOutput( XP.result() );
 	}
 	else
 	{
@@ -289,7 +278,7 @@ QString preprocessString( const QString &S )
 	return( O );
 }
 
-bool Connection::startElement( const QString &namespaceURI, const QString &localName, const QString &qName, const QXmlAttributes &atts )
+bool XmlParser::startElement( const QString &namespaceURI, const QString &localName, const QString &qName, const QXmlAttributes &atts )
 {
 	Q_UNUSED( namespaceURI )
 	Q_UNUSED( qName )
@@ -309,7 +298,7 @@ bool Connection::startElement( const QString &namespaceURI, const QString &local
 	return( true );
 }
 
-bool Connection::endElement( const QString &namespaceURI, const QString &localName, const QString &qName )
+bool XmlParser::endElement( const QString &namespaceURI, const QString &localName, const QString &qName )
 {
 	Q_UNUSED( namespaceURI )
 	Q_UNUSED( localName )
@@ -335,12 +324,12 @@ bool Connection::endElement( const QString &namespaceURI, const QString &localNa
 	return( true );
 }
 
-QString Connection::errorString() const
+QString XmlParser::errorString() const
 {
 	return( QString() );
 }
 
-bool Connection::characters(const QString &ch)
+bool XmlParser::characters(const QString &ch)
 {
 //	qDebug() << "characters" << ch;
 
@@ -349,8 +338,7 @@ bool Connection::characters(const QString &ch)
 	return( true );
 }
 
-
-bool Connection::skippedEntity(const QString &name)
+bool XmlParser::skippedEntity(const QString &name)
 {
 //	qDebug() << "skippedEntity" << name;
 
