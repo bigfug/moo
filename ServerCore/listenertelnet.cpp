@@ -29,10 +29,12 @@ ListenerTelnet::ListenerTelnet( ObjectId pObjectId, quint16 pPort, QObject *pPar
 
 void ListenerTelnet::newConnection( void )
 {
-	QTcpSocket		*S;
+	QSslSocket		*S;
 
-	while( ( S = mServer.nextPendingConnection() ) != 0 )
+	while( ( S = qobject_cast<QSslSocket *>( mServer.nextPendingConnection() ) ) != nullptr )
 	{
+		qDebug() << "Socket Encrypted:" << S->isEncrypted();
+
 		ListenerTelnetSocket		*LS = new ListenerTelnetSocket( this, S );
 
 		if( !LS )

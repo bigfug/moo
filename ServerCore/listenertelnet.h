@@ -5,6 +5,7 @@
 #include <QObject>
 #include <QTcpServer>
 #include <QTcpSocket>
+#include <QSslSocket>
 #include "connection.h"
 #include <QTimer>
 #include <QTimerEvent>
@@ -13,6 +14,40 @@
 #include "libtelnet.h"
 
 #include "listenerserver.h"
+
+class ListenerTelnetServer : public QTcpServer
+{
+	Q_OBJECT
+
+public:
+	ListenerTelnetServer( QObject *parent = Q_NULLPTR )
+		: QTcpServer( parent )
+	{
+
+	}
+
+	virtual ~ListenerTelnetServer( void ) {}
+
+	// QTcpServer interface
+protected:
+	virtual void incomingConnection( qintptr handle ) Q_DECL_OVERRIDE
+	{
+		QSslSocket	*ServerSocket = new QSslSocket();
+
+		if( ServerSocket->setSocketDescriptor( handle ) )
+		{
+			addPendingConnection( ServerSocket );
+
+//			connect( ServerSocket, &QSslSocket::encrypted, this, &ListenerTelnetServer::ready );
+
+			ServerSocket->startServerEncryption();
+		}
+		else
+		{
+			delete ServerSocket;
+		}
+	}
+};
 
 class ListenerTelnet : public ListenerServer
 {
@@ -27,7 +62,7 @@ private slots:
 	void newConnection( void );
 
 private:
-	QTcpServer					 mServer;
+	ListenerTelnetServer		 mServer;
 	ObjectId					 mListeningObjectId;
 	QVector<telnet_telopt_t>	 mOptions;
 };
