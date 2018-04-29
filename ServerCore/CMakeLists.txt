@@ -115,7 +115,7 @@ include_directories(
 find_package( Lua51 REQUIRED )
 
 if( LUA51_FOUND )
-	include_directories( ${LUA_INCLUDE_DIR} )
+	target_include_directories( ${PROJECT_NAME} BEFORE PRIVATE ${LUA_INCLUDE_DIR} )
 
 	target_link_libraries( ${PROJECT_NAME} ${LUA_LIBRARIES} )
 endif()
