@@ -35,7 +35,7 @@ int Func::compile()
 
 	lua_State		*L = luaL_newstate();
 
-	if( L == 0 )
+	if( !L )
 	{
 		return( 0 );
 	}

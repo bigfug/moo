@@ -17,6 +17,7 @@ add_subdirectory( Editor )
 add_subdirectory( libs )
 add_subdirectory( Server )
 add_subdirectory( ServerCore )
+add_subdirectory( ServerCoreTests )
 add_subdirectory( Daemon )
 
 include( CPack )

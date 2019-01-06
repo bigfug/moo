@@ -163,7 +163,7 @@ QString preprocessString( const QString &S )
 
 				if( C == 'e' )
 				{
-					O.append( '\e' ); Escaped = false; continue;
+					O.append( 0x1b ); Escaped = false; continue;
 				}
 
 				if( C == 'f' )

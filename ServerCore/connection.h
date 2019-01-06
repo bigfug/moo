@@ -52,7 +52,7 @@ class Connection : public QObject, private QXmlDefaultHandler
 {
 	Q_OBJECT
 
-	explicit Connection( ConnectionId pConnectionId, QObject *pParent = 0 );
+	explicit Connection( ConnectionId pConnectionId, QObject *pParent = Q_NULLPTR );
 
 	inline void setObjectId( const ObjectId pObjectId )
 	{

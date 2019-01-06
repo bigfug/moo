@@ -55,11 +55,11 @@ include( ../qtdeploy.cmake )
 #-------------------------------------
 # Lua 5.1
 
-find_package( Lua51 REQUIRED )
+find_package( Lua51 )
 
 if( LUA51_FOUND )
 	target_include_directories( ${PROJECT_NAME} BEFORE PRIVATE ${LUA_INCLUDE_DIR} )
 
-        target_link_libraries( ${PROJECT_NAME} ${LUA_LIBRARIES} )
+	target_link_libraries( ${PROJECT_NAME} ${LUA_LIBRARIES} )
 endif()
 

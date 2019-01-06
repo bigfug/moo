@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QtTest/QtTest>
+
 #include "mooglobal.h"
 
 class Object;

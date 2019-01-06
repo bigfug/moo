@@ -18,11 +18,11 @@
 #include "odb.h"
 #include "odb_file.h"
 
-ObjectManager			*ObjectManager::mInstance = 0;
+ObjectManager			*ObjectManager::mInstance  = Q_NULLPTR;
 qint64					 ObjectManager::mTimeStamp = 0;
 
 ObjectManager::ObjectManager( QObject *pParent )
-	: QObject( pParent ), mODB( 0 )
+	: QObject( pParent ), mODB( Q_NULLPTR )
 {
 	mData.mObjNum = 0;
 
@@ -126,14 +126,14 @@ qint64 ObjectManager::timeToNextTask() const
 
 void ObjectManager::reset( void )
 {
-	if( mInstance == 0 )
+	if( !mInstance )
 	{
 		return;
 	}
 
 	delete mInstance;
 
-	mInstance = 0;
+	mInstance = Q_NULLPTR;
 }
 
 ObjectId ObjectManager::findPlayer( QString pName ) const
@@ -153,11 +153,11 @@ Object *ObjectManager::object( ObjectId pIndex )
 		return( nullptr );
 	}
 
-	Object *O = mData.mObjMap.value( pIndex, 0 );
+	Object *O = mData.mObjMap.value( pIndex, Q_NULLPTR );
 
 	if( !O && mODB )
 	{
-		if( ( O = mODB->object( pIndex ) ) != 0 )
+		if( ( O = mODB->object( pIndex ) ) != Q_NULLPTR )
 		{
 			mData.mObjMap.insert( pIndex, O );
 		}
@@ -178,14 +178,14 @@ ObjectManager *ObjectManager::instance( void )
 		return( mInstance );
 	}
 
-	if( ( mInstance = new ObjectManager() ) != 0 )
+	if( ( mInstance = new ObjectManager() ) != Q_NULLPTR )
 	{
 		return( mInstance );
 	}
 
 	throw( mooException( E_MEMORY, "cannot create object manager" ) );
 
-	return( 0 );
+	return( Q_NULLPTR );
 }
 
 void ObjectManager::clear()

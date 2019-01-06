@@ -112,7 +112,7 @@ include_directories(
 	../libs/SMTPEmail/src
 )
 
-find_package( Lua51 REQUIRED )
+find_package( Lua51 )
 
 if( LUA51_FOUND )
 	target_include_directories( ${PROJECT_NAME} BEFORE PRIVATE ${LUA_INCLUDE_DIR} )

@@ -14,19 +14,19 @@ ConnectionManager::ConnectionManager( QObject *pParent ) :
 
 ConnectionManager *ConnectionManager::instance( void )
 {
-	if( mInstance != 0 )
+	if( mInstance )
 	{
 		return( mInstance );
 	}
 
-	if( ( mInstance = new ConnectionManager() ) != 0 )
+	if( ( mInstance = new ConnectionManager() ) != Q_NULLPTR )
 	{
 		return( mInstance );
 	}
 
 	throw( mooException( E_MEMORY, "cannot create object manager" ) );
 
-	return( 0 );
+	return( Q_NULLPTR );
 }
 
 ConnectionId ConnectionManager::doConnect( ObjectId pListenerId )
@@ -34,7 +34,7 @@ ConnectionId ConnectionManager::doConnect( ObjectId pListenerId )
 	const ConnectionId	 CID = ++mConnectionId;
 	Connection			*CON = new Connection( CID, this );
 
-	if( CON == 0 )
+	if( !CON )
 	{
 		return( 0 );
 	}
@@ -103,7 +103,7 @@ Connection *ConnectionManager::connection( ConnectionId pConnectionId )
 
 	if( it == mConnectionNodeMap.end() )
 	{
-		return( 0 );
+		return( Q_NULLPTR );
 	}
 
 	return( it.value() );

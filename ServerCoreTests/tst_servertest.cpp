@@ -52,7 +52,7 @@ void ServerTest::luaRegistration( void )
 	{
 		lua_State		*L  = luaL_newstate();
 
-		QVERIFY( L != 0 );
+		QVERIFY( L );
 
 		lua_moo::luaNewState( L );
 
@@ -64,16 +64,6 @@ void ServerTest::luaRegistration( void )
 	}
 }
 
-int main( int argc, char *argv[] )
-{
-	ServerTest		ST;
+QTEST_GUILESS_MAIN( ServerTest )
 
-	QTest::qExec( &ST, argc, argv );
-
-	///PermissionsTest		PT;
-
-	//QTest::qExec( &PT, argc, argv );
-
-}
-
-//#include "tst_servertest.moc"
+#include "tst_servertest.moc"

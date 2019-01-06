@@ -89,7 +89,7 @@ int main( int argc, char *argv[] )
 
 		if( arg.startsWith( "-port=", Qt::CaseInsensitive ) )
 		{
-			ServerPort = arg.mid( 6 ).toInt();
+			ServerPort = arg.mid( 6 ).toUShort();
 
 			continue;
 		}
@@ -111,7 +111,7 @@ int main( int argc, char *argv[] )
 
 	mooApp			*App = new mooApp();
 
-	if( App != 0 )
+	if( App )
 	{
 		OSC			*OSCHost = OSC::newDevice();
 
@@ -119,11 +119,11 @@ int main( int argc, char *argv[] )
 		{
 			ConnectionManager	*CM = ConnectionManager::instance();
 
-			if( CM != 0 )
+			if( CM )
 			{
 				ListenerServer	*L = new ListenerTelnet( 0, ServerPort, CM );
 
-				if( L != 0 )
+				if( L )
 				{
 					CM->doConnect( 0 );
 
