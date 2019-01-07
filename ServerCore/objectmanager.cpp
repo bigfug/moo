@@ -364,7 +364,7 @@ void ObjectManager::onFrame( qint64 pTimeStamp )
 {
 	mTimeStamp = QDateTime::currentMSecsSinceEpoch();
 
-	static quint64		LastTime = mTimeStamp;
+	static qint64		LastTime = mTimeStamp;
 
 	for( const NetRepEnt &NRE : mNetRepLst )
 	{
