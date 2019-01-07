@@ -34,7 +34,7 @@ private:
 	ObjectId			 mPassVerbObject;
 	QString				 mPassVerb;
 
-	const static char	*mPrepositionList[];
+	const static QList<QString>	 mPrepositionList;
 
 	friend class lua_task;
 

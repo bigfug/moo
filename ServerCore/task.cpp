@@ -4,7 +4,7 @@
 #include "lua_object.h"
 #include <QDateTime>
 
-const char		*Task::mPrepositionList[] =
+const QList<QString>	 Task::mPrepositionList =
 {
 	"with/using",
 	"at/to",
@@ -21,9 +21,29 @@ const char		*Task::mPrepositionList[] =
 	"is",
 	"as",
 	"off/off of",
-	"up",
-	0
+	"up"
 };
+
+//const char		*Task::mPrepositionList[] =
+//{
+//	"with/using",
+//	"at/to",
+//	"in front of",
+//	"in/inside/into",
+//	"on top of/on/onto/upon",
+//	"out of/from inside/from",
+//	"over",
+//	"through",
+//	"under/underneath/beneath",
+//	"behind",
+//	"beside",
+//	"for/about",
+//	"is",
+//	"as",
+//	"off/off of",
+//	"up",
+//	0
+//};
 
 Task::Task( const QString &pCommand ) : mCommand( pCommand )
 {
@@ -77,7 +97,7 @@ void Task::findObject( const QString &pName, QList<ObjectId> &pId ) const
 		bool	ok;
 		int		id = pName.mid( 1 ).toInt( &ok );
 
-		if( ok && ObjectManager::instance()->object( id ) != 0 )
+		if( ok && ObjectManager::instance()->object( id ) )
 		{
 			pId.append( id );
 
@@ -128,7 +148,7 @@ void Task::findObject( const QString &pName, QList<ObjectId> &pId ) const
 	{
 		Object			*Player;
 
-		if( ( Player = ObjectManager::instance()->object( player() ) ) != 0 )
+		if( ( Player = ObjectManager::instance()->object( player() ) ) != Q_NULLPTR )
 		{
 			pId.append( Player->location() );
 		}
@@ -141,7 +161,7 @@ void Task::findObject( const QString &pName, QList<ObjectId> &pId ) const
 
 	Object			*Player;
 
-	if( ( Player = ObjectManager::instance()->object( player() ) ) != 0 )
+	if( ( Player = ObjectManager::instance()->object( player() ) ) != Q_NULLPTR )
 	{
 		const QList<ObjectId>	&Contents = Player->contents();
 
@@ -149,7 +169,7 @@ void Task::findObject( const QString &pName, QList<ObjectId> &pId ) const
 		{
 			Object		*Object;
 
-			if( ( Object = ObjectManager::instance()->object( id ) ) != 0 )
+			if( ( Object = ObjectManager::instance()->object( id ) ) != Q_NULLPTR )
 			{
 				if( Object->matchName( pName ) )
 				{
@@ -164,7 +184,7 @@ void Task::findObject( const QString &pName, QList<ObjectId> &pId ) const
 
 		Object			*Location;
 
-		if( ( Location = ObjectManager::instance()->object( Player->location() ) ) != 0 )
+		if( ( Location = ObjectManager::instance()->object( Player->location() ) ) != Q_NULLPTR )
 		{
 			if( Location->matchName( pName ) )
 			{
@@ -177,7 +197,7 @@ void Task::findObject( const QString &pName, QList<ObjectId> &pId ) const
 			{
 				Object		*Object;
 
-				if( ( Object = ObjectManager::instance()->object( id ) ) != 0 )
+				if( ( Object = ObjectManager::instance()->object( id ) ) != Q_NULLPTR )
 				{
 					if( Object->matchName( pName ) )
 					{
@@ -197,9 +217,8 @@ int Task::findPreposition( const QStringList &pWords )
 	{
 		const QString	CurWrd = pWords.at( i );
 
-		for( const char **p = mPrepositionList ; *p != 0 ; p++ )
+		for( QString s : mPrepositionList )
 		{
-			QString			s( *p );
 			QStringList		PrpSet = s.split( '/' );
 
 			if( PrpSet.contains( CurWrd ) )
