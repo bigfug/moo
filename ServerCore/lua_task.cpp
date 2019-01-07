@@ -246,28 +246,28 @@ int lua_task::luaSetProgrammer( lua_State *L )
 }
 
 lua_task::lua_task( ConnectionId pConnectionId, const Task &pTask )
-	: mL( 0 ), mConnectionId( pConnectionId ), mMemUse( 0 )
+	: mL( Q_NULLPTR ), mConnectionId( pConnectionId ), mMemUse( 0 )
 {
 	mTasks.push_front( pTask );
 }
 
 lua_task::~lua_task( void )
 {
-	if( mL != 0 )
+	if( mL )
 	{
 		lua_close( mL );
 
-		mL = 0;
+		mL = Q_NULLPTR;
 	}
 }
 
 lua_State *lua_task::L()
 {
-	if( mL == 0 )
+	if( !mL )
 	{
-		if( ( mL = lua_newstate( lua_task::luaAlloc, this ) ) == 0 )
+		if( ( mL = lua_newstate( lua_task::luaAlloc, this ) ) == Q_NULLPTR )
 		{
-			return( 0 );
+			return( Q_NULLPTR );
 		}
 
 		lua_moo::luaNewState( mL );
@@ -307,7 +307,7 @@ void *lua_task::luaAlloc( void *ptr, size_t osize, size_t nsize )
 	{
 		free(ptr);
 
-		return NULL;
+		return Q_NULLPTR;
 	}
 
 	mMemUse += nsize;
@@ -325,7 +325,7 @@ int lua_task::execute( qint64 pTimeStamp )
 	Connection		*C		= ConnectionManager::instance()->connection( connectionid() );
 	Task			&T		= mTasks.front();
 
-	if( C != 0 && C->processInput( T.command() ) )
+	if( C && C->processInput( T.command() ) )
 	{
 		return( 0 );
 	}
@@ -349,7 +349,7 @@ int lua_task::execute( qint64 pTimeStamp )
 
 	if( First == "PREFIX" || First == "OUTPUTPREFIX" )
 	{
-		if( C != 0 )
+		if( C )
 		{
 			if( !Words.isEmpty() )
 			{
@@ -365,7 +365,7 @@ int lua_task::execute( qint64 pTimeStamp )
 	}
 	else if( First == "SUFFIX" || First == "OUTPUTSUFFIX" )
 	{
-		if( C != 0 )
+		if( C )
 		{
 			if( !Words.isEmpty() )
 			{
@@ -386,7 +386,7 @@ int lua_task::execute( qint64 pTimeStamp )
 
 	// We're processing a normal command from the user
 
-	if( mL == 0 )
+	if( !mL )
 	{
 		if( ( mL = lua_newstate( lua_task::luaAlloc, this ) ) == 0 )
 		{
@@ -405,7 +405,7 @@ int lua_task::execute( qint64 pTimeStamp )
 
 	luaSetTask( mL, this );
 
-	if( C != 0 && C->player() == OBJECT_NONE )
+	if( C && C->player() == OBJECT_NONE )
 	{
 		return( executeLogin() );
 	}
@@ -415,7 +415,7 @@ int lua_task::execute( qint64 pTimeStamp )
 
 int lua_task::eval( void )
 {
-	if( mL == 0 )
+	if( !mL )
 	{
 		if( ( mL = lua_newstate( lua_task::luaAlloc, this ) ) == 0 )
 		{
