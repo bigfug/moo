@@ -928,7 +928,7 @@ int lua_object::luaVerbDel(lua_State *L)
 
 		Verb				*V = O->verb( VerbName );
 
-		if( V == 0 )
+		if( !V )
 		{
 			throw mooException( E_INVARG, "verb not defined on object" );
 		}
@@ -1316,7 +1316,7 @@ int lua_object::luaNotify( lua_State *L )
 		Connection			*CON = ConnectionManager::instance()->connection( CID );
 		QString				 MSG = QString( lua_tostring( L, 2 ) );
 
-		if( CON != 0 )
+		if( CON )
 		{
 			CON->notify( MSG );
 		}
@@ -1635,7 +1635,6 @@ int lua_object::luaPlayers( lua_State *L )
 
 	return( LuaErr ? lua_error( L ) : 0 );
 }
-
 
 int lua_object::luaChild( lua_State *L )
 {

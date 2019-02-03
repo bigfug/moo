@@ -70,6 +70,8 @@ public:
 	QStringList taskVerbStack( void ) const;
 
 private:
+	int subeval( void );
+
 	static void initialise( void );
 
 	static void luaRegisterState( lua_State *L );

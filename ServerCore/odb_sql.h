@@ -19,7 +19,7 @@ class ODBSQL : public ODB
 public:
 	ODBSQL( void );
 
-	virtual ~ODBSQL( void ) {}
+	virtual ~ODBSQL( void ) Q_DECL_OVERRIDE {}
 
 	virtual void load( void ) Q_DECL_OVERRIDE;
 	virtual void save( void ) Q_DECL_OVERRIDE;

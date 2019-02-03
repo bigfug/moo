@@ -53,7 +53,7 @@ void lua_serialport::initialise()
 	// As we're overriding __index, build a static QMap of commands
 	// pointing to their relevant functions (hopefully pretty fast)
 
-	for( const luaL_Reg *FP = mLuaInstanceFunctions ; FP->name != 0 ; FP++ )
+	for( const luaL_Reg *FP = mLuaInstanceFunctions ; FP->name ; FP++ )
 	{
 		mLuaMap[ FP->name ] = FP->func;
 	}

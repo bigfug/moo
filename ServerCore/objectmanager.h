@@ -44,7 +44,7 @@ class ObjectManager : public QObject
 {
 	Q_OBJECT
 
-	explicit ObjectManager( QObject *parent = 0 );
+	explicit ObjectManager( QObject *parent = Q_NULLPTR );
 
 	friend class ODB;
 

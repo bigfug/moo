@@ -415,9 +415,11 @@ int lua_task::execute( qint64 pTimeStamp )
 
 int lua_task::eval( void )
 {
+	ODB			*OM_ODB = ObjectManager::instance()->odb();
+
 	if( !mL )
 	{
-		if( ( mL = lua_newstate( lua_task::luaAlloc, this ) ) == 0 )
+		if( ( mL = lua_newstate( lua_task::luaAlloc, this ) ) == Q_NULLPTR )
 		{
 			return( 0 );
 		}
@@ -443,7 +445,7 @@ int lua_task::eval( void )
 		}
 	}
 
-	if( Error != 0 )
+	if( Error )
 	{
 		QString		Err = QString( lua_tostring( mL, -1 ) );
 
@@ -466,6 +468,11 @@ int lua_task::eval( void )
 	return( NewTop - OldTop );
 }
 
+int lua_task::subeval()
+{
+
+}
+
 int lua_task::executeLogin( void )
 {
 	bool		LuaErr = false;
@@ -475,11 +482,11 @@ int lua_task::executeLogin( void )
 		Task			&T				= mTasks.front();
 		ObjectManager	&OM				= *ObjectManager::instance();
 		Object			*Root			= OM.object( 0 );
-		Verb			*LoginCommand	= ( Root != 0 ? Root->verbMatch( "do_login_command" ) : 0 );
+		Verb			*LoginCommand	= ( Root ? Root->verbMatch( "do_login_command" ) : Q_NULLPTR );
 		ObjectId		 MaxId			= OM.maxId();
 		Verb			*V;
 
-		if( LoginCommand == 0 )
+		if( !LoginCommand )
 		{
 			return( 0 );
 		}
@@ -501,7 +508,7 @@ int lua_task::executeLogin( void )
 
 		Q_ASSERT( lua_gettop( mL ) == 0 );
 
-		if( Player == 0 )
+		if( !Player )
 		{
 			return( 0 );
 		}
@@ -523,7 +530,7 @@ int lua_task::executeLogin( void )
 			{
 				if( C->object() != 0 )
 				{
-					if( ( V = Root->verbMatch( "user_client_disconnected" ) ) != 0 )
+					if( ( V = Root->verbMatch( "user_client_disconnected" ) ) != Q_NULLPTR )
 					{
 						lua_object::lua_pushobject( mL, Player );
 
@@ -700,8 +707,8 @@ int lua_task::execute( void )
 		ObjectId		 IndirectObjectId = T.indirectObjectId();
 		Object			*DirectObject   = OM.object( DirectObjectId );
 		Object			*IndirectObject = OM.object( IndirectObjectId );
-		Verb			*FndVrb;
-		Object			*FndObj;
+		Verb			*FndVrb = Q_NULLPTR;
+		Object			*FndObj = Q_NULLPTR;;
 
 		if( Player && Player->verbFind( T.verb(), &FndVrb, &FndObj, DirectObjectId, T.preposition(), IndirectObjectId ) )
 		{
@@ -725,7 +732,7 @@ int lua_task::execute( void )
 		}
 		else
 		{
-			if( C != 0 )
+			if( C )
 			{
 				C->notify( "I couldn't understand that." );
 			}
@@ -869,7 +876,7 @@ void lua_task::luaHook( lua_State *L, lua_Debug *ar )
 	{
 		lua_task		*T = lua_task::luaGetTask( L );
 
-		if( T != 0 )
+		if( T )
 		{
 			if( QDateTime::currentMSecsSinceEpoch() - T->timestamp() > 5000 )
 			{
