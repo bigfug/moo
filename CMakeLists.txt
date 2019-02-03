@@ -20,6 +20,15 @@ add_subdirectory( ServerCore )
 add_subdirectory( ServerCoreTests )
 add_subdirectory( Daemon )
 
+# The dependencies for various UNIX packages
+
+if( UNIX AND NOT APPLE )
+	set( CPACK_DEBIAN_PACKAGE_DEBUG ON )
+	set( CPACK_DEB_COMPONENT_INSTALL ON )
+	set( CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON )
+	set( CPACK_DEBIAN_PACKAGE_GENERATE_SHLIBS ON )
+endif()
+
 include( CPack )
 
 
