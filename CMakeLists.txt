@@ -13,6 +13,15 @@ set( CMAKE_CXX_STANDARD 11 )
 set( CMAKE_CXX_STANDARD_REQUIRED ON )
 set( CMAKE_CXX_EXTENSIONS OFF )
 
+#------------------------------------------------------------------------------
+# Enable Unit Testing
+
+include( CTest )
+
+set( CTEST_OUTPUT_ON_FAILURE ON )
+
+#------------------------------------------------------------------------------
+
 add_subdirectory( Editor )
 add_subdirectory( libs )
 add_subdirectory( Server )
