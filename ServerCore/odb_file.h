@@ -88,7 +88,7 @@ public:
 	{
 		mTaskQueue << TE;
 
-		qSort( mTaskQueue.begin(), mTaskQueue.end(), TaskEntry::lessThan );
+		std::sort( mTaskQueue.begin(), mTaskQueue.end(), TaskEntry::lessThan );
 	}
 
 	virtual QList<TaskEntry> tasks(qint64 pTimeStamp) Q_DECL_OVERRIDE
