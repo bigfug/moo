@@ -470,7 +470,7 @@ int lua_task::eval( void )
 
 int lua_task::subeval()
 {
-
+	return( 0 );
 }
 
 int lua_task::executeLogin( void )
