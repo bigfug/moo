@@ -120,6 +120,7 @@ public slots:
 		mODB = pODB;
 	}
 
+	void recycle( ObjectId pObjectId );
 	void recycle( Object *pObject );
 	void restore( Object *pObject );
 

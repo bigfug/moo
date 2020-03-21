@@ -567,6 +567,11 @@ void ObjectManager::checkpoint()
 	QFile( "moo.db" ).copy( QString( "%1.db" ).arg( DatStr ) );
 }
 
+void ObjectManager::recycle(ObjectId pObjectId)
+{
+	recycle( object( pObjectId ) );
+}
+
 void ObjectManager::timeoutObjects()
 {
 	for( ObjectId OID : mAddedObjects )

@@ -179,11 +179,7 @@ void ServerTest::luaPropBoolean( void )
 
 	if( true )
 	{
-		QString			 CMD = QString( "o( %1 ):propadd( 'test', true );" ).arg( O->id() );
-		TaskEntry		 TE( CMD, CID, Programmer->id() );
-		lua_task		 Com( CID, TE );
-
-		Com.eval();
+		lua_task::process( QString( "o( %1 ):propadd( 'test', true );" ).arg( O->id() ), CID, Programmer->id() );
 
 		Property	*P = O->prop( "test" );
 
@@ -195,11 +191,7 @@ void ServerTest::luaPropBoolean( void )
 
 	if( true )
 	{
-		QString			 CMD = QString( "o( %1 ).test=false;" ).arg( O->id() );
-		TaskEntry		 TE( CMD, CID, Programmer->id() );
-		lua_task		 Com( CID, TE );
-
-		Com.eval();
+		lua_task::process( QString( "o( %1 ).test=false;" ).arg( O->id() ), CID, Programmer->id() );
 
 		Property	*P = O->prop( "test" );
 
@@ -209,11 +201,7 @@ void ServerTest::luaPropBoolean( void )
 
 	if( true )
 	{
-		QString			 CMD = QString( "o( %1 ).test=20;" ).arg( O->id() );
-		TaskEntry		 TE( CMD, CID, Programmer->id() );
-		lua_task		 Com( CID, TE );
-
-		Com.eval();
+		lua_task::process( QString( "o( %1 ).test=20;" ).arg( O->id() ), CID, Programmer->id() );
 
 		Property	*P = O->prop( "test" );
 
@@ -223,11 +211,7 @@ void ServerTest::luaPropBoolean( void )
 
 	if( true )
 	{
-		QString			 CMD = QString( "o( %1 ):propdel( 'test' )" ).arg( O->id() );
-		TaskEntry		 TE( CMD, CID, Programmer->id() );
-		lua_task		 Com( CID, TE );
-
-		Com.eval();
+		lua_task::process( QString( "o( %1 ):propdel( 'test' )" ).arg( O->id() ), CID, Programmer->id() );
 
 		Property	*P = O->prop( "test" );
 
@@ -254,11 +238,7 @@ void ServerTest::luaPropObject( void )
 
 	if( true )
 	{
-		QString			 CMD = QString( "o( %1 ):propadd( 'test', o( %2 ) );" ).arg( O->id() ).arg( O1->id() );
-		TaskEntry		 TE( CMD, CID, Programmer->id() );
-		lua_task		 Com( CID, TE );
-
-		Com.eval();
+		lua_task::process( QString( "o( %1 ):propadd( 'test', o( %2 ) );" ).arg( O->id() ).arg( O1->id() ), CID, Programmer->id() );
 
 		Property	*P = O->prop( "test" );
 
@@ -270,11 +250,7 @@ void ServerTest::luaPropObject( void )
 
 	if( true )
 	{
-		QString			 CMD = QString( "o( %1 ).test=o( %2 );" ).arg( O->id() ).arg( O2->id() );
-		TaskEntry		 TE( CMD, CID, Programmer->id() );
-		lua_task		 Com( CID, TE );
-
-		Com.eval();
+		lua_task::process( QString( "o( %1 ).test=o( %2 );" ).arg( O->id() ).arg( O2->id() ), CID, Programmer->id() );
 
 		Property	*P = O->prop( "test" );
 
@@ -284,11 +260,7 @@ void ServerTest::luaPropObject( void )
 
 	if( true )
 	{
-		QString			 CMD = QString( "o( %1 ).test=20;" ).arg( O->id() );
-		TaskEntry		 TE( CMD, CID, Programmer->id() );
-		lua_task		 Com( CID, TE );
-
-		Com.eval();
+		lua_task::process( QString( "o( %1 ).test=20;" ).arg( O->id() ), CID, Programmer->id() );
 
 		Property	*P = O->prop( "test" );
 
@@ -298,11 +270,7 @@ void ServerTest::luaPropObject( void )
 
 	if( true )
 	{
-		QString			 CMD = QString( "o( %1 ):propdel( 'test' )" ).arg( O->id() );
-		TaskEntry		 TE( CMD, CID, Programmer->id() );
-		lua_task		 Com( CID, TE );
-
-		Com.eval();
+		lua_task::process( QString( "o( %1 ):propdel( 'test' )" ).arg( O->id() ), CID, Programmer->id() );
 
 		Property	*P = O->prop( "test" );
 
@@ -327,11 +295,7 @@ void ServerTest::luaPropList( void )
 
 	if( true )
 	{
-		QString			 CMD = QString( "o( %1 ):propadd( 'test', { 12.0, 'thirteen', { 14, 'fifteen' } } );" ).arg( O->id() );
-		TaskEntry		 TE( CMD, CID, Programmer->id() );
-		lua_task		 Com( CID, TE );
-
-		Com.eval();
+		lua_task::process( QString( "o( %1 ):propadd( 'test', { 12.0, 'thirteen', { 14, 'fifteen' } } );" ).arg( O->id() ), CID, Programmer->id() );
 
 		Property	*P = O->prop( "test" );
 
@@ -354,11 +318,7 @@ void ServerTest::luaPropList( void )
 
 	if( true )
 	{
-		QString			 CMD = QString( "o( %1 ).test={ 'hello', 'world' };" ).arg( O->id() );
-		TaskEntry		 TE( CMD, CID, Programmer->id() );
-		lua_task		 Com( CID, TE );
-
-		Com.eval();
+		lua_task::process( QString( "o( %1 ).test={ 'hello', 'world' };" ).arg( O->id() ), CID, Programmer->id() );
 
 		Property	*P = O->prop( "test" );
 
@@ -372,11 +332,7 @@ void ServerTest::luaPropList( void )
 
 	if( true )
 	{
-		QString			 CMD = QString( "o( %1 ).test=20;" ).arg( O->id() );
-		TaskEntry		 TE( CMD, CID, Programmer->id() );
-		lua_task		 Com( CID, TE );
-
-		Com.eval();
+		lua_task::process( QString( "o( %1 ).test=20;" ).arg( O->id() ), CID, Programmer->id() );
 
 		Property	*P = O->prop( "test" );
 
@@ -390,11 +346,7 @@ void ServerTest::luaPropList( void )
 
 	if( true )
 	{
-		QString			 CMD = QString( "o( %1 ):propdel( 'test' )" ).arg( O->id() );
-		TaskEntry		 TE( CMD, CID, Programmer->id() );
-		lua_task		 Com( CID, TE );
-
-		Com.eval();
+		lua_task::process( QString( "o( %1 ):propdel( 'test' )" ).arg( O->id() ), CID, Programmer->id() );
 
 		Property	*P = O->prop( "test" );
 
@@ -419,11 +371,7 @@ void ServerTest::luaPropGetSet( void )
 
 	if( true )
 	{
-		QString			 CMD = QString( "o( %1 ):propadd( 'test', 14 )" ).arg( O->id() );
-		TaskEntry		 TE( CMD, CID, Programmer->id() );
-		lua_task		 Com( CID, TE );
-
-		Com.eval();
+		lua_task::process( QString( "o( %1 ):propadd( 'test', 14 )" ).arg( O->id() ), CID, Programmer->id() );
 
 		Property	*P = O->prop( "test" );
 
@@ -438,11 +386,7 @@ void ServerTest::luaPropGetSet( void )
 
 	if( true )
 	{
-		QString			 CMD = QString( "o( %1 ):prop( 'test' ).r = true" ).arg( O->id() );
-		TaskEntry		 TE( CMD, CID, Programmer->id() );
-		lua_task		 Com( CID, TE );
-
-		Com.eval();
+		lua_task::process( QString( "o( %1 ):prop( 'test' ).r = true" ).arg( O->id() ), CID, Programmer->id() );
 
 		Property	*P = O->prop( "test" );
 
@@ -452,11 +396,7 @@ void ServerTest::luaPropGetSet( void )
 
 	if( true )
 	{
-		QString			 CMD = QString( "o( %1 ):prop( 'test' ).c = true" ).arg( O->id() );
-		TaskEntry		 TE( CMD, CID, Programmer->id() );
-		lua_task		 Com( CID, TE );
-
-		Com.eval();
+		lua_task::process( QString( "o( %1 ):prop( 'test' ).c = true" ).arg( O->id() ), CID, Programmer->id() );
 
 		Property	*P = O->prop( "test" );
 
@@ -466,11 +406,7 @@ void ServerTest::luaPropGetSet( void )
 
 	if( true )
 	{
-		QString			 CMD = QString( "o( %1 ):prop( 'test' ).w = true" ).arg( O->id() );
-		TaskEntry		 TE( CMD, CID, Programmer->id() );
-		lua_task		 Com( CID, TE );
-
-		Com.eval();
+		lua_task::process( QString( "o( %1 ):prop( 'test' ).w = true" ).arg( O->id() ), CID, Programmer->id() );
 
 		Property	*P = O->prop( "test" );
 

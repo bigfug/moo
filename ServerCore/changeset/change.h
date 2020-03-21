@@ -6,10 +6,7 @@ namespace change {
 class Change
 {
 public:
-	Change( void )
-	{
-
-	}
+	virtual ~Change( void ) {}
 
 	virtual void commit( void ) = 0;
 

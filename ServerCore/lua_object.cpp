@@ -239,6 +239,8 @@ int lua_object::luaCreate( lua_State *L )
 
 		if( ( objObject = OM.object( id ) ) != 0 )
 		{
+			Command->changeAdd( new change::ObjectCreate( id ) );
+
 			// The owner of the new object is either the programmer (if owner is not provided)
 			// the new object itself (if owner was given as #-1)
 			// or owner (otherwise).
@@ -817,7 +819,7 @@ int lua_object::luaSet( lua_State *L )
 
 		QVariant					 V;
 
-		if( FndPrp->value().typeName() == lua_object::luaHandle::mTypeName )
+		if( !strcmp( FndPrp->value().typeName(), lua_object::luaHandle::mTypeName ) )
 		{
 			lua_object::luaHandle		 H;
 

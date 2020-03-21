@@ -71,20 +71,26 @@ ObjectId ObjectLogic::create( lua_task &pTask, ObjectId pUserId, ObjectId pParen
 	// Otherwise, the quota is decremented and stored back into the `ownership_quota'
 	//   property as a part of the creation of the new object.
 
+	Property			*Quota = nullptr;
+	int					 QuotaValue = 0;
+
 	if( objOwner )
 	{
-		Property		*Quota = objOwner->prop( "ownership_quota" );
+		Quota = objOwner->prop( "ownership_quota" );
 
-		if( Quota && Quota->type() == QVariant::Int )
+		if( Quota && Quota->type() != QVariant::Int )
 		{
-			int		QuotaValue = Quota->value().toInt();
+			Quota = nullptr;
+		}
+
+		if( Quota )
+		{
+			QuotaValue = Quota->value().toInt();
 
 			if( QuotaValue <= 0 )
 			{
 				throw( mooException( E_QUOTA, "" ) );
 			}
-
-			Quota->setValue( int( QuotaValue - 1 ) );
 		}
 	}
 
@@ -93,6 +99,11 @@ ObjectId ObjectLogic::create( lua_task &pTask, ObjectId pUserId, ObjectId pParen
 	if( !objNew )
 	{
 		throw( mooException( E_MEMORY, "" ) );
+	}
+
+	if( Quota )
+	{
+		Quota->setValue( int( QuotaValue - 1 ) );
 	}
 
 	if( objParent != 0 )

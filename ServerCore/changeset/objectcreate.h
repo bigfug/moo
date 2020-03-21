@@ -1,8 +1,8 @@
 #ifndef OBJECTCREATE_H
 #define OBJECTCREATE_H
 
-#include "../lua_task.h"
-#include "../connection.h"
+#include "../object.h"
+#include "../objectmanager.h"
 
 #include "change.h"
 
@@ -11,9 +11,9 @@ namespace change {
 class ObjectCreate : public Change
 {
 public:
-	ObjectCreate( lua_task &pTask, ObjectId pUserId, ObjectId pParentId, ObjectId pOwnerId, Connection *pConnection = Q_NULLPTR )
+	ObjectCreate( ObjectId pObjectId )
+		: mObjectId( pObjectId )
 	{
-
 	}
 
 	// Change interface
@@ -24,7 +24,11 @@ public:
 
 	virtual void rollback() Q_DECL_OVERRIDE
 	{
+		ObjectManager::instance()->recycle( mObjectId );
 	}
+
+private:
+	ObjectId		 mObjectId;
 };
 
 }

@@ -1,5 +1,7 @@
 #include <QCoreApplication>
 
+#include <iostream>
+
 #include "mooapp.h"
 #include "connectionmanager.h"
 #include "connection.h"
@@ -99,7 +101,9 @@ int main( int argc, char *argv[] )
 	{
 		if( !QDir::setCurrent( DataDir ) )
 		{
-			qFatal( QString( QObject::tr( "Can't set directory to %1" ) ).arg( DataDir ).toLatin1() );
+			std::cerr << QString( QObject::tr( "Can't set directory to %1" ).arg( DataDir ) ).toStdString() << std::endl;
+
+			return( -1 );
 		}
 	}
 

@@ -22,8 +22,6 @@ public:
 		if( mProperty )
 		{
 			mOldValue = mProperty->value();
-
-			std::cout << mObject->id() << ":" << mPrpNam.toStdString() << " " << pValue.toString().toStdString() << " (" << mOldValue.toString().toStdString() << ")" << std::endl;
 		}
 
 		mObject->propSet( mPrpNam, pValue );
