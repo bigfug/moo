@@ -70,6 +70,8 @@ public:
 
 	Object *object( ObjectId pIndex );
 
+	Object *objectIncludingRecycled( ObjectId pIndex );
+
 	void clear( void );
 
 	ObjectId findPlayer( QString pName ) const;
@@ -119,6 +121,7 @@ public slots:
 	}
 
 	void recycle( Object *pObject );
+	void restore( Object *pObject );
 
 	void recycleObjects( void );
 

@@ -26,6 +26,8 @@ public:
 
 	virtual Object *object( ObjectId pIndex ) const Q_DECL_OVERRIDE;
 
+	virtual bool hasObject( ObjectId pIndex ) const Q_DECL_OVERRIDE;
+
 	virtual void addObject( Object &pObject ) Q_DECL_OVERRIDE;
 	virtual void deleteObject( Object &pObject ) Q_DECL_OVERRIDE;
 	virtual void updateObject( Object &pObject ) Q_DECL_OVERRIDE;

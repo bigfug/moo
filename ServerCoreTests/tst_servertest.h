@@ -120,6 +120,8 @@ private Q_SLOTS:
 	void luaVerbVerbCall( void );
 	void luaVerbParentVerbCall( void );
 
+	void taskRollbackObject( void );
+
 	void cleanupTestCase( void );
 };
 

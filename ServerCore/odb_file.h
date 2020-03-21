@@ -30,6 +30,13 @@ public:
 		return( 0 );
 	}
 
+	virtual bool hasObject( ObjectId pIndex ) const Q_DECL_OVERRIDE
+	{
+		Q_UNUSED( pIndex )
+
+		return( false );
+	}
+
 	virtual void addObject( Object &pObject ) Q_DECL_OVERRIDE
 	{
 		Q_UNUSED( pObject )

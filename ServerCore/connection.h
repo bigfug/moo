@@ -139,6 +139,8 @@ public:
 
 	QVariant cookie( const QString &pName );
 
+	bool hasCookie( const QString &pName ) const;
+
 signals:
 	void taskOutput( TaskEntry &pTask );
 	void textOutput( const QString &pText );

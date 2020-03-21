@@ -17,11 +17,25 @@
 #include "lua_utilities.h"
 #include "mooexception.h"
 
+#include "changeset/objectaliasadd.h"
+#include "changeset/objectaliasdelete.h"
+#include "changeset/objectcreate.h"
+#include "changeset/objectsetname.h"
+#include "changeset/objectsetowner.h"
+#include "changeset/objectsetproperty.h"
+#include "changeset/objectverbadd.h"
+#include "changeset/objectverbdelete.h"
+#include "changeset/objectpropadd.h"
+#include "changeset/objectpropclear.h"
+#include "changeset/objectpropdelete.h"
+#include "changeset/connectionnotify.h"
+
 //-----------------------------------------------------------------------------
 // Lua state
 //-----------------------------------------------------------------------------
 
 const char	*lua_object::luaHandle::mLuaName    = "moo.object";
+const char	*lua_object::luaHandle::mTypeName   = "lua_object::luaHandle";
 
 LuaMap		lua_object::mLuaMap;
 
@@ -217,6 +231,8 @@ int lua_object::luaCreate( lua_State *L )
 			}
 		}
 
+		//change::ObjectCreate	*Change = new change::ObjectCreate( *Command, T.programmer(), ParentId, OwnerId );
+
 		//qDebug() << "create: ParentId:" << ParentId << "OwnerId:" << OwnerId;
 
 		ObjectId id = ObjectLogic::create( *Command, T.programmer(), ParentId, OwnerId );
@@ -256,6 +272,8 @@ int lua_object::luaCreate( lua_State *L )
 
 			if( CON )
 			{
+				CON->lastCreatedObjectId();
+
 				CON->setLastCreatedObjectId( id );
 			}
 		}
@@ -535,7 +553,7 @@ int lua_object::luaSet( lua_State *L )
 		const Task			&T = Command->task();
 		Object				*PRG = ObjectManager::o( Command->programmer() );
 
-		if( PRG == 0 )
+		if( !PRG )
 		{
 			throw mooException( E_PERM, "programmer is invalid" );
 		}
@@ -543,7 +561,7 @@ int lua_object::luaSet( lua_State *L )
 //		Object				*Player = ObjectManager::instance()->object( T.player() );
 		Object				*O = argObj( L );
 
-		if( O == 0 || !O->valid() )
+		if( !O || !O->valid() )
 		{
 			throw( mooException( E_PERM, QString( "object (#%1) is invalid" ).arg( argId( L ) ) ) );
 		}
@@ -574,14 +592,14 @@ int lua_object::luaSet( lua_State *L )
 
 			case NAME:
 				{
-					const char			*V = luaL_checkstring( L, 3 );
-
 					if( !isOwner && !isWizard )
 					{
 						throw( mooException( E_PERM, "programmer is not owner or wizard" ) );
 					}
 
-					O->setName( V );
+					const char			*V = luaL_checkstring( L, 3 );
+
+					Command->changeAdd( new change::ObjectSetName( O, V ) );
 
 					return( 0 );
 				}
@@ -597,6 +615,8 @@ int lua_object::luaSet( lua_State *L )
 					Object				*V = argObj( L, 3 );
 
 					O->setOwner( V->id() );
+
+					Command->changeAdd( new change::ObjectSetOwner( O, V->id() ) );
 
 					return( 0 );
 				}
@@ -790,7 +810,67 @@ int lua_object::luaSet( lua_State *L )
 			throw( mooException( E_PERM, QString( "programmer (#%1) is not owner (#%2) or wizard of property (#%3)" ).arg( T.programmer() ).arg( O->owner() ).arg( FndPrp->owner() ) ) );
 		}
 
-		return( lua_prop::luaSetValue( L, N, O, FndPrp, FndObj, 3 ) );
+		if( !FndPrp->write() && PRG->id() != FndPrp->owner() && !isWizard )
+		{
+			throw mooException( E_PERM, "no access to property" );
+		}
+
+		QVariant					 V;
+
+		if( FndPrp->value().typeName() == lua_object::luaHandle::mTypeName )
+		{
+			lua_object::luaHandle		 H;
+
+			H.O = lua_object::argId( L, 3 );
+
+			V.setValue( H );
+		}
+		else
+		{
+			switch( FndPrp->type() )
+			{
+				case QVariant::Bool:
+					{
+						luaL_checktype( L, 3, LUA_TBOOLEAN );
+
+						bool	v = lua_toboolean( L, 3 );
+
+						V.setValue( v );
+					}
+					break;
+
+				case QVariant::Double:
+					{
+						lua_Number	v = luaL_checknumber( L, 3 );
+
+						V.setValue( v );
+					}
+					break;
+
+				case QVariant::String:
+					{
+						size_t		l;
+
+						const char *v = luaL_checklstring( L, 3, &l );
+
+						V.setValue( QString::fromLatin1( v, l ) );
+					}
+					break;
+
+				case QVariant::Map:
+					{
+						luaL_checktype( L, 3, LUA_TTABLE );
+
+						lua_prop::luaNewRecurse( L, 3, V );
+					}
+					break;
+
+				default:
+					throw mooException( E_TYPE, QString( "Unknown property value type: %1" ).arg( FndPrp->type() ) );
+			}
+		}
+
+		Command->changeAdd( new change::ObjectSetProperty( O, FndPrp->name(), V ) );
 	}
 	catch( mooException e )
 	{
@@ -954,7 +1034,7 @@ int lua_object::luaVerbAdd( lua_State *L )
 		V.setOwner( T.programmer() );
 		V.setObject( O->id() );
 
-		O->verbAdd( VerbName, V );
+		Command->changeAdd( new change::ObjectVerbAdd( O, VerbName, V ) );
 
 		lua_verb::lua_pushverb( L, O->verb( VerbName ) );
 
@@ -1006,7 +1086,7 @@ int lua_object::luaVerbDel(lua_State *L)
 			throw mooException( E_INVARG, "verb not defined on object" );
 		}
 
-		O->verbDelete( VerbName );
+		Command->changeAdd( new change::ObjectVerbDelete( O, VerbName ) );
 
 		return( 0 );
 	}
@@ -1224,7 +1304,7 @@ int lua_object::luaPropAdd( lua_State *L )
 
 		//lua_pushproperty( L, OBJECT_NONE, QString( lua_tostring( L, 1 ) ), P );
 
-		O->propAdd( PropName, P );
+		Command->changeAdd( new change::ObjectPropAdd( O, PropName, P ) );
 
 		return( 0 );
 	}
@@ -1289,7 +1369,7 @@ int lua_object::luaPropDel( lua_State *L )
 			throw mooException( E_PROPNF, "prop not defined on this object" );
 		}
 
-		O->propDelete( PropName );
+		Command->changeAdd( new change::ObjectPropDelete( O, PropName ) );
 
 		return( 0 );
 	}
@@ -1357,7 +1437,7 @@ int lua_object::luaPropClear(lua_State *L)
 			throw mooException( E_PROPNF, "prop is defined on this object" );
 		}
 
-		O->propClear( PropName );
+		Command->changeAdd( new change::ObjectPropClear( O, PropName ) );
 
 		return( 0 );
 	}
@@ -1383,6 +1463,7 @@ int lua_object::luaNotify( lua_State *L )
 
 	try
 	{
+		lua_task			*Command = lua_task::luaGetTask( L );
 		Object				*O = argObj( L );
 		ConnectionManager	&CM  = *ConnectionManager::instance();
 		ConnectionId		 CID = CM.fromPlayer( O->id() );
@@ -1391,7 +1472,7 @@ int lua_object::luaNotify( lua_State *L )
 
 		if( CON )
 		{
-			CON->notify( MSG );
+			Command->changeAdd( new change::ConnectionNotify( CON, MSG ) );
 		}
 
 		return( 0 );
@@ -1862,7 +1943,8 @@ int lua_object::luaAliasAdd(lua_State *L)
 
 	try
 	{
-		const Task			&T = lua_task::luaGetTask( L )->task();
+		lua_task			*Command = lua_task::luaGetTask( L );
+		const Task			&T = Command->task();
 		Object				*O = argObj( L );
 		Object				*Player = ObjectManager::o( T.programmer() );
 
@@ -1878,7 +1960,7 @@ int lua_object::luaAliasAdd(lua_State *L)
 			throw mooException( E_PERM, "programmer has no access" );
 		}
 
-		O->aliasAdd( N );
+		Command->changeAdd( new change::ObjectAliasAdd( O, N ) );
 	}
 	catch( mooException e )
 	{
@@ -1900,7 +1982,8 @@ int lua_object::luaAliasDel(lua_State *L)
 
 	try
 	{
-		const Task			&T = lua_task::luaGetTask( L )->task();
+		lua_task			*Command = lua_task::luaGetTask( L );
+		const Task			&T = Command->task();
 		Object				*O = argObj( L );
 		Object				*Player = ObjectManager::o( T.programmer() );
 
@@ -1916,7 +1999,7 @@ int lua_object::luaAliasDel(lua_State *L)
 			throw mooException( E_PERM, "programmer has no access" );
 		}
 
-		O->aliasDelete( N );
+		Command->changeAdd( new change::ObjectAliasDelete( O, N ) );
 	}
 	catch( mooException e )
 	{

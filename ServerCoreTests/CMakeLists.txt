@@ -28,6 +28,7 @@ set( SOURCE_FILES
 	stdafx.h
 	luatestdata.h
 	permissionstest.h
+	tst_task_rollback_object.cpp
 	)
 
 add_executable( ${PROJECT_NAME} ${SOURCE_FILES} )

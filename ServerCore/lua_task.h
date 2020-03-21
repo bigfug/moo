@@ -7,9 +7,14 @@
 
 #include <QList>
 #include "task.h"
+#include "changeset/changeset.h"
 
 class Connection;
 class Verb;
+
+namespace change {
+class Change;
+}
 
 class lua_task
 {
@@ -69,6 +74,11 @@ public:
 
 	QStringList taskVerbStack( void ) const;
 
+	inline void changeAdd( change::Change *pChange )
+	{
+		mChanges.add( pChange );
+	}
+
 	static int process( QString pCommand, ConnectionId pConnectionId = CONNECTION_NONE, ObjectId pPlayerId = OBJECT_NONE );
 
 private:
@@ -107,18 +117,31 @@ private:
 	static void *luaAlloc( void *ud, void *ptr, size_t osize, size_t nsize );
 	void *luaAlloc( void *ptr, size_t osize, size_t nsize );
 
+	void commit( void )
+	{
+		mChanges.commit();
+	}
+
+	void rollback( void )
+	{
+		mChanges.rollback();
+	}
+
 private:
-	lua_State		*mL;
-	ConnectionId	 mConnectionId;
-	QList<Task>		 mTasks;
-	qint64			 mTimeStamp; // when the current task was started
-	size_t			 mMemUse;
+	lua_State					*mL;
+	ConnectionId				 mConnectionId;
+	QList<Task>					 mTasks;
+	qint64						 mTimeStamp; // when the current task was started
+	size_t						 mMemUse;
+	change::ChangeSet			 mChanges;
+	bool						 mError;
 
 	static const luaL_Reg		 mLuaStatic[];
 	static const luaL_Reg		 mLuaGet[];
 	static const luaL_Reg		 mLuaSet[];
 
 	friend class lua_moo;
+	friend class ServerTest;
 };
 
 #endif // LUA_TASK_H

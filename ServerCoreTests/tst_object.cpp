@@ -57,11 +57,12 @@ void ServerTest::objectDefaults( void )
 	QCOMPARE( O->recycle(), true );
 	QCOMPARE( O->valid(), false );
 
-	QCOMPARE( OM.object( 0 ), O );
+	QCOMPARE( OM.object( 0 ), nullptr );
+	QCOMPARE( OM.objectIncludingRecycled( 0 ), O );
 
 	OM.recycleObjects();
 
-	QVERIFY( OM.object( 0 ) == 0 );
+	QCOMPARE( OM.object( 0 ), nullptr );
 
 	QVERIFY( OM.objectCount() == 0 );
 
@@ -86,7 +87,7 @@ void ServerTest::objectGetSet( void )
 	O->setPlayer( true );
 	O->setProgrammer( true );
 	O->setRead( true );
-	O->setRecycle( true );
+	O->setRecycled( true );
 	O->setWizard( true );
 	O->setWrite( true );
 

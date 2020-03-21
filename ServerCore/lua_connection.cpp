@@ -7,6 +7,7 @@
 #include "mooexception.h"
 #include "lua_task.h"
 #include "connectionmanager.h"
+#include "changeset/connectionnotify.h"
 
 const char	*lua_connection::mLuaName = "moo.connection";
 LuaMap		lua_connection::mLuaMap;
@@ -126,7 +127,11 @@ int lua_connection::luaNotify( lua_State *L )
 
 		if( Con && Con->mConnection )
 		{
-			Con->mConnection->notify( QString( Msg ) );
+			lua_task			*Command = lua_task::luaGetTask( L );
+
+			Command->changeAdd( new change::ConnectionNotify( Con->mConnection, QString::fromLatin1( Msg ) ) );
+
+//			Con->mConnection->notify( QString( Msg ) );
 		}
 
 		return( 0 );

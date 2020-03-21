@@ -60,6 +60,11 @@ QVariant Connection::cookie( const QString &pName )
 	return( mCookies.value( pName ) );
 }
 
+bool Connection::hasCookie(const QString &pName) const
+{
+	return( mCookies.contains( pName ) );
+}
+
 void Connection::write( const QString &pText )
 {
 	emit textOutput( pText );

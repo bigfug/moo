@@ -1,5 +1,6 @@
 #include <QDateTime>
 #include <QDebug>
+#include <iostream>
 
 #include "lua_task.h"
 #include "task.h"
@@ -246,7 +247,7 @@ int lua_task::luaSetProgrammer( lua_State *L )
 }
 
 lua_task::lua_task( ConnectionId pConnectionId, const Task &pTask )
-	: mL( Q_NULLPTR ), mConnectionId( pConnectionId ), mMemUse( 0 )
+	: mL( Q_NULLPTR ), mConnectionId( pConnectionId ), mMemUse( 0 ), mError( false )
 {
 	mTasks.push_front( pTask );
 }
@@ -258,6 +259,15 @@ lua_task::~lua_task( void )
 		lua_close( mL );
 
 		mL = Q_NULLPTR;
+	}
+
+	if( !mError )
+	{
+		mChanges.commit();
+	}
+	else
+	{
+		mChanges.rollback();
 	}
 }
 
@@ -273,6 +283,8 @@ lua_State *lua_task::L()
 		lua_moo::luaNewState( mL );
 
 		lua_sethook( mL, &lua_task::luaHook, LUA_MASKCOUNT, 10 );
+
+		luaSetTask( mL, this );
 	}
 
 	return( mL );
@@ -441,12 +453,12 @@ int lua_task::eval( void )
 		{
 			CON->notify( Err );
 		}
-		else
-		{
-			qDebug() << Err;
-		}
+
+		std::cerr << Err.toStdString() << std::endl;
 
 		lua_pop( LS, 1 );
+
+		mError = true;
 	}
 
 	const int			 NewTop = lua_gettop( LS );
@@ -792,12 +804,12 @@ int lua_task::verbCall( Task &pTask, Verb *V, int pArgCnt  )
 
 int lua_task::verbCallCode( Verb *V, int pArgCnt )
 {
-	Connection		*C = ConnectionManager::instance()->connection( connectionid() );
+	Connection		*C    = ConnectionManager::instance()->connection( connectionid() );
 
-	int				c1 = lua_gettop( mL ) - pArgCnt;
-	int				Error;
+	int				c1    = lua_gettop( mL ) - pArgCnt;
+	int				Error = V->lua_pushverb( mL );
 
-	if( ( Error = V->lua_pushverb( mL ) ) == 0 )
+	if( !Error )
 	{
 //		qDebug() << "verbCallCode " << V->name() << "with" << pArgCnt << " args (before args):";
 
@@ -826,12 +838,12 @@ int lua_task::verbCallCode( Verb *V, int pArgCnt )
 		{
 			C->notify( S );
 		}
-		else
-		{
-			qDebug() << S;
-		}
+
+		std::cerr << S.toStdString() << std::endl;
 
 		lua_pop( mL, 1 );
+
+		mError = true;
 	}
 
 	int				c2 = lua_gettop( mL );
@@ -906,6 +918,17 @@ QStringList lua_task::taskVerbStack() const
 int lua_task::process( QString pCommand, ConnectionId pConnectionId, ObjectId pPlayerId )
 {
 	lua_task		 Com( pConnectionId, TaskEntry( pCommand, pConnectionId, pPlayerId ) );
+	int				 Ret = 0;
 
-	return( Com.eval() );
+	luaSetTask( Com.L(), &Com );
+
+	try
+	{
+		Ret = Com.eval();
+	}
+	catch( ... )
+	{
+	}
+
+	return( Ret );
 }

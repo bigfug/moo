@@ -23,6 +23,10 @@
 
 #include "connectionmanager.h"
 
+#include "changeset/connectionnotify.h"
+#include "changeset/connectionsetcookie.h"
+#include "changeset/connectionclearcookie.h"
+
 LuaMap		lua_moo::mLuaFun;
 LuaMap		lua_moo::mLuaGet;
 LuaMap		lua_moo::mLuaSet;
@@ -612,7 +616,7 @@ int lua_moo::luaNotify( lua_State *L )
 
 		if( C )
 		{
-			C->notify( Msg );
+			Command->changeAdd( new change::ConnectionNotify( C, Msg ) );
 		}
 
 		return( 0 );
@@ -830,7 +834,7 @@ int lua_moo::luaDebug( lua_State *L )
 {
 	for( int i = 1 ; i <= lua_gettop( L ) ; i++ )
 	{
-		qDebug() << QString( lua_tostring( L, i ) );
+		std::cout << lua_tostring( L, i ) << std::endl;
 	}
 
 	return( 0 );
@@ -1368,7 +1372,7 @@ int lua_moo::luaGMCP( lua_State *L )
 		A.append( Data );
 	}
 
-	C->gmcpOutput( A );
+	C->sendGMCP( A );
 
 	return( 0 );
 }
@@ -1601,7 +1605,7 @@ int lua_moo::luaSetCookie( lua_State *L )
 			break;
 	}
 
-	C->setCookie( QString::fromLatin1( S ), V );
+	Command->changeAdd( new change::ConnectionSetCookie( C, QString::fromLatin1( S ), V ) );
 
 	return( 0 );
 }
@@ -1652,7 +1656,10 @@ int lua_moo::luaClearCookie( lua_State *L )
 		lua_task			*Command = lua_task::luaGetTask( L );
 		Connection			*C = ConnectionManager::instance()->connection( Command->connectionid() );
 
-		C->clearCookie( QString::fromLatin1( S ) );
+		if( C->hasCookie( QString::fromLatin1( S ) ) )
+		{
+			Command->changeAdd( new change::ConnectionClearCookie( C, QString::fromLatin1( S ) ) );
+		}
 	}
 	catch( mooException e )
 	{

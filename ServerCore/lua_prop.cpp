@@ -14,6 +14,11 @@
 #include "inputsinkset.h"
 #include "inputsinkedittext.h"
 
+#include "changeset/propertysetowner.h"
+#include "changeset/propertysetread.h"
+#include "changeset/propertysetwrite.h"
+#include "changeset/propertysetchange.h"
+
 const char	*lua_prop::mLuaName = "moo.prop";
 
 LuaMap		 lua_prop::mLuaMap;
@@ -108,100 +113,6 @@ lua_prop::luaProp *lua_prop::arg( lua_State *L, int pIndex )
 	luaL_argcheck( L, P != NULL, 1, "`property' expected" );
 
 	return( P );
-}
-
-int lua_prop::luaSetValue( lua_State *L, const QString &pPrpNam, Object *pObject, Property *pFndPrp, Object *pFndObj, int pIdx )
-{
-	Q_UNUSED( pFndObj )
-
-	bool		LuaErr = false;
-
-	try
-	{
-		const Task			&T = lua_task::luaGetTask( L )->task();
-		QString				 TypeName = QString( pFndPrp->value().typeName() );
-		Object				*PRG = ObjectManager::o( T.programmer() );
-
-		if( PRG == 0 || ( !pFndPrp->write() && PRG->id() != pFndPrp->owner() && !PRG->wizard() ) )
-		{
-			throw mooException( E_PERM, "no access to property" );
-		}
-
-		if( TypeName == "lua_object::luaHandle" )
-		{
-			lua_object::luaHandle		 H;
-
-			H.O = lua_object::argId( L, 3 );
-
-			QVariant					 V;
-
-			V.setValue( H );
-
-			pObject->propSet( pPrpNam, V );
-
-			return( 0 );
-		}
-
-		switch( pFndPrp->type() )
-		{
-			case QVariant::Bool:
-				{
-					luaL_checktype( L, pIdx, LUA_TBOOLEAN );
-
-					bool	v = lua_toboolean( L, pIdx );
-
-					pObject->propSet( pPrpNam, v );
-				}
-				break;
-
-			case QVariant::Double:
-				{
-					lua_Number	v = luaL_checknumber( L, pIdx );
-
-					pObject->propSet( pPrpNam, v );
-				}
-				break;
-
-			case QVariant::String:
-				{
-					size_t		l;
-
-					const char *v = luaL_checklstring( L, pIdx, &l );
-
-					pObject->propSet( pPrpNam, QString::fromLatin1( v, l ) );
-				}
-				break;
-
-			case QVariant::Map:
-				{
-					luaL_checktype( L, pIdx, LUA_TTABLE );
-
-					QVariant		Lst;
-
-					luaNewRecurse( L, pIdx, Lst );
-
-					pObject->propSet( pPrpNam, Lst );
-				}
-				break;
-
-			default:
-				throw mooException( E_TYPE, QString( "Unknown property value type: %1" ).arg( pFndPrp->type() ) );
-		}
-
-		return( 0 );
-	}
-	catch( mooException e )
-	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
-	}
-	catch( ... )
-	{
-
-	}
-
-	return( LuaErr ? lua_error( L ) : 0 );
 }
 
 int lua_prop::luaGC( lua_State *L )
@@ -368,7 +279,7 @@ int lua_prop::luaSet( lua_State *L )
 
 			Object				*D = lua_object::argObj( L, 3 );
 
-			P->setOwner( D->id() );
+			Command->changeAdd( new change::PropertySetOwner( P, D->id() ) );
 
 			return( 0 );
 		}
@@ -382,7 +293,7 @@ int lua_prop::luaSet( lua_State *L )
 
 			bool		v = lua_toboolean( L, 3 );
 
-			P->setRead( v );
+			Command->changeAdd( new change::PropertySetRead( P, v ) );
 
 			return( 0 );
 		}
@@ -396,7 +307,7 @@ int lua_prop::luaSet( lua_State *L )
 
 			bool		v = lua_toboolean( L, 3 );
 
-			P->setWrite( v );
+			Command->changeAdd( new change::PropertySetWrite( P, v ) );
 
 			return( 0 );
 		}
@@ -410,7 +321,7 @@ int lua_prop::luaSet( lua_State *L )
 
 			bool		v = lua_toboolean( L, 3 );
 
-			P->setChange( v );
+			Command->changeAdd( new change::PropertySetChange( P, v ) );
 
 			return( 0 );
 		}

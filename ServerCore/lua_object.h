@@ -33,6 +33,7 @@ public:
 		ObjectId		O;
 
 		static const char		*mLuaName;
+		static const char		*mTypeName;
 	} luaHandle;
 
 private:
@@ -85,6 +86,7 @@ private:
 
 	typedef enum Fields
 	{
+		UNKNOWN,
 		ID,
 		TO_STRING,
 		ALIASES,

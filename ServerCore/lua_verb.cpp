@@ -12,6 +12,17 @@
 #include "inputsinkprogram.h"
 #include "inputsinkeditor.h"
 
+#include "changeset/verbsetowner.h"
+#include "changeset/verbsetread.h"
+#include "changeset/verbsetwrite.h"
+#include "changeset/verbsetexecute.h"
+#include "changeset/verbsetscript.h"
+#include "changeset/verbsetdirectobject.h"
+#include "changeset/verbsetindirectobject.h"
+#include "changeset/verbsetproposition.h"
+#include "changeset/verbaliasadd.h"
+#include "changeset/verbaliasdelete.h"
+
 const char	*lua_verb::mLuaName = "moo.verb";
 
 LuaMap		lua_verb::mLuaMap;
@@ -305,7 +316,7 @@ int lua_verb::luaSet( lua_State *L )
 
 			Object				*D = lua_object::argObj( L, 3 );
 
-			V->setOwner( D->id() );
+			Command->changeAdd( new change::VerbSetOwner( V, D->id() ) );
 
 			return( 0 );
 		}
@@ -319,7 +330,7 @@ int lua_verb::luaSet( lua_State *L )
 
 			bool		v = lua_toboolean( L, 3 );
 
-			V->setRead( v );
+			Command->changeAdd( new change::VerbSetRead( V, v ) );
 
 			return( 0 );
 		}
@@ -333,7 +344,7 @@ int lua_verb::luaSet( lua_State *L )
 
 			bool		v = lua_toboolean( L, 3 );
 
-			V->setWrite( v );
+			Command->changeAdd( new change::VerbSetWrite( V, v ) );
 
 			return( 0 );
 		}
@@ -347,7 +358,7 @@ int lua_verb::luaSet( lua_State *L )
 
 			bool		v = lua_toboolean( L, 3 );
 
-			V->setExecute( v );
+			Command->changeAdd( new change::VerbSetExecute( V, v ) );
 
 			return( 0 );
 		}
@@ -359,7 +370,9 @@ int lua_verb::luaSet( lua_State *L )
 				throw( mooException( E_PERM, "player is not owner or wizard" ) );
 			}
 
-			V->setScript( lua_tostring( L, 3 ) );
+			QString		v = lua_tostring( L, 3 );
+
+			Command->changeAdd( new change::VerbSetScript( V, v ) );
 
 			return( 0 );
 		}
@@ -375,15 +388,21 @@ int lua_verb::luaSet( lua_State *L )
 
 			if( Direct == "this" )
 			{
-				V->setDirectObjectArgument( THIS );
+				Command->changeAdd( new change::VerbSetDirectObject( V, THIS ) );
+
+				//V->setDirectObjectArgument( THIS );
 			}
 			else if( Direct == "any" )
 			{
-				V->setDirectObjectArgument( ANY );
+				Command->changeAdd( new change::VerbSetDirectObject( V, ANY ) );
+
+//				V->setDirectObjectArgument( ANY );
 			}
 			else if( Direct == "none" )
 			{
-				V->setDirectObjectArgument( NONE );
+				Command->changeAdd( new change::VerbSetDirectObject( V, NONE ) );
+
+//				V->setDirectObjectArgument( NONE );
 			}
 			else
 			{
@@ -404,15 +423,18 @@ int lua_verb::luaSet( lua_State *L )
 
 			if( Direct == "this" )
 			{
-				V->setIndirectObjectArgument( THIS );
+				Command->changeAdd( new change::VerbSetIndirectObject( V, THIS ) );
+//				V->setIndirectObjectArgument( THIS );
 			}
 			else if( Direct == "any" )
 			{
-				V->setIndirectObjectArgument( ANY );
+				Command->changeAdd( new change::VerbSetIndirectObject( V, ANY ) );
+//				V->setIndirectObjectArgument( ANY );
 			}
 			else if( Direct == "none" )
 			{
-				V->setIndirectObjectArgument( NONE );
+				Command->changeAdd( new change::VerbSetIndirectObject( V, NONE ) );
+//				V->setIndirectObjectArgument( NONE );
 			}
 			else
 			{
@@ -437,11 +459,13 @@ int lua_verb::luaSet( lua_State *L )
 			{
 				if( PrepType == ANY )
 				{
-					V->setPrepositionArgument( ANY );
+					Command->changeAdd( new change::VerbSetPreposition( V, ANY ) );
+//					V->setPrepositionArgument( ANY );
 				}
 				else if( PrepType == NONE )
 				{
-					V->setPrepositionArgument( NONE );
+					Command->changeAdd( new change::VerbSetPreposition( V, NONE ) );
+//					V->setPrepositionArgument( NONE );
 				}
 				else
 				{
@@ -451,7 +475,8 @@ int lua_verb::luaSet( lua_State *L )
 			}
 			else
 			{
-				V->setPrepositionArgument( Prep );
+				Command->changeAdd( new change::VerbSetPreposition( V, QString( Prep ) ) );
+//				V->setPrepositionArgument( Prep );
 			}
 
 			return( 0 );
@@ -481,7 +506,8 @@ int lua_verb::luaAliasAdd( lua_State *L )
 
 	try
 	{
-		const Task			&T = lua_task::luaGetTask( L )->task();
+		lua_task			*Command = lua_task::luaGetTask( L );
+		const Task			&T = Command->task();
 		Object				*Player = ObjectManager::o( T.programmer() );
 
 		if( Player == 0 )
@@ -504,7 +530,7 @@ int lua_verb::luaAliasAdd( lua_State *L )
 			throw mooException( E_PERM, "programmer has no access" );
 		}
 
-		V->addAlias( QString( N ) );
+		Command->changeAdd( new change::VerbAliasAdd( V, N ) );
 	}
 	catch( mooException e )
 	{
@@ -528,7 +554,8 @@ int lua_verb::luaAliasRem(lua_State *L)
 
 	try
 	{
-		const Task			&T = lua_task::luaGetTask( L )->task();
+		lua_task			*Command = lua_task::luaGetTask( L );
+		const Task			&T = Command->task();
 		Object				*Player = ObjectManager::o( T.programmer() );
 
 		if( Player == 0 )
@@ -550,6 +577,8 @@ int lua_verb::luaAliasRem(lua_State *L)
 		{
 			throw mooException( E_PERM, "programmer has no access" );
 		}
+
+		Command->changeAdd( new change::VerbAliasDelete( V, N ) );
 
 		V->remAlias( QString( N ) );
 	}

@@ -43,6 +43,7 @@ ODBSQL::ODBSQL()
 				  "read BOOLEAN DEFAULT true,"
 				  "write BOOLEAN DEFAULT false,"
 				  "fertile BOOLEAN DEFAULT false"
+				  "recycled BOOLEAN DEFAULT false"
 				  ")" );
 
 		QSqlError		DBE = mDB.lastError();
@@ -143,7 +144,7 @@ void ODBSQL::load()
 
 	// Load all the player objects that were previously connected
 
-	QSqlQuery	Q2 = mDB.exec( "SELECT id FROM object WHERE player AND connection != -1" );
+	QSqlQuery	Q2 = mDB.exec( "SELECT id FROM object WHERE player AND connection != -1 AND !recycled" );
 
 	while( Q2.next() )
 	{
@@ -242,6 +243,7 @@ Object *ODBSQL::object( ObjectId pIndex ) const
 	D.mRead = Q.value( "read" ).toBool();
 	D.mWizard = Q.value( "wizard" ).toBool();
 	D.mWrite = Q.value( "write" ).toBool();
+	D.mRecycled = Q.value( "recycled" ).toBool();
 
 	D.mLastRead = ObjectManager::timestamp();
 
@@ -422,6 +424,29 @@ Object *ODBSQL::object( ObjectId pIndex ) const
 	return( O );
 }
 
+bool ODBSQL::hasObject( ObjectId pIndex ) const
+{
+	QSqlQuery	Q;
+
+	Q.prepare( "SELECT 1 FROM object WHERE id = :id" );
+
+	Q.bindValue( ":id", pIndex );
+
+	if( !Q.exec() )
+	{
+		return( true );
+	}
+
+	ObjectManager::instance()->recordRead();
+
+	if( !Q.next() )
+	{
+		return( false );
+	}
+
+	return( true );
+}
+
 void bindObject( const ObjectData &D, QSqlQuery &Q )
 {
 	Q.bindValue( ":id", D.mId );
@@ -437,6 +462,7 @@ void bindObject( const ObjectData &D, QSqlQuery &Q )
 	Q.bindValue( ":read", D.mRead );
 	Q.bindValue( ":write", D.mWrite );
 	Q.bindValue( ":fertile", D.mFertile );
+	Q.bindValue( ":recycled", D.mRecycled );
 }
 
 void bindFunc( const FuncData &D, QSqlQuery &Q )
@@ -579,9 +605,9 @@ void ODBSQL::addObject( Object &pObject )
 	QSqlQuery			 Q;
 
 	Q.prepare( "INSERT INTO object "
-			   "( id, parent, name, aliases, player, connection, owner, location, programmer, wizard, read, write, fertile ) "
+			   "( id, parent, name, aliases, player, connection, owner, location, programmer, wizard, read, write, fertile, recycled ) "
 			   "VALUES "
-			   "( :id, :parent, :name, :aliases, :player, :connection, :owner, :location, :programmer, :wizard, :read, :write, :fertile )" );
+			   "( :id, :parent, :name, :aliases, :player, :connection, :owner, :location, :programmer, :wizard, :read, :write, :fertile, :recycled )" );
 
 	bindObject( D, Q );
 
@@ -601,11 +627,13 @@ void ODBSQL::addObject( Object &pObject )
 
 void ODBSQL::deleteObject( Object &pObject )
 {
+	ObjectData	&D = data( pObject );
+
 	QSqlQuery		Q;
 
-	Q.prepare( "DELETE FROM object WHERE id = :id" );
+	Q.prepare( "UPDATE object SET recycled = TRUE WHERE id = :id" );
 
-	Q.bindValue( ":id", pObject.id() );
+	bindObject( D, Q );
 
 	Q.exec();
 

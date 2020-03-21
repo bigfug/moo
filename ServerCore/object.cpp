@@ -626,7 +626,7 @@ void Object::setFertile(bool pFertile)
 	}
 }
 
-void Object::setRecycle(bool pRecycle)
+void Object::setRecycled( bool pRecycle )
 {
 	mData.mRecycled = pRecycle;
 }

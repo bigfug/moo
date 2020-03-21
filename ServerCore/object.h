@@ -252,7 +252,7 @@ public:
 
 	void setFertile( bool pFertile );
 
-	void setRecycle( bool pRecycle );
+	void setRecycled( bool pRecycle );
 
 	void setConnection( ConnectionId pConnectionId );
 

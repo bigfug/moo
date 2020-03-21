@@ -23,8 +23,6 @@ public:
 
 	static luaProp *arg( lua_State *L, int pIndex = 1 );
 
-	static int luaSetValue( lua_State *L, const QString &pPrpNam, Object *pObject, Property *pFndPrp, Object *pFndObj, int pIdx );
-
 	static void luaNewRecurse( lua_State *L, int pIdx, QVariant &pVariant  );
 
 private:

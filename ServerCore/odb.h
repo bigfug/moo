@@ -26,6 +26,8 @@ public:
 
 	virtual Object *object( ObjectId pIndex ) const = 0;
 
+	virtual bool hasObject( ObjectId pIndex ) const = 0;
+
 	virtual void addObject( Object &pObject ) = 0;
 	virtual void deleteObject( Object &pObject ) = 0;
 	virtual void updateObject( Object &pObject ) = 0;

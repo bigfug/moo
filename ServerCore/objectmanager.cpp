@@ -148,6 +148,13 @@ ObjectId ObjectManager::findByProp( QString pName, QVariant pValue ) const
 
 Object *ObjectManager::object( ObjectId pIndex )
 {
+	Object		*O = objectIncludingRecycled( pIndex );
+
+	return( !O || O->recycle() ? nullptr : O );
+}
+
+Object *ObjectManager::objectIncludingRecycled( ObjectId pIndex )
+{
 	if( pIndex < 0 )
 	{
 		return( nullptr );
@@ -228,7 +235,7 @@ Object *ObjectManager::newObject( void )
 
 void ObjectManager::recycle( Object *pObject )
 {
-	pObject->setRecycle( true );
+	pObject->setRecycled( true );
 
 	mAddedObjects.removeAll( pObject->id() );
 	mUpdatedObjects.removeAll( pObject->id() );
@@ -236,6 +243,25 @@ void ObjectManager::recycle( Object *pObject )
 	// TODO: Verbs, Props
 
 	mDeletedObjects << pObject->id();
+}
+
+void ObjectManager::restore(Object *pObject)
+{
+	pObject->setRecycled( false );
+
+	mDeletedObjects.removeAll( pObject->id() );
+
+	if( mODB )
+	{
+		if( mODB->hasObject( pObject->id() ) )
+		{
+			mUpdatedObjects << pObject->id();
+		}
+		else
+		{
+			mAddedObjects << pObject->id();
+		}
+	}
 }
 
 ObjectId ObjectManager::newObjectId( void )
@@ -252,7 +278,7 @@ void ObjectManager::recycleObjects( void )
 
 	for( ObjectId id : mDeletedObjects )
 	{
-		Object		*O = object( id );
+		Object		*O = objectIncludingRecycled( id );
 
 		if( mODB )
 		{

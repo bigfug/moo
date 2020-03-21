@@ -89,6 +89,37 @@ set( HEADER_FILES
 	listenerwebsocketsocket.h
 	lua_smtp.h
 	inputsinkread.h
+	changeset/changeset.cpp
+	changeset/changeset.h
+	changeset/change.h
+	changeset/objectaliasadd.h
+	changeset/objectaliasdelete.h
+	changeset/objectcreate.h
+	changeset/objectsetname.h
+	changeset/objectsetowner.h
+	changeset/objectsetproperty.h
+	changeset/objectverbadd.h
+	changeset/objectverbdelete.h
+	changeset/objectpropadd.h
+	changeset/objectpropclear.h
+	changeset/objectpropdelete.h
+	changeset/propertysetowner.h
+	changeset/propertysetread.h
+	changeset/propertysetwrite.h
+	changeset/propertysetchange.h
+	changeset/connectionnotify.h
+	changeset/connectionsetcookie.h
+	changeset/connectionclearcookie.h
+	changeset/verbsetowner.h
+	changeset/verbsetread.h
+	changeset/verbsetwrite.h
+	changeset/verbsetexecute.h
+	changeset/verbsetscript.h
+	changeset/verbsetdirectobject.h
+	changeset/verbsetindirectobject.h
+	changeset/verbsetproposition.h
+	changeset/verbaliasadd.h
+	changeset/verbaliasdelete.h
 )
 
 add_library( ${PROJECT_NAME} STATIC ${SOURCE_FILES} ${HEADER_FILES} )

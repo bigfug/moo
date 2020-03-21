@@ -20,11 +20,7 @@ void ServerTest::luaParentTestValidObject( void )
 
 	if( true )
 	{
-		QString			 CMD = QString( "o( 123 ).parent = o( %1 )" ).arg( Programmer->id() );
-		TaskEntry		 TE( CMD, CID, Programmer->id() );
-		lua_task		 Com( CID, TE );
-
-		Com.eval();
+		lua_task::process( QString( "o( 123 ).parent = o( %1 )" ).arg( Programmer->id() ), CID, Programmer->id() );
 
 		//lua_moo::stackDump( Com.L() );
 
@@ -47,11 +43,7 @@ void ServerTest::luaParentTestValidParent( void )
 
 	if( true )
 	{
-		QString			 CMD = QString( "o( %1 ).parent = 123" ).arg( objObject->id() );
-		TaskEntry		 TE( CMD, CID, Programmer->id() );
-		lua_task		 Com( CID, TE );
-
-		Com.eval();
+		lua_task::process( QString( "o( %1 ).parent = 123" ).arg( objObject->id() ), CID, Programmer->id() );
 
 		//lua_moo::stackDump( Com.L() );
 
@@ -80,11 +72,7 @@ void ServerTest::luaParentBasic( void )
 
 	if( true )
 	{
-		QString			 CMD = QString( "o( %1 ).parent = %2" ).arg( objObject->id() ).arg( Parent->id() );
-		TaskEntry		 TE( CMD, CID, Programmer->id() );
-		lua_task		 Com( CID, TE );
-
-		Com.eval();
+		lua_task::process( QString( "o( %1 ).parent = %2" ).arg( objObject->id() ).arg( Parent->id() ), CID, Programmer->id() );
 
 		//lua_moo::stackDump( Com.L() );
 
@@ -118,11 +106,7 @@ void ServerTest::luaParentBasicReparent( void )
 
 	if( true )
 	{
-		QString			 CMD = QString( "o( %1 ).parent = %2" ).arg( objObject->id() ).arg( Parent2->id() );
-		TaskEntry		 TE( CMD, CID, Programmer->id() );
-		lua_task		 Com( CID, TE );
-
-		Com.eval();
+		lua_task::process( QString( "o( %1 ).parent = %2" ).arg( objObject->id() ).arg( Parent2->id() ), CID, Programmer->id() );
 
 		//lua_moo::stackDump( Com.L() );
 
@@ -171,11 +155,7 @@ void ServerTest::luaParentLoopTest( void )
 
 	if( true )
 	{
-		QString			 CMD = QString( "o( %1 ).parent = %2" ).arg( O[ 2 ]->id() ).arg( O[ 0 ]->id() );
-		TaskEntry		 TE( CMD, CID, Programmer->id() );
-		lua_task		 Com( CID, TE );
-
-		Com.eval();
+		lua_task::process( QString( "o( %1 ).parent = %2" ).arg( O[ 2 ]->id() ).arg( O[ 0 ]->id() ), CID, Programmer->id() );
 
 		QCOMPARE( O[ 0 ]->children().size(), 1 );
 		QCOMPARE( O[ 1 ]->children().size(), 1 );
@@ -188,7 +168,7 @@ void ServerTest::luaParentLoopTest( void )
 		QCOMPARE( O[ 3 ]->parent(), O[ 2 ]->id() );
 	}
 
-	for( int i = 0 ; i < 4 ; i++ )
+	for( int i = 3 ; i >= 0 ; i-- )
 	{
 		O[ i ]->setParent( OBJECT_NONE );
 
@@ -235,6 +215,8 @@ void ServerTest::luaParentTestIsParentOf( void )
 		TaskEntry		 TE( CMD, CID, Programmer->id() );
 		lua_task		 Com( CID, TE );
 
+		lua_task::luaSetTask( Com.L(), &Com );
+
 		int				 R = Com.eval();
 
 		QCOMPARE( R, 1 );
@@ -249,6 +231,8 @@ void ServerTest::luaParentTestIsParentOf( void )
 		QString			 CMD = QString( "return( o( %1 ):isParentOf( o( %2 ) ) )" ).arg( O[ 0 ]->id() ).arg( O[ 1 ]->id() );
 		TaskEntry		 TE( CMD, CID, Programmer->id() );
 		lua_task		 Com( CID, TE );
+
+		lua_task::luaSetTask( Com.L(), &Com );
 
 		int				 R = Com.eval();
 
@@ -265,6 +249,8 @@ void ServerTest::luaParentTestIsParentOf( void )
 		TaskEntry		 TE( CMD, CID, Programmer->id() );
 		lua_task		 Com( CID, TE );
 
+		lua_task::luaSetTask( Com.L(), &Com );
+
 		int				 R = Com.eval();
 
 		QCOMPARE( R, 1 );
@@ -279,6 +265,8 @@ void ServerTest::luaParentTestIsParentOf( void )
 		QString			 CMD = QString( "return( o( %1 ):isParentOf( o( %2 ) ) )" ).arg( O[ 1 ]->id() ).arg( O[ 0 ]->id() );
 		TaskEntry		 TE( CMD, CID, Programmer->id() );
 		lua_task		 Com( CID, TE );
+
+		lua_task::luaSetTask( Com.L(), &Com );
 
 		int				 R = Com.eval();
 
@@ -295,6 +283,8 @@ void ServerTest::luaParentTestIsParentOf( void )
 		TaskEntry		 TE( CMD, CID, Programmer->id() );
 		lua_task		 Com( CID, TE );
 
+		lua_task::luaSetTask( Com.L(), &Com );
+
 		int				 R = Com.eval();
 
 		QCOMPARE( R, 1 );
@@ -309,6 +299,8 @@ void ServerTest::luaParentTestIsParentOf( void )
 		QString			 CMD = QString( "return( o( %1 ):isParentOf( o( %2 ) ) )" ).arg( O[ 1 ]->id() ).arg( O[ 2 ]->id() );
 		TaskEntry		 TE( CMD, CID, Programmer->id() );
 		lua_task		 Com( CID, TE );
+
+		lua_task::luaSetTask( Com.L(), &Com );
 
 		int				 R = Com.eval();
 
@@ -325,6 +317,8 @@ void ServerTest::luaParentTestIsParentOf( void )
 		TaskEntry		 TE( CMD, CID, Programmer->id() );
 		lua_task		 Com( CID, TE );
 
+		lua_task::luaSetTask( Com.L(), &Com );
+
 		int				 R = Com.eval();
 
 		QCOMPARE( R, 1 );
@@ -339,6 +333,8 @@ void ServerTest::luaParentTestIsParentOf( void )
 		QString			 CMD = QString( "return( o( %1 ):isParentOf( o( %2 ) ) )" ).arg( O[ 2 ]->id() ).arg( O[ 1 ]->id() );
 		TaskEntry		 TE( CMD, CID, Programmer->id() );
 		lua_task		 Com( CID, TE );
+
+		lua_task::luaSetTask( Com.L(), &Com );
 
 		int				 R = Com.eval();
 
@@ -355,6 +351,8 @@ void ServerTest::luaParentTestIsParentOf( void )
 		TaskEntry		 TE( CMD, CID, Programmer->id() );
 		lua_task		 Com( CID, TE );
 
+		lua_task::luaSetTask( Com.L(), &Com );
+
 		int				 R = Com.eval();
 
 		QCOMPARE( R, 1 );
@@ -364,7 +362,7 @@ void ServerTest::luaParentTestIsParentOf( void )
 		QCOMPARE( B, false );
 	}
 
-	for( int i = 0 ; i < 3 ; i++ )
+	for( int i = 2 ; i >= 0 ; i-- )
 	{
 		O[ i ]->setParent( OBJECT_NONE );
 
@@ -411,6 +409,8 @@ void ServerTest::luaParentTestIsChildOf( void )
 		TaskEntry		 TE( CMD, CID, Programmer->id() );
 		lua_task		 Com( CID, TE );
 
+		lua_task::luaSetTask( Com.L(), &Com );
+
 		int				 R = Com.eval();
 
 		QCOMPARE( R, 1 );
@@ -425,6 +425,8 @@ void ServerTest::luaParentTestIsChildOf( void )
 		QString			 CMD = QString( "return( o( %1 ):isChildOf( o( %2 ) ) )" ).arg( O[ 0 ]->id() ).arg( O[ 1 ]->id() );
 		TaskEntry		 TE( CMD, CID, Programmer->id() );
 		lua_task		 Com( CID, TE );
+
+		lua_task::luaSetTask( Com.L(), &Com );
 
 		int				 R = Com.eval();
 
@@ -441,6 +443,8 @@ void ServerTest::luaParentTestIsChildOf( void )
 		TaskEntry		 TE( CMD, CID, Programmer->id() );
 		lua_task		 Com( CID, TE );
 
+		lua_task::luaSetTask( Com.L(), &Com );
+
 		int				 R = Com.eval();
 
 		QCOMPARE( R, 1 );
@@ -455,6 +459,8 @@ void ServerTest::luaParentTestIsChildOf( void )
 		QString			 CMD = QString( "return( o( %1 ):isChildOf( o( %2 ) ) )" ).arg( O[ 1 ]->id() ).arg( O[ 0 ]->id() );
 		TaskEntry		 TE( CMD, CID, Programmer->id() );
 		lua_task		 Com( CID, TE );
+
+		lua_task::luaSetTask( Com.L(), &Com );
 
 		int				 R = Com.eval();
 
@@ -471,6 +477,8 @@ void ServerTest::luaParentTestIsChildOf( void )
 		TaskEntry		 TE( CMD, CID, Programmer->id() );
 		lua_task		 Com( CID, TE );
 
+		lua_task::luaSetTask( Com.L(), &Com );
+
 		int				 R = Com.eval();
 
 		QCOMPARE( R, 1 );
@@ -485,6 +493,8 @@ void ServerTest::luaParentTestIsChildOf( void )
 		QString			 CMD = QString( "return( o( %1 ):isChildOf( o( %2 ) ) )" ).arg( O[ 1 ]->id() ).arg( O[ 2 ]->id() );
 		TaskEntry		 TE( CMD, CID, Programmer->id() );
 		lua_task		 Com( CID, TE );
+
+		lua_task::luaSetTask( Com.L(), &Com );
 
 		int				 R = Com.eval();
 
@@ -501,6 +511,8 @@ void ServerTest::luaParentTestIsChildOf( void )
 		TaskEntry		 TE( CMD, CID, Programmer->id() );
 		lua_task		 Com( CID, TE );
 
+		lua_task::luaSetTask( Com.L(), &Com );
+
 		int				 R = Com.eval();
 
 		QCOMPARE( R, 1 );
@@ -515,6 +527,8 @@ void ServerTest::luaParentTestIsChildOf( void )
 		QString			 CMD = QString( "return( o( %1 ):isChildOf( o( %2 ) ) )" ).arg( O[ 2 ]->id() ).arg( O[ 1 ]->id() );
 		TaskEntry		 TE( CMD, CID, Programmer->id() );
 		lua_task		 Com( CID, TE );
+
+		lua_task::luaSetTask( Com.L(), &Com );
 
 		int				 R = Com.eval();
 
@@ -531,6 +545,8 @@ void ServerTest::luaParentTestIsChildOf( void )
 		TaskEntry		 TE( CMD, CID, Programmer->id() );
 		lua_task		 Com( CID, TE );
 
+		lua_task::luaSetTask( Com.L(), &Com );
+
 		int				 R = Com.eval();
 
 		QCOMPARE( R, 1 );
@@ -540,7 +556,7 @@ void ServerTest::luaParentTestIsChildOf( void )
 		QCOMPARE( B, false );
 	}
 
-	for( int i = 0 ; i < 3 ; i++ )
+	for( int i = 2 ; i >= 0 ; i-- )
 	{
 		O[ i ]->setParent( OBJECT_NONE );
 
