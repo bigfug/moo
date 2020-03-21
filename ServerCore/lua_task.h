@@ -69,6 +69,8 @@ public:
 
 	QStringList taskVerbStack( void ) const;
 
+	static int process( QString pCommand, ConnectionId pConnectionId = CONNECTION_NONE, ObjectId pPlayerId = OBJECT_NONE );
+
 private:
 	int subeval( void );
 

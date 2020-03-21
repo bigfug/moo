@@ -124,17 +124,13 @@ void ConnectionManager::processClosedSockets( void )
 	{
 		ListenerSocket		*LS = mClosedSocketList.takeFirst();
 
-		Connection		*CON		= connection( LS->connectionId() );
+		Connection			*CON = connection( LS->connectionId() );
 
 		if( CON->player() != OBJECT_NONE )
 		{
 			try
 			{
-				QString			 CMD = QString( "moo.root:user_client_disconnected( o( %1 ) )" ).arg( CON->player() );
-				TaskEntry		 TE( CMD, LS->connectionId(), CON->player() );
-				lua_task		 Com( 0, TE );
-
-				Com.eval();
+				lua_task::process( QString( "moo.root:user_client_disconnected( o( %1 ) )" ).arg( CON->player() ), LS->connectionId(), CON->player() );
 			}
 			catch( mooException e )
 			{

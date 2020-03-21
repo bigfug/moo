@@ -25,16 +25,10 @@ void ServerTest::luaCreate( void )
 
 	if( true )
 	{
-		QString			 CMD = QString( "moo.create()" );
-		TaskEntry		 TE( CMD, CID );
-		lua_task		 Com( CID, TE );
-
 		ObjectId		 oid = OM.maxId();
 		Object			*O   = 0;
 
-		//qDebug() << Com.command();
-
-		Com.eval();
+		lua_task::process( "moo.create()", CID );
 
 		O = OM.object( oid );
 

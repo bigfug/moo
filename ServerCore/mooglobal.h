@@ -7,6 +7,8 @@ typedef	qint32		ObjectId;
 typedef qint32		TaskId;
 typedef qint32		ConnectionId;
 
+#define CONNECTION_NONE		(0)
+
 #define OBJECT_NONE			(-1)
 #define OBJECT_AMBIGUOUS	(-2)
 #define OBJECT_FAILED_MATCH	(-3)

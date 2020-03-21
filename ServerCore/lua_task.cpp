@@ -916,3 +916,10 @@ QStringList lua_task::taskVerbStack() const
 
 	return( VrbLst );
 }
+
+int lua_task::process( QString pCommand, ConnectionId pConnectionId, ObjectId pPlayerId )
+{
+	lua_task		 Com( pConnectionId, TaskEntry( pCommand, pConnectionId, pPlayerId ) );
+
+	return( Com.eval() );
+}

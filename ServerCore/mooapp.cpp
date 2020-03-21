@@ -77,11 +77,7 @@ mooApp::mooApp( const QString &pDataFileName, QObject *pParent )
 		{
 			if( HasVerb )
 			{
-				QString			 CMD = QString( "moo.root:user_disconnected( o( %1 ) )" ).arg( O->id() );
-				TaskEntry		 TE( CMD, 0, 0 );
-				lua_task		 Com( 0, TE );
-
-				Com.eval();
+				lua_task::process( QString( "moo.root:user_disconnected( o( %1 ) )" ).arg( O->id() ) );
 			}
 
 			O->setConnection( -1 );
@@ -89,11 +85,7 @@ mooApp::mooApp( const QString &pDataFileName, QObject *pParent )
 
 		if( Root->verb( "server_started" ) )
 		{
-			QString			 CMD = QString( "moo.root:server_started()" );
-			TaskEntry		 TE( CMD, 0, 0 );
-			lua_task		 Com( 0, TE );
-
-			Com.eval();
+			lua_task::process( "moo.root:server_started()" );
 		}
 	}
 
@@ -127,16 +119,9 @@ mooApp::~mooApp()
 
 	Object		*Root = ObjectManager::o( 0 );
 
-	if( Root )
+	if( Root && Root->verb( "server_closing" ) )
 	{
-		if( Root->verb( "server_closing" ) )
-		{
-			QString			 CMD = QString( "moo.root:server_closing()" );
-			TaskEntry		 TE( CMD, 0, 0 );
-			lua_task		 Com( 0, TE );
-
-			Com.eval();
-		}
+		lua_task::process( "moo.root:server_closing()" );
 	}
 
 	ODB			*OM_ODB = ObjectManager::instance()->odb();
