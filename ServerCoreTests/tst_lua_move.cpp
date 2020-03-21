@@ -22,11 +22,7 @@ void ServerTest::luaMoveTestValidWhat( void )
 
 	if( true )
 	{
-		QString			 CMD = QString( "o( 123 ).location = o( %1 )" ).arg( Programmer->id() );
-		TaskEntry		 TE( CMD, CID, Programmer->id() );
-		lua_task		 Com( CID, TE );
-
-		Com.eval();
+		lua_task::process( QString( "o( 123 ).location = o( %1 )" ).arg( Programmer->id() ), CID, Programmer->id() );
 
 		//lua_moo::stackDump( Com.L() );
 
@@ -60,11 +56,7 @@ void ServerTest::luaMoveToRoot( void )
 
 	if( true )
 	{
-		QString			 CMD = QString( "o( %1 ).location = -1" ).arg( Object->id() );
-		TaskEntry		 TE( CMD, CID, Programmer->id() );
-		lua_task		 Com( CID, TE );
-
-		Com.eval();
+		lua_task::process( QString( "o( %1 ).location = -1" ).arg( Object->id() ), CID, Programmer->id() );
 
 		//lua_moo::stackDump( Com.L() );
 
@@ -90,13 +82,7 @@ void ServerTest::luaMove( void )
 
 	if( true )
 	{
-		QString			 CMD = QString( "o( %1 ).location = o( %2 )" ).arg( Child->id() ).arg( Programmer->id() );
-		TaskEntry		 TE( CMD, CID, Programmer->id() );
-		lua_task		 Com( CID, TE );
-
-		//qDebug() << Com.command();
-
-		Com.eval();
+		lua_task::process( QString( "o( %1 ).location = o( %2 )" ).arg( Child->id() ).arg( Programmer->id() ), CID, Programmer->id() );
 	}
 
 	ObjectManager::reset();

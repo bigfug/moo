@@ -71,11 +71,11 @@ ObjectId ObjectLogic::create( lua_task &pTask, ObjectId pUserId, ObjectId pParen
 	// Otherwise, the quota is decremented and stored back into the `ownership_quota'
 	//   property as a part of the creation of the new object.
 
-	if( objOwner != 0 )
+	if( objOwner )
 	{
 		Property		*Quota = objOwner->prop( "ownership_quota" );
 
-		if( Quota != 0 && Quota->type() == QVariant::Int )
+		if( Quota && Quota->type() == QVariant::Int )
 		{
 			int		QuotaValue = Quota->value().toInt();
 
@@ -90,7 +90,7 @@ ObjectId ObjectLogic::create( lua_task &pTask, ObjectId pUserId, ObjectId pParen
 
 	Object		*objNew = OM.newObject();
 
-	if( objNew == 0 )
+	if( !objNew )
 	{
 		throw( mooException( E_MEMORY, "" ) );
 	}
@@ -415,15 +415,15 @@ void ObjectLogic::recycle( lua_task &pTask, ObjectId pUserId, ObjectId pObjectId
 
 	// if the owner of the former object has a property named `ownership_quota' and the value of that property is a integer, then recycle() treats that value as a quota and increments it by one, storing the result back into the `ownership_quota' property.
 
-	if( objOwner != 0 )
+	if( objOwner )
 	{
 		Property		*Quota = objOwner->prop( "ownership_quota" );
 
-		if( Quota != 0 && Quota->type() == QVariant::Int )
+		if( Quota && Quota->type() == QVariant::Int )
 		{
 			int		QuotaValue = Quota->value().toInt();
 
-			Quota->setValue( int( QuotaValue + 1 ) );
+			Quota->setValue( QuotaValue + 1 );
 		}
 	}
 

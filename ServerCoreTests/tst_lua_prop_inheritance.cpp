@@ -32,11 +32,7 @@ void ServerTest::luaPropInheritance( void )
 
 	if( true )
 	{
-		QString			 CMD = QString( "o( %1 ):propadd( 'test', 14 )" ).arg( O2->id() );
-		TaskEntry		 TE( CMD, CID, Programmer->id() );
-		lua_task		 Com( CID, TE );
-
-		Com.eval();
+		lua_task::process( QString( "o( %1 ):propadd( 'test', 14 )" ).arg( O2->id() ), CID, Programmer->id() );
 
 		Property	*P = O2->prop( "test" );
 
@@ -53,11 +49,7 @@ void ServerTest::luaPropInheritance( void )
 
 	if( true )
 	{
-		QString			 CMD = QString( "o( %1 ):propadd( 'test', 30 )" ).arg( O3->id() );
-		TaskEntry		 TE( CMD, CID, Programmer->id() );
-		lua_task		 Com( CID, TE );
-
-		Com.eval();
+		lua_task::process( QString( "o( %1 ):propadd( 'test', 30 )" ).arg( O3->id() ), CID, Programmer->id() );
 
 		Property	*P = O3->prop( "test" );
 
@@ -68,11 +60,7 @@ void ServerTest::luaPropInheritance( void )
 
 	if( true )
 	{
-		QString			 CMD = QString( "o( %1 ):propadd( 'test', 30 )" ).arg( O1->id() );
-		TaskEntry		 TE( CMD, CID, Programmer->id() );
-		lua_task		 Com( CID, TE );
-
-		Com.eval();
+		lua_task::process( QString( "o( %1 ):propadd( 'test', 30 )" ).arg( O1->id() ), CID, Programmer->id() );
 
 		Property	*P = O1->prop( "test" );
 
@@ -83,11 +71,7 @@ void ServerTest::luaPropInheritance( void )
 
 	if( true )
 	{
-		QString			 CMD = QString( "o( %1 ).test = 20" ).arg( O3->id() );
-		TaskEntry		 TE( CMD, CID, Programmer->id() );
-		lua_task		 Com( CID, TE );
-
-		Com.eval();
+		lua_task::process( QString( "o( %1 ).test = 20" ).arg( O3->id() ), CID, Programmer->id() );
 
 		Property	*P = O3->prop( "test" );
 
@@ -102,11 +86,7 @@ void ServerTest::luaPropInheritance( void )
 
 	if( true )
 	{
-		QString			 CMD = QString( "o( %1 ):propclr( 'test' )" ).arg( O3->id() );
-		TaskEntry		 TE( CMD, CID, Programmer->id() );
-		lua_task		 Com( CID, TE );
-
-		Com.eval();
+		lua_task::process( QString( "o( %1 ):propclr( 'test' )" ).arg( O3->id() ), CID, Programmer->id() );
 
 		Property	*P = O3->prop( "test" );
 

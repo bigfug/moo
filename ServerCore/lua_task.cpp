@@ -415,31 +415,17 @@ int lua_task::execute( qint64 pTimeStamp )
 
 int lua_task::eval( void )
 {
-	ODB			*OM_ODB = ObjectManager::instance()->odb();
-
-	if( !mL )
-	{
-		if( ( mL = lua_newstate( lua_task::luaAlloc, this ) ) == Q_NULLPTR )
-		{
-			return( 0 );
-		}
-
-		lua_moo::luaNewState( mL );
-
-		lua_sethook( mL, &lua_task::luaHook, LUA_MASKCOUNT, 10 );
-
-		luaSetTask( mL, this );
-	}
+	lua_State		*LS			= L();	// initialise mL
 
 	Task			&T			= mTasks.front();
-	const int		 OldTop		= lua_gettop( mL );
+	const int		 OldTop		= lua_gettop( LS );
 	int				 Error;
 
-	if( ( Error = luaL_loadstring( mL, T.command().toLatin1() ) ) == 0 )
+	if( ( Error = luaL_loadstring( LS, T.command().toLatin1() ) ) == 0 )
 	{
-		lua_moo::luaSetEnv( mL );
+		lua_moo::luaSetEnv( LS );
 
-		if( ( Error = lua_pcall( mL, 0, LUA_MULTRET, 0 ) ) == 0 )
+		if( ( Error = lua_pcall( LS, 0, LUA_MULTRET, 0 ) ) == 0 )
 		{
 
 		}
@@ -447,7 +433,7 @@ int lua_task::eval( void )
 
 	if( Error )
 	{
-		QString		Err = QString( lua_tostring( mL, -1 ) );
+		QString		Err = QString( lua_tostring( LS, -1 ) );
 
 		Connection	*CON = ConnectionManager::instance()->connection( connectionid() );
 
@@ -460,10 +446,10 @@ int lua_task::eval( void )
 			qDebug() << Err;
 		}
 
-		lua_pop( mL, 1 );
+		lua_pop( LS, 1 );
 	}
 
-	const int			 NewTop = lua_gettop( mL );
+	const int			 NewTop = lua_gettop( LS );
 
 	return( NewTop - OldTop );
 }

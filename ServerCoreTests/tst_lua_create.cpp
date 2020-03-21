@@ -46,18 +46,12 @@ void ServerTest::luaCreate( void )
 
 	if( true )
 	{
-		QString			 CMD = QString( "moo.create( o( %1 ) )" ).arg( Parent->id() );
-		TaskEntry		 TE( CMD, CID );
-		lua_task		 Com( CID, TE );
-
 		ObjectId		 oid = OM.maxId();
 		Object			*O   = 0;
 
-		//qDebug() << Com.command();
-
 		try
 		{
-			Com.eval();
+			lua_task::process( QString( "moo.create( o( %1 ) )" ).arg( Parent->id() ), CID );
 		}
 		catch( ... )
 		{
@@ -80,16 +74,10 @@ void ServerTest::luaCreate( void )
 
 	if( true )
 	{
-		QString			 CMD = QString( "moo.create( o( %1 ), -1 )" ).arg( Parent->id() );
-		TaskEntry		 TE( CMD, CID );
-		lua_task		 Com( CID, TE );
-
 		ObjectId		 oid = OM.maxId();
 		Object			*O   = 0;
 
-		//qDebug() << Com.command();
-
-		Com.eval();
+		lua_task::process( QString( "moo.create( o( %1 ), -1 )" ).arg( Parent->id() ), CID );
 
 		O = OM.object( oid );
 
@@ -107,16 +95,10 @@ void ServerTest::luaCreate( void )
 
 	if( true )
 	{
-		QString			 CMD = QString( "moo.create( o( %1 ), o( %2 ) )" ).arg( Parent->id() ).arg( Owner->id() );
-		TaskEntry		 TE( CMD, CID );
-		lua_task		 Com( CID, TE );
-
 		ObjectId		 oid = OM.maxId();
 		Object			*O   = 0;
 
-		//qDebug() << Com.command();
-
-		Com.eval();
+		lua_task::process( QString( "moo.create( o( %1 ), o( %2 ) )" ).arg( Parent->id() ).arg( Owner->id() ), CID );
 
 		O = OM.object( oid );
 

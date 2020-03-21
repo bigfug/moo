@@ -23,11 +23,7 @@ void ServerTest::luaTaskTests( void )
 
 	if( true )
 	{
-		QString			 CMD = QString( "moo.notify( \"PlayerId = \" .. moo.player.id )" );
-		TaskEntry		 TE( CMD, CID );
-		lua_task		 Com( CID, TE );
-
-		Com.eval();
+		lua_task::process( "moo.notify( \"PlayerId = \" .. moo.player.id )", CID );
 	}
 
 	ObjectManager::reset();
