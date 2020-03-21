@@ -1100,7 +1100,7 @@ int lua_object::luaPropAdd( lua_State *L )
 
 		O->ancestors( ObjLst );
 
-		foreach( ObjectId id, ObjLst )
+		for( ObjectId id : ObjLst )
 		{
 			if( ( O2 = OM.object( id ) ) == 0 )
 			{
@@ -1119,7 +1119,7 @@ int lua_object::luaPropAdd( lua_State *L )
 
 		O->descendants( ObjLst );
 
-		foreach( ObjectId id, ObjLst )
+		for( ObjectId id : ObjLst )
 		{
 			if( ( O2 = OM.object( id ) ) == 0 )
 			{

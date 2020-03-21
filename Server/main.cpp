@@ -77,7 +77,7 @@ int main( int argc, char *argv[] )
 
 	const QStringList	args = a.arguments();
 
-	foreach( const QString &arg, args )
+	for( const QString &arg : args )
 	{
 		if( arg.startsWith( "-dir=", Qt::CaseSensitive ) )
 		{

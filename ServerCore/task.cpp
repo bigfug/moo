@@ -165,7 +165,7 @@ void Task::findObject( const QString &pName, QList<ObjectId> &pId ) const
 	{
 		const QList<ObjectId>	&Contents = Player->contents();
 
-		foreach( ObjectId id, Contents )
+		for( ObjectId id : Contents )
 		{
 			Object		*Object;
 
@@ -193,7 +193,7 @@ void Task::findObject( const QString &pName, QList<ObjectId> &pId ) const
 
 			const QList<ObjectId>	&Contents = Location->contents();
 
-			foreach( ObjectId id, Contents )
+			for( ObjectId id : Contents )
 			{
 				Object		*Object;
 

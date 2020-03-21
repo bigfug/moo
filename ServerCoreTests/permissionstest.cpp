@@ -46,15 +46,15 @@ void PermissionsTest::propAdd_data()
 	QTest::addColumn<bool>( "ObjectRead" );
 	QTest::addColumn<bool>( "ObjectWrite" );
 
-	foreach( ObjectId ProgrammerId, ProgrammerIds )
+	for( ObjectId ProgrammerId : ProgrammerIds )
 	{
-		foreach( ObjectId ObjectParentId, ProgrammerIds )
+		for( ObjectId ObjectParentId : ProgrammerIds )
 		{
-			foreach( ObjectId ObjectOwnerId, ProgrammerIds )
+			for( ObjectId ObjectOwnerId : ProgrammerIds )
 			{
-				foreach( bool ObjectRead, BoolList )
+				for( bool ObjectRead : BoolList )
 				{
-					foreach( bool ObjectWrite, BoolList )
+					for( bool ObjectWrite : BoolList )
 					{
 						const QString	TestName = QString( "t%1" ).arg( ++TestNumber );
 

@@ -208,7 +208,7 @@ void ObjectLogic::chparent( lua_task &pTask, ObjectId pUserId, ObjectId pObjectI
 
 		QStringList		NewParPrp;
 
-		foreach( ObjectId id, NewParAsc )
+		for( ObjectId id : NewParAsc )
 		{
 			Object		*O = OM.object( id );
 
@@ -233,7 +233,7 @@ void ObjectLogic::chparent( lua_task &pTask, ObjectId pUserId, ObjectId pObjectI
 
 		QStringList			ObjDscPrp;
 
-		foreach( ObjectId id, ObjDsc )
+		for( ObjectId id : ObjDsc )
 		{
 			Object		*O = OM.object( id );
 
@@ -390,7 +390,7 @@ void ObjectLogic::recycle( lua_task &pTask, ObjectId pUserId, ObjectId pObjectId
 
 	QList<ObjectId>		Children = objObject->children();
 
-	foreach( ObjectId idChild, Children )
+	for( ObjectId idChild : Children )
 	{
 		chparent( pTask, pUserId, idChild, idParent );
 	}
@@ -399,7 +399,7 @@ void ObjectLogic::recycle( lua_task &pTask, ObjectId pUserId, ObjectId pObjectId
 
 	QList<ObjectId>		Contents = objObject->contents();
 
-	foreach( ObjectId idContents, Contents )
+	for( ObjectId idContents : Contents )
 	{
 		move( pTask, pUserId, idContents, OBJECT_NONE );
 	}
