@@ -65,6 +65,25 @@ const luaL_Reg lua_object::mLuaInstanceFunctions[] =
 	{ 0, 0 }
 };
 
+const QMap<QString,lua_object::Fields>		lua_object::mFieldMap =
+{
+	{ "id", ID },
+	{ "__tostring", TO_STRING },
+	{ "aliases", ALIASES },
+	{ "name", NAME },
+	{ "owner", OWNER },
+	{ "parent", PARENT },
+	{ "location", LOCATION },
+	{ "connection", CONNECTION },
+	{ "contents", CONTENTS },
+	{ "player", PLAYER },
+	{ "programmer", PROGRAMMER },
+	{ "wizard", WIZARD },
+	{ "r", READ },
+	{ "w", WRITE },
+	{ "f", FERTILE }
+};
+
 void lua_object::luaRegisterState( lua_State *L )
 {
 	// Create our global 'o()' function for fast object access
@@ -310,139 +329,155 @@ int lua_object::luaGet( lua_State *L )
 			return( 1 );
 		}
 
-		if( strcmp( s, "__tostring" ) == 0 )
+		switch( mFieldMap.value( QString::fromLatin1( s ) ) )
 		{
-			lua_pushcfunction( L, lua_object::luaToString );
-
-			return( 1 );
-		}
-
-		// Look for a property on this object
-
-		if( strcmp( s, "id" ) == 0 )
-		{
-			lua_pushinteger( L, O->id() );
-
-			return( 1 );
-		}
-
-		if( strcmp( s, "aliases" ) == 0 )
-		{
-			const QStringList    AliasList = O->aliases();
-
-			lua_newtable( L );
-
-			for( int i = 0 ; i < AliasList.size() ; i++ )
-			{
-				lua_pushstring( L, AliasList[ i ].toLatin1() );
-
-				lua_rawseti( L, -2, i + 1 );
-			}
-
-			return( 1 );
-		}
-
-		if( strcmp( s, "name" ) == 0 )
-		{
-			lua_pushstring( L, O->name().toLatin1() );
-
-			return( 1 );
-		}
-
-		if( strcmp( s, "owner" ) == 0 )
-		{
-			lua_pushobjectid( L, O->owner() );
-
-			return( 1 );
-		}
-
-		if( strcmp( s, "parent" ) == 0 )
-		{
-			lua_pushobjectid( L, O->parent() );
-
-			return( 1 );
-		}
-
-		if( strcmp( s, "location" ) == 0 )
-		{
-			lua_pushobjectid( L, O->location() );
-
-			return( 1 );
-		}
-
-		if( strcmp( s, "connection" ) == 0 )
-		{
-			if( O->player() )
-			{
-				Connection			*C = ConnectionManager::instance()->connection( ConnectionManager::instance()->fromPlayer( O->id() ) );
-
-				if( C )
+			case ID:
 				{
-					lua_connection::lua_pushconnection( L, C );
+					lua_pushinteger( L, O->id() );
 
 					return( 1 );
 				}
-			}
+				break;
 
-			lua_pushnil( L );
+			case TO_STRING:
+				{
+					lua_pushcfunction( L, lua_object::luaToString );
 
-			return( 1 );
-		}
+					return( 1 );
+				}
+				break;
 
-		if( strcmp( s, "contents" ) == 0 )
-		{
-			lua_newtable( L );
+			case ALIASES:
+				{
+					const QStringList    AliasList = O->aliases();
 
-			for( int i = 0 ; i < O->contents().size() ; i++ )
-			{
-				lua_pushinteger( L, i + 1 );
-				lua_pushobjectid( L, O->contents().at( i ) );
-				lua_settable( L, -3 );
-			}
+					lua_newtable( L );
 
-			return( 1 );
-		}
+					for( int i = 0 ; i < AliasList.size() ; i++ )
+					{
+						lua_pushstring( L, AliasList[ i ].toLatin1() );
 
-		if( strcmp( s, "player" ) == 0 )
-		{
-			lua_pushboolean( L, O->player() );
+						lua_rawseti( L, -2, i + 1 );
+					}
 
-			return( 1 );
-		}
+					return( 1 );
+				}
+				break;
 
-		if( strcmp( s, "programmer" ) == 0 )
-		{
-			lua_pushboolean( L, O->programmer() );
+			case NAME:
+				{
+					lua_pushstring( L, O->name().toLatin1() );
 
-			return( 1 );
-		}
+					return( 1 );
+				}
+				break;
 
-		if( strcmp( s, "wizard" ) == 0 )
-		{
-			lua_pushboolean( L, O->wizard() );
+			case OWNER:
+				{
+					lua_pushobjectid( L, O->owner() );
 
-			return( 1 );
-		}
+					return( 1 );
+				}
+				break;
 
-		if( strcmp( s, "r" ) == 0 )
-		{
-			lua_pushboolean( L, O->read() );
+			case PARENT:
+				{
+					lua_pushobjectid( L, O->parent() );
 
-			return( 1 );
-		}
+					return( 1 );
+				}
+				break;
 
-		if( strcmp( s, "w" ) == 0 )
-		{
-			lua_pushboolean( L, O->write() );
+			case LOCATION:
+				{
+					lua_pushobjectid( L, O->location() );
 
-			return( 1 );
-		}
+					return( 1 );
+				}
+				break;
 
-		if( strcmp( s, "f" ) == 0 )
-		{
-			lua_pushboolean( L, O->fertile() );
+			case CONNECTION:
+				{
+					if( O->player() )
+					{
+						Connection			*C = ConnectionManager::instance()->connection( ConnectionManager::instance()->fromPlayer( O->id() ) );
 
-			return( 1 );
+						if( C )
+						{
+							lua_connection::lua_pushconnection( L, C );
+
+							return( 1 );
+						}
+					}
+
+					lua_pushnil( L );
+
+					return( 1 );
+				}
+				break;
+
+			case CONTENTS:
+				{
+					lua_newtable( L );
+
+					for( int i = 0 ; i < O->contents().size() ; i++ )
+					{
+						lua_pushinteger( L, i + 1 );
+						lua_pushobjectid( L, O->contents().at( i ) );
+						lua_settable( L, -3 );
+					}
+
+					return( 1 );
+				}
+				break;
+
+			case PLAYER:
+				{
+					lua_pushboolean( L, O->player() );
+
+					return( 1 );
+				}
+				break;
+
+			case PROGRAMMER:
+				{
+					lua_pushboolean( L, O->programmer() );
+
+					return( 1 );
+				}
+				break;
+
+			case WIZARD:
+				{
+					lua_pushboolean( L, O->wizard() );
+
+					return( 1 );
+				}
+				break;
+
+			case READ:
+				{
+					lua_pushboolean( L, O->read() );
+
+					return( 1 );
+				}
+				break;
+
+			case WRITE:
+				{
+					lua_pushboolean( L, O->write() );
+
+					return( 1 );
+				}
+				break;
+
+			case FERTILE:
+				{
+					lua_pushboolean( L, O->fertile() );
+
+					return( 1 );
+				}
+				break;
 		}
 
 		// Look for a verb on this object
@@ -517,191 +552,229 @@ int lua_object::luaSet( lua_State *L )
 		const bool			 isOwner  = ( PRG->id() == O->owner() );
 		const bool			 isWizard = ( PRG->wizard() );
 
-		if( strcmp( N, "id" ) == 0 )
+		switch( mFieldMap.value( QString::fromLatin1( N ) ) )
 		{
-			throw( mooException( E_PERM, "can't set object id" ) );
-		}
-
-		if( strcmp( N, "name" ) == 0 )
-		{
-			const char			*V = luaL_checkstring( L, 3 );
-
-			if( !isOwner && !isWizard )
-			{
-				throw( mooException( E_PERM, "programmer is not owner or wizard" ) );
-			}
-
-			O->setName( V );
-
-			return( 0 );
-		}
-
-		if( strcmp( N, "owner" ) == 0 )
-		{
-			if( !isOwner && !isWizard )
-			{
-				throw( mooException( E_PERM, "programmer is not owner or wizard" ) );
-			}
-
-			Object				*V = argObj( L, 3 );
-
-			O->setOwner( V->id() );
-
-			return( 0 );
-		}
-
-		if( strcmp( N, "programmer" ) == 0 )
-		{
-			if( !isWizard )
-			{
-				throw( mooException( E_PERM, "programmer is not wizard" ) );
-			}
-
-			bool		V = lua_toboolean( L, 3 );
-
-			O->setProgrammer( V );
-
-			return( 0 );
-		}
-
-		if( strcmp( N, "wizard" ) == 0 )
-		{
-			if( !isWizard )
-			{
-				throw( mooException( E_PERM, "programmer is not wizard" ) );
-			}
-
-			bool		V = lua_toboolean( L, 3 );
-
-			O->setWizard( V );
-
-			return( 0 );
-		}
-
-		if( strcmp( N, "player" ) == 0 )
-		{
-			if( !isWizard )
-			{
-				throw( mooException( E_PERM, "programmer is not wizard" ) );
-			}
-
-			bool		V = lua_toboolean( L, 3 );
-
-			O->setPlayer( V );
-
-			return( 0 );
-		}
-
-		if( strcmp( N, "r" ) == 0 )
-		{
-			if( !isOwner && !isWizard )
-			{
-				throw( mooException( E_PERM, "programmer is not owner or wizard" ) );
-			}
-
-			bool		V = lua_toboolean( L, 3 );
-
-			O->setRead( V );
-
-			return( 0 );
-		}
-
-		if( strcmp( N, "w" ) == 0 )
-		{
-			if( !isOwner && !isWizard )
-			{
-				throw( mooException( E_PERM, "programmer is not owner or wizard" ) );
-			}
-
-			bool		V = lua_toboolean( L, 3 );
-
-			O->setWrite( V );
-
-			return( 0 );
-		}
-
-		if( strcmp( N, "f" ) == 0 )
-		{
-			if( !isOwner && !isWizard )
-			{
-				throw( mooException( E_PERM, "programmer is not owner or wizard" ) );
-			}
-
-			bool		V = lua_toboolean( L, 3 );
-
-			O->setFertile( V );
-
-			return( 0 );
-		}
-
-		if( strcmp( N, "location" ) == 0 )
-		{
-			Object				*ObjWhere   = 0;
-			ObjectId			 ObjWhereId = -1;
-
-			if( lua_isnumber( L, 3 ) )
-			{
-				if( ( ObjWhereId = lua_tointeger( L, 3 ) ) != -1 )
+			case ID:
 				{
-					if( ( ObjWhere = ObjectManager::o( ObjWhereId ) ) == 0 )
+					throw( mooException( E_PERM, "can't set object id" ) );
+				}
+				break;
+
+			case TO_STRING:
+				{
+					throw( mooException( E_PERM, "can't set __tostring" ) );
+				}
+				break;
+
+			case ALIASES:
+				{
+					throw( mooException( E_PERM, "can't set aliases" ) );
+				}
+				break;
+
+			case NAME:
+				{
+					const char			*V = luaL_checkstring( L, 3 );
+
+					if( !isOwner && !isWizard )
 					{
-						throw( mooException( E_TYPE, QString( "unknown object %1" ).arg( ObjWhereId ) ) );
+						throw( mooException( E_PERM, "programmer is not owner or wizard" ) );
 					}
+
+					O->setName( V );
+
+					return( 0 );
 				}
-			}
-			else if( lua_isuserdata( L, 3 ) )
-			{
-				if( ( ObjWhere = argObj( L, 3 ) ) == 0 )
+				break;
+
+			case OWNER:
 				{
-					throw( mooException( E_VARNF, QString( "unknown location object" ) ) );
-				}
-
-				ObjWhereId = ObjWhere->id();
-			}
-			else
-			{
-				throw( mooException( E_TYPE, QString( "ObjectId or Object expected %1" ).arg( 2 ) ) );
-			}
-
-			ObjectLogic::move( *Command, T.programmer(), O->id(), ObjWhereId );
-
-			return( 0 );
-		}
-
-		if( strcmp( N, "parent" ) == 0 )
-		{
-			ObjectId			 NewParentId = -1;
-			Object				*NewParent   = 0;
-
-			luaL_checkany( L, 3 );
-
-			if( lua_isnumber( L, 3 ) )
-			{
-				if( ( NewParentId = lua_tointeger( L, 3 ) ) != -1 )
-				{
-					if( ( NewParent = ObjectManager::o( NewParentId ) ) == 0 )
+					if( !isOwner && !isWizard )
 					{
-						throw( mooException( E_TYPE, QString( "unknown object %1" ).arg( NewParentId ) ) );
+						throw( mooException( E_PERM, "programmer is not owner or wizard" ) );
 					}
+
+					Object				*V = argObj( L, 3 );
+
+					O->setOwner( V->id() );
+
+					return( 0 );
 				}
-			}
-			else if( lua_isuserdata( L, 3 ) )
-			{
-				if( ( NewParent = argObj( L, 3 ) ) == 0 )
+				break;
+
+			case PARENT:
 				{
-					throw( mooException( E_VARNF, QString( "unknown parent object" ) ) );
+					ObjectId			 NewParentId = -1;
+					Object				*NewParent   = 0;
+
+					luaL_checkany( L, 3 );
+
+					if( lua_isnumber( L, 3 ) )
+					{
+						if( ( NewParentId = lua_tointeger( L, 3 ) ) != -1 )
+						{
+							if( ( NewParent = ObjectManager::o( NewParentId ) ) == 0 )
+							{
+								throw( mooException( E_TYPE, QString( "unknown object %1" ).arg( NewParentId ) ) );
+							}
+						}
+					}
+					else if( lua_isuserdata( L, 3 ) )
+					{
+						if( ( NewParent = argObj( L, 3 ) ) == 0 )
+						{
+							throw( mooException( E_VARNF, QString( "unknown parent object" ) ) );
+						}
+
+						NewParentId = NewParent->id();
+					}
+					else
+					{
+						throw( mooException( E_TYPE, QString( "ObjectId or Object expected %1" ).arg( 2 ) ) );
+					}
+
+					ObjectLogic::chparent( *Command, T.programmer(), O->id(), NewParentId );
+
+					return( 0 );
 				}
+				break;
 
-				NewParentId = NewParent->id();
-			}
-			else
-			{
-				throw( mooException( E_TYPE, QString( "ObjectId or Object expected %1" ).arg( 2 ) ) );
-			}
+			case LOCATION:
+				{
+					Object				*ObjWhere   = 0;
+					ObjectId			 ObjWhereId = -1;
 
-			ObjectLogic::chparent( *Command, T.programmer(), O->id(), NewParentId );
+					if( lua_isnumber( L, 3 ) )
+					{
+						if( ( ObjWhereId = lua_tointeger( L, 3 ) ) != -1 )
+						{
+							if( ( ObjWhere = ObjectManager::o( ObjWhereId ) ) == 0 )
+							{
+								throw( mooException( E_TYPE, QString( "unknown object %1" ).arg( ObjWhereId ) ) );
+							}
+						}
+					}
+					else if( lua_isuserdata( L, 3 ) )
+					{
+						if( ( ObjWhere = argObj( L, 3 ) ) == 0 )
+						{
+							throw( mooException( E_VARNF, QString( "unknown location object" ) ) );
+						}
 
-			return( 0 );
+						ObjWhereId = ObjWhere->id();
+					}
+					else
+					{
+						throw( mooException( E_TYPE, QString( "ObjectId or Object expected %1" ).arg( 2 ) ) );
+					}
+
+					ObjectLogic::move( *Command, T.programmer(), O->id(), ObjWhereId );
+
+					return( 0 );
+				}
+				break;
+
+			case CONNECTION:
+				{
+					throw( mooException( E_PERM, "can't set object connection" ) );
+				}
+				break;
+
+			case CONTENTS:
+				{
+					throw( mooException( E_PERM, "can't set object contents" ) );
+				}
+				break;
+
+			case PLAYER:
+				{
+					if( !isWizard )
+					{
+						throw( mooException( E_PERM, "programmer is not wizard" ) );
+					}
+
+					bool		V = lua_toboolean( L, 3 );
+
+					O->setPlayer( V );
+
+					return( 0 );
+				}
+				break;
+
+			case PROGRAMMER:
+				{
+					if( !isWizard )
+					{
+						throw( mooException( E_PERM, "programmer is not wizard" ) );
+					}
+
+					bool		V = lua_toboolean( L, 3 );
+
+					O->setProgrammer( V );
+
+					return( 0 );
+				}
+				break;
+
+			case WIZARD:
+				{
+					if( !isWizard )
+					{
+						throw( mooException( E_PERM, "programmer is not wizard" ) );
+					}
+
+					bool		V = lua_toboolean( L, 3 );
+
+					O->setWizard( V );
+
+					return( 0 );
+				}
+				break;
+
+			case READ:
+				{
+					if( !isOwner && !isWizard )
+					{
+						throw( mooException( E_PERM, "programmer is not owner or wizard" ) );
+					}
+
+					bool		V = lua_toboolean( L, 3 );
+
+					O->setRead( V );
+
+					return( 0 );
+				}
+				break;
+
+			case WRITE:
+				{
+					if( !isOwner && !isWizard )
+					{
+						throw( mooException( E_PERM, "programmer is not owner or wizard" ) );
+					}
+
+					bool		V = lua_toboolean( L, 3 );
+
+					O->setWrite( V );
+
+					return( 0 );
+				}
+				break;
+
+			case FERTILE:
+				{
+					if( !isOwner && !isWizard )
+					{
+						throw( mooException( E_PERM, "programmer is not owner or wizard" ) );
+					}
+
+					bool		V = lua_toboolean( L, 3 );
+
+					O->setFertile( V );
+
+					return( 0 );
+				}
+				break;
 		}
 
 		Property		*FndPrp;

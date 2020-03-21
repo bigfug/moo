@@ -83,6 +83,27 @@ private:
 	static int luaIsChildOf( lua_State *L );
 	static int luaIsParentOf( lua_State *L );
 
+	typedef enum Fields
+	{
+		ID,
+		TO_STRING,
+		ALIASES,
+		NAME,
+		OWNER,
+		PARENT,
+		LOCATION,
+		CONNECTION,
+		CONTENTS,
+		PLAYER,
+		PROGRAMMER,
+		WIZARD,
+		READ,
+		WRITE,
+		FERTILE
+	} Fields;
+
+	static const QMap<QString,Fields>		mFieldMap;
+
 //	static int luaPushVariant( lua_State *L, const QVariant &pV );
 
 	static LuaMap				 mLuaMap;
