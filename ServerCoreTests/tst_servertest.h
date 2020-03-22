@@ -135,6 +135,9 @@ private Q_SLOTS:
 	void taskRollbackObjectWizard( void );
 
 	void taskRollbackObjectPropAdd( void );
+	void taskRollbackObjectPropDelete( void );
+	void taskRollbackObjectPropClear( void );
+	void taskRollbackObjectPropValue( void );
 
 	void taskRollbackObjectAliasAdd();
 	void taskRollbackObjectAliasDelete();

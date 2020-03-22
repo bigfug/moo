@@ -14,7 +14,9 @@ public:
 	ObjectPropClear( Object *pObject, QString pPropName )
 		: mObject( pObject ), mPropName( pPropName )
 	{
-		mOldProp = *mObject->prop( mPropName );
+		Property		*P = mObject->prop( mPropName );
+
+		mOldProp = P->value();
 
 		mObject->propClear( mPropName );
 	}
@@ -28,13 +30,13 @@ public:
 
 	virtual void rollback() Q_DECL_OVERRIDE
 	{
-		mObject->propSet( mPropName, mOldProp.value() );
+		mObject->propSet( mPropName, mOldProp );
 	}
 
 private:
 	Object		*mObject;
 	QString		 mPropName;
-	Property	 mOldProp;
+	QVariant	 mOldProp;
 };
 
 }

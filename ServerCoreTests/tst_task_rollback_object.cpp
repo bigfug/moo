@@ -272,6 +272,108 @@ void ServerTest::taskRollbackObjectPropAdd( void )
 	QVERIFY( !O->prop( v1 ) );
 }
 
+void ServerTest::taskRollbackObjectPropDelete()
+{
+	LuaTestData			TD;
+
+	Object		*O = TD.OM.newObject();
+
+	QVERIFY( O );
+
+	QString		v1( "test1" );
+	QString		v2( "test2" );
+
+	TD.process( QString( "o( %1 ):propadd( '%2', '%3' );" ).arg( O->id() ).arg( v1 ).arg( v2 ) );
+
+	QVERIFY( O->prop( v1 ) );
+
+	QCOMPARE( O->prop( v1 )->value().toString(), v2 );
+
+	lua_task	 C = TD.eval( QString( "o( %1 ):propdel( '%2' );" ).arg( O->id() ).arg( v1 ) );
+
+	QVERIFY( !O->prop( v1 ) );
+
+	C.rollback();
+
+	QVERIFY( O->prop( v1 ) );
+
+	QCOMPARE( O->prop( v1 )->value().toString(), v2 );
+}
+
+void ServerTest::taskRollbackObjectPropClear()
+{
+	LuaTestData			TD;
+
+	Object		*O1 = TD.OM.newObject();
+	Object		*O2 = TD.OM.newObject();
+
+	QVERIFY( O1 );
+	QVERIFY( O2 );
+
+	O2->setParent( O1->id() );
+
+	QString		v1( "test1" );
+	QString		v2( "test2" );
+	QString		v3( "test3" );
+
+	QVERIFY( v2 != v3 );
+
+	TD.process( QString( "o( %1 ):propadd( '%2', '%3' );" ).arg( O1->id() ).arg( v1 ).arg( v2 ) );
+
+	QVERIFY( O1->prop( v1 ) );
+	QVERIFY( !O2->prop( v1 ) );
+	QVERIFY( O2->propParent( v1 ) );
+	QCOMPARE( O2->propParent( v1 )->value().toString(), v2 );
+
+	TD.process( QString( "o( %1 ).%2 = '%3'" ).arg( O2->id() ).arg( v1 ).arg( v3 ) );
+
+	QVERIFY( O2->prop( v1 ) );
+	QCOMPARE( O2->prop( v1 )->value().toString(), v3 );
+
+	lua_task	 C = TD.eval( QString( "o( %1 ):propclr( '%2' );" ).arg( O2->id() ).arg( v1 ) );
+
+	QVERIFY( !O2->prop( v1 ) );
+	QVERIFY( O2->propParent( v1 ) );
+
+	C.rollback();
+
+	QVERIFY( O2->prop( v1 ) );
+	QCOMPARE( O2->prop( v1 )->value().toString(), v3 );
+}
+
+void ServerTest::taskRollbackObjectPropValue()
+{
+	LuaTestData			TD;
+
+	Object		*O = TD.OM.newObject();
+
+	QVERIFY( O );
+
+	QString		v1( "test1" );
+	QString		v2( "test2" );
+	QString		v3( "test3" );
+
+	QVERIFY( v2 != v3 );
+
+	TD.process( QString( "o( %1 ):propadd( '%2', '%3' );" ).arg( O->id() ).arg( v1 ).arg( v2 ) );
+
+	QVERIFY( O->prop( v1 ) );
+
+	QCOMPARE( O->prop( v1 )->value().toString(), v2 );
+
+	lua_task	 C = TD.eval( QString( "o( %1 ).%2 = '%3';" ).arg( O->id() ).arg( v1 ).arg( v3 ) );
+
+	QVERIFY( O->prop( v1 ) );
+
+	QCOMPARE( O->prop( v1 )->value().toString(), v3 );
+
+	C.rollback();
+
+	QVERIFY( O->prop( v1 ) );
+
+	QCOMPARE( O->prop( v1 )->value().toString(), v2 );
+}
+
 void ServerTest::taskRollbackObjectAliasAdd( void )
 {
 	LuaTestData			TD;
