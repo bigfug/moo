@@ -381,3 +381,10 @@ void ODBFile::saveTask( QDataStream &DS, const TaskEntry &TE )
 	DS << Data.mPlayerId;
 	DS << Data.mConnectionId;
 }
+
+void ODBFile::checkpoint()
+{
+	QString		DatStr = QDateTime::currentDateTime().toString( "yyyy-MM-dd.hh-mm-ss" );
+
+	QFile( "moo.db" ).copy( QString( "%1.db" ).arg( DatStr ) );
+}

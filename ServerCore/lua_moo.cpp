@@ -18,6 +18,7 @@
 #include "lua_json.h"
 #include "lua_serialport.h"
 #include "lua_smtp.h"
+#include "lua_text.h"
 
 #include "inputsinkread.h"
 
@@ -62,7 +63,6 @@ const luaL_Reg lua_moo::mLuaStatic[] =
 	{ "setCookie", lua_moo::luaSetCookie },
 	{ "clear", lua_moo::luaClearCookie },
 	{ "isValidObject", lua_moo::luaIsValidObject },
-	{ "s", lua_moo::luaPronounSubstitution },
 	{ "gmcp", lua_moo::luaGMCP },
 	{ 0, 0 }
 };
@@ -196,6 +196,7 @@ void lua_moo::initialiseAll()
 	lua_json::initialise();
 	lua_serialport::initialise();
 	lua_smtp::initialise();
+	lua_text::initialise();
 }
 
 void lua_moo::luaRegisterAllStates(lua_State *L)
@@ -230,6 +231,9 @@ void lua_moo::luaRegisterAllStates(lua_State *L)
 	Q_ASSERT( lua_gettop( L ) == 0 );
 
 	lua_smtp::luaRegisterState( L );
+	Q_ASSERT( lua_gettop( L ) == 0 );
+
+	lua_text::luaRegisterState( L );
 	Q_ASSERT( lua_gettop( L ) == 0 );
 }
 
@@ -1094,188 +1098,6 @@ int lua_moo::luaPanic( lua_State *L )
 	qDebug() << "**** LUA PANIC ****";
 
 	return( 0 );
-}
-
-int lua_moo::luaPronounSubstitution(lua_State *L)
-{
-	bool				 LuaErr = false;
-
-	try
-	{
-		lua_task			*Command = lua_task::luaGetTask( L );
-		//Connection			*C = ConnectionManager::instance()->connection( Command->connectionid() );
-		const char			*S = luaL_checkstring( L, 1 );
-
-		QString				 D;
-		bool				 E = false;
-		QString				 SubStr;
-
-		Object				*O = nullptr;
-		Object				*Player = nullptr;
-		Object				*Location = nullptr;
-		Object				*Direct = nullptr;
-		Object				*Indirect = nullptr;
-
-		while( *S )
-		{
-			const char		 c = *S++;
-
-			if( E )
-			{
-				if( SubStr.isEmpty() )
-				{
-					SubStr += c;
-
-					if( c != '(' && c != '[' )
-					{
-						E = false;
-					}
-				}
-				else if( SubStr.startsWith( '(' ) )
-				{
-					SubStr += c;
-
-					if( c == ')' )
-					{
-						E = false;
-					}
-				}
-				else if( SubStr.startsWith( '[' ) )
-				{
-					SubStr += c;
-
-					if( c == ']' )
-					{
-						E = false;
-					}
-				}
-
-				if( !E && !SubStr.isEmpty() )
-				{
-					QString				 SubRes;
-
-					if( SubStr.size() == 1 )
-					{
-						QString				 SubLwr = SubStr.toLower();
-
-						if( SubLwr == QStringLiteral( "n" ) )
-						{
-							if( ( Player = ( Player ? Player : ObjectManager::o( Command->task().player() ) ) ) )
-							{
-								SubRes = Player->name();
-							}
-						}
-						else if( SubLwr == QStringLiteral( "o" ) )
-						{
-							if( ( O = ( O ? O : ObjectManager::o( Command->task().object() ) ) ) )
-							{
-								SubRes = O->name();
-							}
-						}
-						else if( SubLwr == QStringLiteral( "d" ) )
-						{
-							if( Command->task().directObjectId() != OBJECT_NONE )
-							{
-								if( ( Direct = ( Direct ? Direct : ObjectManager::o( Command->task().directObjectId() ) ) ) )
-								{
-									SubRes = Direct->name();
-								}
-							}
-							else
-							{
-								SubRes = Command->task().directObjectName();
-							}
-						}
-						else if( SubLwr == QStringLiteral( "i" ) )
-						{
-							if( Command->task().indirectObjectId() != OBJECT_NONE )
-							{
-								if( ( Indirect = ( Indirect ? Indirect : ObjectManager::o( Command->task().indirectObjectId() ) ) ) )
-								{
-									SubRes = Indirect->name();
-								}
-							}
-							else
-							{
-								SubRes = Command->task().indirectObjectName();
-							}
-						}
-						else if( SubLwr == QStringLiteral( "l" ) )
-						{
-							if( !Location )
-							{
-								if( ( Player = ( Player ? Player : ObjectManager::o( Command->task().player() ) ) ) )
-								{
-									Location = ObjectManager::o( Player->location() );
-								}
-							}
-
-							if( Location )
-							{
-								SubRes = Location->name();
-							}
-						}
-						else
-						{
-							D += "%" + SubStr;
-						}
-					}
-					else if( SubStr.startsWith( '[' ) && SubStr.endsWith( ']' ) )
-					{
-
-					}
-					else if( SubStr.startsWith( '(' ) && SubStr.endsWith( ')' ) )
-					{
-
-					}
-					else
-					{
-						D += "%" + SubStr;
-					}
-
-					D += SubRes;
-
-					SubStr.clear();
-				}
-			}
-			else if( c == '%' )
-			{
-				if( E )
-				{
-					D += '%';
-				}
-				else
-				{
-					E = true;
-				}
-			}
-			else
-			{
-				D += c;
-			}
-		}
-
-		if( !SubStr.isEmpty() )
-		{
-			D += "%" + SubStr;
-		}
-
-		lua_pushstring( L, D.toLatin1().constData() );
-
-		return( 1 );
-	}
-	catch( mooException e )
-	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
-	}
-	catch( ... )
-	{
-
-	}
-
-	return( LuaErr ? lua_error( L ) : 0 );
 }
 
 int lua_moo::luaGMCP( lua_State *L )

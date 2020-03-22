@@ -64,7 +64,6 @@ private:
 
 	static int luaPanic( lua_State *L );
 
-	static int luaPronounSubstitution( lua_State *L );
 	static int luaGMCP( lua_State *L );
 
 	static void typeDump( lua_State *L, const int i )

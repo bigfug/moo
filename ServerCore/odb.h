@@ -48,6 +48,8 @@ public:
 
 	virtual void killTask( TaskId pTaskId ) = 0;
 
+	virtual void checkpoint( void ) = 0;
+
 protected:
 	Object *newObject( void ) const;
 

@@ -55,6 +55,8 @@ public:
 
 	virtual void killTask( TaskId pTaskId ) Q_DECL_OVERRIDE;
 
+	virtual void checkpoint( void ) Q_DECL_OVERRIDE;
+
 private:
 	//void updateObject( const Object &O );
 

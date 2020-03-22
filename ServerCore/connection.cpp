@@ -291,9 +291,9 @@ bool XmlParser::startElement( const QString &namespaceURI, const QString &localN
 
 	if( localName != "moo" )
 	{
-		QString			Style = QSettings( MOO_SETTINGS ).value( QString( "style/%1" ).arg( qName ) ).toString();
+		QString			Style = QSettings( MOO_SETTINGS ).value( QString( "style/%1.start" ).arg( qName ) ).toString();
 
-		//Style = preprocessString( Style );
+		Style = preprocessString( Style );
 
 		mXML.append( Style );
 
@@ -314,6 +314,18 @@ bool XmlParser::endElement( const QString &namespaceURI, const QString &localNam
 		if( !mStyles.isEmpty() )
 		{
 			mStyles.removeLast();
+		}
+
+		QSettings		Settings( MOO_SETTINGS );
+		QString			StyleName = QString( "style/%1.end" ).arg( qName );
+
+		if( Settings.contains( StyleName ) )
+		{
+			QString			Style = Settings.value( StyleName ).toString();
+
+			Style = preprocessString( Style );
+
+			mXML.append( Style );
 		}
 
 		if( !mStyles.isEmpty() )
@@ -351,3 +363,29 @@ bool XmlParser::skippedEntity(const QString &name)
 
 	return( true );
 }
+
+
+bool XmlParser::warning(const QXmlParseException &exception)
+{
+	mXML.append( QString( "\x1b[0m\nWARNING (%1):" ).arg( exception.columnNumber() ) );
+	mXML.append( exception.message() );
+
+	return( false );
+}
+
+bool XmlParser::error(const QXmlParseException &exception)
+{
+	mXML.append( QString( "\x1b[0m\nERROR (%1):" ).arg( exception.columnNumber() ) );
+	mXML.append( exception.message() );
+
+	return( false );
+}
+
+bool XmlParser::fatalError(const QXmlParseException &exception)
+{
+	mXML.append( QString( "\x1b[0m\nFATAL (%1):" ).arg( exception.columnNumber() ) );
+	mXML.append( exception.message() );
+
+	return( false );
+}
+

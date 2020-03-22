@@ -567,9 +567,10 @@ bool ObjectManager::killTask(TaskId pTaskId)
 
 void ObjectManager::checkpoint()
 {
-	QString		DatStr = QDateTime::currentDateTime().toString( "yyyy-MM-dd.hh-mm-ss" );
-
-	QFile( "moo.db" ).copy( QString( "%1.db" ).arg( DatStr ) );
+	if( mODB )
+	{
+		mODB->checkpoint();
+	}
 }
 
 void ObjectManager::recycle(ObjectId pObjectId)

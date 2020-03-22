@@ -65,6 +65,8 @@ set( HEADER_FILES
 	mooexception.h
 	lua_listener.h
 	lua_prop.h
+	lua_text.cpp
+	lua_text.h
 	func.h
 	connectionmanager.h
 	taskentry.h

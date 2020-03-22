@@ -88,6 +88,8 @@ public:
 		Q_UNUSED( pName )
 	}
 
+	virtual void checkpoint() Q_DECL_OVERRIDE;
+
 	virtual ObjectId findPlayer( QString pName ) const Q_DECL_OVERRIDE;
 	virtual ObjectId findByProp( QString pName, const QVariant &pValue ) const Q_DECL_OVERRIDE;
 

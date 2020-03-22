@@ -1029,3 +1029,8 @@ void ODBSQL::killTask( TaskId pTaskId )
 	Q.exec();
 }
 
+void ODBSQL::checkpoint()
+{
+
+}
+
