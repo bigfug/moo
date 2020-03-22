@@ -312,23 +312,23 @@ void Object::descendants( QList<ObjectId> &pList ) const
 
 void Object::move( Object *pWhere )
 {
-	Object		*From = ( mData.mLocation == -1 ? 0 : ObjectManager::instance()->object( mData.mLocation ) );
+	Object		*From = ( mData.mLocation == OBJECT_NONE ? nullptr : ObjectManager::instance()->object( mData.mLocation ) );
 
-	if( From != 0 )
+	if( From )
 	{
 		int	Count = From->mData.mContents.removeAll( mData.mId );
 
 		Q_ASSERT( Count == 1 );
 	}
 
-	if( pWhere != 0 )
+	if( pWhere )
 	{
 		Q_ASSERT( pWhere->mData.mContents.removeAll( mData.mId ) == 0 );
 
 		pWhere->mData.mContents.push_back( mData.mId );
 	}
 
-	mData.mLocation = ( pWhere == 0 ? -1 : pWhere->id() );
+	mData.mLocation = ( !pWhere ? OBJECT_NONE : pWhere->id() );
 
 	setUpdated();
 }
@@ -344,9 +344,9 @@ void Object::setParent( ObjectId pNewParentId )
 	{
 		Object		*O = ObjectManager::instance()->object( mData.mParent );
 
-		Q_ASSERT( O != 0 );
+		Q_ASSERT( O );
 
-		if( O != 0 )
+		if( O )
 		{
 			int c = O->mData.mChildren.removeAll( mData.mId );
 
@@ -354,13 +354,13 @@ void Object::setParent( ObjectId pNewParentId )
 		}
 	}
 
-	if( pNewParentId != -1 )
+	if( pNewParentId != OBJECT_NONE )
 	{
 		Object		*O = ObjectManager::instance()->object( pNewParentId );
 
-		Q_ASSERT( O != 0 );
+		Q_ASSERT( O );
 
-		if( O != 0 )
+		if( O )
 		{
 			Q_ASSERT( O->mData.mChildren.removeAll( mData.mId ) == 0 );
 

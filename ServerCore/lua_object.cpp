@@ -19,13 +19,10 @@
 
 #include "changeset/objectaliasadd.h"
 #include "changeset/objectaliasdelete.h"
-#include "changeset/objectcreate.h"
-#include "changeset/objectrecycle.h"
 #include "changeset/objectsetname.h"
 #include "changeset/objectsetowner.h"
 #include "changeset/objectsetread.h"
 #include "changeset/objectsetwrite.h"
-#include "changeset/objectsetparent.h"
 #include "changeset/objectsetfertile.h"
 #include "changeset/objectsetplayer.h"
 #include "changeset/objectsetprogrammer.h"
@@ -239,16 +236,12 @@ int lua_object::luaCreate( lua_State *L )
 			}
 		}
 
-		//change::ObjectCreate	*Change = new change::ObjectCreate( *Command, T.programmer(), ParentId, OwnerId );
-
 		//qDebug() << "create: ParentId:" << ParentId << "OwnerId:" << OwnerId;
 
 		ObjectId id = ObjectLogic::create( *Command, T.programmer(), ParentId, OwnerId );
 
 		if( ( objObject = OM.object( id ) ) != 0 )
 		{
-			Command->changeAdd( new change::ObjectCreate( id ) );
-
 			// The owner of the new object is either the programmer (if owner is not provided)
 			// the new object itself (if owner was given as #-1)
 			// or owner (otherwise).
@@ -666,8 +659,6 @@ int lua_object::luaSet( lua_State *L )
 					}
 
 					ObjectLogic::chparent( *Command, T.programmer(), O->id(), NewParentId );
-
-					Command->changeAdd( new change::ObjectSetParent( O, OldParentId, NewParentId ) );
 
 					return( 0 );
 				}
@@ -1860,8 +1851,6 @@ int lua_object::luaRecycle( lua_State *L )
 		Object				*O = argObj( L );
 
 		ObjectLogic::recycle( *Command, T.programmer(), O->id() );
-
-		Command->changeAdd( new change::ObjectRecycle( O->id() ) );
 	}
 	catch( mooException e )
 	{

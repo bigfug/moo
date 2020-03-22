@@ -11,9 +11,12 @@ namespace change {
 class ObjectSetParent : public Change
 {
 public:
-	ObjectSetParent( Object *pObject, ObjectId pOldParentId, ObjectId pNewParentId )
-		: mObject( pObject ), mOldParent( pOldParentId ), mNewParent( pNewParentId )
+	ObjectSetParent( Object *pObject, ObjectId pNewParentId )
+		: mObject( pObject ), mNewParent( pNewParentId )
 	{
+		mOldParent = pObject->parent();
+
+		mObject->setParent( mNewParent );
 	}
 
 	// Change interface

@@ -12,6 +12,11 @@
 #include "lua_object.h"
 #include "lua_task.h"
 
+#include "changeset/objectsetlocation.h"
+#include "changeset/objectsetparent.h"
+#include "changeset/objectrecycle.h"
+#include "changeset/objectcreate.h"
+
 ObjectId ObjectLogic::create( lua_task &pTask, ObjectId pUserId, ObjectId pParentId, ObjectId pOwnerId )
 {
 	Q_UNUSED( pTask )
@@ -71,8 +76,8 @@ ObjectId ObjectLogic::create( lua_task &pTask, ObjectId pUserId, ObjectId pParen
 	// Otherwise, the quota is decremented and stored back into the `ownership_quota'
 	//   property as a part of the creation of the new object.
 
-	Property			*Quota = nullptr;
-	int					 QuotaValue = 0;
+	Property			*Quota      = nullptr;
+	int					 QuotaValue = 1;
 
 	if( objOwner )
 	{
@@ -86,12 +91,12 @@ ObjectId ObjectLogic::create( lua_task &pTask, ObjectId pUserId, ObjectId pParen
 		if( Quota )
 		{
 			QuotaValue = Quota->value().toInt();
-
-			if( QuotaValue <= 0 )
-			{
-				throw( mooException( E_QUOTA, "" ) );
-			}
 		}
+	}
+
+	if( QuotaValue <= 0 )
+	{
+		throw( mooException( E_QUOTA, "" ) );
 	}
 
 	Object		*objNew = OM.newObject();
@@ -106,12 +111,12 @@ ObjectId ObjectLogic::create( lua_task &pTask, ObjectId pUserId, ObjectId pParen
 		Quota->setValue( int( QuotaValue - 1 ) );
 	}
 
-	if( objParent != 0 )
+	if( objParent )
 	{
 		objNew->setParent( pParentId );
 	}
 
-	if( objOwner != 0 )
+	if( objOwner )
 	{
 		objNew->setOwner( pOwnerId );
 	}
@@ -125,6 +130,8 @@ ObjectId ObjectLogic::create( lua_task &pTask, ObjectId pUserId, ObjectId pParen
 	{
 		objNew->setOwner( OBJECT_NONE );
 	}
+
+	pTask.changeAdd( new change::ObjectCreate( objNew->id() ) );
 
 	return( objNew->id() );
 }
@@ -202,7 +209,7 @@ void ObjectLogic::chparent( lua_task &pTask, ObjectId pUserId, ObjectId pObjectI
 	//   same name as one defined either on new-parent or on one of its
 	//   ancestors, then E_INVARG is raised.
 
-	if( objNewParent != 0 )
+	if( objNewParent )
 	{
 		// Get a list of the ObjectId's of NewParent and all its ancestors
 
@@ -223,12 +230,10 @@ void ObjectLogic::chparent( lua_task &pTask, ObjectId pUserId, ObjectId pObjectI
 		{
 			Object		*O = OM.object( id );
 
-			if( O == 0 )
+			if( O )
 			{
-				continue;
+				O->propNames( NewParPrp );
 			}
-
-			O->propNames( NewParPrp );
 		}
 
 		std::sort( NewParPrp.begin(), NewParPrp.end() );
@@ -248,12 +253,10 @@ void ObjectLogic::chparent( lua_task &pTask, ObjectId pUserId, ObjectId pObjectI
 		{
 			Object		*O = OM.object( id );
 
-			if( O == 0 )
+			if( O )
 			{
-				continue;
+				O->propNames( ObjDscPrp );
 			}
-
-			O->propNames( ObjDscPrp );
 		}
 
 		std::sort( ObjDscPrp.begin(), ObjDscPrp.end() );
@@ -278,7 +281,7 @@ void ObjectLogic::chparent( lua_task &pTask, ObjectId pUserId, ObjectId pObjectI
 	// All properties that are not removed or added in the reparenting
 	//   process are completely unchanged.
 
-	if( objOldParent != 0 && objNewParent != 0 )
+	if( objOldParent && objNewParent )
 	{
 		// Let common be the nearest ancestor that object and new-parent have
 		//   in common before the parent of object is changed.
@@ -355,7 +358,7 @@ void ObjectLogic::chparent( lua_task &pTask, ObjectId pUserId, ObjectId pObjectI
 	//   it becomes a new root of the parent/child hierarchy. In this case,
 	//   all formerly inherited properties on object are simply removed.
 
-	objObject->setParent( pNewParentId );
+	pTask.changeAdd( new change::ObjectSetParent( objObject, pNewParentId ) );
 }
 
 void ObjectLogic::recycle( lua_task &pTask, ObjectId pUserId, ObjectId pObjectId )
@@ -397,7 +400,10 @@ void ObjectLogic::recycle( lua_task &pTask, ObjectId pUserId, ObjectId pObjectId
 
 	ObjectId	idParent = ( objParent == 0 ? OBJECT_NONE : objParent->id() );
 
-	objObject->setParent( OBJECT_NONE );
+	if( objObject->parent() != OBJECT_NONE )
+	{
+		pTask.changeAdd( new change::ObjectSetParent( objObject, OBJECT_NONE ) );
+	}
 
 	QList<ObjectId>		Children = objObject->children();
 
@@ -438,7 +444,7 @@ void ObjectLogic::recycle( lua_task &pTask, ObjectId pUserId, ObjectId pObjectId
 		}
 	}
 
-	OM.recycle( objObject );
+	pTask.changeAdd( new change::ObjectRecycle( objObject->id() ) );
 }
 
 void ObjectLogic::move( lua_task &pTask, ObjectId pUserId, ObjectId pObjectId, ObjectId pWhereId )
@@ -498,7 +504,7 @@ void ObjectLogic::move( lua_task &pTask, ObjectId pUserId, ObjectId pObjectId, O
 	// If where does not define an accept verb, then it is treated as
 	//   if it defined one that always returned false.
 
-	if( objWhere != 0 && !UserIsWizard )
+	if( objWhere && !UserIsWizard )
 	{
 		if( !objWhere->verbFind( "accept", &FndVrb, &FndObj ) )
 		{
@@ -536,7 +542,7 @@ void ObjectLogic::move( lua_task &pTask, ObjectId pUserId, ObjectId pObjectId, O
 	//   are modified appropriately. Let old-where be the location
 	//   of what before it was moved.
 
-	objObject->move( objWhere );
+	pTask.changeAdd( new change::ObjectSetLocation( objObject, pWhereId ) );
 
 	// If old-where is a valid object, then the verb-call
 	//

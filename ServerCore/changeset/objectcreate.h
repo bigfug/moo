@@ -24,6 +24,23 @@ public:
 
 	virtual void rollback() Q_DECL_OVERRIDE
 	{
+		Object		*objObject = ObjectManager::o( mObjectId );
+		Object		*objOwner  = objObject ? ObjectManager::o( objObject->owner() ) : nullptr;
+
+		// if the owner of the former object has a property named `ownership_quota' and the value of that property is a integer, then recycle() treats that value as a quota and increments it by one, storing the result back into the `ownership_quota' property.
+
+		if( objOwner )
+		{
+			Property		*Quota = objOwner->prop( "ownership_quota" );
+
+			if( Quota && Quota->type() == QVariant::Int )
+			{
+				int		QuotaValue = Quota->value().toInt();
+
+				Quota->setValue( QuotaValue + 1 );
+			}
+		}
+
 		ObjectManager::instance()->recycle( mObjectId );
 	}
 
