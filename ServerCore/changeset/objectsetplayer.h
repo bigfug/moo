@@ -15,7 +15,7 @@ public:
 	{
 		mOldValue = mObject->player();
 
-		mObject->setRead( pValue );
+		mObject->setPlayer( pValue );
 	}
 
 	// Change interface

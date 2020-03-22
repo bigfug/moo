@@ -627,8 +627,6 @@ int lua_object::luaSet( lua_State *L )
 
 					Object				*V = argObj( L, 3 );
 
-					O->setOwner( V->id() );
-
 					Command->changeAdd( new change::ObjectSetOwner( O, V->id() ) );
 
 					return( 0 );

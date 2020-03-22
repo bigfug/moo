@@ -8,186 +8,308 @@
 
 #include "luatestdata.h"
 
-void ServerTest::taskRollbackObject( void )
+void ServerTest::taskRollbackObjectCreate( void )
 {
 	LuaTestData			TD;
 
-	if( true )
-	{
-		ObjectId		 oid = TD.OM.maxId();
-		Object			*O   = 0;
+	ObjectId		 oid = TD.OM.maxId();
+	Object			*O   = 0;
 
-		lua_task		 Task = TD.eval( "moo.create()" );
+	lua_task		 Task = TD.eval( "moo.create()" );
 
-		O = TD.OM.object( oid );
+	O = TD.OM.object( oid );
 
-		QVERIFY( O != 0 );
+	QVERIFY( O != 0 );
 
-		Task.rollback();
+	Task.rollback();
 
-		QVERIFY( O->recycle() );
-
-		TD.OM.recycleObjects();
-	}
-
-	if( true )
-	{
-		ObjectId		 oid = TD.OM.maxId();
-		Object			*O   = 0;
-
-		TD.process( QString( "moo.create()" ) );
-
-		O = TD.OM.object( oid );
-
-		QVERIFY( O != 0 );
-
-		lua_task		 Com = TD.eval( QString( "o( %1 ):recycle()" ).arg( oid ) );
-
-		QVERIFY( O->recycle() );
-
-		QCOMPARE( TD.OM.o( oid ), nullptr );
-
-		Com.rollback();
-
-		QVERIFY( TD.OM.o( oid ) != 0 );
-
-		TD.OM.recycle( oid );
-
-		TD.OM.recycleObjects();
-	}
-
-	if( true )
-	{
-		ObjectId		 oid = TD.OM.maxId();
-
-		TD.process( "moo.create()" );
-
-		Object			*O   = TD.OM.object( oid );
-
-		QVERIFY( O != 0 );
-
-		bool			 V = O->read();
-
-		lua_task		 Com = TD.eval( QString( "o( %1 ).r = %2" ).arg( oid ).arg( !V ) );
-
-		QCOMPARE( O->read(), !V );
-
-		Com.rollback();
-
-		QCOMPARE( O->read(), V );
-
-		TD.OM.recycle( oid );
-
-		TD.OM.recycleObjects();
-	}
+	QVERIFY( O->recycle() );
+	QCOMPARE( TD.OM.o( O->id() ), nullptr );
 }
 
-void ServerTest::taskRollbackObjectProps( void )
+void ServerTest::taskRollbackObjectRecycle()
 {
-	ObjectManager		&OM = *ObjectManager::instance();
-	ConnectionManager	&CM = *ConnectionManager::instance();
-	qint64				 TimeStamp = QDateTime::currentMSecsSinceEpoch();
-	ConnectionId		 CID = initLua( TimeStamp );
-	Connection			&Con = *CM.connection( CID );
+	LuaTestData			TD;
 
-	Object			*Programmer = OM.object( Con.player() );
+	Object		*O = TD.OM.newObject();
 
-	if( true )
-	{
-		ObjectId		 oid = OM.maxId();
-		Object			*O   = 0;
+	QVERIFY( O );
 
-		lua_task::process( QString( "moo.create()" ), CID, Programmer->id() );
+	lua_task		 Com = TD.eval( QString( "o( %1 ):recycle()" ).arg( O->id() ) );
 
-		O = OM.object( oid );
+	QVERIFY( O->recycle() );
 
-		QVERIFY( O != 0 );
+	QCOMPARE( TD.OM.o( O->id() ), nullptr );
+	QCOMPARE( TD.OM.objectIncludingRecycled( O->id() ), O );
 
-		QString			 CMD = QString( "o( %1 ):propadd( 'hello', 'world' );" ).arg( oid );
-		TaskEntry		 TE( CMD, CID, Programmer->id() );
-		lua_task		 Com( CID, TE );
+	Com.rollback();
 
-		Com.eval();
-
-		QVERIFY( O->prop( "hello" )->value().toString() == "world" );
-
-		Com.rollback();
-
-		QCOMPARE( O->prop( "hello" ), nullptr);
-
-		OM.recycle( oid );
-
-		OM.recycleObjects();
-	}
+	QCOMPARE( TD.OM.o( O->id() ), O );
 }
 
-void ServerTest::taskRollbackObjectAliases( void )
+void ServerTest::taskRollbackObjectRead()
 {
-	ObjectManager		&OM = *ObjectManager::instance();
-	ConnectionManager	&CM = *ConnectionManager::instance();
-	qint64				 TimeStamp = QDateTime::currentMSecsSinceEpoch();
-	ConnectionId		 CID = initLua( TimeStamp );
-	Connection			&Con = *CM.connection( CID );
+	LuaTestData			TD;
 
-	Object			*Programmer = OM.object( Con.player() );
+	Object		*O = TD.OM.newObject();
 
-	if( true )
-	{
-		ObjectId		 oid = OM.maxId();
-		Object			*O   = 0;
+	QVERIFY( O );
 
-		lua_task::process( QString( "moo.create()" ), CID, Programmer->id() );
+	bool		 V = O->read();
 
-		O = OM.object( oid );
+	lua_task	 C = TD.eval( QString( "o( %1 ).r = %2" ).arg( O->id() ).arg( !V ) );
 
-		QVERIFY( O != 0 );
+	QCOMPARE( O->read(), !V );
 
-		QString			 CMD = QString( "o( %1 ):aliasadd( 'test' )" ).arg( oid );
-		TaskEntry		 TE( CMD, CID, Programmer->id() );
-		lua_task		 Com( CID, TE );
+	C.rollback();
 
-		Com.eval();
+	QCOMPARE( O->read(), V );
+}
 
-		QVERIFY( O->aliases().contains( "test" ) );
+void ServerTest::taskRollbackObjectWrite( void )
+{
+	LuaTestData			TD;
 
-		Com.rollback();
+	Object		*O = TD.OM.newObject();
 
-		QVERIFY( !O->aliases().contains( "test" ) );
+	QVERIFY( O );
 
-		OM.recycle( oid );
+	bool		 V = O->write();
 
-		OM.recycleObjects();
-	}
+	lua_task	 C = TD.eval( QString( "o( %1 ).w = %2" ).arg( O->id() ).arg( !V ) );
 
-	if( true )
-	{
-		ObjectId		 oid = OM.maxId();
-		Object			*O   = 0;
+	QCOMPARE( O->write(), !V );
 
-		lua_task::process( QString( "moo.create()" ), CID, Programmer->id() );
+	C.rollback();
 
-		O = OM.object( oid );
+	QCOMPARE( O->write(), V );
+}
 
-		QVERIFY( O != 0 );
+void ServerTest::taskRollbackObjectFertile( void )
+{
+	LuaTestData			TD;
 
-		lua_task::process( QString( "o( %1 ):aliasadd( 'test' )" ).arg( oid ), CID, Programmer->id() );
+	Object		*O = TD.OM.newObject();
 
-		QVERIFY( O->aliases().contains( "test" ) );
+	QVERIFY( O );
 
-		QString			 CMD = QString( "o( %1 ):aliasdel( 'test' )" ).arg( oid );
-		TaskEntry		 TE( CMD, CID, Programmer->id() );
-		lua_task		 Com( CID, TE );
+	bool		 V = O->fertile();
 
-		Com.eval();
+	lua_task	 C = TD.eval( QString( "o( %1 ).f = %2" ).arg( O->id() ).arg( !V ) );
 
-		QVERIFY( !O->aliases().contains( "test" ) );
+	QCOMPARE( O->fertile(), !V );
 
-		Com.rollback();
+	C.rollback();
 
-		QVERIFY( O->aliases().contains( "test" ) );
+	QCOMPARE( O->fertile(), V );
+}
 
-		OM.recycle( oid );
+void ServerTest::taskRollbackObjectName( void )
+{
+	LuaTestData			TD;
 
-		OM.recycleObjects();
-	}
+	Object		*O = TD.OM.newObject();
+
+	QVERIFY( O );
+
+	QString		v1( "test1" );
+	QString		v2( "test2" );
+
+	O->setName( v1 );
+
+	lua_task	 C = TD.eval( QString( "o( %1 ).name = '%2'" ).arg( O->id() ).arg( v2 ) );
+
+	QCOMPARE( O->name(), v2 );
+
+	C.rollback();
+
+	QCOMPARE( O->name(), v1 );
+}
+
+void ServerTest::taskRollbackObjectOwner()
+{
+	LuaTestData			TD;
+
+	Object		*O = TD.OM.newObject();
+
+	QVERIFY( O );
+
+	ObjectId		v1( 1 );
+	ObjectId		v2( 2 );
+
+	O->setOwner( v1 );
+
+	lua_task	 C = TD.eval( QString( "o( %1 ).owner = o( %2 )" ).arg( O->id() ).arg( v2 ) );
+
+	QCOMPARE( O->owner(), v2 );
+
+	C.rollback();
+
+	QCOMPARE( O->owner(), v1 );
+}
+
+void ServerTest::taskRollbackObjectParent()
+{
+	LuaTestData			TD;
+
+	Object		*O = TD.OM.newObject();
+
+	QVERIFY( O );
+
+	ObjectId		v1( 1 );
+	ObjectId		v2( 2 );
+
+	O->setParent( v1 );
+
+	lua_task	 C = TD.eval( QString( "o( %1 ).parent = o( %2 )" ).arg( O->id() ).arg( v2 ) );
+
+	QCOMPARE( O->parent(), v2 );
+
+	C.rollback();
+
+	QCOMPARE( O->parent(), v1 );
+}
+
+void ServerTest::taskRollbackObjectLocation()
+{
+	LuaTestData			TD;
+
+	Object		*O  = TD.OM.newObject();
+	Object		*L1 = TD.OM.newObject();
+	Object		*L2 = TD.OM.newObject();
+
+	QVERIFY( O );
+
+	O->move( L1 );
+
+	QCOMPARE( O->location(), L1->id() );
+
+	lua_task	 C = TD.eval( QString( "o( %1 ).location = o( %2 )" ).arg( O->id() ).arg( L2->id() ) );
+
+	QCOMPARE( O->location(), L2->id() );
+
+	C.rollback();
+
+	QCOMPARE( O->location(), L1->id() );
+}
+
+void ServerTest::taskRollbackObjectPlayer()
+{
+	LuaTestData			TD;
+
+	Object		*O = TD.OM.newObject();
+
+	QVERIFY( O );
+
+	bool		 V = O->player();
+
+	lua_task	 C = TD.eval( QString( "o( %1 ).player = %2" ).arg( O->id() ).arg( !V ) );
+
+	QCOMPARE( O->player(), !V );
+
+	C.rollback();
+
+	QCOMPARE( O->player(), V );
+}
+
+void ServerTest::taskRollbackObjectProgrammer()
+{
+	LuaTestData			TD;
+
+	Object		*O = TD.OM.newObject();
+
+	QVERIFY( O );
+
+	bool		 V = O->programmer();
+
+	lua_task	 C = TD.eval( QString( "o( %1 ).programmer = %2" ).arg( O->id() ).arg( !V ) );
+
+	QCOMPARE( O->programmer(), !V );
+
+	C.rollback();
+
+	QCOMPARE( O->programmer(), V );
+}
+
+void ServerTest::taskRollbackObjectWizard()
+{
+	LuaTestData			TD;
+
+	Object		*O = TD.OM.newObject();
+
+	QVERIFY( O );
+
+	bool		 V = O->wizard();
+
+	lua_task	 C = TD.eval( QString( "o( %1 ).wizard = %2" ).arg( O->id() ).arg( !V ) );
+
+	QCOMPARE( O->wizard(), !V );
+
+	C.rollback();
+
+	QCOMPARE( O->wizard(), V );
+}
+
+void ServerTest::taskRollbackObjectPropAdd( void )
+{
+	LuaTestData			TD;
+
+	Object		*O = TD.OM.newObject();
+
+	QVERIFY( O );
+
+	QString		v1( "test1" );
+	QString		v2( "test2" );
+
+	lua_task	 C = TD.eval( QString( "o( %1 ):propadd( '%2', '%3' );" ).arg( O->id() ).arg( v1 ).arg( v2 ) );
+
+	QVERIFY( O->prop( v1 ) );
+
+	QCOMPARE( O->prop( v1 )->value().toString(), v2 );
+
+	C.rollback();
+
+	QVERIFY( !O->prop( v1 ) );
+}
+
+void ServerTest::taskRollbackObjectAliasAdd( void )
+{
+	LuaTestData			TD;
+
+	Object		*O = TD.OM.newObject();
+
+	QVERIFY( O );
+
+	QString		v1( "test1" );
+
+	lua_task	 C = TD.eval( QString( "o( %1 ):aliasadd( '%2' )" ).arg( O->id() ).arg( v1 ) );
+
+	QVERIFY( O->aliases().contains( v1 ) );
+
+	C.rollback();
+
+	QVERIFY( !O->aliases().contains( v1 ) );
+}
+
+void ServerTest::taskRollbackObjectAliasDelete()
+{
+	LuaTestData			TD;
+
+	Object		*O = TD.OM.newObject();
+
+	QVERIFY( O );
+
+	QString		v1( "test1" );
+
+	TD.process( QString( "o( %1 ):aliasadd( '%2' )" ).arg( O->id() ).arg( v1 ) );
+
+	QVERIFY( O->aliases().contains( v1 ) );
+
+	lua_task	 C = TD.eval( QString( "o( %1 ):aliasdel( '%2' )" ).arg( O->id() ).arg( v1 ) );
+
+	QVERIFY( !O->aliases().contains( v1 ) );
+
+	C.rollback();
+
+	QVERIFY( O->aliases().contains( v1 ) );
 }
