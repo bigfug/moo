@@ -12,6 +12,8 @@ class ChangeSet
 public:
 	ChangeSet();
 
+	ChangeSet( ChangeSet &&c );
+
 	virtual ~ChangeSet( void );
 
 	inline void add( Change *pChange )

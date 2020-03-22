@@ -9,6 +9,12 @@ ChangeSet::ChangeSet()
 
 }
 
+ChangeSet::ChangeSet( ChangeSet &&c )
+	: mChanges( std::move( c.mChanges ) )
+{
+
+}
+
 ChangeSet::~ChangeSet()
 {
 	Q_ASSERT( mChanges.empty() );

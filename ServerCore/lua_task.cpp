@@ -252,6 +252,20 @@ lua_task::lua_task( ConnectionId pConnectionId, const Task &pTask )
 	mTasks.push_front( pTask );
 }
 
+lua_task::lua_task( lua_task &&t )
+	: mL( std::exchange( t.mL, nullptr ) ),
+	  mConnectionId( std::exchange( t.mConnectionId, CONNECTION_NONE ) ),
+	  mTasks( std::move( t.mTasks ) ),
+	  mTimeStamp( t.mTimeStamp ),
+	  mMemUse( t.mMemUse ),
+	  mChanges( std::move( t.mChanges ) ),
+	  mError( t.mError )
+{
+	lua_setallocf( mL, lua_task::luaAlloc, this );
+
+	luaSetTask( mL, this );
+}
+
 lua_task::~lua_task( void )
 {
 	if( mL )

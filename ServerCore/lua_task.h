@@ -26,6 +26,8 @@ public:
 public:
 	lua_task( ConnectionId pConnectionId, const Task &pTask );
 
+	lua_task( lua_task &&t );
+
 	virtual ~lua_task( void );
 
 	inline const Task &task( void ) const
