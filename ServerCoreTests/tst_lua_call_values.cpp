@@ -111,10 +111,8 @@ void ServerTest::luaCallValueObjectFirst( void )
 	Object				*O  = TD.OM.newObject();
 	QString				 CD = QString( ";o( %1 ).result = moo.object.id" ).arg( O->id() );
 
-	TD.initTask( CD, TD.Programmer->id() );
-
 	O->setParent( 2 );
-	O->setOwner( TD.Programmer->id() );
+	O->setOwner( TD.programmerId() );
 
 	// Add property to hold result
 
@@ -122,14 +120,14 @@ void ServerTest::luaCallValueObjectFirst( void )
 
 	P.initialise();
 
-	P.setValue( "result" );
-	P.setOwner( TD.Programmer->id() );
+	P.setValue( "string" );
+	P.setOwner( TD.programmerId() );
 
 	O->propAdd( "result", P );
 
 	// Call test
 
-	TD.Com->execute( TD.TimeStamp );
+	TD.execute( CD );
 
 	// Check result
 
@@ -146,13 +144,10 @@ void ServerTest::luaCallValueCallerFirst( void )
 
 	TD.Programmer->setWizard( false );
 
-	Object				*O     = TD.OM.newObject();
-	QString				 CD = QString( ";o( %1 ).result = moo.caller.id" ).arg( O->id() );
-
-	TD.initTask( CD, TD.Programmer->id() );
+	Object				*O  = TD.OM.newObject();
 
 	O->setParent( 2 );
-	O->setOwner( TD.Programmer->id() );
+	O->setOwner( TD.programmerId() );
 
 	// Add property to hold result
 
@@ -160,14 +155,14 @@ void ServerTest::luaCallValueCallerFirst( void )
 
 	P.initialise();
 
-	P.setValue( "result" );
-	P.setOwner( TD.Programmer->id() );
+	P.setValue( "string" );
+	P.setOwner( TD.programmerId() );
 
 	O->propAdd( "result", P );
 
 	// Call test
 
-	TD.Com->execute( TD.TimeStamp );
+	TD.execute( QString( ";o( %1 ).result = moo.caller.id" ).arg( O->id() ) );
 
 	// Check result
 
@@ -185,12 +180,9 @@ void ServerTest::luaCallValuePlayerFirst( void )
 	TD.Programmer->setWizard( false );
 
 	Object				*O     = TD.OM.newObject();
-	QString				 CD = QString( ";o( %1 ).result = moo.player.id" ).arg( O->id() );
-
-	TD.initTask( CD, TD.Programmer->id() );
 
 	O->setParent( 2 );
-	O->setOwner( TD.Programmer->id() );
+	O->setOwner( TD.programmerId() );
 
 	// Add property to hold result
 
@@ -198,14 +190,14 @@ void ServerTest::luaCallValuePlayerFirst( void )
 
 	P.initialise();
 
-	P.setValue( "result" );
-	P.setOwner( TD.Programmer->id() );
+	P.setValue( "string" );
+	P.setOwner( TD.programmerId() );
 
 	O->propAdd( "result", P );
 
 	// Call test
 
-	TD.Com->execute( TD.TimeStamp );
+	TD.execute( QString( ";o( %1 ).result = moo.player.id" ).arg( O->id() ) );
 
 	// Check result
 
@@ -223,9 +215,6 @@ void ServerTest::luaCallValueProgrammerFirst( void )
 	TD.Programmer->setWizard( false );
 
 	Object				*O     = TD.OM.newObject();
-	QString				 CD = QString( ";o( %1 ).result = moo.programmer.id" ).arg( O->id() );
-
-	TD.initTask( CD, TD.Programmer->id() );
 
 	O->setParent( 2 );
 
@@ -235,14 +224,14 @@ void ServerTest::luaCallValueProgrammerFirst( void )
 
 	P.initialise();
 
-	P.setValue( "result" );
-	P.setOwner( TD.Programmer->id() );
+	P.setValue( "string" );
+	P.setOwner( TD.programmerId() );
 
 	O->propAdd( "result", P );
 
 	// Call test
 
-	TD.Com->execute( TD.TimeStamp );
+	TD.execute( QString( ";o( %1 ).result = moo.programmer.id" ).arg( O->id() ) );
 
 	// Check result
 
@@ -250,7 +239,7 @@ void ServerTest::luaCallValueProgrammerFirst( void )
 
 	QVERIFY( R != 0 );
 	QVERIFY( R->type() == QVariant::String );
-	QCOMPARE( R->value().toString(), QString( "%1" ).arg( TD.Programmer->id() ) );
+	QCOMPARE( R->value().toString(), QString( "%1" ).arg( TD.programmerId() ) );
 }
 
 //------
@@ -262,9 +251,6 @@ void ServerTest::luaCallValueObjectSecond( void )
 	TD.Programmer->setWizard( false );
 
 	Object				*O  = TD.OM.newObject();
-	QString				 CD = QString( ";o( %1 ):test()" ).arg( O->id() );
-
-	TD.initTask( CD, TD.Programmer->id() );
 
 	O->setParent( 2 );
 
@@ -274,7 +260,7 @@ void ServerTest::luaCallValueObjectSecond( void )
 
 	P.initialise();
 
-	P.setValue( "result" );
+	P.setValue( "string" );
 	P.setOwner( O->id() );
 
 	O->propAdd( "result", P );
@@ -292,7 +278,7 @@ void ServerTest::luaCallValueObjectSecond( void )
 
 	// Call test
 
-	TD.Com->execute( TD.TimeStamp );
+	TD.execute( QString( ";o( %1 ):test()" ).arg( O->id() ) );
 
 	// Check result
 
@@ -310,9 +296,6 @@ void ServerTest::luaCallValueCallerSecond( void )
 	TD.Programmer->setWizard( false );
 
 	Object				*O     = TD.OM.newObject();
-	QString				 CD = QString( ";o( %1 ):test()" ).arg( O->id() );
-
-	TD.initTask( CD, TD.Programmer->id() );
 
 	O->setParent( 2 );
 
@@ -322,7 +305,7 @@ void ServerTest::luaCallValueCallerSecond( void )
 
 	P.initialise();
 
-	P.setValue( "result" );
+	P.setValue( "string" );
 	P.setOwner( 2 );
 
 	O->propAdd( "result", P );
@@ -340,7 +323,7 @@ void ServerTest::luaCallValueCallerSecond( void )
 
 	// Call test
 
-	TD.Com->execute( TD.TimeStamp );
+	TD.execute( QString( ";o( %1 ):test()" ).arg( O->id() ) );
 
 	// Check result
 
@@ -358,9 +341,6 @@ void ServerTest::luaCallValuePlayerSecond( void )
 	TD.Programmer->setWizard( false );
 
 	Object				*O     = TD.OM.newObject();
-	QString				 CD = QString( ";o( %1 ):test()" ).arg( O->id() );
-
-	TD.initTask( CD, TD.Programmer->id() );
 
 	O->setParent( 2 );
 
@@ -370,7 +350,7 @@ void ServerTest::luaCallValuePlayerSecond( void )
 
 	P.initialise();
 
-	P.setValue( "result" );
+	P.setValue( "string" );
 	P.setOwner( 2 );
 
 	O->propAdd( "result", P );
@@ -388,7 +368,7 @@ void ServerTest::luaCallValuePlayerSecond( void )
 
 	// Call test
 
-	TD.Com->execute( TD.TimeStamp );
+	TD.execute( QString( ";o( %1 ):test()" ).arg( O->id() ) );
 
 	// Check result
 
@@ -406,9 +386,6 @@ void ServerTest::luaCallValueProgrammerSecond( void )
 	TD.Programmer->setWizard( false );
 
 	Object				*O     = TD.OM.newObject();
-	QString				 CD = QString( ";o( %1 ):test()" ).arg( O->id() );
-
-	TD.initTask( CD, TD.Programmer->id() );
 
 	O->setParent( 2 );
 
@@ -418,7 +395,7 @@ void ServerTest::luaCallValueProgrammerSecond( void )
 
 	P.initialise();
 
-	P.setValue( "result" );
+	P.setValue( "string" );
 	P.setOwner( 2 );
 
 	O->propAdd( "result", P );
@@ -436,7 +413,7 @@ void ServerTest::luaCallValueProgrammerSecond( void )
 
 	// Call test
 
-	TD.Com->execute( TD.TimeStamp );
+	TD.execute( QString( ";o( %1 ):test()" ).arg( O->id() ) );
 
 	// Check result
 
@@ -461,9 +438,6 @@ void ServerTest::luaCallValueObjectThird( void )
 
 	Object				*O1 = TD.OM.newObject();
 	Object				*O2 = TD.OM.newObject();
-	QString				 CD = QString( ";o( %1 ):test()" ).arg( O1->id() );
-
-	TD.initTask( CD, TD.Programmer->id() );
 
 	O1->setParent( 2 );
 	O2->setParent( 1 );
@@ -503,7 +477,7 @@ void ServerTest::luaCallValueObjectThird( void )
 
 	// Call test
 
-	TD.Com->execute( TD.TimeStamp );
+	TD.execute( QString( ";o( %1 ):test()" ).arg( O1->id() ) );
 
 	// Check result
 
@@ -522,9 +496,6 @@ void ServerTest::luaCallValuePlayerThird()
 
 	Object				*O1 = TD.OM.newObject();
 	Object				*O2 = TD.OM.newObject();
-	QString				 CD = QString( ";o( %1 ):test()" ).arg( O1->id() );
-
-	TD.initTask( CD, TD.Programmer->id() );
 
 	O1->setParent( 2 );
 	O2->setParent( 1 );
@@ -564,7 +535,7 @@ void ServerTest::luaCallValuePlayerThird()
 
 	// Call test
 
-	TD.Com->execute( TD.TimeStamp );
+	TD.execute( QString( ";o( %1 ):test()" ).arg( O1->id() ) );
 
 	// Check result
 
@@ -583,9 +554,6 @@ void ServerTest::luaCallValueCallerThird()
 
 	Object				*O1 = TD.OM.newObject();
 	Object				*O2 = TD.OM.newObject();
-	QString				 CD = QString( ";o( %1 ):test()" ).arg( O1->id() );
-
-	TD.initTask( CD, TD.Programmer->id() );
 
 	O1->setParent( 2 );
 	O2->setParent( 1 );
@@ -625,7 +593,7 @@ void ServerTest::luaCallValueCallerThird()
 
 	// Call test
 
-	TD.Com->execute( TD.TimeStamp );
+	TD.execute( QString( ";o( %1 ):test()" ).arg( O1->id() ) );
 
 	// Check result
 
@@ -644,9 +612,6 @@ void ServerTest::luaCallValueProgrammerThird()
 
 	Object				*O1 = TD.OM.newObject();
 	Object				*O2 = TD.OM.newObject();
-	QString				 CD = QString( ";o( %1 ):test()" ).arg( O1->id() );
-
-	TD.initTask( CD, TD.Programmer->id() );
 
 	O1->setParent( 2 );
 	O2->setParent( 1 );
@@ -686,7 +651,7 @@ void ServerTest::luaCallValueProgrammerThird()
 
 	// Call test
 
-	TD.Com->execute( TD.TimeStamp );
+	TD.execute( QString( ";o( %1 ):test()" ).arg( O1->id() ) );
 
 	// Check result
 
@@ -703,10 +668,7 @@ void ServerTest::luaCallValueProgrammerThird()
 void ServerTest::luaCallValueObjectFirstWizard( void )
 {
 	LuaTestData			 TD;
-	Object				*O     = TD.OM.newObject();
-	QString				 CD = QString( ";o( %1 ).result = moo.object.id" ).arg( O->id() );
-
-	TD.initTask( CD, TD.Programmer->id() );
+	Object				*O = TD.OM.newObject();
 
 	O->setParent( 2 );
 
@@ -716,14 +678,14 @@ void ServerTest::luaCallValueObjectFirstWizard( void )
 
 	P.initialise();
 
-	P.setValue( "result" );
-	P.setOwner( TD.Programmer->id() );
+	P.setValue( "string" );
+	P.setOwner( TD.programmerId() );
 
 	O->propAdd( "result", P );
 
 	// Call test
 
-	TD.Com->execute( TD.TimeStamp );
+	TD.execute( QString( ";o( %1 ).result = moo.object.id" ).arg( O->id() ) );
 
 	// Check result
 
@@ -738,9 +700,6 @@ void ServerTest::luaCallValueCallerFirstWizard( void )
 {
 	LuaTestData			 TD;
 	Object				*O     = TD.OM.newObject();
-	QString				 CD = QString( ";o( %1 ).result = moo.caller.id" ).arg( O->id() );
-
-	TD.initTask( CD, TD.Programmer->id() );
 
 	O->setParent( 2 );
 
@@ -750,14 +709,14 @@ void ServerTest::luaCallValueCallerFirstWizard( void )
 
 	P.initialise();
 
-	P.setValue( "result" );
-	P.setOwner( TD.Programmer->id() );
+	P.setValue( "string" );
+	P.setOwner( TD.programmerId() );
 
 	O->propAdd( "result", P );
 
 	// Call test
 
-	TD.Com->execute( TD.TimeStamp );
+	TD.execute( QString( ";o( %1 ).result = moo.caller.id" ).arg( O->id() ) );
 
 	// Check result
 
@@ -772,9 +731,6 @@ void ServerTest::luaCallValuePlayerFirstWizard( void )
 {
 	LuaTestData			 TD;
 	Object				*O     = TD.OM.newObject();
-	QString				 CD = QString( ";o( %1 ).result = moo.player.id" ).arg( O->id() );
-
-	TD.initTask( CD, TD.Programmer->id() );
 
 	O->setParent( 2 );
 
@@ -784,14 +740,14 @@ void ServerTest::luaCallValuePlayerFirstWizard( void )
 
 	P.initialise();
 
-	P.setValue( "result" );
-	P.setOwner( TD.Programmer->id() );
+	P.setValue( "string" );
+	P.setOwner( TD.programmerId() );
 
 	O->propAdd( "result", P );
 
 	// Call test
 
-	TD.Com->execute( TD.TimeStamp );
+	TD.execute( QString( ";o( %1 ).result = moo.player.id" ).arg( O->id() ) );
 
 	// Check result
 
@@ -806,9 +762,6 @@ void ServerTest::luaCallValueProgrammerFirstWizard( void )
 {
 	LuaTestData			 TD;
 	Object				*O     = TD.OM.newObject();
-	QString				 CD = QString( ";o( %1 ).result = moo.programmer.id" ).arg( O->id() );
-
-	TD.initTask( CD, TD.Programmer->id() );
 
 	O->setParent( 2 );
 
@@ -818,13 +771,13 @@ void ServerTest::luaCallValueProgrammerFirstWizard( void )
 
 	P.initialise();
 
-	P.setValue( "result" );
+	P.setValue( "string" );
 
 	O->propAdd( "result", P );
 
 	// Call test
 
-	TD.Com->execute( TD.TimeStamp );
+	TD.execute( QString( ";o( %1 ).result = moo.programmer.id" ).arg( O->id() ) );
 
 	// Check result
 
@@ -832,7 +785,7 @@ void ServerTest::luaCallValueProgrammerFirstWizard( void )
 
 	QVERIFY( R != 0 );
 	QVERIFY( R->type() == QVariant::String );
-	QCOMPARE( R->value().toString(), QString( "%1" ).arg( TD.Programmer->id() ) );
+	QCOMPARE( R->value().toString(), QString( "%1" ).arg( TD.programmerId() ) );
 }
 
 //------
@@ -841,9 +794,6 @@ void ServerTest::luaCallValueObjectSecondWizard( void )
 {
 	LuaTestData			 TD;
 	Object				*O     = TD.OM.newObject();
-	QString				 CD = QString( ";o( %1 ):test()" ).arg( O->id() );
-
-	TD.initTask( CD, TD.Programmer->id() );
 
 	O->setParent( 2 );
 
@@ -853,7 +803,7 @@ void ServerTest::luaCallValueObjectSecondWizard( void )
 
 	P.initialise();
 
-	P.setValue( "result" );
+	P.setValue( "string" );
 
 	O->propAdd( "result", P );
 
@@ -870,7 +820,7 @@ void ServerTest::luaCallValueObjectSecondWizard( void )
 
 	// Call test
 
-	TD.Com->execute( TD.TimeStamp );
+	TD.execute( QString( ";o( %1 ):test()" ).arg( O->id() ) );
 
 	// Check result
 
@@ -885,9 +835,6 @@ void ServerTest::luaCallValueCallerSecondWizard( void )
 {
 	LuaTestData			 TD;
 	Object				*O     = TD.OM.newObject();
-	QString				 CD = QString( ";o( %1 ):test()" ).arg( O->id() );
-
-	TD.initTask( CD, TD.Programmer->id() );
 
 	O->setParent( 2 );
 
@@ -897,7 +844,7 @@ void ServerTest::luaCallValueCallerSecondWizard( void )
 
 	P.initialise();
 
-	P.setValue( "result" );
+	P.setValue( "string" );
 
 	O->propAdd( "result", P );
 
@@ -914,7 +861,7 @@ void ServerTest::luaCallValueCallerSecondWizard( void )
 
 	// Call test
 
-	TD.Com->execute( TD.TimeStamp );
+	TD.execute( QString( ";o( %1 ):test()" ).arg( O->id() ) );
 
 	// Check result
 
@@ -931,8 +878,6 @@ void ServerTest::luaCallValuePlayerSecondWizard( void )
 	Object				*O     = TD.OM.newObject();
 	QString				 CD = QString( ";o( %1 ):test()" ).arg( O->id() );
 
-	TD.initTask( CD, TD.Programmer->id() );
-
 	O->setParent( 2 );
 
 	// Add property to hold result
@@ -941,7 +886,7 @@ void ServerTest::luaCallValuePlayerSecondWizard( void )
 
 	P.initialise();
 
-	P.setValue( "result" );
+	P.setValue( "string" );
 
 	O->propAdd( "result", P );
 
@@ -958,7 +903,7 @@ void ServerTest::luaCallValuePlayerSecondWizard( void )
 
 	// Call test
 
-	TD.Com->execute( TD.TimeStamp );
+	TD.execute( CD );
 
 	// Check result
 
@@ -975,8 +920,6 @@ void ServerTest::luaCallValueProgrammerSecondWizard( void )
 	Object				*O     = TD.OM.newObject();
 	QString				 CD = QString( ";o( %1 ):test()" ).arg( O->id() );
 
-	TD.initTask( CD, TD.Programmer->id() );
-
 	O->setParent( 2 );
 
 	// Add property to hold result
@@ -985,7 +928,7 @@ void ServerTest::luaCallValueProgrammerSecondWizard( void )
 
 	P.initialise();
 
-	P.setValue( "result" );
+	P.setValue( "string" );
 
 	O->propAdd( "result", P );
 
@@ -1002,7 +945,7 @@ void ServerTest::luaCallValueProgrammerSecondWizard( void )
 
 	// Call test
 
-	TD.Com->execute( TD.TimeStamp );
+	TD.execute( CD );
 
 	// Check result
 
@@ -1010,7 +953,7 @@ void ServerTest::luaCallValueProgrammerSecondWizard( void )
 
 	QVERIFY( R != 0 );
 	QVERIFY( R->type() == QVariant::String );
-	QCOMPARE( R->value().toString(), QString( "%1" ).arg( TD.Programmer->id() ) );
+	QCOMPARE( R->value().toString(), QString( "%1" ).arg( TD.programmerId() ) );
 }
 
 //------
@@ -1021,8 +964,6 @@ void ServerTest::luaCallValueObjectThirdWizard( void )
 	Object				*O1 = TD.OM.newObject();
 	Object				*O2 = TD.OM.newObject();
 	QString				 CD = QString( ";o( %1 ):test()" ).arg( O1->id() );
-
-	TD.initTask( CD, TD.Programmer->id() );
 
 	O1->setParent( 2 );
 	O2->setParent( 1 );
@@ -1061,7 +1002,7 @@ void ServerTest::luaCallValueObjectThirdWizard( void )
 
 	// Call test
 
-	TD.Com->execute( TD.TimeStamp );
+	TD.execute( CD );
 
 	// Check result
 
@@ -1078,8 +1019,6 @@ void ServerTest::luaCallValuePlayerThirdWizard()
 	Object				*O1 = TD.OM.newObject();
 	Object				*O2 = TD.OM.newObject();
 	QString				 CD = QString( ";o( %1 ):test()" ).arg( O1->id() );
-
-	TD.initTask( CD, TD.Programmer->id() );
 
 	O1->setParent( 2 );
 	O2->setParent( 1 );
@@ -1118,7 +1057,7 @@ void ServerTest::luaCallValuePlayerThirdWizard()
 
 	// Call test
 
-	TD.Com->execute( TD.TimeStamp );
+	TD.execute( CD );
 
 	// Check result
 
@@ -1126,7 +1065,7 @@ void ServerTest::luaCallValuePlayerThirdWizard()
 
 	QVERIFY( R != 0 );
 	QVERIFY( R->type() == QVariant::String );
-	QCOMPARE( R->value().toString(), QString( "%1" ).arg( TD.Programmer->id() ) );
+	QCOMPARE( R->value().toString(), QString( "%1" ).arg( TD.programmerId() ) );
 }
 
 void ServerTest::luaCallValueCallerThirdWizard()
@@ -1135,8 +1074,6 @@ void ServerTest::luaCallValueCallerThirdWizard()
 	Object				*O1 = TD.OM.newObject();
 	Object				*O2 = TD.OM.newObject();
 	QString				 CD = QString( ";o( %1 ):test()" ).arg( O1->id() );
-
-	TD.initTask( CD, TD.Programmer->id() );
 
 	O1->setParent( 2 );
 	O2->setParent( 1 );
@@ -1175,7 +1112,7 @@ void ServerTest::luaCallValueCallerThirdWizard()
 
 	// Call test
 
-	TD.Com->execute( TD.TimeStamp );
+	TD.execute( CD );
 
 	// Check result
 
@@ -1192,8 +1129,6 @@ void ServerTest::luaCallValueProgrammerThirdWizard()
 	Object				*O1 = TD.OM.newObject();
 	Object				*O2 = TD.OM.newObject();
 	QString				 CD = QString( ";o( %1 ):test()" ).arg( O1->id() );
-
-	TD.initTask( CD, TD.Programmer->id() );
 
 	O1->setParent( 2 );
 	O2->setParent( 1 );
@@ -1232,7 +1167,7 @@ void ServerTest::luaCallValueProgrammerThirdWizard()
 
 	// Call test
 
-	TD.Com->execute( TD.TimeStamp );
+	TD.execute( CD );
 
 	// Check result
 
@@ -1240,5 +1175,5 @@ void ServerTest::luaCallValueProgrammerThirdWizard()
 
 	QVERIFY( R != 0 );
 	QVERIFY( R->type() == QVariant::String );
-	QCOMPARE( R->value().toString(), QString( "%1" ).arg( TD.Programmer->id() ) );
+	QCOMPARE( R->value().toString(), QString( "%1" ).arg( TD.programmerId() ) );
 }

@@ -10,86 +10,65 @@
 
 void ServerTest::taskRollbackObject( void )
 {
-	ObjectManager		&OM = *ObjectManager::instance();
-	ConnectionManager	&CM = *ConnectionManager::instance();
-	qint64				 TimeStamp = QDateTime::currentMSecsSinceEpoch();
-	ConnectionId		 CID = initLua( TimeStamp );
-	Connection			&Con = *CM.connection( CID );
-
-	Object			*Programmer = OM.object( Con.player() );
-	Object			*Parent     = OM.newObject();
-	Object			*Owner      = OM.newObject();
+	LuaTestData			TD;
 
 	if( true )
 	{
-		ObjectId		 oid = OM.maxId();
+		ObjectId		 oid = TD.OM.maxId();
 		Object			*O   = 0;
 
-		QString			 CMD = QString( "moo.create()" );
-		TaskEntry		 TE( CMD, CID, Programmer->id() );
-		lua_task		 Com( CID, TE );
+		lua_task		 Task = TD.eval( "moo.create()" );
 
-		Com.eval();
-
-		O = OM.object( oid );
+		O = TD.OM.object( oid );
 
 		QVERIFY( O != 0 );
 
-		Com.rollback();
+		Task.rollback();
 
 		QVERIFY( O->recycle() );
 
-		OM.recycleObjects();
+		TD.OM.recycleObjects();
 	}
 
 	if( true )
 	{
-		ObjectId		 oid = OM.maxId();
+		ObjectId		 oid = TD.OM.maxId();
 		Object			*O   = 0;
 
-		lua_task::process( QString( "moo.create()" ), CID, Programmer->id() );
+		TD.process( QString( "moo.create()" ) );
 
-		O = OM.object( oid );
+		O = TD.OM.object( oid );
 
 		QVERIFY( O != 0 );
 
-		QString			 CMD = QString( "o( %1 ):recycle()" ).arg( oid );
-		TaskEntry		 TE( CMD, CID, Programmer->id() );
-		lua_task		 Com( CID, TE );
-
-		Com.eval();
+		lua_task		 Com = TD.eval( QString( "o( %1 ):recycle()" ).arg( oid ) );
 
 		QVERIFY( O->recycle() );
 
-		QCOMPARE( OM.o( oid ), nullptr );
+		QCOMPARE( TD.OM.o( oid ), nullptr );
 
 		Com.rollback();
 
-		QVERIFY( OM.o( oid ) != 0 );
+		QVERIFY( TD.OM.o( oid ) != 0 );
 
-		OM.recycle( oid );
+		TD.OM.recycle( oid );
 
-		OM.recycleObjects();
+		TD.OM.recycleObjects();
 	}
 
 	if( true )
 	{
-		ObjectId		 oid = OM.maxId();
-		Object			*O   = 0;
+		ObjectId		 oid = TD.OM.maxId();
 
-		lua_task::process( QString( "moo.create()" ), CID, Programmer->id() );
+		TD.process( "moo.create()" );
 
-		O = OM.object( oid );
+		Object			*O   = TD.OM.object( oid );
 
 		QVERIFY( O != 0 );
 
 		bool			 V = O->read();
 
-		QString			 CMD = QString( "o( %1 ).r = %2" ).arg( oid ).arg( !V );
-		TaskEntry		 TE( CMD, CID, Programmer->id() );
-		lua_task		 Com( CID, TE );
-
-		Com.eval();
+		lua_task		 Com = TD.eval( QString( "o( %1 ).r = %2" ).arg( oid ).arg( !V ) );
 
 		QCOMPARE( O->read(), !V );
 
@@ -97,9 +76,9 @@ void ServerTest::taskRollbackObject( void )
 
 		QCOMPARE( O->read(), V );
 
-		OM.recycle( oid );
+		TD.OM.recycle( oid );
 
-		OM.recycleObjects();
+		TD.OM.recycleObjects();
 	}
 }
 
@@ -112,8 +91,6 @@ void ServerTest::taskRollbackObjectProps( void )
 	Connection			&Con = *CM.connection( CID );
 
 	Object			*Programmer = OM.object( Con.player() );
-	Object			*Parent     = OM.newObject();
-	Object			*Owner      = OM.newObject();
 
 	if( true )
 	{
@@ -153,8 +130,6 @@ void ServerTest::taskRollbackObjectAliases( void )
 	Connection			&Con = *CM.connection( CID );
 
 	Object			*Programmer = OM.object( Con.player() );
-	Object			*Parent     = OM.newObject();
-	Object			*Owner      = OM.newObject();
 
 	if( true )
 	{

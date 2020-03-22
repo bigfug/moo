@@ -78,8 +78,6 @@ void PermissionsTest::propAdd()
 	Object				*O  = TD.OM.newObject();
 	QString				 CD = QString( ";o( %1 ):propadd( 'test', 'testval' )" ).arg( O->id() );
 
-	TD.initTask( CD, ProgrammerId );
-
 	O->setParent( ObjectParentId );
 	O->setOwner( ObjectOwnerId );
 	O->setRead( ObjectRead );
@@ -87,7 +85,7 @@ void PermissionsTest::propAdd()
 
 	// Call test
 
-	TD.Com->execute( TD.TimeStamp );
+	TD.execute( CD );
 
 	// Check result
 

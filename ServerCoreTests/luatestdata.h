@@ -14,19 +14,33 @@ public:
 
 	~LuaTestData( void );
 
-	void initTask( const QString &pCmd, ObjectId pProgrammerId );
+	lua_task execute( const QString &pCmd );
 
+	lua_task task( const QString &pCmd );
+
+	lua_task task( const QString &pCmd, ObjectId pProgrammerId );
+
+	lua_task eval( const QString &pCmd );
+
+	lua_task eval( const QString &pCmd, ObjectId pProgrammerId );
+
+	void process( const QString &pCmd );
+
+	void process( const QString &pCmd, ObjectId pProgrammerId );
+
+	inline ObjectId programmerId( void ) const
+	{
+		return( Programmer->id() );
+	}
+
+public:
 	ObjectManager		&OM;
 	ConnectionManager	&CM;
 	qint64				 TimeStamp;
 	ConnectionId		 CID;
 	Connection			*Con;
 
-	Object			*Programmer;
-
-	QString			 CMD;
-	TaskEntry		 TE;
-	lua_task		 *Com;
+	Object				*Programmer;
 };
 
 #endif // LUATESTDATA_H

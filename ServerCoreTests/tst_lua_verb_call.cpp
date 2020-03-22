@@ -51,7 +51,7 @@ void ServerTest::luaVerbVerbCall( void )
 
 	QString				 CD = QString( ";o( %1 ):testverb2()" ).arg( O2->id() );
 
-	TD.initTask( CD, TD.Programmer->id() );
+	TD.execute( CD );
 
 	// Add property to hold result
 
@@ -66,7 +66,7 @@ void ServerTest::luaVerbVerbCall( void )
 
 	// Call test
 
-	TD.Com->execute( TD.TimeStamp );
+	TD.execute( CD );
 
 //	qDebug() << "O1 =" << O1->id() << "O2 =" << O2->id();
 
@@ -121,8 +121,6 @@ void ServerTest::luaVerbParentVerbCall( void )
 
 	QString				 CD = QString( ";o( %1 ):testverb2()" ).arg( O3->id() );
 
-	TD.initTask( CD, TD.Programmer->id() );
-
 	// Add property to hold result
 
 	Property		P;
@@ -136,7 +134,7 @@ void ServerTest::luaVerbParentVerbCall( void )
 
 	// Call test
 
-	TD.Com->execute( TD.TimeStamp );
+	TD.execute( CD );
 
 //	qDebug() << "O1 =" << O1->id() << "O2 =" << O2->id() << "O3 =" << O3->id();
 

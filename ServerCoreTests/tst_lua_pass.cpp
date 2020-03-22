@@ -17,8 +17,6 @@ void ServerTest::luaPass1( void )
 	Object				*O2 = TD.OM.newObject();
 	QString				 CD = QString( ";o( %1 ):test()" ).arg( O2->id() );
 
-	TD.initTask( CD, TD.Programmer->id() );
-
 	O1->setParent( 2 );
 	O2->setParent( O1->id() );
 
@@ -60,7 +58,7 @@ void ServerTest::luaPass1( void )
 
 	// Call test
 
-	TD.Com->execute( TD.TimeStamp );
+	TD.execute( CD );
 
 	// Check result
 
@@ -80,8 +78,6 @@ void ServerTest::luaPass2( void )
 	Object				*O2 = TD.OM.newObject();
 	Object				*O3 = TD.OM.newObject();
 	QString				 CD = QString( ";o( %1 ):test()" ).arg( O3->id() );
-
-	TD.initTask( CD, TD.Programmer->id() );
 
 	O1->setParent( 2 );
 	O2->setParent( O1->id() );
@@ -137,7 +133,7 @@ void ServerTest::luaPass2( void )
 
 	// Call test
 
-	TD.Com->execute( TD.TimeStamp );
+	TD.execute( CD );
 
 	// Check result
 
@@ -158,8 +154,6 @@ void ServerTest::luaPass3( void )
 	Object				*O3 = TD.OM.newObject();
 	Object				*O4 = TD.OM.newObject();
 	QString				 CD = QString( ";o( %1 ):test()" ).arg( O4->id() );
-
-	TD.initTask( CD, TD.Programmer->id() );
 
 	O1->setParent( 2 );
 	O2->setParent( O1->id() );
@@ -217,7 +211,7 @@ void ServerTest::luaPass3( void )
 
 	// Call test
 
-	TD.Com->execute( TD.TimeStamp );
+	TD.execute( CD );
 
 	// Check result
 
@@ -237,8 +231,6 @@ void ServerTest::luaPass4( void )
 	Object				*O2 = TD.OM.newObject();
 	Object				*O3 = TD.OM.newObject();
 	QString				 CD = QString( ";o( %1 ):test()" ).arg( O3->id() );
-
-	TD.initTask( CD, TD.Programmer->id() );
 
 	O1->setParent( 2 );
 	O2->setParent( O1->id() );
@@ -294,7 +286,7 @@ void ServerTest::luaPass4( void )
 
 	// Call test
 
-	TD.Com->execute( TD.TimeStamp );
+	TD.execute( CD );
 
 	// Check result
 
@@ -315,8 +307,6 @@ void ServerTest::luaPass5( void )
 	Object				*O3 = TD.OM.newObject();
 	Object				*O4 = TD.OM.newObject();
 	QString				 CD = QString( ";o( %1 ):test()" ).arg( O4->id() );
-
-	TD.initTask( CD, TD.Programmer->id() );
 
 	O1->setParent( 2 );
 	O2->setParent( O1->id() );
@@ -374,7 +364,7 @@ void ServerTest::luaPass5( void )
 
 	// Call test
 
-	TD.Com->execute( TD.TimeStamp );
+	TD.execute( CD );
 
 	// Check result
 
@@ -395,8 +385,6 @@ void ServerTest::luaPass6( void )
 	Object				*O3 = TD.OM.newObject();
 	Object				*O4 = TD.OM.newObject();
 	QString				 CD = QString( ";o( %1 ):test()" ).arg( O4->id() );
-
-	TD.initTask( CD, TD.Programmer->id() );
 
 	O1->setParent( 2 );
 	O2->setParent( O1->id() );
@@ -465,7 +453,7 @@ void ServerTest::luaPass6( void )
 
 	// Call test
 
-	TD.Com->execute( TD.TimeStamp );
+	TD.execute( CD );
 
 	// Check result
 

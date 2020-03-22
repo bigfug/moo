@@ -17,14 +17,12 @@ void ServerTest::luaPropAddSecurityPass( void )
 	Object				*O  = TD.OM.newObject();
 	QString				 CD = QString( ";o( %1 ):propadd( 'test', 'testval' )" ).arg( O->id() );
 
-	TD.initTask( CD, TD.Programmer->id() );
-
 	O->setParent( TD.Programmer->id() );
 	O->setOwner( TD.Programmer->id() );
 
 	// Call test
 
-	TD.Com->execute( TD.TimeStamp );
+	TD.execute( CD );
 
 	// Check result
 
@@ -43,14 +41,12 @@ void ServerTest::luaPropAddSecurityFail( void )
 	Object				*O  = TD.OM.newObject();
 	QString				 CD = QString( ";o( %1 ):propadd( 'test', 'testval' )" ).arg( O->id() );
 
-	TD.initTask( CD, TD.Programmer->id() );
-
 	O->setParent( 2 );
 	O->setOwner( 2 );
 
 	// Call test
 
-	TD.Com->execute( TD.TimeStamp );
+	TD.execute( CD );
 
 	// Check result
 
@@ -65,14 +61,12 @@ void ServerTest::luaPropAddSecurityWizardOwner( void )
 	Object				*O  = TD.OM.newObject();
 	QString				 CD = QString( ";o( %1 ):propadd( 'test', 'testval' )" ).arg( O->id() );
 
-	TD.initTask( CD, TD.Programmer->id() );
-
 	O->setParent( TD.Programmer->id() );
 	O->setOwner( TD.Programmer->id() );
 
 	// Call test
 
-	TD.Com->execute( TD.TimeStamp );
+	TD.execute( CD );
 
 	// Check result
 
@@ -88,14 +82,12 @@ void ServerTest::luaPropAddSecurityWizard( void )
 	Object				*O  = TD.OM.newObject();
 	QString				 CD = QString( ";o( %1 ):propadd( 'test', 'testval' )" ).arg( O->id() );
 
-	TD.initTask( CD, TD.Programmer->id() );
-
 	O->setParent( 2 );
 	O->setOwner( 2 );
 
 	// Call test
 
-	TD.Com->execute( TD.TimeStamp );
+	TD.execute( CD );
 
 	// Check result
 
@@ -116,8 +108,6 @@ void ServerTest::luaPropDelSecurityPass( void )
 	Object				*O  = TD.OM.newObject();
 	QString				 CD = QString( ";o( %1 ):propdel( 'test' )" ).arg( O->id() );
 
-	TD.initTask( CD, TD.Programmer->id() );
-
 	O->setParent( TD.Programmer->id() );
 	O->setOwner( TD.Programmer->id() );
 
@@ -133,7 +123,7 @@ void ServerTest::luaPropDelSecurityPass( void )
 
 	// Call test
 
-	TD.Com->execute( TD.TimeStamp );
+	TD.execute( CD );
 
 	// Check result
 
