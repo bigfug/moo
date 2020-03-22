@@ -95,9 +95,17 @@ set( HEADER_FILES
 	changeset/objectaliasadd.h
 	changeset/objectaliasdelete.h
 	changeset/objectcreate.h
+	changeset/objectrecycle.h
 	changeset/objectsetname.h
 	changeset/objectsetowner.h
+	changeset/objectsetread.h
+	changeset/objectsetwrite.h
 	changeset/objectsetproperty.h
+	changeset/objectsetparent.h
+	changeset/objectsetplayer.h
+	changeset/objectsetprogrammer.h
+	changeset/objectsetwizard.h
+	changeset/objectsetfertile.h
 	changeset/objectverbadd.h
 	changeset/objectverbdelete.h
 	changeset/objectpropadd.h

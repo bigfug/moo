@@ -20,8 +20,16 @@
 #include "changeset/objectaliasadd.h"
 #include "changeset/objectaliasdelete.h"
 #include "changeset/objectcreate.h"
+#include "changeset/objectrecycle.h"
 #include "changeset/objectsetname.h"
 #include "changeset/objectsetowner.h"
+#include "changeset/objectsetread.h"
+#include "changeset/objectsetwrite.h"
+#include "changeset/objectsetparent.h"
+#include "changeset/objectsetfertile.h"
+#include "changeset/objectsetplayer.h"
+#include "changeset/objectsetprogrammer.h"
+#include "changeset/objectsetwizard.h"
 #include "changeset/objectsetproperty.h"
 #include "changeset/objectverbadd.h"
 #include "changeset/objectverbdelete.h"
@@ -498,6 +506,9 @@ int lua_object::luaGet( lua_State *L )
 					return( 1 );
 				}
 				break;
+
+			case UNKNOWN:
+				break;
 		}
 
 		// Look for a verb on this object
@@ -626,6 +637,7 @@ int lua_object::luaSet( lua_State *L )
 
 			case PARENT:
 				{
+					ObjectId			 OldParentId = O->parent();
 					ObjectId			 NewParentId = -1;
 					Object				*NewParent   = 0;
 
@@ -656,6 +668,8 @@ int lua_object::luaSet( lua_State *L )
 					}
 
 					ObjectLogic::chparent( *Command, T.programmer(), O->id(), NewParentId );
+
+					Command->changeAdd( new change::ObjectSetParent( O, OldParentId, NewParentId ) );
 
 					return( 0 );
 				}
@@ -717,7 +731,7 @@ int lua_object::luaSet( lua_State *L )
 
 					bool		V = lua_toboolean( L, 3 );
 
-					O->setPlayer( V );
+					Command->changeAdd( new change::ObjectSetPlayer( O, V ) );
 
 					return( 0 );
 				}
@@ -732,7 +746,7 @@ int lua_object::luaSet( lua_State *L )
 
 					bool		V = lua_toboolean( L, 3 );
 
-					O->setProgrammer( V );
+					Command->changeAdd( new change::ObjectSetProgrammer( O, V ) );
 
 					return( 0 );
 				}
@@ -747,7 +761,7 @@ int lua_object::luaSet( lua_State *L )
 
 					bool		V = lua_toboolean( L, 3 );
 
-					O->setWizard( V );
+					Command->changeAdd( new change::ObjectSetWizard( O, V ) );
 
 					return( 0 );
 				}
@@ -762,7 +776,7 @@ int lua_object::luaSet( lua_State *L )
 
 					bool		V = lua_toboolean( L, 3 );
 
-					O->setRead( V );
+					Command->changeAdd( new change::ObjectSetRead( O, V ) );
 
 					return( 0 );
 				}
@@ -777,7 +791,7 @@ int lua_object::luaSet( lua_State *L )
 
 					bool		V = lua_toboolean( L, 3 );
 
-					O->setWrite( V );
+					Command->changeAdd( new change::ObjectSetWrite( O, V ) );
 
 					return( 0 );
 				}
@@ -792,10 +806,13 @@ int lua_object::luaSet( lua_State *L )
 
 					bool		V = lua_toboolean( L, 3 );
 
-					O->setFertile( V );
+					Command->changeAdd( new change::ObjectSetFertile( O, V ) );
 
 					return( 0 );
 				}
+				break;
+
+			case UNKNOWN:
 				break;
 		}
 
@@ -1845,6 +1862,8 @@ int lua_object::luaRecycle( lua_State *L )
 		Object				*O = argObj( L );
 
 		ObjectLogic::recycle( *Command, T.programmer(), O->id() );
+
+		Command->changeAdd( new change::ObjectRecycle( O->id() ) );
 	}
 	catch( mooException e )
 	{

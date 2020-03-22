@@ -245,6 +245,11 @@ void ObjectManager::recycle( Object *pObject )
 	mDeletedObjects << pObject->id();
 }
 
+void ObjectManager::restore( ObjectId pObjectId )
+{
+	restore( objectIncludingRecycled( pObjectId ) );
+}
+
 void ObjectManager::restore(Object *pObject)
 {
 	pObject->setRecycled( false );

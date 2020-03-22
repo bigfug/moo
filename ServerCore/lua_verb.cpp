@@ -50,6 +50,20 @@ const luaL_Reg lua_verb::mLuaInstanceFunctions[] =
 	{ 0, 0 }
 };
 
+const QMap<QString,lua_verb::Fields>		lua_verb::mFieldMap =
+{
+	{ "name", NAME },
+	{ "aliases", ALIASES },
+	{ "owner", OWNER },
+	{ "r", READ },
+	{ "w", WRITE },
+	{ "x", EXECUTE },
+	{ "script", SCRIPT },
+	{ "dobj", DIRECT_OBJECT },
+	{ "iobj", INDIRECT_OBJECT },
+	{ "prep", PREPOSITION }
+};
+
 void lua_verb::initialise()
 {
 //	lua_moo::addFunctions( mLuaStatic );
@@ -163,97 +177,113 @@ int lua_verb::luaGet( lua_State *L )
 			return( 1 );
 		}
 
-		if( strcmp( s, "name" ) == 0 )
+		switch( mFieldMap.value( QString( s ) ) )
 		{
-			lua_pushstring( L, V->name().toLatin1() );
+			case NAME:
+				{
+					lua_pushstring( L, V->name().toLatin1() );
 
-			return( 1 );
-		}
+					return( 1 );
+				}
+				break;
 
-		if( strcmp( s, "aliases" ) == 0 )
-		{
-			const QStringList	AliasList = V->aliases();
+			case ALIASES:
+				{
+					const QStringList	AliasList = V->aliases();
 
-			lua_newtable( L );
+					lua_newtable( L );
 
-			for( int i = 0 ; i < AliasList.size() ; i++ )
-			{
-				lua_pushstring( L, AliasList[ i ].toLatin1() );
+					for( int i = 0 ; i < AliasList.size() ; i++ )
+					{
+						lua_pushstring( L, AliasList[ i ].toLatin1() );
 
-				lua_rawseti( L, -2, i + 1 );
-			}
+						lua_rawseti( L, -2, i + 1 );
+					}
 
-			return( 1 );
-		}
+					return( 1 );
+				}
+				break;
 
-		if( strcmp( s, "owner" ) == 0 )
-		{
-			lua_object::lua_pushobjectid( L, V->owner() );
+			case OWNER:
+				{
+					lua_object::lua_pushobjectid( L, V->owner() );
 
-			return( 1 );
-		}
+					return( 1 );
+				}
+				break;
 
-		if( strcmp( s, "r" ) == 0 )
-		{
-			lua_pushboolean( L, V->read() );
+			case READ:
+				{
+					lua_pushboolean( L, V->read() );
 
-			return( 1 );
-		}
+					return( 1 );
+				}
+				break;
 
-		if( strcmp( s, "w" ) == 0 )
-		{
-			lua_pushboolean( L, V->write() );
+			case WRITE:
+				{
+					lua_pushboolean( L, V->write() );
 
-			return( 1 );
-		}
+					return( 1 );
+				}
+				break;
 
-		if( strcmp( s, "x" ) == 0 )
-		{
-			lua_pushboolean( L, V->execute() );
+			case EXECUTE:
+				{
+					lua_pushboolean( L, V->execute() );
 
-			return( 1 );
-		}
+					return( 1 );
+				}
+				break;
 
-		if( strcmp( s, "script" ) == 0 )
-		{
-			if( !isWizard && !isOwner && !V->read() )
-			{
-				throw( mooException( E_TYPE, "not allowed to read script" ) );
-			}
+			case SCRIPT:
+				{
+					if( !isWizard && !isOwner && !V->read() )
+					{
+						throw( mooException( E_TYPE, "not allowed to read script" ) );
+					}
 
-			lua_pushstring( L, V->script().toLatin1() );
+					lua_pushstring( L, V->script().toLatin1() );
 
-			return( 1 );
-		}
+					return( 1 );
+				}
+				break;
 
-		if( strcmp( s, "dobj" ) == 0 )
-		{
-			lua_pushstring( L, Verb::argobj_name( V->directObject() ) );
+			case DIRECT_OBJECT:
+				{
+					lua_pushstring( L, Verb::argobj_name( V->directObject() ) );
 
-			return( 1 );
-		}
+					return( 1 );
+				}
+				break;
 
-		if( strcmp( s, "iobj" ) == 0 )
-		{
-			lua_pushstring( L, Verb::argobj_name( V->indirectObject() ) );
+			case INDIRECT_OBJECT:
+				{
+					lua_pushstring( L, Verb::argobj_name( V->indirectObject() ) );
 
-			return( 1 );
-		}
+					return( 1 );
+				}
+				break;
 
-		if( strcmp( s, "prep" ) == 0 )
-		{
-			QString		Prep = V->preposition();
+			case PREPOSITION:
+				{
+					QString		Prep = V->preposition();
 
-			if( Prep.isEmpty() )
-			{
-				lua_pushstring( L, Verb::argobj_name( V->prepositionType() ) );
-			}
-			else
-			{
-				lua_pushfstring( L, "%s", Prep.toLatin1().constData() );
-			}
+					if( Prep.isEmpty() )
+					{
+						lua_pushstring( L, Verb::argobj_name( V->prepositionType() ) );
+					}
+					else
+					{
+						lua_pushfstring( L, "%s", Prep.toLatin1().constData() );
+					}
 
-			return( 1 );
+					return( 1 );
+				}
+				break;
+
+			case UNKNOWN:
+				break;
 		}
 
 		// Nothing found
@@ -302,184 +332,198 @@ int lua_verb::luaSet( lua_State *L )
 		const bool			 isOwner  = ( Player != 0 && O != 0 ? Player->id() == O->owner() : false );
 		const bool			 isWizard = ( Player != 0 ? Player->wizard() : false );
 
-		if( strcmp( N, "name" ) == 0 )
+		switch( mFieldMap.value( QString( N ) ) )
 		{
-			throw( mooException( E_PERM, "can't set verb name" ) );
-		}
-
-		if( strcmp( N, "owner" ) == 0 )
-		{
-			if( !isWizard && !isOwner )
-			{
-				throw( mooException( E_PERM, "player is not owner or wizard" ) );
-			}
-
-			Object				*D = lua_object::argObj( L, 3 );
-
-			Command->changeAdd( new change::VerbSetOwner( V, D->id() ) );
-
-			return( 0 );
-		}
-
-		if( strcmp( N, "r" ) == 0 )
-		{
-			if( !isWizard && !isOwner )
-			{
-				throw( mooException( E_PERM, "player is not owner or wizard" ) );
-			}
-
-			bool		v = lua_toboolean( L, 3 );
-
-			Command->changeAdd( new change::VerbSetRead( V, v ) );
-
-			return( 0 );
-		}
-
-		if( strcmp( N, "w" ) == 0 )
-		{
-			if( !isWizard && !isOwner )
-			{
-				throw( mooException( E_PERM, "player is not owner or wizard" ) );
-			}
-
-			bool		v = lua_toboolean( L, 3 );
-
-			Command->changeAdd( new change::VerbSetWrite( V, v ) );
-
-			return( 0 );
-		}
-
-		if( strcmp( N, "x" ) == 0 )
-		{
-			if( !isWizard && !isOwner )
-			{
-				throw( mooException( E_PERM, "player is not owner or wizard" ) );
-			}
-
-			bool		v = lua_toboolean( L, 3 );
-
-			Command->changeAdd( new change::VerbSetExecute( V, v ) );
-
-			return( 0 );
-		}
-
-		if( strcmp( N, "script" ) == 0 )
-		{
-			if( !isWizard && !isOwner )
-			{
-				throw( mooException( E_PERM, "player is not owner or wizard" ) );
-			}
-
-			QString		v = lua_tostring( L, 3 );
-
-			Command->changeAdd( new change::VerbSetScript( V, v ) );
-
-			return( 0 );
-		}
-
-		if( strcmp( N, "dobj" ) == 0 )
-		{
-			if( !isWizard && !isOwner )
-			{
-				throw( mooException( E_PERM, "player is not owner or wizard" ) );
-			}
-
-			const QString	Direct = luaL_checkstring( L, 3 );
-
-			if( Direct == "this" )
-			{
-				Command->changeAdd( new change::VerbSetDirectObject( V, THIS ) );
-
-				//V->setDirectObjectArgument( THIS );
-			}
-			else if( Direct == "any" )
-			{
-				Command->changeAdd( new change::VerbSetDirectObject( V, ANY ) );
-
-//				V->setDirectObjectArgument( ANY );
-			}
-			else if( Direct == "none" )
-			{
-				Command->changeAdd( new change::VerbSetDirectObject( V, NONE ) );
-
-//				V->setDirectObjectArgument( NONE );
-			}
-			else
-			{
-				throw( mooException( E_PROPNF, QString( "unknown direct object argument" ).arg( Direct ) ) );
-			}
-
-			return( 0 );
-		}
-
-		if( strcmp( N, "iobj" ) == 0 )
-		{
-			if( !isWizard && !isOwner )
-			{
-				throw( mooException( E_PERM, "player is not owner or wizard" ) );
-			}
-
-			const QString	Direct = luaL_checkstring( L, 3 );
-
-			if( Direct == "this" )
-			{
-				Command->changeAdd( new change::VerbSetIndirectObject( V, THIS ) );
-//				V->setIndirectObjectArgument( THIS );
-			}
-			else if( Direct == "any" )
-			{
-				Command->changeAdd( new change::VerbSetIndirectObject( V, ANY ) );
-//				V->setIndirectObjectArgument( ANY );
-			}
-			else if( Direct == "none" )
-			{
-				Command->changeAdd( new change::VerbSetIndirectObject( V, NONE ) );
-//				V->setIndirectObjectArgument( NONE );
-			}
-			else
-			{
-				throw( mooException( E_PROPNF, QString( "unknown indirect object argument" ).arg( Direct ) ) );
-			}
-
-			return( 0 );
-		}
-
-		if( strcmp( N, "prep" ) == 0 )
-		{
-			if( !isWizard && !isOwner )
-			{
-				throw( mooException( E_PERM, "player is not owner or wizard" ) );
-			}
-
-			const char		*Prep = luaL_checkstring( L, 3 );
-			bool			 PrepTypeOK;
-			ArgObj			 PrepType = Verb::argobj_from( Prep, &PrepTypeOK );
-
-			if( PrepTypeOK )
-			{
-				if( PrepType == ANY )
+			case NAME:
 				{
-					Command->changeAdd( new change::VerbSetPreposition( V, ANY ) );
-//					V->setPrepositionArgument( ANY );
+					throw( mooException( E_PERM, "can't set verb name" ) );
 				}
-				else if( PrepType == NONE )
-				{
-					Command->changeAdd( new change::VerbSetPreposition( V, NONE ) );
-//					V->setPrepositionArgument( NONE );
-				}
-				else
-				{
-					throw( mooException( E_INVARG, QString( "bad prep type: %1" ).arg( Prep ) ) );
-				}
-				//V->setPrepositionArgument( PrepType );
-			}
-			else
-			{
-				Command->changeAdd( new change::VerbSetPreposition( V, QString( Prep ) ) );
-//				V->setPrepositionArgument( Prep );
-			}
+				break;
 
-			return( 0 );
+			case ALIASES:
+				{
+					throw( mooException( E_PERM, "can't set verb alises here" ) );
+				}
+				break;
+
+			case OWNER:
+				{
+					if( !isWizard && !isOwner )
+					{
+						throw( mooException( E_PERM, "player is not owner or wizard" ) );
+					}
+
+					Object				*D = lua_object::argObj( L, 3 );
+
+					Command->changeAdd( new change::VerbSetOwner( V, D->id() ) );
+
+					return( 0 );
+				}
+				break;
+
+			case READ:
+				{
+					if( !isWizard && !isOwner )
+					{
+						throw( mooException( E_PERM, "player is not owner or wizard" ) );
+					}
+
+					bool		v = lua_toboolean( L, 3 );
+
+					Command->changeAdd( new change::VerbSetRead( V, v ) );
+
+					return( 0 );
+				}
+				break;
+
+			case WRITE:
+				{
+					if( !isWizard && !isOwner )
+					{
+						throw( mooException( E_PERM, "player is not owner or wizard" ) );
+					}
+
+					bool		v = lua_toboolean( L, 3 );
+
+					Command->changeAdd( new change::VerbSetWrite( V, v ) );
+
+					return( 0 );
+				}
+				break;
+
+			case EXECUTE:
+				{
+					if( !isWizard && !isOwner )
+					{
+						throw( mooException( E_PERM, "player is not owner or wizard" ) );
+					}
+
+					bool		v = lua_toboolean( L, 3 );
+
+					Command->changeAdd( new change::VerbSetExecute( V, v ) );
+
+					return( 0 );
+				}
+				break;
+
+			case SCRIPT:
+				{
+					if( !isWizard && !isOwner )
+					{
+						throw( mooException( E_PERM, "player is not owner or wizard" ) );
+					}
+
+					QString		v = lua_tostring( L, 3 );
+
+					Command->changeAdd( new change::VerbSetScript( V, v ) );
+
+					return( 0 );
+				}
+				break;
+
+			case DIRECT_OBJECT:
+				{
+					if( !isWizard && !isOwner )
+					{
+						throw( mooException( E_PERM, "player is not owner or wizard" ) );
+					}
+
+					const QString	Direct = luaL_checkstring( L, 3 );
+
+					if( Direct == "this" )
+					{
+						Command->changeAdd( new change::VerbSetDirectObject( V, THIS ) );
+
+						//V->setDirectObjectArgument( THIS );
+					}
+					else if( Direct == "any" )
+					{
+						Command->changeAdd( new change::VerbSetDirectObject( V, ANY ) );
+
+		//				V->setDirectObjectArgument( ANY );
+					}
+					else if( Direct == "none" )
+					{
+						Command->changeAdd( new change::VerbSetDirectObject( V, NONE ) );
+
+		//				V->setDirectObjectArgument( NONE );
+					}
+					else
+					{
+						throw( mooException( E_PROPNF, QString( "unknown direct object argument" ).arg( Direct ) ) );
+					}
+
+					return( 0 );
+				}
+				break;
+
+			case INDIRECT_OBJECT:
+				{
+					if( !isWizard && !isOwner )
+					{
+						throw( mooException( E_PERM, "player is not owner or wizard" ) );
+					}
+
+					const QString	Direct = luaL_checkstring( L, 3 );
+
+					if( Direct == "this" )
+					{
+						Command->changeAdd( new change::VerbSetIndirectObject( V, THIS ) );
+					}
+					else if( Direct == "any" )
+					{
+						Command->changeAdd( new change::VerbSetIndirectObject( V, ANY ) );
+					}
+					else if( Direct == "none" )
+					{
+						Command->changeAdd( new change::VerbSetIndirectObject( V, NONE ) );
+					}
+					else
+					{
+						throw( mooException( E_PROPNF, QString( "unknown indirect object argument" ).arg( Direct ) ) );
+					}
+
+					return( 0 );
+				}
+				break;
+
+			case PREPOSITION:
+				{
+					if( !isWizard && !isOwner )
+					{
+						throw( mooException( E_PERM, "player is not owner or wizard" ) );
+					}
+
+					const char		*Prep = luaL_checkstring( L, 3 );
+					bool			 PrepTypeOK;
+					ArgObj			 PrepType = Verb::argobj_from( Prep, &PrepTypeOK );
+
+					if( PrepTypeOK )
+					{
+						if( PrepType == ANY )
+						{
+							Command->changeAdd( new change::VerbSetPreposition( V, ANY ) );
+						}
+						else if( PrepType == NONE )
+						{
+							Command->changeAdd( new change::VerbSetPreposition( V, NONE ) );
+						}
+						else
+						{
+							throw( mooException( E_INVARG, QString( "bad prep type: %1" ).arg( Prep ) ) );
+						}
+					}
+					else
+					{
+						Command->changeAdd( new change::VerbSetPreposition( V, QString( Prep ) ) );
+					}
+
+					return( 0 );
+				}
+				break;
+
+			case UNKNOWN:
+				break;
 		}
 
 		throw( mooException( E_PROPNF, QString( "property '%1' is not defined" ).arg( N ) ) );

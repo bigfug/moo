@@ -22,6 +22,23 @@ public:
 	static luaVerb *arg( lua_State *L, int pIndex = 1 );
 
 private:
+	typedef enum Fields
+	{
+		UNKNOWN,
+		NAME,
+		ALIASES,
+		OWNER,
+		READ,
+		WRITE,
+		EXECUTE,
+		SCRIPT,
+		DIRECT_OBJECT,
+		INDIRECT_OBJECT,
+		PREPOSITION
+	} Fields;
+
+	static const QMap<QString,Fields>		mFieldMap;
+
 	static void initialise( void );
 
 	static void luaRegisterState( lua_State *L );

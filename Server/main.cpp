@@ -11,6 +11,7 @@
 #include <QFile>
 #include <QDir>
 #include <QDebug>
+#include <iostream>
 
 #include "objectmanager.h"
 #include "osc.h"
@@ -98,7 +99,7 @@ int main( int argc, char *argv[] )
 	{
 		if( !QDir::setCurrent( DataDir ) )
 		{
-			qFatal( QString( QObject::tr( "Can't set directory to %1" ) ).arg( DataDir ).toLatin1() );
+			std::cerr << QString( QObject::tr( "Can't set directory to %1" ).arg( DataDir ) ).toStdString() << std::endl;
 		}
 	}
 

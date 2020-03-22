@@ -122,6 +122,8 @@ public slots:
 
 	void recycle( ObjectId pObjectId );
 	void recycle( Object *pObject );
+
+	void restore( ObjectId pObjectId );
 	void restore( Object *pObject );
 
 	void recycleObjects( void );

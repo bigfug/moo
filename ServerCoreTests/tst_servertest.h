@@ -121,6 +121,8 @@ private Q_SLOTS:
 	void luaVerbParentVerbCall( void );
 
 	void taskRollbackObject( void );
+	void taskRollbackObjectProps( void );
+	void taskRollbackObjectAliases();
 
 	void cleanupTestCase( void );
 };
