@@ -12,7 +12,7 @@
 #include "mooglobal.h"
 #include "lua_utilities.h"
 
-#define MOO_SETTINGS	"moo.ini", QSettings::IniFormat
+#define MOO_SETTINGS	lua_moo::settingsFilePath(), QSettings::IniFormat
 
 class lua_moo
 {
@@ -27,6 +27,8 @@ private:
 	static LuaMap						mLuaSet;
 
 	static QNetworkAccessManager		mNAM;
+
+	static QString						mSettingsFilePath;
 
 	static void luaRegisterAllStates( lua_State *L );
 
@@ -130,6 +132,10 @@ private:
 	static void initialise( void );
 
 public:
+	static void setSettingsFilePath( QString pFilePath );
+
+	static QString settingsFilePath( void );
+
 	static void initialiseAll( void );
 
 	static void luaNewState( lua_State *L );
@@ -175,6 +181,7 @@ public:
 	static void addFunctions( const luaL_Reg *pFuncs );
 	static void addGet( const luaL_Reg *pFuncs );
 	static void addSet( const luaL_Reg *pFuncs );
+
 protected:
 	static QVariantMap parseReadArgs( lua_State *L, int pIndex );
 };

@@ -2,19 +2,27 @@ project( Server )
 
 set( SOURCE_FILES
 	main.cpp
-	mainwindow.cpp
-)
 
-set( HEADER_FILES
+	mainwindow.cpp
 	mainwindow.h
 	mainwindow.ui
+
+	objectselector.cpp
+	objectselector.h
+	objectselector.ui
+
+	mooitemmodel.cpp
+	mooitemmodel.h
+
+	../ServerCore/mooapplication.cpp
+	../ServerCore/mooapplication.h
 )
 
 set( QRC_FILES
 	Server.qrc
 )
 
-add_executable( ${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${SOURCE_FILES} ${HEADER_FILES} ${QRC_FILES} )
+add_executable( ${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${SOURCE_FILES} ${QRC_FILES} )
 
 include_directories(
 	../ServerCore

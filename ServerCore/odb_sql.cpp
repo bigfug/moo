@@ -42,7 +42,7 @@ ODBSQL::ODBSQL()
 				  "wizard BOOLEAN DEFAULT false,"
 				  "read BOOLEAN DEFAULT true,"
 				  "write BOOLEAN DEFAULT false,"
-				  "fertile BOOLEAN DEFAULT false"
+				  "fertile BOOLEAN DEFAULT false,"
 				  "recycled BOOLEAN DEFAULT false"
 				  ")" );
 
@@ -50,6 +50,8 @@ ODBSQL::ODBSQL()
 
 		if( DBE.type() != QSqlError::NoError )
 		{
+			qCritical() << "CREATE TABLE object:" << DBE.databaseText() << DBE.driverText();
+
 			return;
 		}
 	}
@@ -77,6 +79,8 @@ ODBSQL::ODBSQL()
 
 		if( DBE.type() != QSqlError::NoError )
 		{
+			qCritical() << "CREATE TABLE verb:" << DBE.databaseText() << DBE.driverText();
+
 			return;
 		}
 	}
@@ -100,6 +104,8 @@ ODBSQL::ODBSQL()
 
 		if( DBE.type() != QSqlError::NoError )
 		{
+			qCritical() << "CREATE TABLE property:" << DBE.databaseText() << DBE.driverText();
+
 			return;
 		}
 	}
@@ -118,6 +124,8 @@ ODBSQL::ODBSQL()
 
 		if( DBE.type() != QSqlError::NoError )
 		{
+			qCritical() << "CREATE TABLE task:" << DBE.databaseText() << DBE.driverText();
+
 			return;
 		}
 	}
@@ -619,7 +627,7 @@ void ODBSQL::addObject( Object &pObject )
 
 	if( DBE.type() != QSqlError::NoError )
 	{
-		qDebug() << DBE.databaseText() << DBE.driverText();
+		qCritical() << "addObject:" << DBE.databaseText() << DBE.driverText();
 	}
 
 	D.mLastWrite = ObjectManager::timestamp();
@@ -643,7 +651,7 @@ void ODBSQL::deleteObject( Object &pObject )
 
 	if( DBE.type() != QSqlError::NoError )
 	{
-		qDebug() << DBE.databaseText() << DBE.driverText();
+		qCritical() << "deleteObject:" << DBE.databaseText() << DBE.driverText();
 	}
 }
 
@@ -653,7 +661,11 @@ void ODBSQL::updateObject( Object &pObject )
 
 	QSqlQuery			 Q;
 
-	Q.prepare( "UPDATE object SET parent = :parent, name = :name, aliases = :aliases, player = :player, connection = :connection, owner = :owner, location = :location, programmer = :programmer, wizard = :wizard, read = :read, write = :write, fertile = :fertile WHERE id = :id" );
+	Q.prepare( "UPDATE object SET "
+			   "parent = :parent, name = :name, aliases = :aliases, player = :player, connection = :connection, "
+			   "owner = :owner, location = :location, programmer = :programmer, wizard = :wizard, read = :read, "
+			   "write = :write, fertile = :fertile, recycled = :recycled "
+			   "WHERE id = :id" );
 
 	bindObject( D, Q );
 
@@ -665,7 +677,7 @@ void ODBSQL::updateObject( Object &pObject )
 
 	if( DBE.type() != QSqlError::NoError )
 	{
-		qDebug() << DBE.databaseText() << DBE.driverText();
+		qCritical() << "updateObject:" << DBE.databaseText() << DBE.driverText();
 	}
 
 	D.mLastWrite = ObjectManager::timestamp();
@@ -706,7 +718,7 @@ void ODBSQL::addVerb( Object &pObject, QString pName )
 
 	if( DBE.type() != QSqlError::NoError )
 	{
-		qDebug() << DBE.databaseText() << DBE.driverText();
+		qCritical() << "addVerb:" << DBE.databaseText() << DBE.driverText();
 	}
 }
 
@@ -731,7 +743,7 @@ void ODBSQL::deleteVerb( Object &pObject, QString pName )
 
 	if( DBE.type() != QSqlError::NoError )
 	{
-		qDebug() << DBE.databaseText() << DBE.driverText();
+		qCritical() << "deleteVerb:" << DBE.databaseText() << DBE.driverText();
 	}
 }
 
@@ -753,8 +765,9 @@ void ODBSQL::updateVerb(Object &pObject, QString pName)
 	if( !B )
 	{
 		B = Q.prepare( "UPDATE verb SET "
-					"owner = :owner, read = :read, write = :write, execute = :execute, script = :script, dobj = :dobj, preptype = :preptype, iobj = :iobj, prep = :prep, aliases = :aliases, code = :code "
-					"WHERE object = :object AND name = :name"
+					   "owner = :owner, read = :read, write = :write, execute = :execute, script = :script, dobj = :dobj, "
+					   "preptype = :preptype, iobj = :iobj, prep = :prep, aliases = :aliases, code = :code "
+					   "WHERE object = :object AND name = :name"
 					);
 	}
 
@@ -769,7 +782,7 @@ void ODBSQL::updateVerb(Object &pObject, QString pName)
 
 	if( DBE.type() != QSqlError::NoError )
 	{
-		qDebug() << DBE.databaseText() << DBE.driverText();
+		qCritical() << "updateVerb:" << DBE.databaseText() << DBE.driverText();
 	}
 }
 
@@ -807,7 +820,7 @@ void ODBSQL::addProperty(Object &pObject, QString pName)
 
 	if( DBE.type() != QSqlError::NoError )
 	{
-		qDebug() << DBE.databaseText() << DBE.driverText();
+		qCritical() << "addProperty:" << DBE.databaseText() << DBE.driverText();
 	}
 }
 
@@ -832,7 +845,7 @@ void ODBSQL::deleteProperty( Object &pObject, QString pName )
 
 	if( DBE.type() != QSqlError::NoError )
 	{
-		qDebug() << DBE.databaseText() << DBE.driverText();
+		qCritical() << "deleteProperty:" << DBE.databaseText() << DBE.driverText();
 	}
 }
 
@@ -868,7 +881,7 @@ void ODBSQL::updateProperty( Object &pObject, QString pName )
 
 	if( DBE.type() != QSqlError::NoError )
 	{
-		qDebug() << DBE.databaseText() << DBE.driverText();
+		qCritical() << "updateProperty:" << DBE.databaseText() << DBE.driverText();
 	}
 }
 
@@ -1032,5 +1045,54 @@ void ODBSQL::killTask( TaskId pTaskId )
 void ODBSQL::checkpoint()
 {
 
+}
+
+ObjectIdVector ODBSQL::children( ObjectId pParentId ) const
+{
+	ObjectIdVector		ChildVector;
+
+	if( !mDB.isOpen() )
+	{
+		return( ChildVector );
+	}
+
+	QSqlQuery	Q;
+
+	Q.prepare( "SELECT id FROM object WHERE parent = :parent AND recycled = false" );
+
+	Q.bindValue( ":parent", pParentId );
+
+	if( !Q.exec() )
+	{
+		return( ChildVector );
+	}
+
+	while( Q.next() )
+	{
+		ChildVector << ObjectId( Q.value( 0 ).toInt() );
+	}
+
+	return( ChildVector );
+}
+
+int ODBSQL::childrenCount( ObjectId pParentId ) const
+{
+	if( !mDB.isOpen() )
+	{
+		return( 0 );
+	}
+
+	QSqlQuery	Q;
+
+	Q.prepare( "SELECT COUNT( id ) FROM object WHERE parent = :parent AND recycled = false" );
+
+	Q.bindValue( ":parent", pParentId );
+
+	if( !Q.exec() || !Q.next() )
+	{
+		return( 0 );
+	}
+
+	return( Q.value( 0 ).toInt() );
 }
 

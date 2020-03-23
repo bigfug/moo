@@ -50,6 +50,10 @@ public:
 
 	virtual void checkpoint( void ) = 0;
 
+	virtual int childrenCount( ObjectId pParentId ) const = 0;
+
+	virtual ObjectIdVector children( ObjectId pParentId ) const = 0;
+
 protected:
 	Object *newObject( void ) const;
 

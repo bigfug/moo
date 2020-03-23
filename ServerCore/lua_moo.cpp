@@ -34,6 +34,8 @@ LuaMap		lua_moo::mLuaSet;
 
 QNetworkAccessManager	lua_moo::mNAM;
 
+QString		lua_moo::mSettingsFilePath = "moo.ini";
+
 const luaL_Reg lua_moo::mLuaGlobal[] =
 {
 	{ 0, 0 }
@@ -197,6 +199,16 @@ void lua_moo::initialiseAll()
 	lua_serialport::initialise();
 	lua_smtp::initialise();
 	lua_text::initialise();
+}
+
+void lua_moo::setSettingsFilePath( QString pFilePath )
+{
+	mSettingsFilePath = pFilePath;
+}
+
+QString lua_moo::settingsFilePath()
+{
+	return( mSettingsFilePath );
 }
 
 void lua_moo::luaRegisterAllStates(lua_State *L)

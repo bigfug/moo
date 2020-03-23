@@ -20,6 +20,7 @@ class ODB;
 typedef QMap<ObjectId,Object*>	ObjectMap;
 typedef QList<Object *>         ObjectList;
 typedef QList<ObjectId>         ObjectIdList;
+typedef QVector<ObjectId>		ObjectIdVector;
 
 typedef struct ObjectManagerData
 {
@@ -102,6 +103,10 @@ public:
 	}
 
 	qint64 timeToNextTask( void ) const;
+
+	ObjectIdVector children( ObjectId pParentId ) const;
+
+	int childrenCount( ObjectId pParentId ) const;
 
 signals:
 	void stats( const ObjectManagerStats &pStats );

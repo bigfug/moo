@@ -130,6 +130,16 @@ public:
 		}
 	}
 
+	virtual ObjectIdVector children( ObjectId pParentId ) const
+	{
+		return( ObjectIdVector() );
+	}
+
+	virtual int childrenCount( ObjectId pParentId ) const
+	{
+		return( -1 );
+	}
+
 private:
 	void loadObject( QDataStream &DS, Object &O );
 	void updateObject( QDataStream &DS, const Object &O );

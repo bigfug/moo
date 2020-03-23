@@ -124,6 +124,16 @@ qint64 ObjectManager::timeToNextTask() const
 	return( NextTaskTime );
 }
 
+ObjectIdVector ObjectManager::children(ObjectId pParentId) const
+{
+	return( mODB ? mODB->children( pParentId ) : ObjectIdVector() );
+}
+
+int ObjectManager::childrenCount(ObjectId pParentId) const
+{
+	return( mODB ? mODB->childrenCount( pParentId ) : 0 );
+}
+
 void ObjectManager::reset( void )
 {
 	if( !mInstance )
