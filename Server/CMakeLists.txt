@@ -14,6 +14,8 @@ set( SOURCE_FILES
 	mooitemmodel.cpp
 	mooitemmodel.h
 
+	Info.plist
+
 	../ServerCore/mooapplication.cpp
 	../ServerCore/mooapplication.h
 )
@@ -40,6 +42,7 @@ if( APPLE )
 set_target_properties( ${PROJECT_NAME} PROPERTIES
 	MACOSX_FRAMEWORK_ICON_FILE moo-icon.ico
 	MACOSX_FRAMEWORK_IDENTIFIER com.bigfug.moo.server
+	MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Info.plist
 )
 endif( APPLE )
 
