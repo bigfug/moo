@@ -2,6 +2,8 @@
 #include "ui_mainwindow.h"
 #include <QDebug>
 #include <QWindowStateChangeEvent>
+#include <QInputDialog>
+
 #include "objectmanager.h"
 
 MainWindow::MainWindow( QWidget *pParent )
@@ -50,6 +52,18 @@ MainWindow::~MainWindow()
 void MainWindow::log( const QString &pMessage )
 {
 	ui->plainTextEdit->appendPlainText( pMessage );
+}
+
+Object *MainWindow::currentObject()
+{
+	QModelIndex	CurIdx = ui->mObjectTree->currentIndex();
+
+	if( !CurIdx.isValid() )
+	{
+		return( nullptr );
+	}
+
+	return( ObjectManager::o( CurIdx.internalId() )  );
 }
 
 void MainWindow::installModel( QAbstractItemModel *pModel )
@@ -196,4 +210,105 @@ void MainWindow::on_mPropList_itemClicked(QListWidgetItem *item)
 void MainWindow::on_mObjectTree_clicked(const QModelIndex &index)
 {
 	setCurrentObject( index.internalId() );
+}
+
+void MainWindow::on_mButtonObjectAdd_clicked()
+{
+	bool		OK;
+    QString		Name = QInputDialog::getText( this, tr( "Object name" ), tr( "Object name" ), QLineEdit::Normal, QString(), &OK );
+
+	if( OK && !Name.isEmpty() )
+	{
+		QModelIndex	CurIdx = ui->mObjectTree->currentIndex();
+
+		ObjectId	PID = CurIdx.isValid() ? CurIdx.internalId() : OBJECT_NONE;
+
+		Object *O = ObjectManager::instance()->newObject();
+
+		O->setName( Name );
+		O->setParent( PID );
+	}
+}
+
+void MainWindow::on_mButtonVerbAdd_clicked()
+{
+	Object		*O = currentObject();
+
+	if( !O )
+	{
+		return;
+	}
+
+	bool		OK;
+    QString		Name = QInputDialog::getText( this, tr( "Verb name" ), tr( "Verb name" ), QLineEdit::Normal, QString(), &OK );
+
+	if( !OK || Name.isEmpty() )
+	{
+		return;
+	}
+
+	Verb		*FndVrb;
+	Object		*FndObj;
+
+	if( O->verbFind( Name, &FndVrb, &FndObj ) )
+	{
+		return;
+	}
+
+	Verb		 V;
+
+	O->verbAdd( Name, V );
+
+	setCurrentObject( O->id() );
+}
+
+void MainWindow::on_mButtonEditorUpdate_clicked()
+{
+	Object		*O = currentObject();
+
+	if( !O )
+	{
+		return;
+	}
+
+	Verb		*V = O->verb( ui->mVerbList->currentItem()->text() );
+
+	if( !V )
+	{
+		return;
+	}
+
+	V->setScript( ui->mTextEditor->document()->toPlainText() );
+}
+
+void MainWindow::on_mButtonPropertyAdd_clicked()
+{
+	Object		*O = currentObject();
+
+	if( !O )
+	{
+		return;
+	}
+
+	bool		OK;
+    QString		Name = QInputDialog::getText( this, tr( "Property name" ), tr( "Property name" ), QLineEdit::Normal, QString(), &OK );
+
+	if( !OK || Name.isEmpty() )
+	{
+		return;
+	}
+
+	Property	*FndPrp;
+	Object		*FndObj;
+
+	if( O->propFind( Name, &FndPrp, &FndObj ) )
+	{
+		return;
+	}
+
+	Property		 P;
+
+	O->propAdd( Name, P );
+
+	setCurrentObject( O->id() );
 }

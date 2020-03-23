@@ -18,17 +18,141 @@
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
-       <widget class="QTreeView" name="mObjectTree"/>
-      </item>
-      <item>
-       <widget class="QListWidget" name="mVerbList">
-        <property name="sortingEnabled">
-         <bool>true</bool>
+       <widget class="QGroupBox" name="verticalGroupBox">
+        <property name="title">
+         <string>Objects</string>
         </property>
+        <layout class="QVBoxLayout" name="verticalLayout_10">
+         <property name="leftMargin">
+          <number>1</number>
+         </property>
+         <property name="topMargin">
+          <number>1</number>
+         </property>
+         <property name="rightMargin">
+          <number>1</number>
+         </property>
+         <property name="bottomMargin">
+          <number>1</number>
+         </property>
+         <item>
+          <widget class="QTreeView" name="mObjectTree"/>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_2">
+           <item>
+            <widget class="QPushButton" name="mButtonObjectAdd">
+             <property name="text">
+              <string>Add</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="mButtonObjectDelete">
+             <property name="text">
+              <string>Delete</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
        </widget>
       </item>
       <item>
-       <widget class="QListWidget" name="mPropList"/>
+       <widget class="QGroupBox" name="groupBox_4">
+        <property name="title">
+         <string>Verbs</string>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_11">
+         <property name="leftMargin">
+          <number>1</number>
+         </property>
+         <property name="topMargin">
+          <number>1</number>
+         </property>
+         <property name="rightMargin">
+          <number>1</number>
+         </property>
+         <property name="bottomMargin">
+          <number>1</number>
+         </property>
+         <item>
+          <widget class="QListWidget" name="mVerbList">
+           <property name="sortingEnabled">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_3">
+           <item>
+            <widget class="QPushButton" name="mButtonVerbAdd">
+             <property name="text">
+              <string>Add</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="mButtonVerbDelete">
+             <property name="text">
+              <string>Delete</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QGroupBox" name="groupBox_5">
+        <property name="title">
+         <string>Properties</string>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_12">
+         <property name="leftMargin">
+          <number>1</number>
+         </property>
+         <property name="topMargin">
+          <number>1</number>
+         </property>
+         <property name="rightMargin">
+          <number>1</number>
+         </property>
+         <property name="bottomMargin">
+          <number>1</number>
+         </property>
+         <item>
+          <widget class="QListWidget" name="mPropList"/>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_4">
+           <item>
+            <widget class="QPushButton" name="mButtonPropertyAdd">
+             <property name="text">
+              <string>Add</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="mButtonPropertyDelete">
+             <property name="text">
+              <string>Delete</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="mButtonPropertyClear">
+             <property name="text">
+              <string>Clear</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
       </item>
       <item>
        <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -53,7 +177,7 @@
         <item>
          <widget class="QStackedWidget" name="mEditorStack">
           <property name="currentIndex">
-           <number>2</number>
+           <number>1</number>
           </property>
           <widget class="QWidget" name="mObjectEditor">
            <property name="enabled">
@@ -192,14 +316,14 @@
                <item row="0" column="1">
                 <widget class="QLineEdit" name="mVerbName"/>
                </item>
-               <item row="1" column="0">
+               <item row="2" column="0">
                 <widget class="QLabel" name="label_8">
                  <property name="text">
                   <string>Owner:</string>
                  </property>
                 </widget>
                </item>
-               <item row="1" column="1">
+               <item row="2" column="1">
                 <widget class="ObjectSelector" name="mVerbOwner" native="true">
                  <property name="minimumSize">
                   <size>
@@ -209,14 +333,14 @@
                  </property>
                 </widget>
                </item>
-               <item row="5" column="0">
+               <item row="6" column="0">
                 <widget class="QLabel" name="label_10">
                  <property name="text">
                   <string>Flags:</string>
                  </property>
                 </widget>
                </item>
-               <item row="5" column="1">
+               <item row="6" column="1">
                 <layout class="QVBoxLayout" name="verticalLayout_5">
                  <item>
                   <widget class="QCheckBox" name="checkBox">
@@ -241,14 +365,14 @@
                  </item>
                 </layout>
                </item>
-               <item row="2" column="0">
+               <item row="3" column="0">
                 <widget class="QLabel" name="label_11">
                  <property name="text">
                   <string>Direct:</string>
                  </property>
                 </widget>
                </item>
-               <item row="2" column="1">
+               <item row="3" column="1">
                 <widget class="QComboBox" name="mVerbDirect">
                  <item>
                   <property name="text">
@@ -267,14 +391,14 @@
                  </item>
                 </widget>
                </item>
-               <item row="3" column="0">
+               <item row="4" column="0">
                 <widget class="QLabel" name="label_12">
                  <property name="text">
                   <string>Indirect:</string>
                  </property>
                 </widget>
                </item>
-               <item row="3" column="1">
+               <item row="4" column="1">
                 <widget class="QComboBox" name="mVerbIndirect">
                  <item>
                   <property name="text">
@@ -293,14 +417,14 @@
                  </item>
                 </widget>
                </item>
-               <item row="4" column="0">
+               <item row="5" column="0">
                 <widget class="QLabel" name="label_13">
                  <property name="text">
                   <string>Preposition:</string>
                  </property>
                 </widget>
                </item>
-               <item row="4" column="1">
+               <item row="5" column="1">
                 <widget class="QComboBox" name="mVerbPreposition">
                  <property name="editable">
                   <bool>true</bool>
@@ -321,6 +445,16 @@
                   </property>
                  </item>
                 </widget>
+               </item>
+               <item row="1" column="0">
+                <widget class="QLabel" name="label_14">
+                 <property name="text">
+                  <string>Aliases:</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="1">
+                <widget class="QLineEdit" name="mVerbAliases"/>
                </item>
               </layout>
              </widget>
@@ -359,7 +493,7 @@
     <item>
      <widget class="QTabWidget" name="mBottomTabs">
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
@@ -392,6 +526,37 @@
         <item>
          <widget class="QPlainTextEdit" name="mTextEditor"/>
         </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_5">
+          <item>
+           <spacer name="horizontalSpacer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QToolButton" name="toolButton">
+            <property name="text">
+             <string>Verify</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QToolButton" name="mButtonEditorUpdate">
+            <property name="text">
+             <string>Update</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
        </layout>
       </widget>
      </widget>
@@ -404,7 +569,7 @@
      <x>0</x>
      <y>0</y>
      <width>1218</width>
-     <height>26</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">

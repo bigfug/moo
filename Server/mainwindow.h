@@ -28,6 +28,9 @@ public slots:
 
 	void log( const QString &pMessage );
 
+private:
+	Object *currentObject( void );
+
 private slots:
 	void trayActivated( QSystemTrayIcon::ActivationReason pReason );
 
@@ -42,6 +45,14 @@ private slots:
 	void on_mPropList_itemClicked(QListWidgetItem *item);
 
 	void on_mObjectTree_clicked(const QModelIndex &index);
+
+	void on_mButtonObjectAdd_clicked();
+
+	void on_mButtonVerbAdd_clicked();
+
+	void on_mButtonEditorUpdate_clicked();
+
+	void on_mButtonPropertyAdd_clicked();
 
 private:
 	bool event( QEvent *pEvent );
