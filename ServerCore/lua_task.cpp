@@ -264,6 +264,11 @@ lua_task::lua_task( lua_task &&t )
 	lua_setallocf( mL, lua_task::luaAlloc, this );
 
 	luaSetTask( mL, this );
+
+	t.mL = nullptr;
+	t.mConnectionId = CONNECTION_NONE;
+	t.mMemUse = 0;
+	t.mError  = false;
 }
 
 lua_task::~lua_task( void )
