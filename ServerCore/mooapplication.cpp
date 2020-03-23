@@ -29,7 +29,7 @@ MooApplication	*MooApplication::mInstance = nullptr;
 MooApplication::MooApplication( QCoreApplication &a ) :
 	QObject( &a ), mApp( a ), mMooApp( nullptr ), mOSC( nullptr ), mServer( nullptr ),
 	mOptionDataDirectory( QStringList() << "d" << "dir", "data directory", "directory", QStandardPaths::writableLocation( QStandardPaths::AppDataLocation ) ),
-	mOptionServerPort( QStringList() << "p" << "port" << "default server port", "port", "1123" ),
+	mOptionServerPort( QStringList() << "p" << "port", "default server port", "port", "1123" ),
 	mOptionConfiguration( QStringList() << "c" << "cfg", "path to moo.ini", "filepath", "moo.ini" )
 {
 	mInstance = this;
@@ -105,6 +105,20 @@ void MooApplication::process( void )
 		SettingsFileInfo.makeAbsolute();
 
 		qInfo() << "Using settings in" << SettingsFileInfo.filePath();
+	}
+
+	//-------------------------------------------------------------------------
+
+	int			Port = optionServerPort();
+
+	if( Port < 0 || Port > 65535 )
+	{
+		qFatal( "Port must be in the range 0-65535" );
+	}
+
+	if( Port < 1024 )
+	{
+		qWarning() << "Port" << Port << "is in the 'well known' range of TCP/IP ports (0-1023)";
 	}
 }
 
