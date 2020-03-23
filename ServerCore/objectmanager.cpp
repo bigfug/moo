@@ -134,6 +134,57 @@ int ObjectManager::childrenCount(ObjectId pParentId) const
 	return( mODB ? mODB->childrenCount( pParentId ) : 0 );
 }
 
+QMap<ObjectId,QString> ObjectManager::objectNames( ObjectIdVector pIds ) const
+{
+	QMap<ObjectId,QString>		ObjNam;
+	ObjectIdVector				ObjIds;
+
+	for( ObjectId OID : pIds )
+	{
+		Object *O = mData.mObjMap.value( OID, Q_NULLPTR );
+
+		if( O )
+		{
+			ObjNam.insert( O->id(), O->name() );
+		}
+		else
+		{
+			ObjIds << OID;
+		}
+	}
+
+	if( ObjIds.isEmpty() )
+	{
+		return( ObjNam );
+	}
+
+	QMap<ObjectId,QString>		ObjRet;
+
+	if( mODB )
+	{
+		ObjRet = mODB->objectNames( ObjIds );
+	}
+
+	if( !ObjNam.isEmpty() )
+	{
+		return( ObjNam.unite( ObjRet ) );
+	}
+
+	return( ObjRet );
+}
+
+QString ObjectManager::objectName( ObjectId pId ) const
+{
+	Object *O = mData.mObjMap.value( pId, Q_NULLPTR );
+
+	if( O )
+	{
+		return( O->name() );
+	}
+
+	return( mODB ? mODB->objectName( pId ) : QString() );
+}
+
 void ObjectManager::reset( void )
 {
 	if( !mInstance )

@@ -140,6 +140,16 @@ public:
 		return( -1 );
 	}
 
+	virtual QMap<ObjectId,QString> objectNames( ObjectIdVector pIds ) const Q_DECL_OVERRIDE
+	{
+		return( QMap<ObjectId,QString>() );
+	}
+
+	virtual QString objectName( ObjectId pId ) const Q_DECL_OVERRIDE
+	{
+		return( QString() );
+	}
+
 private:
 	void loadObject( QDataStream &DS, Object &O );
 	void updateObject( QDataStream &DS, const Object &O );

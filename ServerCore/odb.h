@@ -54,6 +54,10 @@ public:
 
 	virtual ObjectIdVector children( ObjectId pParentId ) const = 0;
 
+	virtual QMap<ObjectId,QString> objectNames( ObjectIdVector pIds ) const = 0;
+
+	virtual QString objectName( ObjectId pId ) const = 0;
+
 protected:
 	Object *newObject( void ) const;
 

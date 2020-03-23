@@ -108,6 +108,10 @@ public:
 
 	int childrenCount( ObjectId pParentId ) const;
 
+	QMap<ObjectId,QString> objectNames( ObjectIdVector pIds ) const;
+
+	QString objectName( ObjectId pId ) const;
+
 signals:
 	void stats( const ObjectManagerStats &pStats );
 	void taskReady( void );

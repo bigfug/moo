@@ -61,6 +61,10 @@ public:
 
 	virtual int childrenCount( ObjectId pParentId ) const Q_DECL_OVERRIDE;
 
+	virtual QMap<ObjectId,QString> objectNames( ObjectIdVector pIds ) const Q_DECL_OVERRIDE;
+
+	virtual QString objectName( ObjectId pId ) const Q_DECL_OVERRIDE;
+
 private:
 	//void updateObject( const Object &O );
 

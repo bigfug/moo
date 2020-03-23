@@ -1096,3 +1096,58 @@ int ODBSQL::childrenCount( ObjectId pParentId ) const
 	return( Q.value( 0 ).toInt() );
 }
 
+QMap<ObjectId,QString> ODBSQL::objectNames( ObjectIdVector pIds ) const
+{
+	QMap<ObjectId,QString>		ObjectNames;
+
+	if( !mDB.isOpen() )
+	{
+		return( ObjectNames );
+	}
+
+	QStringList		OIDLst;
+
+	for( ObjectId OID : pIds )
+	{
+		OIDLst << QString::number( OID );
+	}
+
+	QSqlQuery	Q;
+
+	Q.prepare( "SELECT id, name FROM object WHERE id IN ( :id ) AND recycled = false" );
+
+	Q.bindValue( ":id", OIDLst );
+
+	if( !Q.exec() )
+	{
+		return( ObjectNames );
+	}
+
+	while( Q.next() )
+	{
+		ObjectNames.insert( Q.value( 0 ).toInt(), Q.value( 1 ).toString() );
+	}
+
+	return( ObjectNames );
+}
+
+QString ODBSQL::objectName( ObjectId pId ) const
+{
+	if( !mDB.isOpen() )
+	{
+		return( 0 );
+	}
+
+	QSqlQuery	Q;
+
+	Q.prepare( "SELECT name FROM object WHERE id = :id AND recycled = false" );
+
+	Q.bindValue( ":id", pId );
+
+	if( !Q.exec() || !Q.next() )
+	{
+		return( QString() );
+	}
+
+	return( Q.value( 0 ).toString() );
+}
