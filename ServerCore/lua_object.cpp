@@ -628,7 +628,6 @@ int lua_object::luaSet( lua_State *L )
 
 			case PARENT:
 				{
-					ObjectId			 OldParentId = O->parent();
 					ObjectId			 NewParentId = -1;
 					Object				*NewParent   = 0;
 

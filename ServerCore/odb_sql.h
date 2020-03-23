@@ -57,9 +57,9 @@ public:
 
 	virtual void checkpoint( void ) Q_DECL_OVERRIDE;
 
-	virtual ObjectIdVector children( ObjectId pParentId ) const;
+	virtual ObjectIdVector children( ObjectId pParentId ) const Q_DECL_OVERRIDE;
 
-	virtual int childrenCount( ObjectId pParentId ) const;
+	virtual int childrenCount( ObjectId pParentId ) const Q_DECL_OVERRIDE;
 
 private:
 	//void updateObject( const Object &O );
