@@ -43,7 +43,7 @@ ListenerTelnetSocket::ListenerTelnetSocket( QObject *pParent, QTcpSocket *pSocke
 
 	connect( &mTimer, &QTimer::timeout, this, &ListenerTelnetSocket::inputTimeout );
 
-	mTimer.singleShot( 1000, this, SLOT(inputTimeout()) );
+	mTimer.singleShot( 500, this, SLOT(inputTimeout()) );
 
 	mTelnet = telnet_init( mOptions.constData(), &ListenerTelnetSocket::telnetEventHandlerStatic, 0, this );
 }
