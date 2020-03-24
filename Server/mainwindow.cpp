@@ -1188,3 +1188,8 @@ void MainWindow::on_mObjectName_editingFinished()
 		O->setName( N );
 	}
 }
+
+void MainWindow::on_actionExit_triggered()
+{
+    close();
+}

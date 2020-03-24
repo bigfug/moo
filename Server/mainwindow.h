@@ -122,6 +122,8 @@ private slots:
 
 	void on_mObjectName_editingFinished();
 
+	void on_actionExit_triggered();
+
 private:
 	bool event( QEvent *pEvent );
 
