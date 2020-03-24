@@ -10,6 +10,7 @@ asd
 #include <QMap>
 #include <QList>
 #include <QMutex>
+#include <QVector>
 
 #include "object.h"
 #include "task.h"
