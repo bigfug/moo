@@ -33,6 +33,8 @@ private slots:
 
 	void on_mObjectSelectionEdit_clicked();
 
+	void on_mObjectSelectionId_editingFinished();
+
 private:
 	Ui::ObjectSelector *ui;
 };

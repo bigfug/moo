@@ -48,11 +48,14 @@ void ObjectSelector::on_mObjectSelectionId_valueChanged(int arg1)
 			ui->mObjectSelectionId->setSuffix( QString( " - %1" ).arg( ObjNam ) );
 		}
 	}
-
-	emit objectSelected( arg1 );
 }
 
 void ObjectSelector::on_mObjectSelectionEdit_clicked()
 {
 	emit objectSelectedForEdit( ui->mObjectSelectionId->value() );
+}
+
+void ObjectSelector::on_mObjectSelectionId_editingFinished()
+{
+	emit objectSelected( ui->mObjectSelectionId->value() );
 }
