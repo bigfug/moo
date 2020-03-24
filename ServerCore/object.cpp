@@ -221,7 +221,7 @@ void Object::propSet( const QString &pName, const QVariant &pValue )
 
 	if( ( P = prop( pName ) ) != 0 )
 	{
-		if( P->value().type() != pValue.type() )
+		if( P->value().type() != QVariant::Invalid && P->value().type() != pValue.type() )
 		{
 			return;
 		}
@@ -230,7 +230,7 @@ void Object::propSet( const QString &pName, const QVariant &pValue )
 	}
 	else if( ( P = propParent( pName ) ) != 0 )
 	{
-		if( P->value().type() != pValue.type() )
+		if( P->value().type() != QVariant::Invalid && P->value().type() != pValue.type() )
 		{
 			return;
 		}
