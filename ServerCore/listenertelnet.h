@@ -30,6 +30,7 @@ public:
 
 	// QTcpServer interface
 protected:
+#if 0
 	virtual void incomingConnection( qintptr handle ) Q_DECL_OVERRIDE
 	{
 		QSslSocket	*ServerSocket = new QSslSocket();
@@ -38,13 +39,35 @@ protected:
 		{
 			addPendingConnection( ServerSocket );
 
-//			connect( ServerSocket, &QSslSocket::encrypted, this, &ListenerTelnetServer::ready );
+			connect( ServerSocket, &QSslSocket::encrypted, this, &ListenerTelnetServer::socketEncrypted );
+
+			connect( ServerSocket, SIGNAL(sslErrors(QList<QSslError>)), this, SLOT(socketSslErrors(QList<QSslError>)) );
 
 			ServerSocket->startServerEncryption();
 		}
 		else
 		{
 			delete ServerSocket;
+		}
+	}
+#endif
+
+private slots:
+	void socketEncrypted( void )
+	{
+		QSslSocket	*ServerSocket = qobject_cast<QSslSocket *>( sender() );
+
+		if( ServerSocket )
+		{
+			qInfo() << "Socket Encrypted";
+		}
+	}
+
+	void socketSslErrors( const QList<QSslError> &errors )
+	{
+		for( const QSslError &E : errors )
+		{
+			qWarning() << E.errorString();
 		}
 	}
 };
