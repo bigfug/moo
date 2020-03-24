@@ -150,6 +150,11 @@ public:
 		return( QString() );
 	}
 
+	virtual ObjectId objectParent( ObjectId pId ) const Q_DECL_OVERRIDE
+	{
+		return( OBJECT_NONE );
+	}
+
 private:
 	void loadObject( QDataStream &DS, Object &O );
 	void updateObject( QDataStream &DS, const Object &O );

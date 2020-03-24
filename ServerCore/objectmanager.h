@@ -112,6 +112,8 @@ public:
 
 	QString objectName( ObjectId pId ) const;
 
+	ObjectId objectParent( ObjectId pId ) const;
+
 signals:
 	void stats( const ObjectManagerStats &pStats );
 	void taskReady( void );

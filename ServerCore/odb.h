@@ -58,6 +58,8 @@ public:
 
 	virtual QString objectName( ObjectId pId ) const = 0;
 
+	virtual ObjectId objectParent( ObjectId pId ) const = 0;
+
 protected:
 	Object *newObject( void ) const;
 

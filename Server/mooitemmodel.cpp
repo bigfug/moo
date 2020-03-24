@@ -42,23 +42,21 @@ QModelIndex MooItemModel::parent( const QModelIndex &child ) const
 
 	ObjectId	ChildId = child.internalId();
 
-	Object		*C = ObjectManager::o( ChildId );
-
-	if( !C )
+	if( ChildId == OBJECT_NONE )
 	{
 		return( QModelIndex() );
 	}
 
-	ObjectId	ParentId = C->parent();
+	ObjectId	ParentId = ObjectManager::instance()->objectParent( ChildId );
 
 	if( ParentId == OBJECT_NONE )
 	{
 		return( QModelIndex() );
 	}
 
-	Object		*P = ObjectManager::o( ParentId );
+	ObjectId	ParentParentId = ObjectManager::instance()->objectParent( ParentId );
 
-	ObjectIdVector	PVec = ObjectManager::instance()->children( P ? P->parent() : OBJECT_NONE );
+	ObjectIdVector	PVec = ObjectManager::instance()->children( ParentParentId );
 
 	int			 i = PVec.indexOf( ParentId );
 
@@ -108,14 +106,7 @@ QVariant MooItemModel::data( const QModelIndex &index, int role ) const
 		return( Id );
 	}
 
-	Object			*O = ObjectManager::o( Id );
-
-	if( !O )
-	{
-		return( QVariant() );
-	}
-
-	return( O->name() );
+	return( ObjectManager::instance()->objectName( Id ) );
 }
 
 

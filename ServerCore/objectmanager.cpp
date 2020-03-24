@@ -185,6 +185,18 @@ QString ObjectManager::objectName( ObjectId pId ) const
 	return( mODB ? mODB->objectName( pId ) : QString() );
 }
 
+ObjectId ObjectManager::objectParent(ObjectId pId) const
+{
+	Object *O = mData.mObjMap.value( pId, Q_NULLPTR );
+
+	if( O )
+	{
+		return( O->parent() );
+	}
+
+	return( mODB ? mODB->objectParent( pId ) : OBJECT_NONE );
+}
+
 void ObjectManager::reset( void )
 {
 	if( !mInstance )

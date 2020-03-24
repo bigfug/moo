@@ -65,6 +65,8 @@ public:
 
 	virtual QString objectName( ObjectId pId ) const Q_DECL_OVERRIDE;
 
+	virtual ObjectId objectParent( ObjectId pId ) const Q_DECL_OVERRIDE;
+
 private:
 	//void updateObject( const Object &O );
 

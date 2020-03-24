@@ -1151,3 +1151,24 @@ QString ODBSQL::objectName( ObjectId pId ) const
 
 	return( Q.value( 0 ).toString() );
 }
+
+ObjectId ODBSQL::objectParent(ObjectId pId) const
+{
+	if( !mDB.isOpen() )
+	{
+		return( 0 );
+	}
+
+	QSqlQuery	Q;
+
+	Q.prepare( "SELECT parent FROM object WHERE id = :id AND recycled = false" );
+
+	Q.bindValue( ":id", pId );
+
+	if( !Q.exec() || !Q.next() )
+	{
+		return( OBJECT_NONE );
+	}
+
+	return( Q.value( 0 ).toInt() );
+}
