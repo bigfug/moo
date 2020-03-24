@@ -106,6 +106,8 @@ MainWindow::MainWindow( QWidget *pParent )
 	} );
 
 	ui->mCurrentOwner->setObjectId( QSettings().value( "owner", ui->mCurrentOwner->objectId() ).toInt() );
+
+	connect( ObjectManager::instance(), &ObjectManager::stats, this, &MainWindow::stats );
 }
 
 MainWindow::~MainWindow()
