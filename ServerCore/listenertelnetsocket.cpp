@@ -28,20 +28,20 @@ ListenerTelnetSocket::ListenerTelnetSocket( QObject *pParent, QTcpSocket *pSocke
 
 	Connection		*CON = ConnectionManager::instance()->connection( mConnectionId );
 
-	connect( this, SIGNAL(textOutput(QString)), CON, SLOT(dataInput(QString)) );
-	connect( CON, SIGNAL(textOutput(QString)), this, SLOT(textInput(QString)));
+	connect( this, &ListenerTelnetSocket::textOutput, CON, &Connection::dataInput );
+	connect( CON, &Connection::textOutput, this, &ListenerTelnetSocket::textInput );
 
 	connect( CON, &Connection::taskOutput, ObjectManager::instance(), &ObjectManager::doTask );
 
-	connect( CON, SIGNAL(lineModeChanged(Connection::LineMode)), this, SLOT(setLineMode(Connection::LineMode)) );
-	connect( this, SIGNAL(lineModeSupported(bool)), CON, SLOT(setLineModeSupport(bool)) );
+	connect( CON, &Connection::lineModeChanged, this, &ListenerTelnetSocket::setLineMode );
+	connect( this, &ListenerTelnetSocket::lineModeSupported, CON, &Connection::setLineModeSupport );
 
-	connect( mSocket, SIGNAL(disconnected()), this, SLOT(disconnected()) );
-	connect( mSocket, SIGNAL(readyRead()), this, SLOT(readyRead()) );
+	connect( mSocket, &QTcpSocket::disconnected, this, &ListenerTelnetSocket::disconnected );
+	connect( mSocket, &QTcpSocket::readyRead, this, &ListenerTelnetSocket::readyRead );
 
-	connect( CON, SIGNAL(gmcpOutput(QByteArray)), this, SLOT(sendGMCP(QByteArray)) );
+	connect( CON, &Connection::gmcpOutput, this, &ListenerTelnetSocket::sendGMCP );
 
-	connect( &mTimer, SIGNAL(timeout()), this, SLOT(inputTimeout()) );
+	connect( &mTimer, &QTimer::timeout, this, &ListenerTelnetSocket::inputTimeout );
 
 	mTimer.singleShot( 1000, this, SLOT(inputTimeout()) );
 

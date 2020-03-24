@@ -5,7 +5,7 @@
 ListenerTelnet::ListenerTelnet( ObjectId pObjectId, quint16 pPort, QObject *pParent ) :
 	ListenerServer( pObjectId, pParent ), mServer( this )
 {
-	connect( &mServer, SIGNAL( newConnection() ), this, SLOT( newConnection() ) );
+	connect( &mServer, &ListenerTelnetServer::newConnection, this, &ListenerTelnet::newConnection );
 
 	mServer.listen( QHostAddress::Any, pPort );
 
