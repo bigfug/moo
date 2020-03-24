@@ -630,6 +630,13 @@
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_14">
              <item>
+              <widget class="QRadioButton" name="mTypeInvalid">
+               <property name="text">
+                <string>Invalid</string>
+               </property>
+              </widget>
+             </item>
+             <item>
               <widget class="QRadioButton" name="mTypeNumber">
                <property name="text">
                 <string>Number</string>

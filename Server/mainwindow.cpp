@@ -322,6 +322,34 @@ void MainWindow::setCurrentObject( ObjectId pId )
 	}
 }
 
+void MainWindow::setCurrentVerb(QString pName)
+{
+	ui->mEditorStack->setCurrentIndex( 1 );
+
+	QList<QListWidgetItem *>	L = ui->mVerbList->findItems( pName, Qt::MatchFixedString );
+
+	if( !L.isEmpty() )
+	{
+		ui->mVerbList->setCurrentItem( L.first() );
+	}
+
+	updateVerb();
+}
+
+void MainWindow::setCurrentProperty(QString pName)
+{
+	ui->mEditorStack->setCurrentIndex( 2 );
+
+	QList<QListWidgetItem *>	L = ui->mPropList->findItems( pName, Qt::MatchFixedString );
+
+	if( !L.isEmpty() )
+	{
+		ui->mPropList->setCurrentItem( L.first() );
+	}
+
+	updateProperty();
+}
+
 void MainWindow::on_mVerbList_itemClicked(QListWidgetItem *item)
 {
 	ui->mEditorStack->setCurrentIndex( 1 );
@@ -407,6 +435,8 @@ void MainWindow::on_mButtonVerbAdd_clicked()
 	O->verbAdd( Name, V );
 
 	setCurrentObject( O->id() );
+
+	setCurrentVerb( Name );
 }
 
 void MainWindow::on_mButtonEditorUpdate_clicked()
@@ -543,6 +573,8 @@ void MainWindow::on_mButtonPropertyAdd_clicked()
 	O->propAdd( Name, P );
 
 	setCurrentObject( O->id() );
+
+	setCurrentProperty( Name );
 }
 
 void MainWindow::on_mTypeNumber_clicked()
@@ -805,11 +837,9 @@ void MainWindow::updateProperty( void )
 
 		if( P->type() == QVariant::Invalid )
 		{
-			ui->mTypeBoolean->setChecked( false );
-			ui->mTypeNumber->setChecked( false );
-			ui->mTypeString->setChecked( false );
-			ui->mTypeMap->setChecked( false );
-			ui->mTypeObject->setChecked( false );
+			ui->mTypeInvalid->setChecked( true );
+
+			ui->mTextEditor->clear();
 		}
 		else if( !strcmp( P->value().typeName(), "lua_object::luaHandle" ) )
 		{
@@ -858,8 +888,11 @@ void MainWindow::updateProperty( void )
 					break;
 
 				default:
+					ui->mTypeInvalid->setChecked( true );
+
 					qWarning() << "Unknown type" << P->value().typeName();
-					ui->mTextEditor->setPlainText( QString() );
+
+					ui->mTextEditor->clear();
 					break;
 			}
 		}

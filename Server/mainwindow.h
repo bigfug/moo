@@ -46,6 +46,10 @@ private slots:
 
 	void setCurrentObject( ObjectId pId );
 
+	void setCurrentVerb( QString pName );
+
+	void setCurrentProperty( QString pName );
+
 	void on_mVerbList_itemClicked(QListWidgetItem *item);
 
 	void on_mPropList_itemClicked(QListWidgetItem *item);
