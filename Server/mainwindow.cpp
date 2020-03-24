@@ -29,7 +29,7 @@ MainWindow::MainWindow( QWidget *pParent )
 
 	mTrayIcon->show();
 
-	connect( ui->mCurrentObject, &ObjectSelector::objectSelected, [=]( ObjectId pId )
+	connect( ui->mCurrentObject, &ObjectSelector::objectSelectedForEdit, [=]( ObjectId pId )
 	{
 		setCurrentObject( pId );
 	} );
@@ -120,14 +120,7 @@ void MainWindow::log( const QString &pMessage )
 
 Object *MainWindow::currentObject()
 {
-	QModelIndex	CurIdx = ui->mObjectTree->currentIndex();
-
-	if( !CurIdx.isValid() )
-	{
-		return( nullptr );
-	}
-
-	return( ObjectManager::o( CurIdx.internalId() )  );
+	return( ObjectManager::o( ui->mCurrentObject->objectId() )  );
 }
 
 Verb *MainWindow::currentVerb()
