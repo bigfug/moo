@@ -18,6 +18,8 @@ public:
 
 	virtual ~ObjectSelector();
 
+	ObjectId objectId( void ) const;
+
 public slots:
 	void setObjectId( ObjectId pId );
 

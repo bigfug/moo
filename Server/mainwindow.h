@@ -31,12 +31,18 @@ public slots:
 private:
 	Object *currentObject( void );
 
+	Verb *currentVerb( void );
+
+	Property *currentProperty( void );
+
+	static void objectsToStrings( QVariantMap &PrpDat );
+
+	static void stringsToObjects( QVariantMap &PrpDat );
+
 private slots:
 	void trayActivated( QSystemTrayIcon::ActivationReason pReason );
 
 	void on_actionAbout_triggered();
-
-	void on_mObjectId_valueChanged(int arg1);
 
 	void setCurrentObject( ObjectId pId );
 
@@ -53,6 +59,64 @@ private slots:
 	void on_mButtonEditorUpdate_clicked();
 
 	void on_mButtonPropertyAdd_clicked();
+
+	void on_mTypeNumber_clicked();
+
+	void on_mTypeString_clicked();
+
+	void on_mTypeBoolean_clicked();
+
+	void updateVerbList( void );
+
+	void updatePropList( void );
+
+	void updateVerb( void );
+
+	void updateProperty( void );
+
+	void on_mTypeObject_clicked();
+
+	void on_mTypeMap_clicked();
+
+	void on_mPropertyName_textEdited(const QString &arg1);
+
+	void on_mPropertyRead_clicked(bool checked);
+
+	void on_mPropertyWrite_clicked(bool checked);
+
+	void on_mPropertyChange_clicked(bool checked);
+
+	void on_mButtonPropertyClear_clicked();
+
+	void on_mButtonPropertyDelete_clicked();
+
+	void on_mButtonVerbDelete_clicked();
+
+	void on_mObjectAliases_textEdited(const QString &arg1);
+
+	void on_mVerbAliases_textEdited(const QString &arg1);
+
+	void on_mObjectPlayer_clicked(bool checked);
+
+	void on_mObjectProgrammer_clicked(bool checked);
+
+	void on_mObjectWizard_clicked(bool checked);
+
+	void on_mObjectRead_clicked(bool checked);
+
+	void on_mObjectWrite_clicked(bool checked);
+
+	void on_mObjectFertile_clicked(bool checked);
+
+	void on_mVerbDirect_currentIndexChanged(int index);
+
+	void on_mVerbIndirect_currentIndexChanged(int index);
+
+	void on_mVerbPreposition_currentIndexChanged(int index);
+
+	void on_mButtonObjectDelete_clicked();
+
+	void on_mObjectName_editingFinished();
 
 private:
 	bool event( QEvent *pEvent );

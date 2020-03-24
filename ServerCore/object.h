@@ -106,7 +106,9 @@ public:
 	//
 
 	void ancestors( QList<ObjectId> &pList ) const;
+	QVector<ObjectId> ancestors( void ) const;
 	void descendants( QList<ObjectId> &pList ) const;
+	QVector<ObjectId> descendants( void ) const;
 
 	// Define property on this object
 	void propAdd( const QString &pName, Property &pProp );

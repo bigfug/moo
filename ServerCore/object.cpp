@@ -184,7 +184,7 @@ void Object::propDelete( const QString &pName )
 		return;
 	}
 
-	if( it.value().parent() != -1 )
+	if( it.value().parent() != OBJECT_NONE )
 	{
 		if( mData.mProperties.remove( pName ) )
 		{
@@ -285,12 +285,29 @@ void Object::ancestors( QList<ObjectId> &pList ) const
 	ObjectManager	&OM = *ObjectManager::instance();
 	Object			*PO = OM.object( mData.mParent );
 
-	while( PO != 0 )
+	while( PO )
 	{
 		pList.push_back( PO->id() );
 
 		PO = OM.object( PO->parent() );
 	}
+}
+
+QVector<ObjectId> Object::ancestors() const
+{
+	QVector<ObjectId> L;
+
+	ObjectManager	&OM = *ObjectManager::instance();
+	Object			*PO = OM.object( mData.mParent );
+
+	while( PO )
+	{
+		L << PO->id();
+
+		PO = OM.object( PO->parent() );
+	}
+
+	return( L );
 }
 
 void Object::descendants( QList<ObjectId> &pList ) const
@@ -308,6 +325,27 @@ void Object::descendants( QList<ObjectId> &pList ) const
 			O->descendants( pList );
 		}
 	}
+}
+
+QVector<ObjectId> Object::descendants() const
+{
+	ObjectManager	&OM = *ObjectManager::instance();
+
+	QVector<ObjectId> L;
+
+	L.append( mData.mChildren.toVector() );
+
+	for( ObjectId id : mData.mChildren )
+	{
+		Object	*O = OM.object( id );
+
+		if( O )
+		{
+			L << O->descendants();
+		}
+	}
+
+	return( L );
 }
 
 void Object::move( Object *pWhere )

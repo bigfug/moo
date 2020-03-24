@@ -158,26 +158,32 @@
        <layout class="QVBoxLayout" name="verticalLayout_4">
         <item>
          <layout class="QFormLayout" name="formLayout_2">
-          <item row="0" column="0">
+          <item row="1" column="0">
            <widget class="QLabel" name="label_6">
             <property name="text">
              <string>Object Id:</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
-           <widget class="QSpinBox" name="mObjectId">
-            <property name="maximum">
-             <number>9999999</number>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_18">
+            <property name="text">
+             <string>Owner:</string>
             </property>
            </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="ObjectSelector" name="mCurrentOwner" native="true"/>
+          </item>
+          <item row="1" column="1">
+           <widget class="ObjectSelector" name="mCurrentObject" native="true"/>
           </item>
          </layout>
         </item>
         <item>
          <widget class="QStackedWidget" name="mEditorStack">
           <property name="currentIndex">
-           <number>2</number>
+           <number>0</number>
           </property>
           <widget class="QWidget" name="mObjectEditor">
            <property name="enabled">
@@ -578,7 +584,14 @@
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_6">
           <item>
-           <widget class="QPlainTextEdit" name="mTextEditor"/>
+           <widget class="QPlainTextEdit" name="mTextEditor">
+            <property name="font">
+             <font>
+              <family>Courier New</family>
+              <pointsize>11</pointsize>
+             </font>
+            </property>
+           </widget>
           </item>
           <item>
            <widget class="QGroupBox" name="groupBox_6">
@@ -587,44 +600,37 @@
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_14">
              <item>
-              <widget class="QRadioButton" name="radioButton_2">
+              <widget class="QRadioButton" name="mTypeNumber">
                <property name="text">
                 <string>Number</string>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QRadioButton" name="radioButton_3">
+              <widget class="QRadioButton" name="mTypeString">
                <property name="text">
                 <string>String</string>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QRadioButton" name="radioButton_5">
+              <widget class="QRadioButton" name="mTypeBoolean">
                <property name="text">
                 <string>Boolean</string>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QRadioButton" name="radioButton_6">
+              <widget class="QRadioButton" name="mTypeObject">
                <property name="text">
                 <string>Object</string>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QRadioButton" name="radioButton">
+              <widget class="QRadioButton" name="mTypeMap">
                <property name="text">
-                <string>Table</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QRadioButton" name="radioButton_4">
-               <property name="text">
-                <string>JSON</string>
+                <string>Map</string>
                </property>
               </widget>
              </item>
