@@ -806,6 +806,21 @@ void MainWindow::updateVerb()
 	{
 		ui->mVerbName->setText( V->name() );
 		ui->mVerbOwner->setObjectId( V->owner() );
+		ui->mVerbAliases->setText( V->aliases().join( ',' ) );
+
+		ui->mVerbDirect->setCurrentIndex( V->directObject() );
+		ui->mVerbIndirect->setCurrentIndex( V->indirectObject() );
+
+		QString		P = V->preposition();
+
+		if( P.isEmpty() )
+		{
+			ui->mVerbPreposition->setCurrentIndex( V->prepositionType() - 1 );
+		}
+		else
+		{
+			ui->mVerbPreposition->setCurrentText( P );
+		}
 
 		ui->mTextEditor->setPlainText( V->script() );
 
@@ -1167,16 +1182,6 @@ void MainWindow::on_mVerbIndirect_currentIndexChanged(int index)
 	}
 }
 
-void MainWindow::on_mVerbPreposition_currentIndexChanged(int index)
-{
-	Verb		*V = currentVerb();
-
-	if( V && index <= 2 )
-	{
-		V->setPrepositionArgument( ArgObj( index ) );
-	}
-}
-
 void MainWindow::on_mObjectName_editingFinished()
 {
 	Object		*O = currentObject();
@@ -1192,4 +1197,18 @@ void MainWindow::on_mObjectName_editingFinished()
 void MainWindow::on_actionExit_triggered()
 {
     close();
+}
+
+void MainWindow::on_mVerbPreposition_activated(int index)
+{
+	Verb		*V = currentVerb();
+
+	if( V && index >= 0 && index <= 1 )
+	{
+		V->setPrepositionArgument( ArgObj( index + 1 ) );
+	}
+	else
+	{
+		V->setPrepositionArgument( ui->mVerbPreposition->currentText() );
+	}
 }

@@ -116,13 +116,13 @@ private slots:
 
 	void on_mVerbIndirect_currentIndexChanged(int index);
 
-	void on_mVerbPreposition_currentIndexChanged(int index);
-
 	void on_mButtonObjectDelete_clicked();
 
 	void on_mObjectName_editingFinished();
 
 	void on_actionExit_triggered();
+
+	void on_mVerbPreposition_activated(int index);
 
 private:
 	bool event( QEvent *pEvent );

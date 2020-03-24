@@ -464,11 +464,6 @@
                  </property>
                  <item>
                   <property name="text">
-                   <string>THIS</string>
-                  </property>
-                 </item>
-                 <item>
-                  <property name="text">
                    <string>ANY</string>
                   </property>
                  </item>
