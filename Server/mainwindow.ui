@@ -158,6 +158,9 @@
        <layout class="QVBoxLayout" name="verticalLayout_4">
         <item>
          <layout class="QFormLayout" name="formLayout_2">
+          <property name="fieldGrowthPolicy">
+           <enum>QFormLayout::ExpandingFieldsGrow</enum>
+          </property>
           <item row="1" column="0">
            <widget class="QLabel" name="label_6">
             <property name="text">
@@ -183,7 +186,7 @@
         <item>
          <widget class="QStackedWidget" name="mEditorStack">
           <property name="currentIndex">
-           <number>0</number>
+           <number>1</number>
           </property>
           <widget class="QWidget" name="mObjectEditor">
            <property name="enabled">
@@ -196,6 +199,9 @@
                <string>Object</string>
               </property>
               <layout class="QFormLayout" name="formLayout_5">
+               <property name="fieldGrowthPolicy">
+                <enum>QFormLayout::ExpandingFieldsGrow</enum>
+               </property>
                <item row="0" column="0">
                 <widget class="QLabel" name="label">
                  <property name="text">
@@ -312,6 +318,9 @@
                <string>Verb</string>
               </property>
               <layout class="QFormLayout" name="formLayout">
+               <property name="fieldGrowthPolicy">
+                <enum>QFormLayout::ExpandingFieldsGrow</enum>
+               </property>
                <item row="0" column="0">
                 <widget class="QLabel" name="label_7">
                  <property name="text">
@@ -380,6 +389,12 @@
                </item>
                <item row="3" column="1">
                 <widget class="QComboBox" name="mVerbDirect">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
                  <item>
                   <property name="text">
                    <string>THIS</string>
@@ -406,6 +421,12 @@
                </item>
                <item row="4" column="1">
                 <widget class="QComboBox" name="mVerbIndirect">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
                  <item>
                   <property name="text">
                    <string>THIS</string>
@@ -432,6 +453,12 @@
                </item>
                <item row="5" column="1">
                 <widget class="QComboBox" name="mVerbPreposition">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
                  <property name="editable">
                   <bool>true</bool>
                  </property>
@@ -475,6 +502,9 @@
                <string>Property</string>
               </property>
               <layout class="QFormLayout" name="formLayout_4">
+               <property name="fieldGrowthPolicy">
+                <enum>QFormLayout::ExpandingFieldsGrow</enum>
+               </property>
                <item row="0" column="0">
                 <widget class="QLabel" name="label_9">
                  <property name="text">
@@ -695,7 +725,7 @@
      <x>0</x>
      <y>0</y>
      <width>1218</width>
-     <height>26</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
