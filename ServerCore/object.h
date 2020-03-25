@@ -51,6 +51,14 @@ typedef struct ObjectData
 	QMap<QString,Verb>			mVerbs;
 	QMap<QString,Property>		mProperties;	// Properties defined on this object
 	QList<Task>					mTasks;
+
+	ObjectData( void )
+		: mId( OBJECT_NONE ), mPlayer( false ), mParent( OBJECT_NONE ), mOwner( OBJECT_NONE ), mLocation( OBJECT_NONE ),
+		  mProgrammer( false ), mWizard( false ), mRead( false ), mWrite( false ), mFertile( false ), mRecycled( false ),
+		  mConnection( CONNECTION_NONE ), mLastRead( 0 ), mLastUpdate( 0 ), mLastWrite( 0 )
+	{
+
+	}
 } ObjectData;
 
 class Object
