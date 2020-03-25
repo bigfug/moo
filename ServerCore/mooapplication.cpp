@@ -7,6 +7,7 @@
 #include <QDebug>
 #include <QFileInfo>
 #include <QDir>
+#include <QSysInfo>
 
 #include <iostream>
 
@@ -23,6 +24,8 @@
 #include "objectmanager.h"
 #include "osc.h"
 
+#define Q(x) #x
+#define QUOTE(x) Q(x)
 
 MooApplication	*MooApplication::mInstance = nullptr;
 
@@ -36,8 +39,13 @@ MooApplication::MooApplication( QCoreApplication &a ) :
 
 	a.setApplicationName( "ArtMOO" );
 	a.setOrganizationName( "Alex May" );
-	a.setOrganizationDomain( "bigfug.com" );
-	a.setApplicationVersion( "0.2" );
+	a.setOrganizationDomain( "www.bigfug.com" );
+
+#if QT_VERSION < QT_VERSION_CHECK( 5, 4, 0 )
+	QApplication::setApplicationVersion( QUOTE( MOO_VERSION ) );
+#else
+	a.setApplicationVersion( QString( "%1 (%2/%3)" ).arg( QUOTE( MOO_VERSION ) ).arg( QSysInfo::buildCpuArchitecture() ).arg( QSysInfo::currentCpuArchitecture() ) );
+#endif
 
 	connect( this, &MooApplication::message, this, &MooApplication::fileMessageHandler );
 

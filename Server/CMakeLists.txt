@@ -1,4 +1,9 @@
-project( Server )
+
+if( UNIX AND NOT APPLE )
+	project( artmoo-server )
+else()
+	project( ArtMOO )
+endif()
 
 set( SOURCE_FILES
 	main.cpp
@@ -26,6 +31,8 @@ set( QRC_FILES
 
 add_executable( ${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${SOURCE_FILES} ${QRC_FILES} )
 
+target_compile_definitions( ${PROJECT_NAME} PRIVATE MOO_VERSION=${MOO_VERSION} )
+
 include_directories(
 	../ServerCore
 	../libtelnet
@@ -46,7 +53,10 @@ set_target_properties( ${PROJECT_NAME} PROPERTIES
 )
 endif( APPLE )
 
-install( TARGETS ${PROJECT_NAME} DESTINATION . )
+install( TARGETS ${PROJECT_NAME}
+	RUNTIME DESTINATION ${PATH_APP}
+	BUNDLE DESTINATION ${PATH_APP}
+)
 
 #-------------------------------------
 # Qt5

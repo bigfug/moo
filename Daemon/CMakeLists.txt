@@ -1,4 +1,4 @@
-project( Daemon )
+project( artmoo-daemon )
 
 add_executable( ${PROJECT_NAME} WIN32 MACOSX_BUNDLE
 	main.cpp
@@ -12,6 +12,8 @@ include_directories(
 	../libtelnet
 	)
 
+target_compile_definitions( ${PROJECT_NAME} PRIVATE MOO_VERSION=${MOO_VERSION} )
+
 target_link_libraries( ${PROJECT_NAME}
 	ServerCore
 	SMTPEmail
@@ -19,8 +21,10 @@ target_link_libraries( ${PROJECT_NAME}
 	Editor
 	)
 
-install( TARGETS ${PROJECT_NAME} DESTINATION . )
-
+install( TARGETS ${PROJECT_NAME}
+	RUNTIME DESTINATION ${PATH_APP}
+	BUNDLE DESTINATION ${PATH_APP}
+)
 
 #-------------------------------------
 # Qt5
