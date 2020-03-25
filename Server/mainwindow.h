@@ -128,6 +128,8 @@ private slots:
 
 	void on_mVerbPreposition_activated(int index);
 
+	void on_mButtonEditorVerify_clicked();
+
 private:
 	bool event( QEvent *pEvent );
 

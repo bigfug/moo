@@ -700,7 +700,7 @@
            </spacer>
           </item>
           <item>
-           <widget class="QToolButton" name="toolButton">
+           <widget class="QToolButton" name="mButtonEditorVerify">
             <property name="text">
              <string>Verify</string>
             </property>

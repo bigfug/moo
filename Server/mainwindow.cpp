@@ -8,12 +8,13 @@
 #include <QJsonObject>
 #include <QJsonDocument>
 #include <QSettings>
+#include <QMessageBox>
 
 #include "objectmanager.h"
 #include "lua_object.h"
+#include "lua_moo.h"
 
 MainWindow::MainWindow( QWidget *pParent )
-	: QMainWindow( pParent ), ui( new Ui::MainWindow )
 	: QMainWindow( pParent ), ui( new Ui::MainWindow ), mLastExecutionTime( 0 )
 {
 	ui->setupUi( this );
@@ -1232,5 +1233,41 @@ void MainWindow::on_mVerbPreposition_activated(int index)
 	else
 	{
 		V->setPrepositionArgument( ui->mVerbPreposition->currentText() );
+	}
+}
+
+void MainWindow::on_mButtonEditorVerify_clicked()
+{
+	if( isEditingVerb() )
+	{
+		Verb			*V = currentVerb();
+
+		if( !V )
+		{
+			return;
+		}
+
+		lua_State		*L = luaL_newstate();
+
+		lua_moo::luaNewState( L );
+
+		QByteArray		 P = ui->mTextEditor->document()->toPlainText().toUtf8();
+
+		int Error = luaL_loadbuffer( L, P, P.size(), V->name().toUtf8() );
+
+		if( !Error )
+		{
+			QMessageBox::information( this, tr( "Verb code verify" ), tr( "No errors detected" ) );
+		}
+		else
+		{
+			QString		Result = lua_tostring( L, -1 );
+
+			QMessageBox::warning( this, tr( "Verb code verify" ), Result );
+
+			lua_pop( L, 1 );
+		}
+
+		lua_close( L );
 	}
 }
