@@ -65,6 +65,7 @@ const luaL_Reg lua_moo::mLuaStatic[] =
 	{ "find", lua_moo::luaFind },
 	{ "cookie", lua_moo::luaCookie },
 	{ "setCookie", lua_moo::luaSetCookie },
+	{ "set_cookie", lua_moo::luaSetCookie },
 	{ "clear", lua_moo::luaClearCookie },
 	{ "isValidObject", lua_moo::luaIsValidObject },
 	{ "is_valid_object", lua_moo::luaIsValidObject },

@@ -44,6 +44,7 @@ const luaL_Reg lua_verb::mLuaInstanceFunctions[] =
 {
 	{ "aliasadd", lua_verb::luaAliasAdd },
 	{ "aliasrem", lua_verb::luaAliasRem },
+	{ "aliasdel", lua_verb::luaAliasRem },
 	{ "dump", lua_verb::luaDump },
 	{ "program", lua_verb::luaProgram },
 	{ "edit", lua_verb::luaEdit },
@@ -58,6 +59,9 @@ const QMap<QString,lua_verb::Fields>		lua_verb::mFieldMap =
 	{ "r", READ },
 	{ "w", WRITE },
 	{ "x", EXECUTE },
+	{ "read", READ },
+	{ "write", WRITE },
+	{ "execute", EXECUTE },
 	{ "script", SCRIPT },
 	{ "dobj", DIRECT_OBJECT },
 	{ "iobj", INDIRECT_OBJECT },

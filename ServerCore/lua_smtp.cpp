@@ -26,6 +26,8 @@ const luaL_Reg lua_smtp::mLuaMimeMessageInstance[] =
 	{ "set_sender", lua_smtp::luaSetSender },
 	{ "addText", lua_smtp::luaAddText },
 	{ "addTo", lua_smtp::luaAddTo },
+	{ "add_text", lua_smtp::luaAddText },
+	{ "add_to", lua_smtp::luaAddTo },
 	{ "setSubject", lua_smtp::luaSetSubject },
 	{ "set_subject", lua_smtp::luaSetSubject },
 	{ "send", lua_smtp::luaSend },

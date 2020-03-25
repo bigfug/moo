@@ -103,7 +103,10 @@ const QMap<QString,lua_object::Fields>		lua_object::mFieldMap =
 	{ "wizard", WIZARD },
 	{ "r", READ },
 	{ "w", WRITE },
-	{ "f", FERTILE }
+	{ "f", FERTILE },
+	{ "read", READ },
+	{ "write", WRITE },
+	{ "fertile", FERTILE }
 };
 
 void lua_object::luaRegisterState( lua_State *L )
