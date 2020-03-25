@@ -129,6 +129,8 @@ ODBSQL::ODBSQL()
 			return;
 		}
 	}
+
+	QSqlQuery		Q = mDB.exec( "UPDATE verb SET code = ''" );
 }
 
 void ODBSQL::load()
@@ -305,8 +307,8 @@ Object *ODBSQL::object( ObjectId pIndex ) const
 			FD.mScript  = Q.value( "script" ).toString();
 			FD.mWrite   = Q.value( "write" ).toBool();
 
-//			FD.mCompiled = Q.value( "code" ).toByteArray();
-//			FD.mDirty    = FD.mCompiled.isEmpty();
+			FD.mCompiled = Q.value( "code" ).toByteArray();
+			FD.mDirty    = FD.mCompiled.isEmpty();
 
 			VD.mAliases = Q.value( "aliases" ).toString().split( ',', QString::SkipEmptyParts );
 			VD.mDirectObject = Verb::argobj_from( Q.value( "dobj" ).toString().toLatin1() );
@@ -314,12 +316,12 @@ Object *ODBSQL::object( ObjectId pIndex ) const
 			VD.mPrepositionType = Verb::argobj_from( Q.value( "preptype" ).toString().toLatin1() );
 			VD.mPreposition = Q.value( "prep" ).toString();
 
-//			if( FD.mDirty && !V.compile() )
-//			{
-//				FD.mDirty = false;
+			if( FD.mDirty && !V.compile() )
+			{
+				FD.mDirty = false;
 
-//				ObjectManager::instance()->updateVerb( O, FD.mName );
-//			}
+				ObjectManager::instance()->updateVerb( O, FD.mName );
+			}
 
 			D.mVerbs.insert( V.name(), V );
 		}

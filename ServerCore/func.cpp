@@ -44,7 +44,7 @@ int Func::compile()
 
 	int Error = luaL_loadstring( L, mData.mScript.toLatin1() );
 
-	if( Error == 0 )
+	if( !Error )
 	{
 		mData.mCompiled.clear();
 
@@ -137,10 +137,7 @@ void Func::setScript( const QString &pScript )
 		mData.mScript = pScript;
 		mData.mDirty  = true;
 
-//		if( compile() == 0 )
-//		{
-//			mData.mDirty = false;
-//		}
+		compile();
 
 		setUpdated();
 	}
