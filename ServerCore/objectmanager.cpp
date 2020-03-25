@@ -31,6 +31,11 @@ ObjectManager::ObjectManager( QObject *pParent )
 	mTimeStamp = QDateTime::currentMSecsSinceEpoch();
 }
 
+ObjectManager::~ObjectManager()
+{
+	clear();
+}
+
 // The database is empty so set up the most minimal (but useful) set of objects
 // Based on LambdaMOO minimal db
 // https://github.com/wrog/lambdamoo/blob/master/README.Minimal

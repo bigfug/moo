@@ -50,6 +50,8 @@ class ObjectManager : public QObject
 
 	explicit ObjectManager( QObject *parent = Q_NULLPTR );
 
+	virtual ~ObjectManager( void );
+
 	friend class ODB;
 
 public:
