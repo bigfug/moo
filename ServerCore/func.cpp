@@ -31,7 +31,12 @@ int Func::writer( lua_State *L, const void* p, size_t sz )
 
 int Func::compile()
 {
-	qDebug() << "Compiling" << mData.mName;
+	if( !mData.mName.isEmpty() )
+	{
+		qDebug() << "Compiling" << QString( "%1:%2" ).arg( mData.mObject ).arg( mData.mName );
+	}
+
+	mData.mCompiled.clear();
 
 	lua_State		*L = luaL_newstate();
 
@@ -48,8 +53,6 @@ int Func::compile()
 
 	if( !Error )
 	{
-		mData.mCompiled.clear();
-
 		lua_dump( L, &Func::writerStatic, this );
 
 		mData.mDirty = false;
@@ -141,9 +144,13 @@ void Func::setScript( const QString &pScript )
 	if( mData.mScript != pScript )
 	{
 		mData.mScript = pScript;
+		mData.mCompiled.clear();
 		mData.mDirty  = true;
 
-		compile();
+		if( !mData.mScript.isEmpty() )
+		{
+			compile();
+		}
 
 		setUpdated();
 	}

@@ -1256,7 +1256,7 @@ int lua_object::luaPropAdd( lua_State *L )
 
 		if( !O->write() && PRG != 0 && !PRG->wizard() && PRG->id() != O->owner() )
 		{
-			luaL_error( L, "programmer does not have write permission on object" );
+			throw mooException( E_INVARG, "programmer does not have write permission on object" );
 		}
 
 		if( O->prop( PropName ) != 0 )
@@ -1332,7 +1332,8 @@ int lua_object::luaPropAdd( lua_State *L )
 
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );	}
+	return( LuaErr ? lua_error( L ) : 0 );
+}
 
 // Removes the property named prop-name from the given object and
 // all of its descendants.
