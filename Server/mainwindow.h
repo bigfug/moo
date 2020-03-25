@@ -39,6 +39,10 @@ private:
 
 	static void stringsToObjects( QVariantMap &PrpDat );
 
+	bool isEditingObject( void ) const;
+	bool isEditingVerb( void ) const;
+	bool isEditingProperty( void ) const;
+
 private slots:
 	void trayActivated( QSystemTrayIcon::ActivationReason pReason );
 

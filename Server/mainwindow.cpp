@@ -235,6 +235,21 @@ void MainWindow::stringsToObjects( QVariantMap &PrpDat )
 	}
 }
 
+bool MainWindow::isEditingObject() const
+{
+	return(	ui->mEditorStack->currentIndex() == 0 );
+}
+
+bool MainWindow::isEditingVerb() const
+{
+	return(	ui->mEditorStack->currentIndex() == 1 );
+}
+
+bool MainWindow::isEditingProperty() const
+{
+	return(	ui->mEditorStack->currentIndex() == 2 );
+}
+
 void MainWindow::installModel( QAbstractItemModel *pModel )
 {
 	ui->mObjectTree->setModel( pModel );
