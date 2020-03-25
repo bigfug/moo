@@ -23,6 +23,18 @@ else ()
 endif ()
 
 #------------------------------------------------------------------------------
+
+# There must be a better way to do this...
+
+if( EXISTS /opt/vc/include/bcm_host.h )
+	set( Q_OS_RASPBERRY_PI TRUE )
+
+	add_definitions( -DQ_OS_RASPBERRY_PI )
+
+	message( "RASPBERRY PI BUILD" )
+endif()
+
+#------------------------------------------------------------------------------
 # Enable Unit Testing
 
 include( CTest )

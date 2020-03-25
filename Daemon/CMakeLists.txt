@@ -47,14 +47,6 @@ endif( APPLE )
 #-------------------------------------
 # Qt5
 
-find_package( Qt5 COMPONENTS Gui Network WebSockets REQUIRED )
-
-target_link_libraries( ${PROJECT_NAME}
-	Qt5::Core
-	Qt5::Network
-	Qt5::WebSockets
-	)
-
 include( ../qtdeploy.cmake )
 
 #-------------------------------------
