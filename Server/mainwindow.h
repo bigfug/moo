@@ -130,6 +130,8 @@ private slots:
 
 	void on_mButtonEditorVerify_clicked();
 
+	bool verifyVerb( void );
+
 private:
 	bool event( QEvent *pEvent );
 

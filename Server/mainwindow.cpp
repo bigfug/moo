@@ -485,7 +485,7 @@ void MainWindow::on_mButtonEditorUpdate_clicked()
 		N.setScript( ui->mTextEditor->document()->toPlainText() );
 
 		O->verbAdd( V->name(), N );
-	}
+		}
 	else if( ui->mEditorStack->currentIndex() == 2 )
 	{
 		Property	*P = currentProperty();
@@ -1240,34 +1240,40 @@ void MainWindow::on_mButtonEditorVerify_clicked()
 {
 	if( isEditingVerb() )
 	{
-		Verb			*V = currentVerb();
-
-		if( !V )
-		{
-			return;
-		}
-
-		lua_State		*L = luaL_newstate();
-
-		lua_moo::luaNewState( L );
-
-		QByteArray		 P = ui->mTextEditor->document()->toPlainText().toUtf8();
-
-		int Error = luaL_loadbuffer( L, P, P.size(), V->name().toUtf8() );
-
-		if( !Error )
+		if( verifyVerb() )
 		{
 			QMessageBox::information( this, tr( "Verb code verify" ), tr( "No errors detected" ) );
 		}
-		else
-		{
-			QString		Result = lua_tostring( L, -1 );
-
-			QMessageBox::warning( this, tr( "Verb code verify" ), Result );
-
-			lua_pop( L, 1 );
-		}
-
-		lua_close( L );
 	}
+}
+
+bool MainWindow::verifyVerb()
+{
+	Verb			*V = currentVerb();
+
+	if( !V )
+	{
+		return( false );
+	}
+
+	lua_State		*L = luaL_newstate();
+
+	lua_moo::luaNewState( L );
+
+	QByteArray		 P = ui->mTextEditor->document()->toPlainText().toUtf8();
+
+	int Error = luaL_loadbuffer( L, P, P.size(), V->name().toUtf8() );
+
+	if( Error )
+	{
+		QString		Result = lua_tostring( L, -1 );
+
+		QMessageBox::warning( this, tr( "Verb code verify" ), Result );
+
+		lua_pop( L, 1 );
+	}
+
+	lua_close( L );
+
+	return( !Error );
 }
