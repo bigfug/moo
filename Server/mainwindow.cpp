@@ -15,7 +15,7 @@
 #include "lua_moo.h"
 
 MainWindow::MainWindow( QWidget *pParent )
-	: QMainWindow( pParent ), ui( new Ui::MainWindow ), mLastExecutionTime( 0 )
+	: QMainWindow( pParent ), ui( new Ui::MainWindow )
 {
 	ui->setupUi( this );
 
@@ -259,18 +259,14 @@ void MainWindow::installModel( QAbstractItemModel *pModel )
 
 void MainWindow::stats( const ObjectManagerStats &pStats )
 {
-	qint64		NewExecutionTime = pStats.mExecutionTime;
-	qint64		CurExecutionTime = NewExecutionTime - mLastExecutionTime;
-
-	mLastExecutionTime = NewExecutionTime;
-
-	ui->mStatusBar->showMessage( tr( "Tasks: %1 - Objects: %2 - Reads: %3 - Writes: %4 - MaxId: %5 - Execution: %6" )
+	ui->mStatusBar->showMessage( tr( "Tasks: %1 - Objects: %2 - Reads: %3 - Writes: %4 - MaxId: %5 - Execution: %6 - Compile: %7" )
 								 .arg( pStats.mTasks )
 								 .arg( pStats.mObjectCount )
 								 .arg( pStats.mReads )
 								 .arg( pStats.mWrites )
 								 .arg( ObjectManager::instance()->maxId() )
-								 .arg( CurExecutionTime ) );
+								 .arg( pStats.mExecutionTime )
+								 .arg( pStats.mCompilationTime ) );
 }
 
 void MainWindow::trayActivated( QSystemTrayIcon::ActivationReason pReason )
@@ -373,7 +369,7 @@ void MainWindow::setCurrentProperty(QString pName)
 	updateProperty();
 }
 
-void MainWindow::on_mVerbList_itemClicked(QListWidgetItem *item)
+void MainWindow::on_mVerbList_itemClicked(QListWidgetItem *)
 {
 	ui->mEditorStack->setCurrentIndex( 1 );
 

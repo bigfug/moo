@@ -40,6 +40,8 @@ int Func::compile()
 		return( 0 );
 	}
 
+	qint64		CompileStart = QDateTime::currentMSecsSinceEpoch();
+
 	lua_moo::luaNewState( L );
 
 	int Error = luaL_loadstring( L, mData.mScript.toLatin1() );
@@ -52,6 +54,10 @@ int Func::compile()
 
 		mData.mDirty = false;
 	}
+
+	qint64		CompileEnd = QDateTime::currentMSecsSinceEpoch();
+
+	ObjectManager::instance()->recordCompilationTime( CompileEnd - CompileStart );
 
 	//lua_moo::stackDump( L );
 

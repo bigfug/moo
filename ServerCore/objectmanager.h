@@ -41,6 +41,7 @@ typedef struct ObjectManagerStats
 	int			mReads;
 	int			mWrites;
 	qint64		mExecutionTime;
+	qint64		mCompilationTime;
 } ObjectManagerStats;
 
 class ObjectManager : public QObject
@@ -163,6 +164,11 @@ public slots:
 	void recordExecutionTime( qint64 pMillis )
 	{
 		mStats.mExecutionTime += pMillis;
+	}
+
+	void recordCompilationTime( qint64 pMillis )
+	{
+		mStats.mCompilationTime += pMillis;
 	}
 
 	void networkRequestFinished( void );
