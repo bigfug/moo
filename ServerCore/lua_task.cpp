@@ -247,7 +247,7 @@ int lua_task::luaSetProgrammer( lua_State *L )
 }
 
 lua_task::lua_task( ConnectionId pConnectionId, const Task &pTask )
-	: mL( Q_NULLPTR ), mConnectionId( pConnectionId ), mMemUse( 0 ), mError( false )
+	: mL( Q_NULLPTR ), mConnectionId( pConnectionId ), mTimeStamp( 0 ), mMemUse( 0 ), mError( false )
 {
 	mTasks.push_front( pTask );
 }
@@ -269,6 +269,7 @@ lua_task::lua_task( lua_task &&t )
 	t.mConnectionId = CONNECTION_NONE;
 	t.mMemUse = 0;
 	t.mError  = false;
+	t.mTimeStamp = 0;
 }
 
 lua_task::~lua_task( void )
@@ -278,6 +279,13 @@ lua_task::~lua_task( void )
 		lua_close( mL );
 
 		mL = Q_NULLPTR;
+	}
+
+	if( mTimeStamp )
+	{
+		qint64		D = QDateTime::currentMSecsSinceEpoch() - mTimeStamp;
+
+		ObjectManager::instance()->recordExecutionTime( D );
 	}
 
 	if( !mError )
@@ -298,6 +306,8 @@ lua_State *lua_task::L()
 		{
 			return( Q_NULLPTR );
 		}
+
+		mTimeStamp = QDateTime::currentMSecsSinceEpoch();
 
 		lua_moo::luaNewState( mL );
 

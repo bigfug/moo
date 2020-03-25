@@ -14,6 +14,7 @@
 
 MainWindow::MainWindow( QWidget *pParent )
 	: QMainWindow( pParent ), ui( new Ui::MainWindow )
+	: QMainWindow( pParent ), ui( new Ui::MainWindow ), mLastExecutionTime( 0 )
 {
 	ui->setupUi( this );
 
@@ -257,12 +258,18 @@ void MainWindow::installModel( QAbstractItemModel *pModel )
 
 void MainWindow::stats( const ObjectManagerStats &pStats )
 {
-	ui->mStatusBar->showMessage( tr( "Tasks: %1 - Objects: %2 - Reads: %3 - Writes: %4 - MaxId: %5" )
+	qint64		NewExecutionTime = pStats.mExecutionTime;
+	qint64		CurExecutionTime = NewExecutionTime - mLastExecutionTime;
+
+	mLastExecutionTime = NewExecutionTime;
+
+	ui->mStatusBar->showMessage( tr( "Tasks: %1 - Objects: %2 - Reads: %3 - Writes: %4 - MaxId: %5 - Execution: %6" )
 								 .arg( pStats.mTasks )
 								 .arg( pStats.mObjectCount )
 								 .arg( pStats.mReads )
 								 .arg( pStats.mWrites )
-								 .arg( ObjectManager::instance()->maxId() ) );
+								 .arg( ObjectManager::instance()->maxId() )
+								 .arg( CurExecutionTime ) );
 }
 
 void MainWindow::trayActivated( QSystemTrayIcon::ActivationReason pReason )

@@ -134,6 +134,7 @@ private:
 private:
 	Ui::MainWindow		*ui;
 	QSystemTrayIcon		*mTrayIcon;
+	qint64				 mLastExecutionTime;
 };
 
 #endif // MAINWINDOW_H
