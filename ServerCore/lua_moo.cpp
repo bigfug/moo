@@ -256,11 +256,6 @@ void lua_moo::luaNewState( lua_State *L )
 {
 	luaL_openlibs( L );
 
-//	luaopen_base( L );		lua_pop( L, 1 );
-//	luaopen_table( L );		lua_pop( L, 1 );
-//	luaopen_string( L );	lua_pop( L, 1 );
-//	luaopen_math( L );		lua_pop( L, 1 );
-
 	luaRegisterAllStates( L );
 }
 
