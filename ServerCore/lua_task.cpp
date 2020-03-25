@@ -949,8 +949,6 @@ int lua_task::process( QString pCommand, ConnectionId pConnectionId, ObjectId pP
 	lua_task		 Com( pConnectionId, TaskEntry( pCommand, pConnectionId, pPlayerId ) );
 	int				 Ret = 0;
 
-	luaSetTask( Com.L(), &Com );
-
 	try
 	{
 		Ret = Com.eval();

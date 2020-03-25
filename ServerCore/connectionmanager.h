@@ -18,10 +18,12 @@ class ConnectionManager : public QObject
 
 	explicit ConnectionManager( QObject *pParent = 0 );
 
+	virtual ~ConnectionManager( void );
+
 public:
 	static ConnectionManager *instance( void );
 
-	virtual ~ConnectionManager( void );
+	static void reset( void );
 
 	ConnectionId fromPlayer( ObjectId pPlayerId );
 

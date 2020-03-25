@@ -131,7 +131,9 @@ mooApp::~mooApp()
 		OM_ODB->save();
 	}
 
-	ObjectManager::instance()->reset();
+	ConnectionManager::reset();
+
+	ObjectManager::reset();
 
 	OSC::deviceDeinitialise();
 }

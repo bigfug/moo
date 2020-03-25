@@ -47,6 +47,16 @@ ConnectionManager *ConnectionManager::instance( void )
 	return( Q_NULLPTR );
 }
 
+void ConnectionManager::reset()
+{
+	if( mInstance )
+	{
+		delete mInstance;
+
+		mInstance = nullptr;
+	}
+}
+
 ConnectionId ConnectionManager::doConnect( ObjectId pListenerId )
 {
 	const ConnectionId	 CID = ++mConnectionId;

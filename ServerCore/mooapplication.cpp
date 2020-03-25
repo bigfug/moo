@@ -178,15 +178,6 @@ void MooApplication::deinitialiseApp()
 		mServer = nullptr;
 	}
 
-	ConnectionManager	*CM = ConnectionManager::instance();
-
-	if( CM )
-	{
-		delete CM;
-
-		CM = nullptr;
-	}
-
 	if( mOSC )
 	{
 		OSC::delDevice( mOSC );
