@@ -81,6 +81,7 @@ const luaL_Reg lua_object::mLuaInstanceFunctions[] =
 	{ "find", lua_object::luaFind },
 	{ "isChildOf", lua_object::luaIsChildOf },
 	{ "isParentOf", lua_object::luaIsParentOf },
+	{ "is_valid", lua_object::luaIsValid },
 	{ 0, 0 }
 };
 
@@ -1720,6 +1721,17 @@ int lua_object::luaIsParentOf( lua_State *L )
 	}
 
 	return( LuaErr ? lua_error( L ) : 0 );
+}
+
+int lua_object::luaIsValid( lua_State *L )
+{
+	luaL_checkany( L, 1 );
+
+	lua_object::luaHandle	*H = (lua_object::luaHandle *)luaL_testudata( L, 1, lua_object::luaHandle::mLuaName );
+
+	lua_pushboolean( L, H && H->O >= 0 );
+
+	return( 1 );
 }
 
 int lua_object::luaChildren( lua_State *L )

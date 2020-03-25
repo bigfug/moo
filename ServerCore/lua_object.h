@@ -83,6 +83,7 @@ private:
 
 	static int luaIsChildOf( lua_State *L );
 	static int luaIsParentOf( lua_State *L );
+	static int luaIsValid( lua_State *L );
 
 	typedef enum Fields
 	{
