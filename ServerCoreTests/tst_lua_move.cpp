@@ -4,32 +4,20 @@
 #include "objectmanager.h"
 #include "connection.h"
 #include "connectionmanager.h"
+#include "luatestdata.h"
 
 #include "lua_moo.h"
 #include "lua_task.h"
 
 void ServerTest::luaMoveTestValidWhat( void )
 {
-	ObjectManager		&OM = *ObjectManager::instance();
-	ConnectionManager	&CM = *ConnectionManager::instance();
-	qint64				 TimeStamp = QDateTime::currentMSecsSinceEpoch();
-	ConnectionId		 CID = initLua( TimeStamp );
-	Connection			&Con = *CM.connection( CID );
+	LuaTestData			 TD;
 
-	Object			*Programmer = OM.object( Con.player() );
+	TD.process( QString( "o( 123 ).location = o( %1 )" ).arg( TD.programmerId() ) );
 
-	QVERIFY( Programmer != 0 );
+	QVERIFY( TD.Programmer );
 
-	if( true )
-	{
-		lua_task::process( QString( "o( 123 ).location = o( %1 )" ).arg( Programmer->id() ), CID, Programmer->id() );
-
-		//lua_moo::stackDump( Com.L() );
-
-		QVERIFY( Programmer->children().isEmpty() );
-	}
-
-	ObjectManager::reset();
+	QVERIFY( TD.Programmer->children().isEmpty() );
 }
 
 void ServerTest::luaMoveToRoot( void )

@@ -3,6 +3,7 @@
 
 #include "objectmanager.h"
 #include "connectionmanager.h"
+#include "luatestdata.h"
 
 #include "connection.h"
 #include "object.h"
@@ -10,21 +11,7 @@
 
 void ServerTest::luaTaskTests( void )
 {
-	ObjectManager		&OM = *ObjectManager::instance();
-	ConnectionManager	&CM = *ConnectionManager::instance();
-	qint64				 TimeStamp = QDateTime::currentMSecsSinceEpoch();
-	ConnectionId		 CID = initLua( TimeStamp );
-	Connection			&Con = *CM.connection( CID );
+	LuaTestData			 TD;
 
-	Object			*Programmer = OM.object( Con.player() );
-	Object			*O = OM.newObject();
-
-	O->setOwner( Programmer->id() );
-
-	if( true )
-	{
-		lua_task::process( "moo.notify( \"PlayerId = \" .. moo.player.id )", CID );
-	}
-
-	ObjectManager::reset();
+	TD.process( "moo.notify( \"PlayerId = \" .. moo.player.id )" );
 }

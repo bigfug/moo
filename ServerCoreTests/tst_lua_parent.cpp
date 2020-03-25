@@ -7,6 +7,7 @@
 
 #include "connection.h"
 #include "lua_task.h"
+#include "luatestdata.h"
 
 void ServerTest::luaParentTestValidObject( void )
 {
@@ -87,18 +88,13 @@ void ServerTest::luaParentBasic( void )
 
 void ServerTest::luaParentBasicReparent( void )
 {
-	ObjectManager		&OM = *ObjectManager::instance();
-	ConnectionManager	&CM = *ConnectionManager::instance();
-	qint64				 TimeStamp = QDateTime::currentMSecsSinceEpoch();
-	ConnectionId		 CID = initLua( TimeStamp );
-	Connection			&Con = *CM.connection( CID );
+	LuaTestData			 TD;
 
-	Object			*Programmer = OM.object( Con.player() );
-	Object			*Parent1   = OM.newObject();
-	Object			*Parent2   = OM.newObject();
-	Object			*objObject = OM.newObject();
+	Object			*Parent1   = TD.OM.newObject();
+	Object			*Parent2   = TD.OM.newObject();
+	Object			*objObject = TD.OM.newObject();
 
-	objObject->setOwner( Programmer->id() );
+	objObject->setOwner( TD.programmerId() );
 	objObject->setParent( Parent1->id() );
 
 	QCOMPARE( Parent1->children().size(), 1 );
@@ -106,7 +102,7 @@ void ServerTest::luaParentBasicReparent( void )
 
 	if( true )
 	{
-		lua_task::process( QString( "o( %1 ).parent = %2" ).arg( objObject->id() ).arg( Parent2->id() ), CID, Programmer->id() );
+		TD.process( QString( "o( %1 ).parent = %2" ).arg( objObject->id() ).arg( Parent2->id() ) );
 
 		//lua_moo::stackDump( Com.L() );
 
@@ -116,8 +112,6 @@ void ServerTest::luaParentBasicReparent( void )
 	}
 
 	objObject->setParent( OBJECT_NONE );
-
-	ObjectManager::reset();
 }
 
 void ServerTest::luaParentLoopTest( void )

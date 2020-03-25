@@ -12,6 +12,24 @@ ConnectionManager::ConnectionManager( QObject *pParent ) :
 {
 }
 
+ConnectionManager::~ConnectionManager()
+{
+	for( ConnectionNodeMap::iterator it = mConnectionNodeMap.begin() ; it != mConnectionNodeMap.end() ; it++ )
+	{
+		delete it.value();
+	}
+
+	mConnectionNodeMap.clear();
+
+	QMutexLocker		 L( &mClosedSocketMutex );
+
+	qDeleteAll( mClosedSocketList );
+
+	mClosedSocketList.clear();
+
+	mInstance = nullptr;
+}
+
 ConnectionManager *ConnectionManager::instance( void )
 {
 	if( mInstance )

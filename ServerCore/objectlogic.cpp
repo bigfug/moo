@@ -310,7 +310,7 @@ void ObjectLogic::chparent( lua_task &pTask, ObjectId pUserId, ObjectId pObjectI
 		//   (that is, those ancestors of object that are in turn descendants
 		//   of common) are removed from object and all of its descendants.
 
-		for( QList<ObjectId>::const_iterator it = ObjAnc.begin() ; *it != NearestAncestor && it != ObjAnc.end() ; it++ )
+		for( QList<ObjectId>::const_iterator it = ObjAnc.begin() ; it != ObjAnc.end() && *it != NearestAncestor ; it++ )
 		{
 			Object		*O = OM.object( *it );
 
@@ -337,7 +337,7 @@ void ObjectLogic::chparent( lua_task &pTask, ObjectId pUserId, ObjectId pObjectI
 		//   see the description of the built-in function clear_property()
 		//   for details.
 
-		for( QList<ObjectId>::const_iterator it = NewAnc.begin() ; *it != NearestAncestor && it != NewAnc.end() ; it++ )
+		for( QList<ObjectId>::const_iterator it = NewAnc.begin() ; it != ObjAnc.end() && *it != NearestAncestor ; it++ )
 		{
 			Object			*O = OM.object( *it );
 

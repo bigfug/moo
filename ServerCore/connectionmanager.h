@@ -21,6 +21,8 @@ class ConnectionManager : public QObject
 public:
 	static ConnectionManager *instance( void );
 
+	virtual ~ConnectionManager( void );
+
 	ConnectionId fromPlayer( ObjectId pPlayerId );
 
 	Connection *connection( ConnectionId pConnectionId );
