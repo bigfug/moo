@@ -14,6 +14,15 @@ set( CMAKE_CXX_STANDARD_REQUIRED ON )
 set( CMAKE_CXX_EXTENSIONS OFF )
 
 #------------------------------------------------------------------------------
+
+if (CMAKE_SIZEOF_VOID_P EQUAL 8)
+	message(STATUS "*** Have SIZEOF void * = 8, so 64-bit")
+	set( IS_64_BIT 1 )
+else ()
+	message(STATUS "*** SIZEOF void * != 8, so not 64-bit")
+endif ()
+
+#------------------------------------------------------------------------------
 # Enable Unit Testing
 
 include( CTest )
