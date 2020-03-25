@@ -17,6 +17,12 @@ typedef enum ArgObj
 
 typedef struct VerbData
 {
+	VerbData( void )
+		: mDirectObject( NONE ), mIndirectObject( NONE ), mPrepositionType( NONE )
+	{
+
+	}
+
 	ArgObj			mDirectObject;
 	ArgObj			mIndirectObject;
 	ArgObj			mPrepositionType;

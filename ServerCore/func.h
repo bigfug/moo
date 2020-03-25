@@ -19,6 +19,11 @@ typedef struct FuncData
 	QString			mScript;
 	QByteArray		mCompiled;
 	bool			mDirty;
+
+	FuncData( void ): mObject( OBJECT_NONE ), mOwner( OBJECT_NONE ), mRead( false ), mWrite( false ), mExecute( false ), mDirty( false )
+	{
+
+	}
 } FuncData;
 
 class Func

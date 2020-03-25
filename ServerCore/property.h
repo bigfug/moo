@@ -8,6 +8,13 @@
 
 typedef struct PropertyData
 {
+	PropertyData( void )
+		: mObject( OBJECT_NONE ), mParent( OBJECT_NONE ), mOwner( OBJECT_NONE ),
+		  mRead( false ), mWrite( false ), mChange( false )
+	{
+
+	}
+
 	ObjectId		mObject;		// The object this property is attached to
 	QString			mName;			// The name of this property
 	ObjectId		mParent;		// The parent object that defined this property

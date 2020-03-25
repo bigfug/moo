@@ -216,6 +216,8 @@ private:
 	QMap<ObjectId,QStringList>	 mAddedProperties;
 	QMap<ObjectId,QStringList>	 mDeletedProperties;
 	QMap<ObjectId,QStringList>	 mUpdatedProperties;
+
+	Q_DISABLE_COPY( ObjectManager )
 };
 
 #endif // OBJECTMANAGER_H

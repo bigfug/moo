@@ -144,6 +144,8 @@ private:
 
 	friend class lua_moo;
 	friend class ServerTest;
+
+	Q_DISABLE_COPY( lua_task )
 };
 
 #endif // LUA_TASK_H
