@@ -294,7 +294,7 @@ int lua_verb::luaGet( lua_State *L )
 
 		throw( mooException( E_PROPNF, QString( "property '%1' is not defined" ).arg( QString( s ) ) ) );
 	}
-	catch( mooException e )
+	catch( mooException &e )
 	{
 		e.lua_pushexception( L );
 
@@ -532,7 +532,7 @@ int lua_verb::luaSet( lua_State *L )
 
 		throw( mooException( E_PROPNF, QString( "property '%1' is not defined" ).arg( N ) ) );
 	}
-	catch( mooException e )
+	catch( mooException &e )
 	{
 		e.lua_pushexception( L );
 
@@ -580,7 +580,7 @@ int lua_verb::luaAliasAdd( lua_State *L )
 
 		Command->changeAdd( new change::VerbAliasAdd( V, N ) );
 	}
-	catch( mooException e )
+	catch( mooException &e )
 	{
 		e.lua_pushexception( L );
 
@@ -630,7 +630,7 @@ int lua_verb::luaAliasRem(lua_State *L)
 
 		V->remAlias( QString( N ) );
 	}
-	catch( mooException e )
+	catch( mooException &e )
 	{
 		e.lua_pushexception( L );
 
@@ -678,7 +678,7 @@ int lua_verb::luaDump( lua_State *L )
 
 		C->notify( "." );
 	}
-	catch( mooException e )
+	catch( mooException &e )
 	{
 		e.lua_pushexception( L );
 
@@ -726,7 +726,7 @@ int lua_verb::luaProgram( lua_State *L )
 
 		C->pushInputSink( IS );
 	}
-	catch( mooException e )
+	catch( mooException &e )
 	{
 		e.lua_pushexception( L );
 
@@ -781,7 +781,7 @@ int lua_verb::luaEdit( lua_State *L )
 
 		C->pushInputSink( IS );
 	}
-	catch( mooException e )
+	catch( mooException &e )
 	{
 		e.lua_pushexception( L );
 

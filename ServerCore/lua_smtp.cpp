@@ -105,7 +105,7 @@ int lua_smtp::luaSetSender(lua_State *L)
 
 		UD->mMimeMessage->setSender( Addr );
 	}
-	catch( mooException e )
+	catch( mooException &e )
 	{
 		e.lua_pushexception( L );
 
@@ -140,7 +140,7 @@ int lua_smtp::luaAddTo( lua_State *L )
 
 		UD->mMimeMessage->addTo( Addr );
 	}
-	catch( mooException e )
+	catch( mooException &e )
 	{
 		e.lua_pushexception( L );
 
@@ -166,7 +166,7 @@ int lua_smtp::luaSetSubject( lua_State *L )
 
 		UD->mMimeMessage->setSubject( QString::fromLatin1( Text, TLen ) );
 	}
-	catch( mooException e )
+	catch( mooException &e )
 	{
 		e.lua_pushexception( L );
 
@@ -196,7 +196,7 @@ int lua_smtp::luaAddText( lua_State *L )
 
 		Mime->setParent( UD->mMimeMessage.data() );
 	}
-	catch( mooException e )
+	catch( mooException &e )
 	{
 		e.lua_pushexception( L );
 
@@ -233,7 +233,7 @@ int lua_smtp::luaSend( lua_State *L )
 
 		Worker->start();
 	}
-	catch( mooException e )
+	catch( mooException &e )
 	{
 		e.lua_pushexception( L );
 

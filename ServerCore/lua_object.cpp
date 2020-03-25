@@ -291,7 +291,7 @@ int lua_object::luaCreate( lua_State *L )
 
 		return( 1 );
 	}
-	catch( mooException e )
+	catch( mooException &e )
 	{
 		e.lua_pushexception( L );
 
@@ -541,7 +541,7 @@ int lua_object::luaGet( lua_State *L )
 
 		// Nothing found
 	}
-	catch( mooException e )
+	catch( mooException &e )
 	{
 		e.lua_pushexception( L );
 
@@ -885,15 +885,11 @@ int lua_object::luaSet( lua_State *L )
 
 		Command->changeAdd( new change::ObjectSetProperty( O, FndPrp->name(), V ) );
 	}
-	catch( mooException e )
+	catch( mooException &e )
 	{
 		e.lua_pushexception( L );
 
 		LuaErr = true;
-	}
-	catch( ... )
-	{
-
 	}
 
 	return( LuaErr ? lua_error( L ) : 0 );
@@ -912,7 +908,7 @@ int lua_object::luaToString( lua_State *L )
 
 		return( 1 );
 	}
-	catch( mooException e )
+	catch( mooException &e )
 	{
 		e.lua_pushexception( L );
 
@@ -948,7 +944,7 @@ int lua_object::luaObject( lua_State *L )
 
 		return( 1 );
 	}
-	catch( mooException e )
+	catch( mooException &e )
 	{
 		e.lua_pushexception( L );
 
@@ -997,7 +993,7 @@ int lua_object::luaVerb( lua_State *L )
 
 		return( 1 );
 	}
-	catch( mooException e )
+	catch( mooException &e )
 	{
 		e.lua_pushexception( L );
 
@@ -1053,7 +1049,7 @@ int lua_object::luaVerbAdd( lua_State *L )
 
 		return( 1 );
 	}
-	catch( mooException e )
+	catch( mooException &e )
 	{
 		e.lua_pushexception( L );
 
@@ -1103,7 +1099,7 @@ int lua_object::luaVerbDel(lua_State *L)
 
 		return( 0 );
 	}
-	catch( mooException e )
+	catch( mooException &e )
 	{
 		e.lua_pushexception( L );
 
@@ -1208,7 +1204,7 @@ int lua_object::luaVerbCall( lua_State *L )
 
 		return( ResCnt );
 	}
-	catch( mooException e )
+	catch( mooException &e )
 	{
 		e.lua_pushexception( L );
 
@@ -1321,7 +1317,7 @@ int lua_object::luaPropAdd( lua_State *L )
 
 		return( 0 );
 	}
-	catch( mooException e )
+	catch( mooException &e )
 	{
 		e.lua_pushexception( L );
 
@@ -1387,7 +1383,7 @@ int lua_object::luaPropDel( lua_State *L )
 
 		return( 0 );
 	}
-	catch( mooException e )
+	catch( mooException &e )
 	{
 		e.lua_pushexception( L );
 
@@ -1455,7 +1451,7 @@ int lua_object::luaPropClear(lua_State *L)
 
 		return( 0 );
 	}
-	catch( mooException e )
+	catch( mooException &e )
 	{
 		e.lua_pushexception( L );
 
@@ -1491,7 +1487,7 @@ int lua_object::luaNotify( lua_State *L )
 
 		return( 0 );
 	}
-	catch( mooException e )
+	catch( mooException &e )
 	{
 		e.lua_pushexception( L );
 
@@ -1526,7 +1522,7 @@ int lua_object::luaProps( lua_State *L )
 
 		return( 1 );
 	}
-	catch( mooException e )
+	catch( mooException &e )
 	{
 		e.lua_pushexception( L );
 
@@ -1561,7 +1557,7 @@ int lua_object::luaVerbs( lua_State *L )
 
 		return( 1 );
 	}
-	catch( mooException e )
+	catch( mooException &e )
 	{
 		e.lua_pushexception( L );
 
@@ -1638,7 +1634,7 @@ int lua_object::luaFind( lua_State *L )
 
 		return( 1 );
 	}
-	catch( mooException e )
+	catch( mooException &e )
 	{
 		e.lua_pushexception( L );
 
@@ -1677,7 +1673,7 @@ int lua_object::luaIsChildOf( lua_State *L )
 
 		return( 1 );
 	}
-	catch( mooException e )
+	catch( mooException &e )
 	{
 		e.lua_pushexception( L );
 
@@ -1715,7 +1711,7 @@ int lua_object::luaIsParentOf( lua_State *L )
 
 		return( 1 );
 	}
-	catch( mooException e )
+	catch( mooException &e )
 	{
 		e.lua_pushexception( L );
 
@@ -1761,7 +1757,7 @@ int lua_object::luaChildren( lua_State *L )
 
 		return( 1 );
 	}
-	catch( mooException e )
+	catch( mooException &e )
 	{
 		e.lua_pushexception( L );
 
@@ -1801,7 +1797,7 @@ int lua_object::luaPlayers( lua_State *L )
 
 		return( 1 );
 	}
-	catch( mooException e )
+	catch( mooException &e )
 	{
 		e.lua_pushexception( L );
 
@@ -1841,7 +1837,7 @@ int lua_object::luaChild( lua_State *L )
 			return( 1 );
 		}
 	}
-	catch( mooException e )
+	catch( mooException &e )
 	{
 		e.lua_pushexception( L );
 
@@ -1869,7 +1865,7 @@ int lua_object::luaRecycle( lua_State *L )
 
 		ObjectLogic::recycle( *Command, T.programmer(), O->id() );
 	}
-	catch( mooException e )
+	catch( mooException &e )
 	{
 		e.lua_pushexception( L );
 
@@ -1948,7 +1944,7 @@ int lua_object::luaProperty( lua_State *L )
 			return( 1 );
 		}
 	}
-	catch( mooException e )
+	catch( mooException &e )
 	{
 		e.lua_pushexception( L );
 
@@ -1987,7 +1983,7 @@ int lua_object::luaAliasAdd(lua_State *L)
 
 		Command->changeAdd( new change::ObjectAliasAdd( O, N ) );
 	}
-	catch( mooException e )
+	catch( mooException &e )
 	{
 		e.lua_pushexception( L );
 
@@ -2026,7 +2022,7 @@ int lua_object::luaAliasDel(lua_State *L)
 
 		Command->changeAdd( new change::ObjectAliasDelete( O, N ) );
 	}
-	catch( mooException e )
+	catch( mooException &e )
 	{
 		e.lua_pushexception( L );
 

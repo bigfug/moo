@@ -193,7 +193,7 @@ int lua_text::luaPronounSubstitution( lua_State *L )
 
 		return( 1 );
 	}
-	catch( mooException e )
+	catch( mooException &e )
 	{
 		e.lua_pushexception( L );
 

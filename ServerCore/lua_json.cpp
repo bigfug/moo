@@ -239,7 +239,7 @@ int lua_json::luaParse( lua_State *L )
 
 		return( 1 );
 	}
-	catch( mooException e )
+	catch( mooException &e )
 	{
 		e.lua_pushexception( L );
 
@@ -274,7 +274,7 @@ int lua_json::luaGetArray( lua_State *L )
 
 		return( lua_pushjsonvalue( L, UD->mJsonArray.at( i ) ) );
 	}
-	catch( mooException e )
+	catch( mooException &e )
 	{
 		e.lua_pushexception( L );
 
@@ -311,7 +311,7 @@ int lua_json::luaObjectGet( lua_State *L )
 
 		return( lua_pushjsonvalue( L, UD->mJsonObject.value( s ) ) );
 	}
-	catch( mooException e )
+	catch( mooException &e )
 	{
 		e.lua_pushexception( L );
 
@@ -466,7 +466,7 @@ int lua_json::luaDocumentGet( lua_State *L )
 
 //		throw( mooException( E_PROPNF, QString( "property '%1' is not defined" ).arg( QString( s ) ) ) );
 	}
-	catch( mooException e )
+	catch( mooException &e )
 	{
 		e.lua_pushexception( L );
 

@@ -92,7 +92,7 @@ int lua_connection::luaPlayer( lua_State *L )
 			return( 1 );
 		}
 	}
-	catch( mooException e )
+	catch( mooException &e )
 	{
 		e.lua_pushexception( L );
 
@@ -136,7 +136,7 @@ int lua_connection::luaNotify( lua_State *L )
 
 		return( 0 );
 	}
-	catch( mooException e )
+	catch( mooException &e )
 	{
 		e.lua_pushexception( L );
 
@@ -234,7 +234,7 @@ int lua_connection::luaGet( lua_State *L )
 
 		throw( mooException( E_PROPNF, QString( "property '%1' is not defined" ).arg( QString( s ) ) ) );
 	}
-	catch( mooException e )
+	catch( mooException &e )
 	{
 		e.lua_pushexception( L );
 
@@ -296,7 +296,7 @@ int lua_connection::luaSet(lua_State *L)
 
 		throw( mooException( E_PROPNF, QString( "property '%1' is not defined" ).arg( QString( s ) ) ) );
 	}
-	catch( mooException e )
+	catch( mooException &e )
 	{
 		e.lua_pushexception( L );
 

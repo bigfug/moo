@@ -499,7 +499,7 @@ int lua_moo::luaGet( lua_State *L )
 			return( F( L ) );
 		}
 	}
-	catch( mooException e )
+	catch( mooException &e )
 	{
 		e.lua_pushexception( L );
 
@@ -530,7 +530,7 @@ int lua_moo::luaSet( lua_State *L )
 			return( F( L ) );
 		}
 	}
-	catch( mooException e )
+	catch( mooException &e )
 	{
 		e.lua_pushexception( L );
 
@@ -636,7 +636,7 @@ int lua_moo::luaNotify( lua_State *L )
 
 		return( 0 );
 	}
-	catch( mooException e )
+	catch( mooException &e )
 	{
 		e.lua_pushexception( L );
 
@@ -667,7 +667,7 @@ int lua_moo::luaRoot( lua_State *L )
 
 		return( 1 );
 	}
-	catch( mooException e )
+	catch( mooException &e )
 	{
 		e.lua_pushexception( L );
 
@@ -696,7 +696,7 @@ int lua_moo::luaSystem( lua_State *L )
 
 		return( lua_object::lua_pushobject( L, O ) );
 	}
-	catch( mooException e )
+	catch( mooException &e )
 	{
 		e.lua_pushexception( L );
 
@@ -775,7 +775,7 @@ int lua_moo::luaPass( lua_State *L )
 			id = P->id();
 		}
 	}
-	catch( mooException e )
+	catch( mooException &e )
 	{
 		e.lua_pushexception( L );
 
@@ -820,7 +820,7 @@ int lua_moo::luaEval( lua_State *L )
 
 		return( Results );
 	}
-	catch( mooException e )
+	catch( mooException &e )
 	{
 		e.lua_pushexception( L );
 
@@ -987,7 +987,7 @@ int lua_moo::luaCheckPoint( lua_State *L )
 
 		OM.checkpoint();
 	}
-	catch( mooException e )
+	catch( mooException &e )
 	{
 		e.lua_pushexception( L );
 
@@ -1021,7 +1021,7 @@ int lua_moo::luaLastObject(lua_State *L)
 
 		return( 1 );
 	}
-	catch( mooException e )
+	catch( mooException &e )
 	{
 		e.lua_pushexception( L );
 
@@ -1088,7 +1088,7 @@ int lua_moo::luaNetworkGet( lua_State *L )
 
 		return( 0 );
 	}
-	catch( mooException e )
+	catch( mooException &e )
 	{
 		e.lua_pushexception( L );
 
@@ -1396,7 +1396,7 @@ int lua_moo::luaRead( lua_State *L )
 			}
 		}
 	}
-	catch( mooException e )
+	catch( mooException &e )
 	{
 		e.lua_pushexception( L );
 
@@ -1464,7 +1464,7 @@ int lua_moo::luaCookie( lua_State *L )
 			return( 1 );
 		}
 	}
-	catch( mooException e )
+	catch( mooException &e )
 	{
 		e.lua_pushexception( L );
 
@@ -1494,7 +1494,7 @@ int lua_moo::luaClearCookie( lua_State *L )
 			Command->changeAdd( new change::ConnectionClearCookie( C, QString::fromLatin1( S ) ) );
 		}
 	}
-	catch( mooException e )
+	catch( mooException &e )
 	{
 		e.lua_pushexception( L );
 

@@ -607,7 +607,7 @@ int lua_task::executeLogin( void )
 			}
 		}
 	}
-	catch( mooException e )
+	catch( mooException &e )
 	{
 		e.lua_pushexception( mL );
 
@@ -789,7 +789,7 @@ int lua_task::execute( void )
 
 		return( verbCallCode( FndVrb ) );
 	}
-	catch( mooException e )
+	catch( mooException &e )
 	{
 		e.lua_pushexception( mL );
 

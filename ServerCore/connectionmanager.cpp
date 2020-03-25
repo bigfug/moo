@@ -160,7 +160,7 @@ void ConnectionManager::processClosedSockets( void )
 			{
 				lua_task::process( QString( "moo.root:user_client_disconnected( o( %1 ) )" ).arg( CON->player() ), LS->connectionId(), CON->player() );
 			}
-			catch( mooException e )
+			catch( mooException &e )
 			{
 
 			}
