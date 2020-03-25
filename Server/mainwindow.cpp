@@ -471,7 +471,7 @@ void MainWindow::on_mButtonEditorUpdate_clicked()
 		return;
 	}
 
-	if( ui->mEditorStack->currentIndex() == 1 )
+	if( isEditingVerb() )
 	{
 		Verb		*V = currentVerb();
 
@@ -480,13 +480,12 @@ void MainWindow::on_mButtonEditorUpdate_clicked()
 			return;
 		}
 
-		Verb		 N = *V;
-
-		N.setScript( ui->mTextEditor->document()->toPlainText() );
-
-		O->verbAdd( V->name(), N );
+		if( verifyVerb() )
+		{
+			V->setScript( ui->mTextEditor->document()->toPlainText() );
 		}
-	else if( ui->mEditorStack->currentIndex() == 2 )
+	}
+	else if( isEditingProperty() )
 	{
 		Property	*P = currentProperty();
 
