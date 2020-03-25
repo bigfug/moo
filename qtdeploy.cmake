@@ -10,7 +10,7 @@ target_link_libraries( ${PROJECT_NAME} Qt5::Core Qt5::Gui Qt5::Network Qt5::Widg
 get_target_property(_qmake_executable Qt5::qmake IMPORTED_LOCATION)
 get_filename_component(_qt_bin_dir "${_qmake_executable}" DIRECTORY)
 
-if( WIN32 AND CMAKE_BUILD_TYPE STREQUAL Release AND FUGIO_BUILD_DIST )
+if( WIN32 AND CMAKE_BUILD_TYPE STREQUAL Release )
 	find_program( WINDEPLOYQT_EXECUTABLE windeployqt HINTS "${_qt_bin_dir}" )
 
 	get_filename_component( ABS_BINARY_DIR "${CMAKE_INSTALL_PREFIX}" REALPATH BASE_DIR "${CMAKE_BINARY_DIR}")
@@ -20,14 +20,11 @@ if( WIN32 AND CMAKE_BUILD_TYPE STREQUAL Release AND FUGIO_BUILD_DIST )
 	  COMMAND "${WINDEPLOYQT_EXECUTABLE}"
 		--verbose 2
 		--no-compiler-runtime
-		--no-angle
-		--no-opengl-sw
-				--concurrent --opengl --serialport --websockets --network --qml --quick --quickwidgets
-				--qmldir "${CMAKE_SOURCE_DIR}/qml"
-				--dir "${ABS_BINARY_DIR}/${PATH_APP}"
-				--libdir "${ABS_BINARY_DIR}/${PATH_APP}"
-				--plugindir "${ABS_BINARY_DIR}/${PATH_APP}"
-				\"$<TARGET_FILE:${PROJECT_NAME}>\"
+		--serialport --websockets --network
+		--dir "${ABS_BINARY_DIR}/${PATH_APP}"
+		--libdir "${ABS_BINARY_DIR}/${PATH_APP}"
+		--plugindir "${ABS_BINARY_DIR}/${PATH_APP}"
+		\"$<TARGET_FILE:${PROJECT_NAME}>\"
 	)
 
 	file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}_$<CONFIG>_path"
@@ -43,11 +40,8 @@ if( WIN32 AND CMAKE_BUILD_TYPE STREQUAL Release AND FUGIO_BUILD_DIST )
 			COMMAND \"${WINDEPLOYQT_EXECUTABLE}\"
 					--dry-run
 					--no-compiler-runtime
-					--no-angle
-					--no-opengl-sw
 					--list mapping
-					--concurrent --opengl --serialport --websockets --network --qml --quick --quickwidgets
-					--qmldir \"${CMAKE_SOURCE_DIR}/qml\"
+					--serialport --websockets --network
 					--dir \"${ABS_BINARY_DIR}/${PATH_APP}\"
 					--libdir \"${ABS_BINARY_DIR}/${PATH_APP}\"
 					--plugindir \"${ABS_BINARY_DIR}/${PATH_APP}\"
@@ -94,7 +88,7 @@ if( WIN32 AND CMAKE_BUILD_TYPE STREQUAL Release AND FUGIO_BUILD_DIST )
 
 endif()
 
-if( APPLE AND CMAKE_BUILD_TYPE STREQUAL Release AND FUGIO_BUILD_DIST )
+if( APPLE AND CMAKE_BUILD_TYPE STREQUAL Release )
 
 	find_program( MACDEPLOYQT_EXECUTABLE macdeployqt HINTS "${_qt_bin_dir}" )
 
