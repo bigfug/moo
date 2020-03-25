@@ -70,6 +70,8 @@ void InputSinkEditor::test()
 
 		lua_pop( L, 1 );
 	}
+
+	lua_close( L );
 }
 
 void InputSinkEditor::save()
@@ -102,4 +104,6 @@ void InputSinkEditor::save()
 
 		lua_pop( L, 1 );
 	}
+
+	lua_close( L );
 }
