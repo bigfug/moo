@@ -19,7 +19,7 @@ LuaTestData::LuaTestData( void ) :
 
 LuaTestData::~LuaTestData()
 {
-	delete ConnectionManager::instance();
+	ConnectionManager::reset();
 
 	ObjectManager::reset();
 }

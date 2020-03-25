@@ -44,7 +44,7 @@ void ServerTest::initTestCase( void )
 
 void ServerTest::cleanupTestCase()
 {
-	delete ConnectionManager::instance();
+	ConnectionManager::reset();
 }
 
 void ServerTest::luaRegistration( void )
