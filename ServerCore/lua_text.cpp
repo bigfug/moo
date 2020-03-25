@@ -211,7 +211,7 @@ int lua_text::luaBold( lua_State *L )
 {
 	const char			*S = luaL_checkstring( L, 1 );
 
-	lua_pushstring( L, QString( "*%1*" ).arg( S ).toLatin1().constData() );
+	lua_pushstring( L, QString( "<b>%1</b>" ).arg( S ).toLatin1().constData() );
 
 	return( 1 );
 }

@@ -40,6 +40,8 @@ const luaL_Reg lua_json::mLuaObjectInstance[] =
 	{ "__index", lua_json::luaObjectGet },
 	{ "isObject", lua_json::luaObjectIsObject },
 	{ "isArray", lua_json::luaObjectIsArray },
+	{ "is_object", lua_json::luaObjectIsObject },
+	{ "is_array", lua_json::luaObjectIsArray },
 	{ "pairs", lua_json::luaObjectPairs },
 	{ 0, 0 }
 };

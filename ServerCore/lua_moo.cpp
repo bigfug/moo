@@ -58,6 +58,8 @@ const luaL_Reg lua_moo::mLuaStatic[] =
 	{ "hash", lua_moo::luaHash },
 	{ "findPlayer", lua_moo::luaFindPlayer },
 	{ "findByProp", lua_moo::luaFindByProp },
+	{ "find_player", lua_moo::luaFindPlayer },
+	{ "find_by_prop", lua_moo::luaFindByProp },
 	{ "get", lua_moo::luaNetworkGet },
 	{ "read", lua_moo::luaRead },
 	{ "find", lua_moo::luaFind },
@@ -65,6 +67,7 @@ const luaL_Reg lua_moo::mLuaStatic[] =
 	{ "setCookie", lua_moo::luaSetCookie },
 	{ "clear", lua_moo::luaClearCookie },
 	{ "isValidObject", lua_moo::luaIsValidObject },
+	{ "is_valid_object", lua_moo::luaIsValidObject },
 	{ "gmcp", lua_moo::luaGMCP },
 	{ 0, 0 }
 };

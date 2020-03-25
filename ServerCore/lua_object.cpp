@@ -81,6 +81,8 @@ const luaL_Reg lua_object::mLuaInstanceFunctions[] =
 	{ "find", lua_object::luaFind },
 	{ "isChildOf", lua_object::luaIsChildOf },
 	{ "isParentOf", lua_object::luaIsParentOf },
+	{ "is_child_of", lua_object::luaIsChildOf },
+	{ "is_parent_of", lua_object::luaIsParentOf },
 	{ "is_valid", lua_object::luaIsValid },
 	{ 0, 0 }
 };

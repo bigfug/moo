@@ -18,6 +18,8 @@ const luaL_Reg lua_serialport::mLuaStatic[] =
 {
 	{ "openSerialPort", lua_serialport::luaOpenSerialPort },
 	{ "serialPort", lua_serialport::luaPort },
+	{ "open_serial_port", lua_serialport::luaOpenSerialPort },
+	{ "serial_port", lua_serialport::luaPort },
 	{ 0, 0 }
 };
 
@@ -31,6 +33,7 @@ const luaL_Reg lua_serialport::mLuaInstance[] =
 const luaL_Reg lua_serialport::mLuaInstanceFunctions[] =
 {
 	{ "setBaudRate", lua_serialport::luaSetBaudRate },
+	{ "set_baud_rate", lua_serialport::luaSetBaudRate },
 	{ "open", lua_serialport::luaOpen },
 	{ "close", lua_serialport::luaClose },
 	{ "read", lua_serialport::luaRead },
