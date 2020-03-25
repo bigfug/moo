@@ -46,12 +46,24 @@ target_link_libraries( ${PROJECT_NAME}
 )
 
 if( APPLE )
-set_target_properties( ${PROJECT_NAME} PROPERTIES
-	MACOSX_FRAMEWORK_ICON_FILE moo-icon.ico
-	MACOSX_FRAMEWORK_IDENTIFIER com.bigfug.moo.server
-	MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Info.plist
-)
+	set( MOO_ICON moo-icon.icns )
+
+	set_target_properties( ${PROJECT_NAME} PROPERTIES
+		MACOSX_FRAMEWORK_IDENTIFIER com.bigfug.moo.server
+		MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Info.plist
+		MACOSX_BUNDLE_ICON_FILE ${MOO_ICON}
+	)
+
+	set_source_files_properties( ${MOO_ICON} PROPERTIES
+		MACOSX_PACKAGE_LOCATION "Resources"
+		)
+
+	target_sources( ${PROJECT_NAME} PRIVATE
+		${MOO_ICON}
+		)
+
 endif( APPLE )
+
 
 install( TARGETS ${PROJECT_NAME}
 	RUNTIME DESTINATION ${PATH_APP}

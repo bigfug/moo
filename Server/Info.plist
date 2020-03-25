@@ -7,7 +7,7 @@
 	<key>NSHighResolutionCapable</key>
 	<string>True</string>
 	<key>CFBundleIconFile</key>
-	<string>icon_128x128.icns</string>
+	<string>moo-icon.icns</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleGetInfoString</key>

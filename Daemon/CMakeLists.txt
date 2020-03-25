@@ -26,6 +26,24 @@ install( TARGETS ${PROJECT_NAME}
 	BUNDLE DESTINATION ${PATH_APP}
 )
 
+if( APPLE )
+	set( MOO_ICON ../Server/moo-icon.icns )
+
+	set_target_properties( ${PROJECT_NAME} PROPERTIES
+		MACOSX_FRAMEWORK_IDENTIFIER com.bigfug.moo.daemon
+#		MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Info.plist
+		MACOSX_BUNDLE_ICON_FILE ${MOO_ICON}
+	)
+
+	set_source_files_properties( ${MOO_ICON} PROPERTIES
+		MACOSX_PACKAGE_LOCATION "Resources"
+		)
+
+	target_sources( ${PROJECT_NAME} PRIVATE
+		${MOO_ICON}
+		)
+endif( APPLE )
+
 #-------------------------------------
 # Qt5
 
