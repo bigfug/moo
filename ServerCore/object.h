@@ -125,6 +125,7 @@ public:
 	void propSet( const QString &pName, const QVariant &pValue );
 	bool propFind( const QString &pName, Property **pProp, Object **pObject );
 	void propNames( QStringList &pList ) const;
+	void propAdd( QString pName, QVariant pVariant );
 
 	const Property *prop( const QString &pName ) const;
 	Property *prop( const QString &pName );

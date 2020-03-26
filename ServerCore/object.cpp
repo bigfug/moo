@@ -416,6 +416,17 @@ void Object::propNames( QStringList &pList ) const
 	pList = mData.mProperties.keys();
 }
 
+void Object::propAdd( QString pName, QVariant pVariant )
+{
+	Property		P;
+
+	P.initialise();
+
+	P.setValue( pVariant );
+
+	propAdd( pName, P );
+}
+
 const Property *Object::prop( const QString &pName ) const
 {
 	QMap<QString,Property>::const_iterator	it = mData.mProperties.find( pName );
