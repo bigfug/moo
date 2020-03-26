@@ -432,24 +432,15 @@ int lua_task::execute( qint64 pTimeStamp )
 
 	// We're processing a normal command from the user
 
-	if( !mL )
+	if( !L() )
 	{
-		if( ( mL = lua_newstate( lua_task::luaAlloc, this ) ) == 0 )
-		{
-			return( 0 );
-		}
-
-		lua_moo::luaNewState( mL );
-
-		lua_sethook( mL, &lua_task::luaHook, LUA_MASKCOUNT, 10 );
+		return( 0 );
 	}
 
 	if( ObjectManager::instance()->maxId() == 0 )
 	{
 		ObjectManager::instance()->luaMinimal();
 	}
-
-	luaSetTask( mL, this );
 
 	if( C && C->player() == OBJECT_NONE )
 	{
