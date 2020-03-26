@@ -93,9 +93,9 @@ void Property::setName( QString pName )
 
 void Property::initialise( void )
 {
-	mData.mObject = -1;
-	mData.mParent = -1;
-	mData.mOwner  = -1;
+	mData.mObject = OBJECT_NONE;
+	mData.mParent = OBJECT_NONE;
+	mData.mOwner  = OBJECT_NONE;
 	mData.mRead   = false;
 	mData.mWrite  = false;
 	mData.mChange = true;

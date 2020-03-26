@@ -10,7 +10,7 @@ typedef struct PropertyData
 {
 	PropertyData( void )
 		: mObject( OBJECT_NONE ), mParent( OBJECT_NONE ), mOwner( OBJECT_NONE ),
-		  mRead( false ), mWrite( false ), mChange( false )
+		  mRead( false ), mWrite( false ), mChange( true )
 	{
 
 	}
