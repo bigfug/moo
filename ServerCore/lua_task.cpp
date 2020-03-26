@@ -516,6 +516,18 @@ int lua_task::executeLogin( void )
 
 		T.setProgrammer( System->owner() );
 
+		QStringList		ArgLst = T.args();
+		QString			ArgVrb = T.verb();
+
+		if( !ArgVrb.isEmpty() )
+		{
+			ArgLst.prepend( ArgVrb );
+
+			T.setArgs( ArgLst );
+		}
+
+		T.setVerb( LoginCommand->name() );
+
 		if( verbCall( System->id(), LoginCommand ) != 1 )
 		{
 			lua_pop( mL, std::max<int>( 0, lua_gettop( mL ) ) );

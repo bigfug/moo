@@ -19,8 +19,10 @@ class Change;
 class lua_task
 {
 public:
+	// gets the currently active task for the given lua_State
 	static lua_task *luaGetTask( lua_State *L );
 
+	// sets the currently active task for the given lua_State
 	static void luaSetTask( lua_State *L, lua_task *T );
 
 public:
