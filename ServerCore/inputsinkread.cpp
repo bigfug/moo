@@ -175,8 +175,6 @@ bool InputSinkRead::input( const QString &pData )
 		{
 			lua_task	 L( mConnection->id(), Task() );
 
-			lua_task::luaSetTask( L.L(), &L );
-
 			L.setProgrammer( V->owner() );
 
 			int			ArgCnt = 1;
