@@ -256,6 +256,16 @@ Object *ObjectManager::objectIncludingRecycled( ObjectId pIndex )
 	return( O );
 }
 
+Object *ObjectManager::rootObject()
+{
+	return( object( 1 ) );
+}
+
+Object *ObjectManager::systemObject()
+{
+	return( object( 0 ) );
+}
+
 ObjectManager *ObjectManager::instance( void )
 {
 	if( mInstance )

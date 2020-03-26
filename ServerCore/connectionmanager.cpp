@@ -154,11 +154,11 @@ void ConnectionManager::processClosedSockets( void )
 
 		Connection			*CON = connection( LS->connectionId() );
 
-		if( CON->player() != OBJECT_NONE )
+		if( CON && CON->player() != OBJECT_NONE )
 		{
 			try
 			{
-				lua_task::process( QString( "moo.root:user_client_disconnected( o( %1 ) )" ).arg( CON->player() ), LS->connectionId(), CON->player() );
+				lua_task::process( QString( "moo.system:user_client_disconnected( o( %1 ) )" ).arg( CON->player() ), LS->connectionId(), CON->player() );
 			}
 			catch( mooException &e )
 			{

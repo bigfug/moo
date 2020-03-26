@@ -657,7 +657,7 @@ int lua_moo::luaRoot( lua_State *L )
 
 	try
 	{
-		Object		*O = ObjectManager::instance()->object( 1 );
+		Object		*O = ObjectManager::instance()->rootObject();
 
 		if( O == 0 )
 		{
@@ -688,7 +688,7 @@ int lua_moo::luaSystem( lua_State *L )
 
 	try
 	{
-		Object		*O = ObjectManager::instance()->object( 0 );
+		Object		*O = ObjectManager::instance()->systemObject();
 
 		if( !O )
 		{

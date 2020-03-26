@@ -78,6 +78,9 @@ public:
 
 	Object *objectIncludingRecycled( ObjectId pIndex );
 
+	Object *rootObject( void );
+	Object *systemObject( void );
+
 	void clear( void );
 
 	ObjectId findPlayer( QString pName ) const;

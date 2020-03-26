@@ -65,27 +65,27 @@ mooApp::mooApp( const QString &pDataFileName, QObject *pParent )
 		OM.luaMinimal();
 	}
 
-	Object		*Root = OM.object( 0 );
+	Object		*System = OM.systemObject();
 
-	if( Root )
+	if( System )
 	{
 		QList<Object *>		ObjLst = ObjectManager::instance()->connectedPlayers();
 
-		bool		HasVerb = Root->verb( "user_disconnected" );
+		bool		HasVerb = System->verb( "user_disconnected" );
 
 		for( Object *O : ObjLst )
 		{
 			if( HasVerb )
 			{
-				lua_task::process( QString( "moo.root:user_disconnected( o( %1 ) )" ).arg( O->id() ) );
+				lua_task::process( QString( "moo.system:user_disconnected( o( %1 ) )" ).arg( O->id() ) );
 			}
 
 			O->setConnection( -1 );
 		}
 
-		if( Root->verb( "server_started" ) )
+		if( System->verb( "server_started" ) )
 		{
-			lua_task::process( "moo.root:server_started()" );
+			lua_task::process( "moo.system:server_started()" );
 		}
 	}
 
@@ -117,11 +117,11 @@ mooApp::~mooApp()
 		killTimer( mTimerId );
 	}
 
-	Object		*Root = ObjectManager::o( 0 );
+	Object		*System = OM.systemObject();
 
-	if( Root && Root->verb( "server_closing" ) )
+	if( System && System->verb( "server_closing" ) )
 	{
-		lua_task::process( "moo.root:server_closing()" );
+		lua_task::process( "moo.system:server_closing()" );
 	}
 
 	ODB			*OM_ODB = ObjectManager::instance()->odb();

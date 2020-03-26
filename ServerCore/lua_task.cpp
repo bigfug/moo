@@ -504,8 +504,8 @@ int lua_task::executeLogin( void )
 	{
 		Task			&T				= mTasks.front();
 		ObjectManager	&OM				= *ObjectManager::instance();
-		Object			*Root			= OM.object( 0 );
-		Verb			*LoginCommand	= ( Root ? Root->verbMatch( "do_login_command" ) : Q_NULLPTR );
+		Object			*System			= OM.systemObject();
+		Verb			*LoginCommand	= ( System ? System->verbMatch( "do_login_command" ) : Q_NULLPTR );
 		ObjectId		 MaxId			= OM.maxId();
 		Verb			*V;
 
@@ -514,9 +514,9 @@ int lua_task::executeLogin( void )
 			return( 0 );
 		}
 
-		T.setProgrammer( Root->owner() );
+		T.setProgrammer( System->owner() );
 
-		if( verbCall( Root->id(), LoginCommand ) != 1 )
+		if( verbCall( System->id(), LoginCommand ) != 1 )
 		{
 			lua_pop( mL, std::max<int>( 0, lua_gettop( mL ) ) );
 
@@ -553,11 +553,11 @@ int lua_task::executeLogin( void )
 			{
 				if( C->object() != 0 )
 				{
-					if( ( V = Root->verbMatch( "user_client_disconnected" ) ) != Q_NULLPTR )
+					if( ( V = System->verbMatch( "user_client_disconnected" ) ) != Q_NULLPTR )
 					{
 						lua_object::lua_pushobject( mL, Player );
 
-						verbCall( Root->id(), V, 1 );
+						verbCall( System->id(), V, 1 );
 					}
 				}
 				else
@@ -577,29 +577,29 @@ int lua_task::executeLogin( void )
 
 		if( OM.maxId() > MaxId )
 		{
-			if( ( V = Root->verbMatch( "user_created" ) ) != 0 )
+			if( ( V = System->verbMatch( "user_created" ) ) != 0 )
 			{
 				lua_object::lua_pushobject( mL, Player );
 
-				verbCall( Root->id(), V, 1 );
+				verbCall( System->id(), V, 1 );
 			}
 		}
 		else if( UR )
 		{
-			if( ( V = Root->verbMatch( "user_reconnected" ) ) != 0 )
+			if( ( V = System->verbMatch( "user_reconnected" ) ) != 0 )
 			{
 				lua_object::lua_pushobject( mL, Player );
 
-				verbCall( Root->id(), V, 1 );
+				verbCall( System->id(), V, 1 );
 			}
 		}
 		else
 		{
-			if( ( V = Root->verbMatch( "user_connected" ) ) != 0 )
+			if( ( V = System->verbMatch( "user_connected" ) ) != 0 )
 			{
 				lua_object::lua_pushobject( mL, Player );
 
-				verbCall( Root->id(), V, 1 );
+				verbCall( System->id(), V, 1 );
 			}
 		}
 	}
@@ -635,7 +635,7 @@ int lua_task::execute( void )
 		//   suspending or aborting) and returns a false value, then the built-in command parser is
 		//   invoked to handle the command as described below.
 
-		Object		*Root = OM.object( 0 );
+		Object		*Root = OM.systemObject();
 		Verb		*DoCommand = ( Root ? Root->verbMatch( "do_command" ) : 0 );
 
 		if( DoCommand && verbCall( *Root, DoCommand ) == 1 && lua_toboolean( mL, -1 ) )
