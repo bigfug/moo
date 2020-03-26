@@ -70,6 +70,7 @@ const luaL_Reg lua_moo::mLuaStatic[] =
 	{ "isValidObject", lua_moo::luaIsValidObject },
 	{ "is_valid_object", lua_moo::luaIsValidObject },
 	{ "gmcp", lua_moo::luaGMCP },
+	{ "import", lua_moo::luaImport },
 	{ 0, 0 }
 };
 
@@ -1208,6 +1209,72 @@ int lua_moo::luaGMCP( lua_State *L )
 	C->sendGMCP( A );
 
 	return( 0 );
+}
+
+int lua_moo::luaImport( lua_State *L )
+{
+	size_t		 FNSize;
+	const char	*FNChars = luaL_checklstring( L, 1, &FNSize );
+	bool		 LuaErr = false;
+
+	try
+	{
+		lua_task	*T = lua_task::luaGetTask( L );
+		Connection	*C = T->connection();
+
+		Object		*P = ObjectManager::o( T->programmer() );
+
+		if( !P || !P->wizard() )
+		{
+			throw mooException( E_PERM, "you have to be a wizard to do that!" );
+		}
+
+		QFile		 FH( QString::fromUtf8( FNChars, int( FNSize ) ) );
+
+		if( !FH.open( QFile::ReadOnly | QFile::Text ) )
+		{
+			throw mooException( E_NACC, "import can't access that file" );
+		}
+
+		QString	HDR = FH.readLine().trimmed();
+
+		if( !HDR.startsWith( "-- ArtMOO Script --" ) )
+		{
+			throw mooException( E_NACC, "import script doesn't begin with correct header" );
+		}
+
+		lua_task		ImportTask( T->connectionId(), TaskEntry( "", T->connectionId(), T->programmer() ) );
+
+		while( !FH.atEnd() )
+		{
+			QString	FL = FH.readLine().trimmed();
+
+			if( FL.isEmpty() )
+			{
+				continue;
+			}
+
+			C->notify( FL );
+
+			ImportTask.taskPush( TaskEntry( FL, T->connectionId(), T->programmer() ) );
+
+			ImportTask.execute( T->timestamp() );
+
+			ImportTask.taskPop();
+		}
+
+		FH.close();
+
+		C->notify( "-- Import Complete" );
+	}
+	catch( const mooException &e )
+	{
+		e.lua_pushexception( L );
+
+		LuaErr = true;
+	}
+
+	return( LuaErr ? lua_error( L ) : 0 );
 }
 
 QVariantMap lua_moo::parseReadArgs( lua_State *L, int pIndex )

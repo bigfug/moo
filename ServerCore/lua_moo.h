@@ -68,6 +68,8 @@ private:
 
 	static int luaGMCP( lua_State *L );
 
+	static int luaImport( lua_State *L );
+
 	static void typeDump( lua_State *L, const int i )
 	{
 		int t = lua_type(L, i);
