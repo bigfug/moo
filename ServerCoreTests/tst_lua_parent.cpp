@@ -8,6 +8,7 @@
 #include "connection.h"
 #include "lua_task.h"
 #include "luatestdata.h"
+#include "objectlogic.h"
 
 void ServerTest::luaParentTestValidObject( void )
 {
@@ -558,4 +559,87 @@ void ServerTest::luaParentTestIsChildOf( void )
 	}
 
 	ObjectManager::reset();
+}
+
+void ServerTest::luaParentChangePropTest1( void )
+{
+	LuaTestData			TD;
+
+	Object		*P1 = TD.OM.newObject();
+	Object		*P2 = TD.OM.newObject();
+	Object		*TO = TD.OM.newObject();
+
+	P1->propAdd( "test", QVariant::fromValue<double>( 0 ) );
+
+	TD.process( QString( "o( %1 ).parent = o( %2 )" ).arg( TO->id() ).arg( P1->id() ) );
+
+	QVERIFY( !TO->prop( "test" ) );
+	QVERIFY( TO->propParent( "test" ) );
+
+	TD.process( QString( "o( %1 ).parent = o( %2 )" ).arg( TO->id() ).arg( P2->id() ) );
+
+	QVERIFY( !TO->propParent( "test" ) );
+}
+
+void ServerTest::luaParentChangePropTest2( void )
+{
+	LuaTestData			TD;
+
+	Object		*P1 = TD.OM.newObject();
+	Object		*TO = TD.OM.newObject();
+
+	P1->propAdd( "test", QVariant::fromValue<double>( 0 ) );
+	TO->propAdd( "test", QVariant::fromValue<QString>( "test" ) );
+
+	TD.process( QString( "o( %1 ).parent = o( %2 )" ).arg( TO->id() ).arg( P1->id() ) );
+
+	QVERIFY( TO->prop( "test" ) );
+
+	QCOMPARE( TO->parent(), OBJECT_NONE );
+}
+
+void ServerTest::luaParentChangePropTest3( void )
+{
+	LuaTestData			TD;
+
+	Object		*P1 = TD.OM.newObject();
+	Object		*C1 = TD.OM.newObject();
+	Object		*TO = TD.OM.newObject();
+
+	P1->propAdd( "test", QVariant::fromValue<double>( 0 ) );
+	C1->propAdd( "test", QVariant::fromValue<double>( 5 ) );
+
+	TD.process( QString( "o( %1 ).parent = o( %2 )" ).arg( C1->id() ).arg( TO->id() ) );
+
+	QCOMPARE( C1->parent(), TO->id() );
+
+	TD.process( QString( "o( %1 ).parent = o( %2 )" ).arg( TO->id() ).arg( P1->id() ) );
+
+	QCOMPARE( TO->parent(), OBJECT_NONE );
+}
+
+void ServerTest::luaParentChangePropTest4( void )
+{
+	LuaTestData			TD;
+
+	Object		*P1 = TD.OM.newObject();
+	Object		*TO = TD.OM.newObject();
+
+	P1->propAdd( "test", QVariant::fromValue<double>( 0 ) );
+
+	TD.process( QString( "o( %1 ).parent = o( %2 )" ).arg( TO->id() ).arg( P1->id() ) );
+
+	TO->propSet( "test", QVariant::fromValue<double>( 5 ) );
+
+	QCOMPARE( TO->parent(), P1->id() );
+
+	QVERIFY( TO->prop( "test" ) );
+
+	QCOMPARE( TO->prop( "test" )->parent(), P1->id() );
+
+	TD.process( QString( "o( %1 ).parent = O_NONE" ).arg( TO->id() ) );
+
+	QCOMPARE( TO->parent(), OBJECT_NONE );
+
+	QCOMPARE( TO->prop( "test" ), nullptr );
 }

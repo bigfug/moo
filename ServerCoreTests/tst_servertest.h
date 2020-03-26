@@ -57,6 +57,11 @@ private Q_SLOTS:
 	void luaParentTestIsParentOf( void );
 	void luaParentTestIsChildOf( void );
 
+	void luaParentChangePropTest1( void );
+	void luaParentChangePropTest2( void );
+	void luaParentChangePropTest3( void );
+	void luaParentChangePropTest4( void );
+
 	void luaCreate( void );
 	void luaRecycle( void );
 
@@ -138,6 +143,7 @@ private Q_SLOTS:
 	void taskRollbackObjectPropDelete( void );
 	void taskRollbackObjectPropClear( void );
 	void taskRollbackObjectPropValue( void );
+	void taskRollbackObjectPropInherit( void );
 
 	void taskRollbackObjectAliasAdd();
 	void taskRollbackObjectAliasDelete();

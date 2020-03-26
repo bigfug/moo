@@ -1,4 +1,5 @@
 #include <QDebug>
+#include <QMultiMap>
 
 #include "objectlogic.h"
 #include "objectmanager.h"
@@ -272,10 +273,11 @@ void ObjectLogic::chparent( lua_task &pTask, ObjectId pUserId, ObjectId pObjectI
 
 		if( !IntPrp.empty() )
 		{
-			throw( mooException( E_INVARG, "" ) );
+			throw( mooException( E_INVARG, "new parent has conflicting properties" ) );
 		}
 	}
 
+#if 0
 	// Changing an object's parent can have the effect of removing some properties from and
 	//   adding some other properties to that object and all of its descendants
 	// All properties that are not removed or added in the reparenting
@@ -295,9 +297,9 @@ void ObjectLogic::chparent( lua_task &pTask, ObjectId pUserId, ObjectId pObjectI
 
 		NewAnc.push_front( pNewParentId );
 
-		for( QList<ObjectId>::const_iterator i1 = ObjAnc.begin() ; NearestAncestor == -1 && i1 != ObjAnc.end() ; i1++ )
+		for( QList<ObjectId>::const_iterator i1 = ObjAnc.begin() ; i1 != ObjAnc.end() && NearestAncestor == -1 ; i1++ )
 		{
-			for( QList<ObjectId>::const_iterator i2 = NewAnc.begin() ; NearestAncestor == -1 && i2 != NewAnc.end() ; i2++ )
+			for( QList<ObjectId>::const_iterator i2 = NewAnc.begin() ; i2 != NewAnc.end() && NearestAncestor == -1 ; i2++ )
 			{
 				if( *i1 == *i2 )
 				{
@@ -337,7 +339,7 @@ void ObjectLogic::chparent( lua_task &pTask, ObjectId pUserId, ObjectId pObjectI
 		//   see the description of the built-in function clear_property()
 		//   for details.
 
-		for( QList<ObjectId>::const_iterator it = NewAnc.begin() ; it != ObjAnc.end() && *it != NearestAncestor ; it++ )
+		for( QList<ObjectId>::const_iterator it = NewAnc.begin() ; it != NewAnc.end() && *it != NearestAncestor ; it++ )
 		{
 			Object			*O = OM.object( *it );
 
@@ -353,12 +355,44 @@ void ObjectLogic::chparent( lua_task &pTask, ObjectId pUserId, ObjectId pObjectI
 			// TODO: Add PrpList to Object
 		}
 	}
+#endif
 
 	// If new-parent is equal to #-1, then object is given no parent at all;
 	//   it becomes a new root of the parent/child hierarchy. In this case,
 	//   all formerly inherited properties on object are simply removed.
 
-	pTask.changeAdd( new change::ObjectSetParent( objObject, pNewParentId ) );
+	QMultiMap<ObjectId,Property>		PrpMap;
+
+	if( pNewParentId == OBJECT_NONE )
+	{
+		QList<ObjectId>		ObjAnc;
+		QList<ObjectId>		ObjLst;
+
+		objObject->ancestors( ObjAnc );
+
+		ObjLst << objObject->id();
+
+		objObject->descendants( ObjLst );
+
+		for( ObjectId OID : ObjLst )
+		{
+			Object				*O = ObjectManager::o( OID );
+
+			for( QString PrpNam : O->properties().keys() )
+			{
+				Property		*P = O->prop( PrpNam );
+
+				if( ObjAnc.contains( P->parent() ) )
+				{
+					PrpMap.insert( OID, *P );
+
+					O->propDelete( PrpNam );
+				}
+			}
+		}
+	}
+
+	pTask.changeAdd( new change::ObjectSetParent( objObject, pNewParentId, PrpMap ) );
 }
 
 void ObjectLogic::recycle( lua_task &pTask, ObjectId pUserId, ObjectId pObjectId )
@@ -402,7 +436,7 @@ void ObjectLogic::recycle( lua_task &pTask, ObjectId pUserId, ObjectId pObjectId
 
 	if( objObject->parent() != OBJECT_NONE )
 	{
-		pTask.changeAdd( new change::ObjectSetParent( objObject, OBJECT_NONE ) );
+		pTask.changeAdd( new change::ObjectSetParent( objObject, OBJECT_NONE, QMultiMap<ObjectId,Property>() ) );
 	}
 
 	QList<ObjectId>		Children = objObject->children();

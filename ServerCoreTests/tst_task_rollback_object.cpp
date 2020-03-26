@@ -415,3 +415,34 @@ void ServerTest::taskRollbackObjectAliasDelete()
 
 	QVERIFY( O->aliases().contains( v1 ) );
 }
+
+void ServerTest::taskRollbackObjectPropInherit( void )
+{
+	LuaTestData			TD;
+
+	Object		*O1 = TD.OM.newObject();
+	Object		*O2 = TD.OM.newObject();
+
+	TD.process( QString( "o( %1 ).parent = o( %2 )" ).arg( O2->id() ).arg( O1->id() ) );
+
+	QCOMPARE( O2->parent(), O1->id() );
+
+	TD.process( QString( "o( %1 ):propadd( 'test', 'value1' )" ).arg( O1->id() ) );
+	TD.process( QString( "o( %1 ).test = 'value2'" ).arg( O2->id() ) );
+
+	QCOMPARE( O2->prop( "test" )->value().toString(), "value2" );
+	QCOMPARE( O2->propParent( "test" )->value().toString(), "value1" );
+
+	lua_task	 C = TD.eval( QString( "o( %1 ).parent = O_NONE" ).arg( O2->id() ) );
+
+	QCOMPARE( O2->parent(), OBJECT_NONE );
+	QCOMPARE( O2->prop( "test" ), nullptr );
+
+	C.rollback();
+
+	QCOMPARE( O2->parent(), O1->id() );
+	QVERIFY( O2->prop( "test" ) );
+	QVERIFY( O2->propParent( "test" ) );
+	QCOMPARE( O2->prop( "test" )->value().toString(), "value2" );
+	QCOMPARE( O2->propParent( "test" )->value().toString(), "value1" );
+}
