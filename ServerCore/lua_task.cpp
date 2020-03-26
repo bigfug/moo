@@ -152,7 +152,7 @@ int lua_task::luaTask( lua_State *L )
 
 	lua_task			*lt = lua_task::luaGetTask( L );
 
-	TaskEntry			E( QString( lua_tostring( L, 2 ) ), lt->connectionid(), T.programmer() );
+	TaskEntry			E( QString( lua_tostring( L, 2 ) ), lt->connectionId(), T.programmer() );
 
 	E.setTimeStamp( E.timestamp() + ( lua_tonumber( L, 1 ) * 1000.0 ) );
 
@@ -363,7 +363,7 @@ void *lua_task::luaAlloc( void *ud, void *ptr, size_t osize, size_t nsize )
 
 int lua_task::execute( qint64 pTimeStamp )
 {
-	Connection		*C		= ConnectionManager::instance()->connection( connectionid() );
+	Connection		*C		= ConnectionManager::instance()->connection( connectionId() );
 	Task			&T		= mTasks.front();
 
 	if( C && C->processInput( T.command() ) )
@@ -476,7 +476,7 @@ int lua_task::eval( void )
 	{
 		QString		Err = QString( lua_tostring( LS, -1 ) );
 
-		Connection	*CON = ConnectionManager::instance()->connection( connectionid() );
+		Connection	*CON = ConnectionManager::instance()->connection( connectionId() );
 
 		if( CON )
 		{
@@ -573,9 +573,9 @@ int lua_task::executeLogin( void )
 			}
 		}
 
-		CM.logon( connectionid(), Player->id() );
+		CM.logon( connectionId(), Player->id() );
 
-		Player->setConnection( connectionid() );
+		Player->setConnection( connectionId() );
 
 		T.setPlayer( Player->id() );
 
@@ -627,7 +627,7 @@ int lua_task::execute( void )
 	try
 	{
 		Task			&T = mTasks.front();
-		Connection		*C = ConnectionManager::instance()->connection( connectionid() );
+		Connection		*C = ConnectionManager::instance()->connection( connectionId() );
 		ObjectManager	&OM = *ObjectManager::instance();
 
 		// The server next gives code in the database a chance to handle the command.
@@ -833,7 +833,7 @@ int lua_task::verbCall( Task &pTask, Verb *V, int pArgCnt  )
 
 int lua_task::verbCallCode( Verb *V, int pArgCnt )
 {
-	Connection		*C    = ConnectionManager::instance()->connection( connectionid() );
+	Connection		*C    = ConnectionManager::instance()->connection( connectionId() );
 
 	int				c1    = lua_gettop( mL ) - pArgCnt;
 	int				Error = V->lua_pushverb( mL );

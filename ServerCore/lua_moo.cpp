@@ -627,7 +627,7 @@ int lua_moo::luaNotify( lua_State *L )
 	try
 	{
 		lua_task			*Command = lua_task::luaGetTask( L );
-		Connection			*C = ConnectionManager::instance()->connection( Command->connectionid() );
+		Connection			*C = ConnectionManager::instance()->connection( Command->connectionId() );
 
 		if( C )
 		{
@@ -1009,7 +1009,7 @@ int lua_moo::luaLastObject(lua_State *L)
 	try
 	{
 		lua_task			*Command = lua_task::luaGetTask( L );
-		Connection			*C = ConnectionManager::instance()->connection( Command->connectionid() );
+		Connection			*C = ConnectionManager::instance()->connection( Command->connectionId() );
 		Object				*O = ObjectManager::instance()->object( C->lastCreatedObjectId() );
 
 		if( !O )
@@ -1114,7 +1114,7 @@ int lua_moo::luaPanic( lua_State *L )
 int lua_moo::luaGMCP( lua_State *L )
 {
 	lua_task			*Command = lua_task::luaGetTask( L );
-	Connection			*C = ConnectionManager::instance()->connection( Command->connectionid() );
+	Connection			*C = ConnectionManager::instance()->connection( Command->connectionId() );
 
 	size_t		 PkgSze  = 0;
 	const char	*Package = luaL_checklstring( L, 1, &PkgSze );
@@ -1275,7 +1275,7 @@ int lua_moo::luaRead( lua_State *L )
 	try
 	{
 		lua_task			*Command = lua_task::luaGetTask( L );
-		Connection			*C = ConnectionManager::instance()->connection( Command->connectionid() );
+		Connection			*C = ConnectionManager::instance()->connection( Command->connectionId() );
 
 		if( !lua_gettop( L ) )
 		{
@@ -1417,7 +1417,7 @@ int lua_moo::luaSetCookie( lua_State *L )
 	luaL_checkany( L, 2 );
 
 	lua_task			*Command = lua_task::luaGetTask( L );
-	Connection			*C = ConnectionManager::instance()->connection( Command->connectionid() );
+	Connection			*C = ConnectionManager::instance()->connection( Command->connectionId() );
 	QVariant			 V;
 
 	switch( lua_type( L, 2 ) )
@@ -1452,7 +1452,7 @@ int lua_moo::luaCookie( lua_State *L )
 	try
 	{
 		lua_task			*Command = lua_task::luaGetTask( L );
-		Connection			*C = ConnectionManager::instance()->connection( Command->connectionid() );
+		Connection			*C = ConnectionManager::instance()->connection( Command->connectionId() );
 
 		QString				 N = QString::fromLatin1( S );
 		QVariant			 V = C->cookie( N );
@@ -1487,7 +1487,7 @@ int lua_moo::luaClearCookie( lua_State *L )
 	try
 	{
 		lua_task			*Command = lua_task::luaGetTask( L );
-		Connection			*C = ConnectionManager::instance()->connection( Command->connectionid() );
+		Connection			*C = ConnectionManager::instance()->connection( Command->connectionId() );
 
 		if( C->hasCookie( QString::fromLatin1( S ) ) )
 		{

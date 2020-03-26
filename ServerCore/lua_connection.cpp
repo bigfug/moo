@@ -178,7 +178,7 @@ int lua_connection::luaConnections( lua_State *L )
 int lua_connection::luaCon( lua_State *L )
 {
 	lua_task			*Command = lua_task::luaGetTask( L );
-	Connection			*C = ConnectionManager::instance()->connection( Command->connectionid() );
+	Connection			*C = ConnectionManager::instance()->connection( Command->connectionId() );
 
 	lua_pushconnection( L, C );
 

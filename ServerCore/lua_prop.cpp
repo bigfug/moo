@@ -441,7 +441,7 @@ int lua_prop::luaDump( lua_State *L )
 		const bool			 isOwner  = ( Player != 0 && O != 0 ? Player->id() == O->owner() : false );
 		const bool			 isWizard = ( Player != 0 ? Player->wizard() : false );
 
-		Connection			*C = ConnectionManager::instance()->connection( lua_task::luaGetTask( L )->connectionid() );
+		Connection			*C = ConnectionManager::instance()->connection( lua_task::luaGetTask( L )->connectionId() );
 
 		if( P == 0 )
 		{
@@ -503,7 +503,7 @@ int lua_prop::luaProgram( lua_State *L )
 		const bool			 isOwner  = ( Player != 0 && O != 0 ? Player->id() == O->owner() : false );
 		const bool			 isWizard = ( Player != 0 ? Player->wizard() : false );
 
-		Connection			*C = ConnectionManager::instance()->connection( lua_task::luaGetTask( L )->connectionid() );
+		Connection			*C = ConnectionManager::instance()->connection( lua_task::luaGetTask( L )->connectionId() );
 
 		if( P == 0 )
 		{
@@ -565,7 +565,7 @@ int lua_prop::luaEdit(lua_State *L)
 		const bool			 isOwner  = ( Player != 0 && O != 0 ? Player->id() == O->owner() : false );
 		const bool			 isWizard = ( Player != 0 ? Player->wizard() : false );
 
-		Connection			*C = ConnectionManager::instance()->connection( lua_task::luaGetTask( L )->connectionid() );
+		Connection			*C = ConnectionManager::instance()->connection( lua_task::luaGetTask( L )->connectionId() );
 
 		if( P == 0 )
 		{

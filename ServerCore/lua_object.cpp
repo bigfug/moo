@@ -277,7 +277,7 @@ int lua_object::luaCreate( lua_State *L )
 				Command->verbCall( T, FndVrb, 0 );
 			}
 
-			Connection	*CON = ConnectionManager::instance()->connection( Command->connectionid() );
+			Connection	*CON = ConnectionManager::instance()->connection( Command->connectionId() );
 
 			if( CON )
 			{
@@ -1180,7 +1180,7 @@ int lua_object::luaVerbCall( lua_State *L )
 		{
 			QString		ErrMsg = QString( lua_tostring( L, -1 ) );
 
-			Connection	*CON = ConnectionManager::instance()->connection( Command->connectionid() );
+			Connection	*CON = ConnectionManager::instance()->connection( Command->connectionId() );
 
 			if( CON )
 			{

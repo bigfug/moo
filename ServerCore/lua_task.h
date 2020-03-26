@@ -54,7 +54,7 @@ public:
 
 	int throwError( mooError pError, const QString pMessage = "" );
 
-	inline ConnectionId connectionid( void )
+	inline ConnectionId connectionId( void ) const
 	{
 		return( mConnectionId );
 	}
