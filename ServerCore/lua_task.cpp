@@ -319,6 +319,11 @@ lua_State *lua_task::L()
 	return( mL );
 }
 
+Connection *lua_task::connection() const
+{
+	return( ConnectionManager::instance()->connection( connectionId() ) );
+}
+
 static const char	 TaskLuaKey = 'k';
 
 lua_task *lua_task::luaGetTask( lua_State *L )

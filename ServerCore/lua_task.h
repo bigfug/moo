@@ -42,6 +42,8 @@ public:
 
 	lua_State *L( void );
 
+	Connection *connection( void ) const;
+
 	int execute( qint64 pTimeStamp );
 
 	int eval( void );
