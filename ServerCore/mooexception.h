@@ -17,7 +17,7 @@ public:
 	{
 	}
 
-	void lua_pushexception( lua_State *L );
+	void lua_pushexception( lua_State *L ) const;
 
 public:
 	const mooError	mError;

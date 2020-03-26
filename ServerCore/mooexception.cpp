@@ -4,7 +4,7 @@
 
 #include "lua_task.h"
 
-void mooException::lua_pushexception( lua_State * L)
+void mooException::lua_pushexception( lua_State * L ) const
 {
 	lua_task			*Command = lua_task::luaGetTask( L );
 	QString				 VrbStr;
