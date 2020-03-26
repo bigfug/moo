@@ -76,25 +76,9 @@ MooApplication::~MooApplication()
 
 void MooApplication::process( void )
 {
-	mParser.process( mApp );
-
-	//-------------------------------------------------------------------------
-
-	QFileInfo	DataDirInfo( mParser.value( mOptionDataDirectory ) );
-
-	if( !DataDirInfo.exists() )
-	{
-		DataDirInfo.dir().mkpath( DataDirInfo.fileName() );
-	}
-
-	if( !QDir::setCurrent( DataDirInfo.filePath() ) )
-	{
-		qFatal( QObject::tr( "Can't set directory to %1" ).arg( DataDirInfo.filePath() ).toLatin1().constData() );
-	}
-
 	qInfo() << QString( "ArtMOO v%1 by Alex May - www.bigfug.com" ).arg( mApp.applicationVersion() );
 
-	qInfo() << "Using data directory" << DataDirInfo.filePath();
+	mParser.process( mApp );
 
 	//-------------------------------------------------------------------------
 
@@ -114,6 +98,22 @@ void MooApplication::process( void )
 
 		qInfo() << "Using settings in" << SettingsFileInfo.filePath();
 	}
+
+	//-------------------------------------------------------------------------
+
+	QFileInfo	DataDirInfo( mParser.value( mOptionDataDirectory ) );
+
+	if( !DataDirInfo.exists() )
+	{
+		DataDirInfo.dir().mkpath( DataDirInfo.fileName() );
+	}
+
+	if( !QDir::setCurrent( DataDirInfo.filePath() ) )
+	{
+		qFatal( QObject::tr( "Can't set directory to %1" ).arg( DataDirInfo.filePath() ).toLatin1().constData() );
+	}
+
+	qInfo() << "Using data directory" << DataDirInfo.filePath();
 
 	//-------------------------------------------------------------------------
 
