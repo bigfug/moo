@@ -1317,7 +1317,7 @@ int lua_object::luaPropAdd( lua_State *L )
 
 		return( 0 );
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
 		e.lua_pushexception( L );
 

@@ -58,6 +58,7 @@ public:
 class Connection : public QObject, private QXmlDefaultHandler
 {
 	Q_OBJECT
+	Q_DISABLE_COPY( Connection )
 
 	explicit Connection( ConnectionId pConnectionId, QObject *pParent = Q_NULLPTR );
 
