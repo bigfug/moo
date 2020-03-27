@@ -117,7 +117,7 @@ mooApp::~mooApp()
 		killTimer( mTimerId );
 	}
 
-	Object		*System = OM.systemObject();
+	Object		*System = ObjectManager::instance()->systemObject();
 
 	if( System && System->verb( "server_closing" ) )
 	{
