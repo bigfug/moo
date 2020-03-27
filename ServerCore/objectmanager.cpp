@@ -18,6 +18,8 @@
 #include "odb.h"
 #include "odb_file.h"
 
+#include "changeset/connectionnotify.h"
+
 ObjectManager			*ObjectManager::mInstance  = Q_NULLPTR;
 qint64					 ObjectManager::mTimeStamp = 0;
 
@@ -556,7 +558,7 @@ void ObjectManager::onFrame( qint64 pTimeStamp )
 
 					if( !S.isEmpty() )
 					{
-						C->notify( S );
+						L.changeAdd( new change::ConnectionNotify( C, S ) );
 					}
 
 					lua_pop( L.L(), 1 );

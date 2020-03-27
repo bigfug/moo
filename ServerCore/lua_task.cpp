@@ -16,6 +16,8 @@
 #include "taskentry.h"
 #include "inputsinkprogram.h"
 
+#include "changeset/connectionnotify.h"
+
 #include <iostream>
 
 const luaL_Reg lua_task::mLuaStatic[] =
@@ -769,7 +771,7 @@ int lua_task::execute( void )
 		{
 			if( C )
 			{
-				C->notify( "I couldn't understand that." );
+				changeAdd( new change::ConnectionNotify( C, "I couldn't understand that." ) );
 			}
 
 			return( 0 );
@@ -873,7 +875,7 @@ int lua_task::verbCallCode( Verb *V, int pArgCnt )
 
 		if( C )
 		{
-			C->notify( S );
+			changeAdd( new change::ConnectionNotify( C, S ) );
 		}
 
 		std::cerr << "verbCallCode" << S.toStdString() << std::endl;

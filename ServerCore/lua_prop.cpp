@@ -18,6 +18,7 @@
 #include "changeset/propertysetread.h"
 #include "changeset/propertysetwrite.h"
 #include "changeset/propertysetchange.h"
+#include "changeset/connectionnotify.h"
 
 const char	*lua_prop::mLuaName = "moo.prop";
 
@@ -462,10 +463,10 @@ int lua_prop::luaDump( lua_State *L )
 
 		for( QStringList::iterator it = Program.begin() ; it != Program.end() ; it++ )
 		{
-			C->notify( *it );
+			Command->changeAdd( new change::ConnectionNotify( C, *it ) );
 		}
 
-		C->notify( "." );
+		Command->changeAdd( new change::ConnectionNotify( C, "." ) );
 	}
 	catch( mooException &e )
 	{

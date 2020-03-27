@@ -23,6 +23,8 @@
 #include "changeset/verbaliasadd.h"
 #include "changeset/verbaliasdelete.h"
 
+#include "changeset/connectionnotify.h"
+
 const char	*lua_verb::mLuaName = "moo.verb";
 
 LuaMap		lua_verb::mLuaMap;
@@ -650,7 +652,8 @@ int lua_verb::luaDump( lua_State *L )
 
 	try
 	{
-		const Task			&T = lua_task::luaGetTask( L )->task();
+		lua_task			*Command = lua_task::luaGetTask( L );
+		const Task			&T = Command->task();
 		luaVerb				*LV = arg( L );
 		Verb				*V = LV->mVerb;
 		Object				*O = ObjectManager::o( V->object() );
@@ -673,10 +676,10 @@ int lua_verb::luaDump( lua_State *L )
 
 		for( QStringList::iterator it = Program.begin() ; it != Program.end() ; it++ )
 		{
-			C->notify( *it );
+			Command->changeAdd( new change::ConnectionNotify( C, *it ) );
 		}
 
-		C->notify( "." );
+		Command->changeAdd( new change::ConnectionNotify( C, "." ) );
 	}
 	catch( mooException &e )
 	{
