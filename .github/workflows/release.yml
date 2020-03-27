@@ -69,9 +69,9 @@ jobs:
         name: ArtMOO-*.exe
         path: build   
 
-  build-windows:
+  build-macos:
 
-    runs-on: windows-latest
+    runs-on: macos-latest
     
     steps:
     - uses: actions/checkout@v2
