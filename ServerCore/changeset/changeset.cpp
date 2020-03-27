@@ -22,24 +22,24 @@ ChangeSet::~ChangeSet()
 
 void ChangeSet::rollback()
 {
-	for( QVector<Change *>::reverse_iterator it = mChanges.rbegin() ; it != mChanges.rend() ; it++ )
+	while( !mChanges.isEmpty() )
 	{
-		(*it)->rollback();
+		Change *C = mChanges.takeLast();
+
+		C->rollback();
+
+		delete C;
 	}
-
-	qDeleteAll( mChanges );
-
-	mChanges.clear();
 }
 
 void ChangeSet::commit()
 {
-	for( QVector<Change *>::iterator it = mChanges.begin() ; it != mChanges.end() ; it++ )
+	while( !mChanges.isEmpty() )
 	{
-		(*it)->commit();
+		Change *C = mChanges.takeLast();
+
+		C->commit();
+
+		delete C;
 	}
-
-	qDeleteAll( mChanges );
-
-	mChanges.clear();
 }

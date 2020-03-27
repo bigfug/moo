@@ -25,7 +25,6 @@ set( SOURCE_FILES
     tst_lua_verb_call.cpp
     tst_lua_pass.cpp
 	tst_servertest.h
-	stdafx.h
 	luatestdata.h
 	permissionstest.h
 	tst_task_rollback_object.cpp

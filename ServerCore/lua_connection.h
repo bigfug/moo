@@ -1,7 +1,9 @@
 #ifndef LUA_CONNECTION_H
 #define LUA_CONNECTION_H
 
-#include <lua.hpp>
+#include "lua.h"
+#include "lualib.h"
+#include "lauxlib.h"
 
 #include "lua_utilities.h"
 

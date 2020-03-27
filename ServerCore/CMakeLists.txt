@@ -60,7 +60,6 @@ set( HEADER_FILES
 	lua_moo.h
 	lua_connection.h
 	connection.h
-	stdafx.h
 	lua_utilities.h
 	mooexception.h
 	lua_listener.h

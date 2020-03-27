@@ -5,7 +5,9 @@
 #include <QDataStream>
 #include <QStringList>
 
-#include <lua.hpp>
+#include "lua.h"
+#include "lualib.h"
+#include "lauxlib.h"
 
 #include "mooglobal.h"
 #include "func.h"

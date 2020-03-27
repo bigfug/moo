@@ -8,7 +8,9 @@
 #include "lua_moo.h"
 #include "objectmanager.h"
 
-#include <lua.hpp>
+#include "lua.h"
+#include "lualib.h"
+#include "lauxlib.h"
 
 InputSinkEditor::InputSinkEditor( Connection *C, ObjectId pObjectId, QString pVerbName, QStringList pText )
 	: mConnection( C ), mObjectId( pObjectId ), mVerbName( pVerbName )

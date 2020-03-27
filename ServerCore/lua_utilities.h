@@ -1,7 +1,9 @@
 #ifndef LUA_UTILITIES_H
 #define LUA_UTILITIES_H
 
-#include <lua.hpp>
+#include "lua.h"
+#include "lualib.h"
+#include "lauxlib.h"
 
 #include <QString>
 #include <QMap>

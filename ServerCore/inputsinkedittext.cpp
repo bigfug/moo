@@ -6,7 +6,9 @@
 #include "lua_moo.h"
 #include "objectmanager.h"
 
-#include <lua.hpp>
+#include "lua.h"
+#include "lualib.h"
+#include "lauxlib.h"
 
 InputSinkEditText::InputSinkEditText(Connection *C, ObjectId pObjectId, QString pPropName, QStringList pText )
 	: mConnection( C ), mObjectId( pObjectId ), mPropName( pPropName )

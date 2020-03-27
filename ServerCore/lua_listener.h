@@ -1,7 +1,9 @@
 #ifndef LUA_LISTENER_H
 #define LUA_LISTENER_H
 
-#include <lua.hpp>
+#include "lua.h"
+#include "lualib.h"
+#include "lauxlib.h"
 
 class ListenerServer;
 

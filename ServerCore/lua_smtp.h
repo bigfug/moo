@@ -4,7 +4,9 @@
 #include <QThread>
 #include <QSharedPointer>
 
-#include <lua.hpp>
+#include "lua.h"
+#include "lualib.h"
+#include "lauxlib.h"
 
 #include "lua_utilities.h"
 

@@ -3,7 +3,9 @@
 
 #include "mooglobal.h"
 
-#include <lua.hpp>
+#include "lua.h"
+#include "lualib.h"
+#include "lauxlib.h"
 
 #include <QList>
 #include "task.h"

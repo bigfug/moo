@@ -479,7 +479,7 @@ int lua_task::eval( void )
 			CON->notify( Err );
 		}
 
-		std::cerr << Err.toStdString() << std::endl;
+		std::cerr << "eval" << Err.toStdString() << std::endl;
 
 		lua_pop( LS, 1 );
 
@@ -876,7 +876,7 @@ int lua_task::verbCallCode( Verb *V, int pArgCnt )
 			C->notify( S );
 		}
 
-		std::cerr << S.toStdString() << std::endl;
+		std::cerr << "verbCallCode" << S.toStdString() << std::endl;
 
 		lua_pop( mL, 1 );
 

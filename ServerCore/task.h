@@ -6,7 +6,10 @@
 #include <QStringList>
 
 #include "mooglobal.h"
-#include <lua.hpp>
+#include "lua.h"
+#include "lualib.h"
+#include "lauxlib.h"
+
 #include "taskentry.h"
 
 class Connection;

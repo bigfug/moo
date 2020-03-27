@@ -1,7 +1,9 @@
 #ifndef LUA_SERIALPORT_H
 #define LUA_SERIALPORT_H
 
-#include <lua.hpp>
+#include "lua.h"
+#include "lualib.h"
+#include "lauxlib.h"
 
 #include <QSerialPort>
 #include <QMap>

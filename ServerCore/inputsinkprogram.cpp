@@ -6,7 +6,9 @@
 #include "lua_moo.h"
 #include "objectmanager.h"
 
-#include <lua.hpp>
+#include "lua.h"
+#include "lualib.h"
+#include "lauxlib.h"
 
 InputSinkProgram::InputSinkProgram( Connection *C, ObjectId pObjectId, QString pVerbName )
 	: mConnection( C ), mObjectId( pObjectId ), mVerbName( pVerbName )
