@@ -110,7 +110,7 @@ void MooApplication::process( void )
 
 	if( !QDir::setCurrent( DataDirInfo.filePath() ) )
 	{
-		qFatal( QObject::tr( "Can't set directory to %1" ).arg( DataDirInfo.filePath() ).toLatin1().constData() );
+		qFatal( "Can't set directory to %s", qPrintable( DataDirInfo.filePath() ) );
 	}
 
 	qInfo() << "Using data directory" << DataDirInfo.filePath();
