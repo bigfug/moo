@@ -430,8 +430,8 @@ void ServerTest::taskRollbackObjectPropInherit( void )
 	TD.process( QString( "o( %1 ):propadd( 'test', 'value1' )" ).arg( O1->id() ) );
 	TD.process( QString( "o( %1 ).test = 'value2'" ).arg( O2->id() ) );
 
-	QCOMPARE( O2->prop( "test" )->value().toString(), "value2" );
-	QCOMPARE( O2->propParent( "test" )->value().toString(), "value1" );
+	QCOMPARE( O2->prop( "test" )->value().toString(), QStringLiteral( "value2" ) );
+	QCOMPARE( O2->propParent( "test" )->value().toString(), QStringLiteral( "value1" ) );
 
 	lua_task	 C = TD.eval( QString( "o( %1 ).parent = O_NONE" ).arg( O2->id() ) );
 
@@ -443,6 +443,6 @@ void ServerTest::taskRollbackObjectPropInherit( void )
 	QCOMPARE( O2->parent(), O1->id() );
 	QVERIFY( O2->prop( "test" ) );
 	QVERIFY( O2->propParent( "test" ) );
-	QCOMPARE( O2->prop( "test" )->value().toString(), "value2" );
-	QCOMPARE( O2->propParent( "test" )->value().toString(), "value1" );
+	QCOMPARE( O2->prop( "test" )->value().toString(), QStringLiteral( "value2" ) );
+	QCOMPARE( O2->propParent( "test" )->value().toString(), QStringLiteral( "value1" ) );
 }
