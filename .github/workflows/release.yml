@@ -34,9 +34,9 @@ jobs:
     - name: pack
       run: cd build && cpack -D CPACK_GENERATOR="DEB" 
     - name: upload
-      uses: actions/upload-artifact@v2-preview
+      uses: actions/checkout@v1
       with:
-        name: ArtMOO-*.deb
+        name: ArtMOO-bionic.deb
         path: build   
 
   build-windows:
@@ -64,9 +64,9 @@ jobs:
     - name: pack
       run: cd build && cpack -D CPACK_GENERATOR="NSIS"
     - name: upload
-      uses: actions/upload-artifact@v2-preview
+      uses: actions/checkout@v1
       with:
-        name: ArtMOO-*.exe
+        name: ArtMOO-win64.exe
         path: build   
 
   build-macos:
@@ -94,8 +94,8 @@ jobs:
     - name: pack
       run: cd build && cpack -D CPACK_GENERATOR="DragNDrop"
     - name: upload
-      uses: actions/upload-artifact@v2-preview
+      uses: actions/checkout@v1
       with:
-        name: ArtMOO-*.dmg
+        name: ArtMOO-macOS.dmg
         path: build   
 
