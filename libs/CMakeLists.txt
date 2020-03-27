@@ -39,7 +39,11 @@ add_library( telnet STATIC
 	libtelnet/libtelnet.h
 )
 
-file( TO_NATIVE_PATH "/" LUA_DIRSEP )
+if( MSVC )
+	set( LUA_DIRSEP "\\" )
+else()
+	set( LUA_DIRSEP( "/" )
+endif()
 
 set ( LUA_PATH "LUA_PATH" CACHE STRING "Environment variable to use as package.path." )
 set ( LUA_CPATH "LUA_CPATH" CACHE STRING "Environment variable to use as package.cpath." )
