@@ -9,6 +9,8 @@ jobs:
     
     steps:
     - uses: actions/checkout@v1
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v2
     - name: configure
       run: mkdir build && cd build && cmake -DCMAKE_CXX_FLAGS="-Werror" ..
     - name: build
@@ -25,6 +27,8 @@ jobs:
     
     steps:
     - uses: actions/checkout@v1
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v2
     - name: configure
       run: mkdir build && cd build && cmake ..
     - name: build
