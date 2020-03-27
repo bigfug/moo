@@ -36,7 +36,7 @@ void ChangeSet::commit()
 {
 	while( !mChanges.isEmpty() )
 	{
-		Change *C = mChanges.takeLast();
+		Change *C = mChanges.takeFirst();
 
 		C->commit();
 
