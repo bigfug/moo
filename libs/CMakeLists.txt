@@ -40,13 +40,13 @@ add_library( telnet STATIC
 )
 
 if( MSVC )
-	set( LUA_DIRSEP "\\" )
+	set( LUA_DIRSEP "\\\\" )
 else()
-	set( LUA_DIRSEP( "/" )
+	set( LUA_DIRSEP "/" )
 endif()
 
-set ( LUA_PATH "LUA_PATH" CACHE STRING "Environment variable to use as package.path." )
-set ( LUA_CPATH "LUA_CPATH" CACHE STRING "Environment variable to use as package.cpath." )
+set( LUA_PATH "LUA_PATH" CACHE STRING "Environment variable to use as package.path." )
+set( LUA_CPATH "LUA_CPATH" CACHE STRING "Environment variable to use as package.cpath." )
 set( LUA_IDSIZE 60 CACHE STRING "gives the maximum size for the description of the source." )
 
 configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/luaconf.h.in ${CMAKE_CURRENT_BINARY_DIR}/luaconf.h )
