@@ -39,7 +39,10 @@ add_test( ServerCore ${PROJECT_NAME} )
 
 include_directories(
 	../ServerCore
-	../libtelnet
+	../libs/libtelnet
+	../libs/lua/src
+	../libs/lua/etc
+	${CMAKE_BINARY_DIR}/libs
 )
 
 target_link_libraries( ${PROJECT_NAME}
@@ -47,17 +50,6 @@ target_link_libraries( ${PROJECT_NAME}
 	SMTPEmail
 	telnet
 	Editor
+	lua
 	Qt5::Core Qt5::Test
 )
-
-#-------------------------------------
-# Lua 5.1
-
-find_package( Lua51 )
-
-if( LUA51_FOUND )
-	target_include_directories( ${PROJECT_NAME} BEFORE PRIVATE ${LUA_INCLUDE_DIR} )
-
-	target_link_libraries( ${PROJECT_NAME} ${LUA_LIBRARIES} )
-endif()
-

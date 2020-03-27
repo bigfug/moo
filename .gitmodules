@@ -1,6 +1,9 @@
-[submodule "libtelnet"]
-	path = libtelnet
-	url = https://github.com/seanmiddleditch/libtelnet.git
 [submodule "libs/SMTPEmail"]
 	path = libs/SMTPEmail
 	url = https://github.com/bluetiger9/SmtpClient-for-Qt.git
+[submodule "libs/libtelnet"]
+	path = libs/libtelnet
+	url = https://github.com/seanmiddleditch/libtelnet.git
+[submodule "libs/lua"]
+	path = libs/lua
+	url = https://github.com/LuaDist/lua

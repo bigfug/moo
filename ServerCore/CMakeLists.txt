@@ -135,7 +135,7 @@ set( HEADER_FILES
 
 add_library( ${PROJECT_NAME} STATIC ${SOURCE_FILES} ${HEADER_FILES} )
 
-add_dependencies( ${PROJECT_NAME} SMTPEmail telnet Editor )
+add_dependencies( ${PROJECT_NAME} SMTPEmail telnet lua Editor )
 
 find_package( Qt5 COMPONENTS Core Network Sql SerialPort Xml WebSockets REQUIRED )
 
@@ -150,15 +150,9 @@ target_link_libraries( ${PROJECT_NAME}
 
 include_directories(
 	../Editor
-	../libtelnet
+	../libs/libtelnet
 	../libs/SMTPEmail/src
+	../libs/lua/src
+	../libs/lua/etc
+	${CMAKE_BINARY_DIR}/libs
 )
-
-find_package( Lua51 )
-
-if( LUA51_FOUND )
-	target_include_directories( ${PROJECT_NAME} BEFORE PRIVATE ${LUA_INCLUDE_DIR} )
-
-	target_link_libraries( ${PROJECT_NAME} ${LUA_LIBRARIES} )
-endif()
-
