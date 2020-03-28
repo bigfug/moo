@@ -46,6 +46,10 @@ public:
 
 	Task( const TaskEntry &pEntry );
 
+	Task( Task &&t ) = default;
+
+	Task( const Task &t ) = default;
+
 	virtual ~Task( void );
 
 	Task &operator =( const Task &T );
