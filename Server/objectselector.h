@@ -23,6 +23,8 @@ public:
 public slots:
 	void setObjectId( ObjectId pId );
 
+	void setEditorEnabled( bool pEnabled = true );
+
 signals:
 	void objectSelectedForEdit( ObjectId pId );
 

@@ -29,6 +29,11 @@ void ObjectSelector::setObjectId(ObjectId pId)
 	ui->mObjectSelectionId->setValue( pId );
 }
 
+void ObjectSelector::setEditorEnabled(bool pEnabled)
+{
+	ui->mObjectSelectionId->setEnabled( pEnabled );
+}
+
 void ObjectSelector::on_mObjectSelectionId_valueChanged(int arg1)
 {
 	if( arg1 == -1 )
