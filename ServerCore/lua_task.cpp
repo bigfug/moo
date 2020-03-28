@@ -899,6 +899,11 @@ int lua_task::verbCallCode( Verb *V, int pArgCnt )
 
 void lua_task::taskPush( const Task &T )
 {
+	if( mTasks.size() >= 50 )
+	{
+		throw mooException( E_MAXREC, "task nest limit reached" );
+	}
+
 	mTasks.push_front( T );
 }
 
