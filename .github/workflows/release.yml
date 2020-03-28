@@ -26,18 +26,18 @@ jobs:
     - name: Install Qt
       uses: jurplel/install-qt-action@v2
     - name: configure
-      run: mkdir build && cd build && cmake -DCMAKE_CXX_FLAGS="-Werror" ..
+      run: mkdir build && mkdir output && mkdir install && cd build && cmake -DCMAKE_CXX_FLAGS="-Werror" -DCMAKE_INSTALL_PREFIX:STRING="../install" -DCPACK_OUTPUT_FILE_PREFIX:STRING="../output"
     - name: build
-      run: cmake --build build --config Release
+      run: cmake --build build --config Release --target install
     - name: test
       run: cd build && ctest
     - name: pack
       run: cd build && cpack -D CPACK_GENERATOR="DEB" 
     - name: upload
-      uses: actions/checkout@v1
+      uses: actions/upload-artifact@v1
       with:
         name: ArtMOO-bionic.deb
-        path: build   
+        path: output   
 
   build-windows:
 
@@ -64,7 +64,7 @@ jobs:
     - name: pack
       run: cd build && cpack -D CPACK_GENERATOR="NSIS"
     - name: upload
-      uses: actions/checkout@v1
+      uses: actions/upload-artifact@v1
       with:
         name: ArtMOO-win64.exe
         path: build   
@@ -94,7 +94,7 @@ jobs:
     - name: pack
       run: cd build && cpack -D CPACK_GENERATOR="DragNDrop"
     - name: upload
-      uses: actions/checkout@v1
+      uses: actions/upload-artifact@v1
       with:
         name: ArtMOO-macOS.dmg
         path: build   
