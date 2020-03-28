@@ -154,11 +154,14 @@ signals:
 	void textOutput( const QString &pText );
 	void lineModeChanged( Connection::LineMode pLineMode );
 	void gmcpOutput( const QByteArray &pGMCP );
+	void connectionClosed( void );
 
 public slots:
 	void write( const QString &pText );
 	void notify( const QString &pText );
 	void dataInput( const QString &pText );
+
+	void close( void );
 
 	void redrawBuffer( void );
 

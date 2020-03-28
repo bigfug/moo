@@ -49,6 +49,8 @@ public slots:
 
 	void logoff( ConnectionId pConnectionId );
 
+	void disconnectAll( void );
+
 private:
 	static ConnectionManager	*mInstance;
 

@@ -112,6 +112,14 @@ void ConnectionManager::logoff( ConnectionId pConnectionId )
 	it.value()->setPlayerId( OBJECT_NONE );
 }
 
+void ConnectionManager::disconnectAll()
+{
+	for( ConnectionNodeMap::iterator it = mConnectionNodeMap.begin() ; it != mConnectionNodeMap.end() ; it++ )
+	{
+		it.value()->close();
+	}
+}
+
 ConnectionId ConnectionManager::fromPlayer( ObjectId pPlayerId )
 {
 	for( ConnectionNodeMap::iterator it = mConnectionNodeMap.begin() ; it != mConnectionNodeMap.end() ; it++ )
@@ -162,7 +170,7 @@ void ConnectionManager::processClosedSockets( void )
 			}
 			catch( mooException &e )
 			{
-
+				qWarning() << e.mMessage;
 			}
 			catch( ... )
 			{

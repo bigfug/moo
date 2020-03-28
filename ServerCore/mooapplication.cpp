@@ -32,7 +32,7 @@
 MooApplication	*MooApplication::mInstance = nullptr;
 
 MooApplication::MooApplication( QCoreApplication &a ) :
-	QObject( &a ), mApp( a ), mMooApp( nullptr ), mOSC( nullptr ), mServer( nullptr ),
+	QObject( &a ), mApp( a ), mMooApp( nullptr ), mOSC( nullptr ), mListenerTelnet( nullptr ),
 	mOptionDataDirectory( QStringList() << "d" << "dir", "data directory", "directory", QStandardPaths::writableLocation( QStandardPaths::AppDataLocation ) ),
 	mOptionServerPort( QStringList() << "p" << "port", "default server port", "port", "1123" ),
 	mOptionConfiguration( QStringList() << "c" << "cfg", "path to moo.ini", "filepath", "moo.ini" )
@@ -134,6 +134,13 @@ void MooApplication::process( void )
 
 bool MooApplication::initialiseApp()
 {
+	ConnectionManager	*CM = ConnectionManager::instance();
+
+	if( !CM )
+	{
+		return( false );
+	}
+
 	mMooApp = new mooApp();
 
 	if( !mMooApp )
@@ -148,16 +155,9 @@ bool MooApplication::initialiseApp()
 		return( false );
 	}
 
-	ConnectionManager	*CM = ConnectionManager::instance();
+	mListenerTelnet	= new ListenerTelnet( 0, optionServerPort() );
 
-	if( !CM )
-	{
-		return( false );
-	}
-
-	mServer	= new ListenerTelnet( 0, optionServerPort(), CM );
-
-	if( !mServer )
+	if( !mListenerTelnet )
 	{
 		return( false );
 	}
@@ -173,11 +173,15 @@ void MooApplication::deinitialiseApp()
 {
 	qInfo() << "ArtMOO exiting\n";
 
-	if( mServer )
-	{
-		delete mServer;
+	ConnectionManager::instance()->disconnectAll();
 
-		mServer = nullptr;
+	ConnectionManager::instance()->processClosedSockets();
+
+	if( mListenerTelnet )
+	{
+		delete mListenerTelnet;
+
+		mListenerTelnet = nullptr;
 	}
 
 	if( mOSC )
@@ -193,6 +197,8 @@ void MooApplication::deinitialiseApp()
 
 		mMooApp = nullptr;
 	}
+
+	ConnectionManager::reset();
 }
 
 void MooApplication::staticMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg)

@@ -62,7 +62,7 @@ private:
 	QCoreApplication		&mApp;
 	mooApp					*mMooApp;
 	OSC						*mOSC;
-	ListenerServer			*mServer;
+	ListenerServer			*mListenerTelnet;
 
 	QCommandLineParser		 mParser;
 	QCommandLineOption		 mOptionDataDirectory;

@@ -41,6 +41,8 @@ ListenerTelnetSocket::ListenerTelnetSocket( QObject *pParent, QTcpSocket *pSocke
 
 	connect( CON, &Connection::gmcpOutput, this, &ListenerTelnetSocket::sendGMCP );
 
+	connect( CON, &Connection::connectionClosed, this, &ListenerTelnetSocket::close );
+
 	connect( &mTimer, &QTimer::timeout, this, &ListenerTelnetSocket::inputTimeout );
 
 	mTimer.singleShot( 500, this, SLOT(inputTimeout()) );
@@ -317,6 +319,11 @@ void ListenerTelnetSocket::sendGMCP( const QByteArray &pGMCP )
 	telnet_subnegotiation( mTelnet, TELNET_TELOPT_GMCP, pGMCP.constData(), pGMCP.size() );
 }
 
+void ListenerTelnetSocket::close()
+{
+	mSocket->close();
+}
+
 void ListenerTelnetSocket::disconnected( void )
 {
 	qInfo() << "Connection disconnected from" << mSocket->peerAddress();
@@ -512,7 +519,11 @@ void ListenerTelnetSocket::telnetEventHandler(telnet_event_t *event)
 
 		case TELNET_EV_SEND:
 			{
-				if( mWebSocketActive )
+				if( !mSocket->isOpen() )
+				{
+					qWarning() << QString::fromLatin1( event->data.buffer, event->data.size );
+				}
+				else if( mWebSocketActive )
 				{
 					QByteArray     Pkt;
 					int            S = event->data.size;

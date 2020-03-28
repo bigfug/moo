@@ -39,6 +39,8 @@ private slots:
 
 	void taskReady( void );
 
+	void frameRun( void );
+
 private:
 	int					 mTimerId;
 	const QString		 mDataFileName;

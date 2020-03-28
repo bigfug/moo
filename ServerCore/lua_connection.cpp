@@ -152,7 +152,13 @@ int lua_connection::luaNotify( lua_State *L )
 
 int lua_connection::luaBoot( lua_State *L )
 {
-	Q_UNUSED( L )
+	lua_task			*Command = lua_task::luaGetTask( L );
+	Connection			*C = ConnectionManager::instance()->connection( Command->connectionId() );
+
+	if( C )
+	{
+		C->close();
+	}
 
 	return( 0 );
 }

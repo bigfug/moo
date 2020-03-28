@@ -104,6 +104,11 @@ void Connection::dataInput( const QString &pText )
 	emit taskOutput( T );
 }
 
+void Connection::close()
+{
+	emit connectionClosed();
+}
+
 void Connection::redrawBuffer()
 {
 	emit textOutput( "\x1b[2J\x1b[1;1H" );

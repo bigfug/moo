@@ -6,7 +6,6 @@
 #include "mooapp.h"
 #include "object.h"
 #include "objectmanager.h"
-#include "connectionmanager.h"
 #include "task.h"
 #include "connection.h"
 #include "lua_moo.h"
@@ -28,8 +27,6 @@
 mooApp::mooApp( const QString &pDataFileName, QObject *pParent )
 	: QObject( pParent ), mTimerId( 0 ), mDataFileName( pDataFileName )
 {
-	//QSettings::setDefaultFormat( QSettings::IniFormat );
-
 	connect( this, SIGNAL(destroyed(QObject*)), this, SLOT(cleanup(QObject*)));
 
 	lua_moo::initialiseAll();
@@ -60,7 +57,7 @@ mooApp::mooApp( const QString &pDataFileName, QObject *pParent )
 		SQL->load();
 	}
 
-	if( OM.maxId() == 0 )
+	if( !OM.maxId() )
 	{
 		OM.luaMinimal();
 	}
@@ -112,9 +109,11 @@ void mooApp::cleanup( QObject *pObject )
 
 mooApp::~mooApp()
 {
-	if( mTimerId == 0 )
+	if( mTimerId )
 	{
 		killTimer( mTimerId );
+
+		mTimerId = 0;
 	}
 
 	Object		*System = ObjectManager::instance()->systemObject();
@@ -131,8 +130,6 @@ mooApp::~mooApp()
 		OM_ODB->save();
 	}
 
-	ConnectionManager::reset();
-
 	ObjectManager::reset();
 
 	OSC::deviceDeinitialise();
@@ -147,21 +144,7 @@ void mooApp::taskReady()
 {
 	ObjectManager		&OM = *ObjectManager::instance();
 
-//	mTimer.stop();
-
-	qint64	TimeStamp = QDateTime::currentMSecsSinceEpoch();
-
-	OSC::devicePacketStart( TimeStamp );
-
-	emit frameStart();
-	emit frameStart( TimeStamp );
-
-	OM.onFrame( TimeStamp );
-
-	emit frameEnd();
-	emit frameEnd( TimeStamp );
-
-	OSC::devicePacketEnd( TimeStamp );
+	frameRun();
 
 	qint64		TimeToNext = OM.timeToNextTask();
 
@@ -177,15 +160,8 @@ void mooApp::taskReady()
 	}
 }
 
-void mooApp::streamCallback( const QString &pText, void *pUserData )
+void mooApp::frameRun()
 {
-	((mooApp*)pUserData)->doOutput( pText );
-}
-
-void mooApp::timerEvent( QTimerEvent *pEvent )
-{
-	Q_UNUSED( pEvent )
-
 	qint64	TimeStamp = QDateTime::currentMSecsSinceEpoch();
 
 	OSC::devicePacketStart( TimeStamp );
@@ -199,6 +175,18 @@ void mooApp::timerEvent( QTimerEvent *pEvent )
 	emit frameEnd( TimeStamp );
 
 	OSC::devicePacketEnd( TimeStamp );
+}
+
+void mooApp::streamCallback( const QString &pText, void *pUserData )
+{
+	((mooApp*)pUserData)->doOutput( pText );
+}
+
+void mooApp::timerEvent( QTimerEvent *pEvent )
+{
+	Q_UNUSED( pEvent )
+
+	frameRun();
 }
 
 void mooApp::doTask( TaskEntry &pTask )
