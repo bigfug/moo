@@ -173,9 +173,13 @@ void MooApplication::deinitialiseApp()
 {
 	qInfo() << "ArtMOO exiting\n";
 
-	ConnectionManager::instance()->disconnectAll();
+	ConnectionManager	*CM = ConnectionManager::instance();
 
-	ConnectionManager::instance()->processClosedSockets();
+	CM->broadcast( "*** SERVER IS SHUTTING DOWN ***" );
+
+	CM->disconnectAll();
+
+	CM->processClosedSockets();
 
 	if( mListenerTelnet )
 	{
