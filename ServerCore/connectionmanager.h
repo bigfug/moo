@@ -51,6 +51,8 @@ public slots:
 
 	void disconnectAll( void );
 
+	void broadcast( const QString &pMessage );
+
 private:
 	static ConnectionManager	*mInstance;
 

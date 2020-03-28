@@ -121,6 +121,14 @@ void ConnectionManager::disconnectAll()
 	}
 }
 
+void ConnectionManager::broadcast( const QString &pMessage )
+{
+	for( ConnectionNodeMap::iterator it = mConnectionNodeMap.begin() ; it != mConnectionNodeMap.end() ; it++ )
+	{
+		it.value()->notify( pMessage );
+	}
+}
+
 ConnectionId ConnectionManager::fromPlayer( ObjectId pPlayerId )
 {
 	for( ConnectionNodeMap::iterator it = mConnectionNodeMap.begin() ; it != mConnectionNodeMap.end() ; it++ )

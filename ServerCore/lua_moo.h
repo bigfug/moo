@@ -30,6 +30,8 @@ private:
 
 	static QString						mSettingsFilePath;
 
+	static QString parseNotify( lua_State *L );
+
 	static void luaRegisterAllStates( lua_State *L );
 
 	static void luaRegisterState( lua_State *L );
@@ -39,6 +41,7 @@ private:
 	static int luaGet( lua_State *L );
 	static int luaSet( lua_State *L );
 
+	static int luaBroadcast( lua_State *L );
 	static int luaNotify( lua_State *L );
 	static int luaRoot( lua_State *L );
 	static int luaSystem( lua_State *L );

@@ -50,6 +50,7 @@ const luaL_Reg lua_moo::mLuaMeta[] =
 
 const luaL_Reg lua_moo::mLuaStatic[] =
 {
+	{ "broadcast", lua_moo::luaBroadcast },
 	{ "checkpoint", lua_moo::luaCheckPoint },
 	{ "notify", lua_moo::luaNotify },
 	{ "pass", lua_moo::luaPass },
@@ -545,17 +546,16 @@ int lua_moo::luaSet( lua_State *L )
 	return( LuaErr ? lua_error( L ) : 0 );
 }
 
-int lua_moo::luaNotify( lua_State *L )
+
+QString lua_moo::parseNotify( lua_State *L )
 {
-	bool				 LuaErr = false;
+	QString				 Msg;
 	int					 ArgCnt = lua_gettop( L );
 
 	if( ArgCnt <= 0 )
 	{
-		return( 0 );
+		return( Msg );
 	}
-
-	QString				 Msg;
 
 	for( int i = 0 ; i < ArgCnt ; i++ )
 	{
@@ -580,7 +580,7 @@ int lua_moo::luaNotify( lua_State *L )
 				break;
 
 			case LUA_TNIL:
-				Msg.append( "<nil>" );
+				Msg.append( QStringLiteral( "<nil>" ).toHtmlEscaped() );
 				break;
 
 			case LUA_TBOOLEAN:
@@ -599,34 +599,79 @@ int lua_moo::luaNotify( lua_State *L )
 				break;
 
 			case LUA_TUSERDATA:
-				Msg.append( "<userdata>" );
+				Msg.append( QStringLiteral( "<userdata>" ).toHtmlEscaped() );
 				break;
 
 			case LUA_TFUNCTION:
-				Msg.append( "<function>" );
+				Msg.append( QStringLiteral( "<function>" ).toHtmlEscaped() );
 				break;
 
 			case LUA_TLIGHTUSERDATA:
-				Msg.append( "<lightuserdata>" );
+				Msg.append( QStringLiteral( "<lightuserdata>" ).toHtmlEscaped() );
 				break;
 
 			case LUA_TTABLE:
-				Msg.append( "<table>" );
+				Msg.append( QStringLiteral( "<table>" ).toHtmlEscaped() );
 				break;
 
 			default:
-				Msg.append( "<unknown>" );
+				Msg.append( QStringLiteral( "<unknown>" ).toHtmlEscaped() );
 				break;
 		}
 	}
 
-	if( Msg.isEmpty() )
-	{
-		return( 0 );
-	}
+	return( Msg );
+}
+
+int lua_moo::luaBroadcast( lua_State *L )
+{
+	bool				 LuaErr = false;
 
 	try
 	{
+		QString				 Msg = parseNotify( L );
+		lua_task			*Command = lua_task::luaGetTask( L );
+		const Task			&T = Command->task();
+		ConnectionManager	*CM = ConnectionManager::instance();
+
+		Object				*PRG = ObjectManager::o( T.programmer() );
+
+		if( !PRG || !PRG->wizard() )
+		{
+			throw mooException( E_PERM, "only wizards can broadcast" );
+		}
+
+		for( Connection *C : CM->connectionList().values() )
+		{
+			if( C )
+			{
+				Command->changeAdd( new change::ConnectionNotify( C, Msg ) );
+			}
+		}
+
+		return( 0 );
+	}
+	catch( mooException &e )
+	{
+		e.lua_pushexception( L );
+
+		LuaErr = true;
+	}
+	catch( ... )
+	{
+
+	}
+
+	return( LuaErr ? lua_error( L ) : 0 );
+}
+
+int lua_moo::luaNotify( lua_State *L )
+{
+	bool				 LuaErr = false;
+
+	try
+	{
+		QString				 Msg = parseNotify( L );
 		lua_task			*Command = lua_task::luaGetTask( L );
 		Connection			*C = ConnectionManager::instance()->connection( Command->connectionId() );
 
