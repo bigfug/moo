@@ -8,6 +8,7 @@
 #include "lua_task.h"
 #include "connectionmanager.h"
 #include "changeset/connectionnotify.h"
+#include "changeset/connectionclose.h"
 
 const char	*lua_connection::mLuaName = "moo.connection";
 LuaMap		lua_connection::mLuaMap;
@@ -153,11 +154,20 @@ int lua_connection::luaNotify( lua_State *L )
 int lua_connection::luaBoot( lua_State *L )
 {
 	lua_task			*Command = lua_task::luaGetTask( L );
+	const Task			&T = Command->task();
+
+	Object				*PRG = ObjectManager::o( T.programmer() );
+
+	if( !PRG || !PRG->wizard() )
+	{
+		throw mooException( E_PERM, "only wizards can boot" );
+	}
+
 	Connection			*C = ConnectionManager::instance()->connection( Command->connectionId() );
 
 	if( C )
 	{
-		C->close();
+		Command->changeAdd( new change::ConnectionClose( C ) );
 	}
 
 	return( 0 );

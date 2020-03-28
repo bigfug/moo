@@ -120,6 +120,7 @@ set( HEADER_FILES
 	changeset/connectionnotify.h
 	changeset/connectionsetcookie.h
 	changeset/connectionclearcookie.h
+	changeset/connectionclose.h
 	changeset/verbsetowner.h
 	changeset/verbsetread.h
 	changeset/verbsetwrite.h
