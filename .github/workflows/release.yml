@@ -26,7 +26,7 @@ jobs:
     - name: Install Qt
       uses: jurplel/install-qt-action@v2
     - name: configure
-      run: mkdir build && mkdir output && mkdir install && cd build && cmake -DCMAKE_CXX_FLAGS="-Werror" -DCMAKE_INSTALL_PREFIX:STRING="../install" -DCPACK_OUTPUT_FILE_PREFIX:STRING="../output"
+      run: mkdir build && mkdir output && mkdir install && cd build && cmake -DCMAKE_CXX_FLAGS="-Werror" -DCMAKE_INSTALL_PREFIX:STRING="../install" -DCPACK_OUTPUT_FILE_PREFIX:STRING="../output" ..
     - name: build
       run: cmake --build build --config Release --target install
     - name: test
