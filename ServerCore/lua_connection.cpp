@@ -31,7 +31,6 @@ const luaL_Reg lua_connection::mLuaInstanceFunctions[] =
 {
 	{ "notify", lua_connection::luaNotify },
 	{ "boot", lua_connection::luaBoot },
-	{ "player", lua_connection::luaPlayer },
 	{ 0, 0 }
 };
 
@@ -76,35 +75,6 @@ void lua_connection::lua_pushconnection( lua_State *L, Connection *O )
 
 	luaL_getmetatable( L, mLuaName );
 	lua_setmetatable( L, -2 );
-}
-
-int lua_connection::luaPlayer( lua_State *L )
-{
-	bool		LuaErr = false;
-
-	try
-	{
-		luaConnection	*Con = arg( L );
-
-		if( Con != 0 )
-		{
-			lua_object::lua_pushobjectid( L, Con->mConnection->player() );
-
-			return( 1 );
-		}
-	}
-	catch( mooException &e )
-	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
-	}
-	catch( ... )
-	{
-
-	}
-
-	return( LuaErr ? lua_error( L ) : 0 );
 }
 
 int lua_connection::luaNotify( lua_State *L )
@@ -228,6 +198,13 @@ int lua_connection::luaGet( lua_State *L )
 		if( ( F = mLuaMap.value( s, 0 ) ) != 0 )
 		{
 			lua_pushcfunction( L, F );
+
+			return( 1 );
+		}
+
+		if( strcmp( s, "id" ) == 0 )
+		{
+			lua_pushinteger( L, C->id() );
 
 			return( 1 );
 		}
