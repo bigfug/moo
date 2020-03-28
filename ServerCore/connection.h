@@ -155,6 +155,7 @@ signals:
 	void lineModeChanged( Connection::LineMode pLineMode );
 	void gmcpOutput( const QByteArray &pGMCP );
 	void connectionClosed( void );
+	void connectionFlush( void );
 
 public slots:
 	void write( const QString &pText );
@@ -162,6 +163,7 @@ public slots:
 	void dataInput( const QString &pText );
 
 	void close( void );
+	void flush( void );
 
 	void redrawBuffer( void );
 

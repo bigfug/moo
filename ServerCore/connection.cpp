@@ -109,6 +109,11 @@ void Connection::close()
 	emit connectionClosed();
 }
 
+void Connection::flush()
+{
+	emit connectionFlush();
+}
+
 void Connection::redrawBuffer()
 {
 	emit textOutput( "\x1b[2J\x1b[1;1H" );

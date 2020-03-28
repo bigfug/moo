@@ -116,6 +116,7 @@ void ConnectionManager::disconnectAll()
 {
 	for( ConnectionNodeMap::iterator it = mConnectionNodeMap.begin() ; it != mConnectionNodeMap.end() ; it++ )
 	{
+		it.value()->flush();
 		it.value()->close();
 	}
 }

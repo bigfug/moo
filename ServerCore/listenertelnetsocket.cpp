@@ -42,6 +42,7 @@ ListenerTelnetSocket::ListenerTelnetSocket( QObject *pParent, QTcpSocket *pSocke
 	connect( CON, &Connection::gmcpOutput, this, &ListenerTelnetSocket::sendGMCP );
 
 	connect( CON, &Connection::connectionClosed, this, &ListenerTelnetSocket::close );
+	connect( CON, &Connection::connectionFlush, mSocket, &QTcpSocket::flush );
 
 	connect( &mTimer, &QTimer::timeout, this, &ListenerTelnetSocket::inputTimeout );
 
