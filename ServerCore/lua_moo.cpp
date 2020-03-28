@@ -364,16 +364,16 @@ void lua_moo::luaSetEnv( lua_State *L )
 
 	//--------------------------------------------------
 
-	lua_pushinteger( L, OBJECT_NONE );
+	lua_object::lua_pushobjectid( L, OBJECT_NONE );
 	lua_setfield( L, -2, "O_NONE" );
 
-	lua_pushinteger( L, OBJECT_AMBIGUOUS );
+	lua_object::lua_pushobjectid( L, OBJECT_AMBIGUOUS );
 	lua_setfield( L, -2, "O_AMBIGUOUS" );
 
-	lua_pushinteger( L, OBJECT_FAILED_MATCH );
+	lua_object::lua_pushobjectid( L, OBJECT_FAILED_MATCH );
 	lua_setfield( L, -2, "O_FAILED_MATCH" );
 
-	lua_pushinteger( L, OBJECT_UNSPECIFIED );
+	lua_object::lua_pushobjectid( L, OBJECT_UNSPECIFIED );
 	lua_setfield( L, -2, "O_UNSPECIFIED" );
 
 	//--------------------------------------------------
