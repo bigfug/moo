@@ -30,6 +30,8 @@ MainWindow::MainWindow( QWidget *pParent )
 	mTrayIcon->setToolTip( "ArtMOO" );
 
 	mTrayIcon->show();
+	
+	ui->mPropertyParent->setEditorEnabled( false );
 
 	connect( ui->mCurrentObject, &ObjectSelector::objectSelectedForEdit, [=]( ObjectId pId )
 	{
@@ -471,6 +473,8 @@ void MainWindow::on_mButtonEditorUpdate_clicked()
 	{
 		Verb		*V = currentVerb();
 
+		Q_ASSERT( V );
+
 		if( !V )
 		{
 			return;
@@ -478,7 +482,21 @@ void MainWindow::on_mButtonEditorUpdate_clicked()
 
 		if( verifyVerb() )
 		{
+			if( V->object() != O->id() )
+			{
+				Verb	V2 = *V;
+
+				O->verbAdd( V->name(), V2 );
+
+				V = currentVerb();
+
+				Q_ASSERT( V );
+			}
+
 			V->setScript( ui->mTextEditor->document()->toPlainText() );
+
+			setCurrentObject( O->id() );
+			setCurrentVerb( V->name() );
 		}
 	}
 	else if( isEditingProperty() )
@@ -488,6 +506,17 @@ void MainWindow::on_mButtonEditorUpdate_clicked()
 		if( !P )
 		{
 			return;
+		}
+
+		if( P->object() != O->id() )
+		{
+			Property	P2 = *P;
+
+			O->propAdd( P->name(), P2 );
+
+			P = currentProperty();
+
+			Q_ASSERT( P );
 		}
 
 		QString		 S = ui->mTextEditor->document()->toPlainText();
@@ -556,6 +585,9 @@ void MainWindow::on_mButtonEditorUpdate_clicked()
 					break;
 			}
 		}
+
+		setCurrentObject( O->id() );
+		setCurrentProperty( P->name() );
 	}
 }
 
