@@ -84,6 +84,8 @@ const luaL_Reg lua_object::mLuaInstanceFunctions[] =
 	{ "is_child_of", lua_object::luaIsChildOf },
 	{ "is_parent_of", lua_object::luaIsParentOf },
 	{ "is_valid", lua_object::luaIsValid },
+	{ "has_verb", lua_object::luaHasVerb },
+	{ "has_prop", lua_object::luaHasProp },
 	{ 0, 0 }
 };
 
@@ -1734,6 +1736,68 @@ int lua_object::luaIsValid( lua_State *L )
 	lua_pushboolean( L, H && H->O >= 0 );
 
 	return( 1 );
+}
+
+int lua_object::luaHasVerb( lua_State *L )
+{
+	bool				 LuaErr = false;
+
+	luaL_checkstring( L, 2 );
+
+	try
+	{
+		Object				*O = argObj( L );
+		QString				 N = QString( lua_tostring( L, 2 ) );
+		Object				*FO;
+		Verb				*FV;
+
+		lua_pushboolean( L, O->verbFind( N, &FV, &FO ) );
+
+		return( 1 );
+	}
+	catch( mooException &e )
+	{
+		e.lua_pushexception( L );
+
+		LuaErr = true;
+	}
+	catch( ... )
+	{
+
+	}
+
+	return( LuaErr ? lua_error( L ) : 0 );
+}
+
+int lua_object::luaHasProp( lua_State *L )
+{
+	bool				 LuaErr = false;
+
+	luaL_checkstring( L, 2 );
+
+	try
+	{
+		Object				*O = argObj( L );
+		QString				 N = QString( lua_tostring( L, 2 ) );
+		Object				*FO;
+		Property			*FP;
+
+		lua_pushboolean( L, O->propFind( N, &FP, &FO ) );
+
+		return( 1 );
+	}
+	catch( mooException &e )
+	{
+		e.lua_pushexception( L );
+
+		LuaErr = true;
+	}
+	catch( ... )
+	{
+
+	}
+
+	return( LuaErr ? lua_error( L ) : 0 );
 }
 
 int lua_object::luaChildren( lua_State *L )

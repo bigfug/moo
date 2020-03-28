@@ -85,6 +85,9 @@ private:
 	static int luaIsParentOf( lua_State *L );
 	static int luaIsValid( lua_State *L );
 
+	static int luaHasVerb( lua_State *L );
+	static int luaHasProp( lua_State *L );
+
 	typedef enum Fields
 	{
 		UNKNOWN,
@@ -116,6 +119,7 @@ private:
 	static const luaL_Reg		 mLuaInstanceFunctions[];
 
 	friend class lua_moo;
+	friend class lua_verb;
 	friend class ServerTest;
 };
 
