@@ -1387,13 +1387,12 @@ int lua_moo::luaRead( lua_State *L )
 	try
 	{
 		lua_task			*Command = lua_task::luaGetTask( L );
+		const Task			&T = lua_task::luaGetTask( L )->task();
 		Connection			*C = ConnectionManager::instance()->connection( Command->connectionId() );
 
 		if( !lua_gettop( L ) )
 		{
-			const Task			&T = lua_task::luaGetTask( L )->task();
-
-			InputSinkRead		*IS = new InputSinkRead( C, T.object(), T.verb(), ReadOpts, VerbArgs );
+			InputSinkRead		*IS = new InputSinkRead( C, T, ReadOpts, VerbArgs );
 
 			if( IS )
 			{
@@ -1404,9 +1403,7 @@ int lua_moo::luaRead( lua_State *L )
 		{
 			ReadOpts = parseReadArgs( L, 1 );
 
-			const Task			&T = lua_task::luaGetTask( L )->task();
-
-			InputSinkRead		*IS = new InputSinkRead( C, T.object(), T.verb(), ReadOpts, VerbArgs );
+			InputSinkRead		*IS = new InputSinkRead( C, T, ReadOpts, VerbArgs );
 
 			if( IS )
 			{
@@ -1500,7 +1497,7 @@ int lua_moo::luaRead( lua_State *L )
 				lua_pop( L, 1 );
 			}
 
-			InputSinkRead	*IS = new InputSinkRead( C, O->id(), V, ReadOpts, VerbArgs );
+			InputSinkRead	*IS = new InputSinkRead( C, T, O->id(), V, ReadOpts, VerbArgs );
 
 			if( IS )
 			{

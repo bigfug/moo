@@ -14,14 +14,21 @@
 #include "lualib.h"
 #include "lauxlib.h"
 
-InputSinkRead::InputSinkRead( Connection *C, ObjectId pObjectId, QString pVerbName, QVariantMap pReadArgs, QVariantList pVerbArgs )
-	: mConnection( C ), mObjectId( pObjectId ), mVerbName( pVerbName ), mReadArgs( pReadArgs ), mVerbArgs( pVerbArgs ),
+InputSinkRead::InputSinkRead( Connection *C, const Task &pTask, ObjectId pObjectId, QString pVerbName, QVariantMap pReadArgs, QVariantList pVerbArgs )
+	: mConnection( C ), mTask( pTask ), mObjectId( pObjectId ), mVerbName( pVerbName ), mReadArgs( pReadArgs ), mVerbArgs( pVerbArgs ),
 	  mAnsiEsc( 0 ), mAnsiPos( 0 )
 {
 	if( mReadArgs.value( "password", false ).toBool() )
 	{
 		mConnection->setLineMode( Connection::REALTIME );
 	}
+}
+
+InputSinkRead::InputSinkRead( Connection *C, const Task &pTask, QVariantMap pReadArgs, QVariantList pVerbArgs )
+	: mConnection( C ), mTask( pTask ), mObjectId( pTask.object() ), mVerbName( pTask.verb() ), mReadArgs( pReadArgs ), mVerbArgs( pVerbArgs ),
+	  mAnsiEsc( 0 ), mAnsiPos( 0 )
+{
+
 }
 
 bool InputSinkRead::input( const QString &pData )
@@ -175,7 +182,7 @@ bool InputSinkRead::input( const QString &pData )
 
 		if( V )
 		{
-			lua_task	 L( mConnection->id(), Task() );
+			lua_task	 L( mConnection->id(), mTask );
 
 			L.setProgrammer( V->owner() );
 
