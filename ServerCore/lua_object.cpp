@@ -325,27 +325,16 @@ int lua_object::luaGet( lua_State *L )
 	try
 	{
 		const Task			&T = lua_task::luaGetTask( L )->task();
-		Object              *O = argObj( L );
-		const char			*s = luaL_checkstring( L, 2 );
-
-		if( O == 0 )
-		{
-			if( strcmp( s, "id" ) == 0 )
-			{
-				lua_pushinteger( L, OBJECT_NONE );
-
-				return( 1 );
-			}
-
-			throw( mooException( E_TYPE, "invalid object" ) );
-		}
 
 		Object				*PRG = ObjectManager::o( T.programmer() );
 
-		if( PRG == 0 )
+		if( !PRG )
 		{
 			throw( mooException( E_TYPE, "invalid programmer" ) );
 		}
+
+		const char			*s = luaL_checkstring( L, 2 );
+		lua_object::Fields	 Field = mFieldMap.value( QString::fromLatin1( s ) );
 
 		// Look for function in mLuaMap
 
@@ -358,7 +347,30 @@ int lua_object::luaGet( lua_State *L )
 			return( 1 );
 		}
 
-		switch( mFieldMap.value( QString::fromLatin1( s ) ) )
+		// Only support
+
+		Object              *O = argObj( L );
+
+		if( !O )
+		{
+			if( Field == ID )
+			{
+				lua_pushinteger( L, OBJECT_NONE );
+
+				return( 1 );
+			}
+
+			if( Field == TO_STRING )
+			{
+				lua_pushcfunction( L, lua_object::luaToString );
+
+				return( 1 );
+			}
+
+			throw( mooException( E_INVARG, "invalid object" ) );
+		}
+
+		switch( Field )
 		{
 			case ID:
 				{
@@ -904,7 +916,7 @@ int lua_object::luaToString( lua_State *L )
 	try
 	{
 		Object				*O = argObj( L );
-		QString				 N = QString( "#%1" ).arg( O->id() );
+		QString				 N = QString( "#%1" ).arg( O ? O->id() : OBJECT_NONE );
 
 		lua_pushstring( L, N.toLatin1() );
 
@@ -971,7 +983,7 @@ int lua_object::luaVerb( lua_State *L )
 		const Task			&T = lua_task::luaGetTask( L )->task();
 		Object				*PRG = ObjectManager::o( T.programmer() );
 
-		if( PRG == 0 )
+		if( !PRG )
 		{
 			throw mooException( E_PERM, "invalid programmer" );
 		}
@@ -984,18 +996,18 @@ int lua_object::luaVerb( lua_State *L )
 		}
 
 		const QString		 VerbName = luaL_checkstring( L, 2 );
-		Verb				*V = O->verb( VerbName );
 
-		if( V == 0 )
+		Object				*FO;
+		Verb				*FV;
+
+		if( O->verbFind( VerbName, &FV, &FO ) )
 		{
-			throw mooException( E_PERM, "bad verb" );
+			lua_verb::lua_pushverb( L, FV );
+
+			return( 1 );
 		}
-
-		lua_verb::lua_pushverb( L, V );
-
-		return( 1 );
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
 		e.lua_pushexception( L );
 
@@ -1994,9 +2006,21 @@ int lua_object::luaProperty( lua_State *L )
 
 	try
 	{
-		//lua_task			*Command = lua_task::luaGetTask( L );
-		//const Task			&T = Command->task();
+		const Task			&T = lua_task::luaGetTask( L )->task();
+		Object				*PRG = ObjectManager::o( T.programmer() );
+
+		if( !PRG )
+		{
+			throw mooException( E_PERM, "invalid programmer" );
+		}
+
 		Object				*O = argObj( L );
+
+		if( !O->read() && PRG->id() != O->owner() && !PRG->wizard() )
+		{
+			throw mooException( E_PERM, "bad access" );
+		}
+
 		const char			*N = luaL_checkstring( L, 2 );
 		Object				*FO;
 		Property			*FP;
