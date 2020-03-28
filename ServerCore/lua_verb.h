@@ -44,6 +44,7 @@ private:
 	static void luaRegisterState( lua_State *L );
 
 	static int luaGC( lua_State *L );
+	static int luaCall( lua_State *L );
 
 	static int luaGet( lua_State *L );
 	static int luaSet( lua_State *L );

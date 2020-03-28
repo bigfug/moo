@@ -39,6 +39,7 @@ const luaL_Reg lua_verb::mLuaInstance[] =
 	{ "__index", lua_verb::luaGet },
 	{ "__newindex", lua_verb::luaSet },
 	{ "__gc", lua_verb::luaGC },
+	{ "__call", lua_verb::luaCall },
 	{ 0, 0 }
 };
 
@@ -150,6 +151,49 @@ int lua_verb::luaGC( lua_State *L )
 //	}
 
 	return( 0 );
+}
+
+int lua_verb::luaCall( lua_State *L )
+{
+	bool		LuaErr = false;
+
+	try
+	{
+		luaVerb				*LV = arg( L );
+		Verb				*V = LV->mVerb;
+		lua_task			*Command = lua_task::luaGetTask( L );
+		Task				 T = Command->task();
+
+		if( !V )
+		{
+			throw( mooException( E_VERBNF, "invalid verb" ) );
+		}
+
+		T.setCaller( V->object() );
+		T.setObject( V->object() );
+		T.setVerb( V->name() );
+
+		Object		*Wizard = ( T.programmer() == OBJECT_NONE ? nullptr : ObjectManager::o( T.programmer() ) );
+
+		if( T.programmer() != OBJECT_NONE && ( !Wizard || !Wizard->wizard() ) )
+		{
+			T.setProgrammer( V->owner() );
+		}
+
+		return( Command->verbCall( T, V, lua_gettop( L ) - 1 ) );
+	}
+	catch( const mooException &e )
+	{
+		e.lua_pushexception( L );
+
+		LuaErr = true;
+	}
+	catch( ... )
+	{
+
+	}
+
+	return( LuaErr ? lua_error( L ) : 0 );
 }
 
 int lua_verb::luaGet( lua_State *L )
