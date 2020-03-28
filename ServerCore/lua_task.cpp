@@ -875,7 +875,7 @@ int lua_task::verbCallCode( Verb *V, int pArgCnt )
 
 		if( C )
 		{
-			changeAdd( new change::ConnectionNotify( C, S ) );
+			C->notify( S.toHtmlEscaped() );
 		}
 
 		std::cerr << "verbCallCode" << S.toStdString() << std::endl;
