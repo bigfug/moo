@@ -362,6 +362,8 @@ void MainWindow::setCurrentObject( ObjectId pId )
 
 		ui->mObjectName->clear();
 	}
+
+	ui->mTabEditor->setEnabled( false );
 }
 
 void MainWindow::setCurrentVerb(QString pName)
@@ -896,6 +898,8 @@ void MainWindow::updateVerb()
 		ui->mTextEditor->setPlainText( V->script() );
 
 		ui->mBottomTabs->setCurrentIndex( 1 );
+
+		ui->mTabEditor->setEnabled( true );
 	}
 	else
 	{
@@ -903,6 +907,8 @@ void MainWindow::updateVerb()
 		ui->mVerbOwner->setObjectId( OBJECT_NONE );
 
 		ui->mTextEditor->clear();
+
+		ui->mTabEditor->setEnabled( false );
 	}
 }
 
@@ -982,10 +988,14 @@ void MainWindow::updateProperty( void )
 					break;
 			}
 		}
+
+		ui->mTabEditor->setEnabled( true );
 	}
 	else
 	{
 		ui->mPropEditor->setEnabled( false );
+
+		ui->mTabEditor->setEnabled( false );
 	}
 }
 

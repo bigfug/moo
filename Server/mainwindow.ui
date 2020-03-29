@@ -600,9 +600,9 @@
     <item>
      <widget class="QTabWidget" name="mBottomTabs">
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
-      <widget class="QWidget" name="tab">
+      <widget class="QWidget" name="mTabLog">
        <attribute name="title">
         <string>Log</string>
        </attribute>
@@ -625,7 +625,7 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tab_2">
+      <widget class="QWidget" name="mTabEditor">
        <attribute name="title">
         <string>Editor</string>
        </attribute>
