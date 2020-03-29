@@ -1102,7 +1102,7 @@ void ODBSQL::updateObjectAddModule( QSqlDatabase &pDB )
 
 	if( !Q.exec() )
 	{
-		throw std::exception( "Can't add column module to object" );
+		throw std::runtime_error( "Can't add column module to object" );
 	}
 
 	Q_ASSERT( findColumn( pDB, "object", "module" ) );
