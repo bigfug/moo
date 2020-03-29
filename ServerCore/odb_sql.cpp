@@ -1488,6 +1488,19 @@ ObjectId ODBSQL::importModule( ObjectId pParentId, ObjectId pOwnerId, const QStr
 			PD.mObject = ObjectIdMap.value( PD.mObject, OBJECT_NONE );
 			PD.mParent = ObjectIdMap.value( PD.mParent, OBJECT_NONE );
 
+			// lookup object ids on properties
+
+			if( !strcmp( PD.mValue.typeName(), lua_object::luaHandle::mTypeName ) )
+			{
+				lua_object::luaHandle		H = PD.mValue.value<lua_object::luaHandle>();
+
+				H.O = ObjectIdMap.value( H.O, OBJECT_NONE );
+
+				PD.mValue = QVariant::fromValue( H );
+			}
+
+			// todo: need to process object id's on QVariantMap
+
 			if( PD.mObject != OBJECT_NONE )
 			{
 				insertPropertyData( P1, PD );
