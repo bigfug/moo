@@ -155,6 +155,16 @@ public:
 		return( OBJECT_NONE );
 	}
 
+	virtual void exportModule( ObjectId pModuleId, const QString &pFileName ) const Q_DECL_OVERRIDE
+	{
+
+	}
+
+	virtual ObjectId importModule( ObjectId pParentId, ObjectId pOwnerId, const QString &pFileName ) Q_DECL_OVERRIDE
+	{
+		return( OBJECT_NONE );
+	}
+
 private:
 	void loadObject( QDataStream &DS, Object &O );
 	void updateObject( QDataStream &DS, const Object &O );

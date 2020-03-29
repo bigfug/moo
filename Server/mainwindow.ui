@@ -54,6 +54,20 @@
              </property>
             </widget>
            </item>
+           <item>
+            <widget class="QPushButton" name="mButtonObjectExport">
+             <property name="text">
+              <string>Export</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="mButtonObjectImport">
+             <property name="text">
+              <string>Import</string>
+             </property>
+            </widget>
+           </item>
           </layout>
          </item>
         </layout>
@@ -186,7 +200,7 @@
         <item>
          <widget class="QStackedWidget" name="mEditorStack">
           <property name="currentIndex">
-           <number>1</number>
+           <number>0</number>
           </property>
           <widget class="QWidget" name="mObjectEditor">
            <property name="enabled">

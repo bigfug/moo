@@ -9,6 +9,7 @@
 #include <QJsonDocument>
 #include <QSettings>
 #include <QMessageBox>
+#include <QFileDialog>
 
 #include "objectmanager.h"
 #include "lua_object.h"
@@ -350,6 +351,8 @@ void MainWindow::setCurrentObject( ObjectId pId )
 		ui->mObjectWizard->setChecked( O->wizard() );
 		ui->mObjectFertile->setChecked( O->fertile() );
 		ui->mObjectProgrammer->setChecked( O->programmer() );
+
+		ui->mButtonObjectExport->setEnabled(  O->module() != OBJECT_NONE );
 
 		ui->mObjectEditor->setEnabled( true );
 	}
@@ -1321,4 +1324,44 @@ bool MainWindow::verifyVerb()
 	lua_close( L );
 
 	return( !Error );
+}
+
+void MainWindow::on_mButtonObjectExport_clicked()
+{
+	QSettings		 S;
+	Object			*O = currentObject();
+
+	if( !O )
+	{
+		return;
+	}
+
+	QString			 N = QFileDialog::getSaveFileName( this, "Export Module", S.value( "export_module_directory", QDir::currentPath() ).toString(), "*.db" );
+
+	if( !N.isEmpty() )
+	{
+		ObjectManager::instance()->exportModule( O->module(), N );
+
+		S.setValue( "export_module_directory", QFileInfo( N ).path() );
+	}
+}
+
+void MainWindow::on_mButtonObjectImport_clicked()
+{
+	QSettings		 S;
+	Object			*O = currentObject();
+
+	if( !O )
+	{
+		return;
+	}
+
+	QString			 N = QFileDialog::getOpenFileName( this, "Import Module", S.value( "import_module_directory", QDir::currentPath() ).toString(), "*.db" );
+
+	if( !N.isEmpty() )
+	{
+		ObjectManager::instance()->importModule( O->id(), ui->mCurrentOwner->objectId(), N );
+
+		S.setValue( "import_module_directory", QFileInfo( N ).path() );
+	}
 }

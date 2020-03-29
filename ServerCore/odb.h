@@ -60,6 +60,10 @@ public:
 
 	virtual ObjectId objectParent( ObjectId pId ) const = 0;
 
+	virtual void exportModule( ObjectId pModuleId, const QString &pFileName ) const = 0;
+
+	virtual ObjectId importModule( ObjectId pParentId, ObjectId pOwnerId, const QString &pFileName ) = 0;
+
 protected:
 	Object *newObject( void ) const;
 

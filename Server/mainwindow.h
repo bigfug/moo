@@ -132,6 +132,10 @@ private slots:
 
 	bool verifyVerb( void );
 
+	void on_mButtonObjectExport_clicked();
+
+	void on_mButtonObjectImport_clicked();
+
 private:
 	bool event( QEvent *pEvent );
 

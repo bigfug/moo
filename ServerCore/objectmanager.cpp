@@ -204,6 +204,19 @@ ObjectId ObjectManager::objectParent(ObjectId pId) const
 	return( mODB ? mODB->objectParent( pId ) : OBJECT_NONE );
 }
 
+void ObjectManager::exportModule( ObjectId pModuleId, const QString &pFileName ) const
+{
+	if( mODB )
+	{
+		mODB->exportModule( pModuleId, pFileName );
+	}
+}
+
+ObjectId ObjectManager::importModule( ObjectId pParentId, ObjectId pOwnerId, const QString &pFileName )
+{
+	return( mODB ? mODB->importModule( pParentId, pOwnerId, pFileName ) : OBJECT_NONE );
+}
+
 void ObjectManager::reset( void )
 {
 	if( !mInstance )

@@ -122,6 +122,10 @@ public:
 
 	ObjectId objectParent( ObjectId pId ) const;
 
+	void exportModule( ObjectId pModuleId, const QString &pFileName ) const;
+
+	ObjectId importModule( ObjectId pParentId, ObjectId pOwnerId, const QString &pFileName );
+
 signals:
 	void stats( const ObjectManagerStats &pStats );
 	void taskReady( void );
