@@ -70,8 +70,21 @@ public:
 private:
 	//void updateObject( const Object &O );
 
-private:
-	QSqlDatabase			 mDB;
+	static void queryToObjectData( const QSqlQuery &Q, ObjectData &D );
+	static void queryToVerbData( const QSqlQuery &Q, FuncData &FD, VerbData &VD );
+	static void queryToPropertyData( const QSqlQuery &Q, PropertyData &PD );
+
+	static void insertObjectData( QSqlQuery &Q, const ObjectData &OD );
+	static void insertVerbData( QSqlQuery &Q, const FuncData &FD, const VerbData &VD );
+	static void insertPropertyData( QSqlQuery &Q, const PropertyData &PD );
+
+	static void initialiseDatabase( QSqlDatabase &pDB );
+
+	static void updateObjectAddModule( QSqlDatabase &pDB );
+
+	bool findColumn( const QString &pTable, const QString &pColumn ) const;
+
+	static bool findColumn( const QSqlDatabase &pDB, const QString &pTable, const QString &pColumn );
 };
 
 #endif // ODBSQL_H

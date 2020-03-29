@@ -102,6 +102,7 @@ set( HEADER_FILES
 	changeset/objectsetread.h
 	changeset/objectsetwrite.h
 	changeset/objectsetlocation.h
+	changeset/objectsetmodule.h
 	changeset/objectsetproperty.h
 	changeset/objectsetparent.h
 	changeset/objectsetplayer.h

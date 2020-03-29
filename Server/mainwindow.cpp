@@ -63,6 +63,23 @@ MainWindow::MainWindow( QWidget *pParent )
 		}
 	} );
 
+	connect( ui->mObjectModule, &ObjectSelector::objectSelectedForEdit, [=]( ObjectId pId )
+	{
+		setCurrentObject( pId );
+	} );
+
+	connect( ui->mObjectModule, &ObjectSelector::objectSelected, [=]( ObjectId pId )
+	{
+		Object			*O = currentObject();
+
+		if( O )
+		{
+			O->setModule( pId );
+		}
+
+		setCurrentObject( pId );
+	} );
+
 	connect( ui->mObjectLocation, &ObjectSelector::objectSelectedForEdit, [=]( ObjectId pId )
 	{
 		setCurrentObject( pId );
@@ -326,6 +343,7 @@ void MainWindow::setCurrentObject( ObjectId pId )
 		ui->mObjectParent->setObjectId( O->parent() );
 		ui->mObjectLocation->setObjectId( O->location() );
 		ui->mObjectAliases->setText( O->aliases().join( ',' ) );
+		ui->mObjectModule->setObjectId( O->module() );
 
 		ui->mObjectRead->setChecked( O->read() );
 		ui->mObjectPlayer->setChecked( O->player() );

@@ -236,21 +236,21 @@
                  </property>
                 </widget>
                </item>
-               <item row="4" column="0">
+               <item row="5" column="0">
                 <widget class="QLabel" name="label_5">
                  <property name="text">
                   <string>Location:</string>
                  </property>
                 </widget>
                </item>
-               <item row="5" column="0">
+               <item row="6" column="0">
                 <widget class="QLabel" name="label_2">
                  <property name="text">
                   <string>Flags:</string>
                  </property>
                 </widget>
                </item>
-               <item row="5" column="1">
+               <item row="6" column="1">
                 <layout class="QVBoxLayout" name="verticalLayout_3">
                  <item>
                   <widget class="QCheckBox" name="mObjectPlayer">
@@ -302,8 +302,18 @@
                <item row="3" column="1">
                 <widget class="ObjectSelector" name="mObjectOwner" native="true"/>
                </item>
-               <item row="4" column="1">
+               <item row="5" column="1">
                 <widget class="ObjectSelector" name="mObjectLocation" native="true"/>
+               </item>
+               <item row="4" column="0">
+                <widget class="QLabel" name="label_19">
+                 <property name="text">
+                  <string>Module:</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="4" column="1">
+                <widget class="ObjectSelector" name="mObjectModule" native="true"/>
                </item>
               </layout>
              </widget>
@@ -727,7 +737,7 @@
      <x>0</x>
      <y>0</y>
      <width>1218</width>
-     <height>22</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">

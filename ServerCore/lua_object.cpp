@@ -33,6 +33,7 @@
 #include "changeset/objectpropadd.h"
 #include "changeset/objectpropclear.h"
 #include "changeset/objectpropdelete.h"
+#include "changeset/objectsetmodule.h"
 #include "changeset/connectionnotify.h"
 
 //-----------------------------------------------------------------------------
@@ -97,6 +98,7 @@ const QMap<QString,lua_object::Fields>		lua_object::mFieldMap =
 	{ "name", NAME },
 	{ "owner", OWNER },
 	{ "parent", PARENT },
+	{ "module", MODULE },
 	{ "location", LOCATION },
 	{ "connection", CONNECTION },
 	{ "contents", CONTENTS },
@@ -429,6 +431,14 @@ int lua_object::luaGet( lua_State *L )
 				}
 				break;
 
+			case MODULE:
+				{
+					lua_pushobjectid( L, O->module() );
+
+					return( 1 );
+				}
+				break;
+
 			case LOCATION:
 				{
 					lua_pushobjectid( L, O->location() );
@@ -663,6 +673,19 @@ int lua_object::luaSet( lua_State *L )
 			case CONNECTION:
 				{
 					throw( mooException( E_PERM, "can't set object connection" ) );
+				}
+				break;
+
+			case MODULE:
+				{
+					if( !isOwner && !isWizard )
+					{
+						throw( mooException( E_PERM, "programmer is not owner or wizard" ) );
+					}
+
+					Command->changeAdd( new change::ObjectSetModule( O, argId( L, 3 ) ) );
+
+					return( 0 );
 				}
 				break;
 

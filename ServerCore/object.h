@@ -24,6 +24,7 @@ typedef struct ObjectData
 
 	bool				mPlayer;		// whether or not the object represents a player
 	ObjectId			mParent;		// The object that is its parent
+	ObjectId			mModule;		// The module that this object belongs to
 	QList<ObjectId>		mChildren;		// A list of the objects that are its children
 
 	// Built-in Properties
@@ -177,6 +178,11 @@ public:
 		return( mData.mPlayer );
 	}
 
+	inline ObjectId module( void ) const
+	{
+		return( mData.mModule );
+	}
+
 	inline ObjectId location( void ) const
 	{
 		return( mData.mLocation );
@@ -266,6 +272,8 @@ public:
 	void setRecycled( bool pRecycle );
 
 	void setConnection( ConnectionId pConnectionId );
+
+	void setModule( ObjectId pObjectId );
 
 protected:
 	ObjectData &data( void )

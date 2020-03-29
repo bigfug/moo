@@ -16,24 +16,16 @@
 #include <QSqlQuery>
 #include <QSqlResult>
 
-ODBSQL::ODBSQL()
+void ODBSQL::initialiseDatabase( QSqlDatabase &pDB )
 {
-	mDB = QSqlDatabase::addDatabase( "QSQLITE" );
-
-	mDB.setDatabaseName( "moo.db" );
-
-	if( !mDB.open() )
+	if( !pDB.tables().contains( "object" ) )
 	{
-		return;
-	}
-
-	if( !mDB.tables().contains( "object" ) )
-	{
-		mDB.exec( "CREATE TABLE object ( "
+		pDB.exec( "CREATE TABLE object ( "
 				  "id INTEGER PRIMARY KEY,"
 				  "name VARCHAR(255),"
 				  "aliases TEXT,"
 				  "parent INTEGER DEFAULT -1,"
+				  "module INTEGER DEFAULT -1,"
 				  "player BOOLEAN DEFAULT false,"
 				  "connection INTEGER DEFAULT -1,"
 				  "owner INTEGER DEFAULT -1,"
@@ -46,7 +38,7 @@ ODBSQL::ODBSQL()
 				  "recycled BOOLEAN DEFAULT false"
 				  ")" );
 
-		QSqlError		DBE = mDB.lastError();
+		QSqlError		DBE = pDB.lastError();
 
 		if( DBE.type() != QSqlError::NoError )
 		{
@@ -55,10 +47,16 @@ ODBSQL::ODBSQL()
 			return;
 		}
 	}
-
-	if( !mDB.tables().contains( "verb" ) )
+	else
 	{
-		mDB.exec( "CREATE TABLE verb ( "
+		// check for existence of object.module
+
+		updateObjectAddModule( pDB );
+	}
+
+	if( !pDB.tables().contains( "verb" ) )
+	{
+		pDB.exec( "CREATE TABLE verb ( "
 				  "name VARCHAR(255),"
 				  "aliases TEXT,"
 				  "object INTEGER,"
@@ -75,7 +73,7 @@ ODBSQL::ODBSQL()
 				  "FOREIGN KEY(`object`) REFERENCES `object`(`id`)"
 				  ")" );
 
-		QSqlError		DBE = mDB.lastError();
+		QSqlError		DBE = pDB.lastError();
 
 		if( DBE.type() != QSqlError::NoError )
 		{
@@ -85,9 +83,9 @@ ODBSQL::ODBSQL()
 		}
 	}
 
-	if( !mDB.tables().contains( "property" ) )
+	if( !pDB.tables().contains( "property" ) )
 	{
-		mDB.exec( "CREATE TABLE property ( "
+		pDB.exec( "CREATE TABLE property ( "
 				  "name VARCHAR(255),"
 				  "object INTEGER,"
 				  "parent INTEGER DEFAULT -1,"
@@ -100,7 +98,7 @@ ODBSQL::ODBSQL()
 				  "FOREIGN KEY(`object`) REFERENCES `object`(`id`)"
 				  ")" );
 
-		QSqlError		DBE = mDB.lastError();
+		QSqlError		DBE = pDB.lastError();
 
 		if( DBE.type() != QSqlError::NoError )
 		{
@@ -110,9 +108,9 @@ ODBSQL::ODBSQL()
 		}
 	}
 
-	if( !mDB.tables().contains( "task" ) )
+	if( !pDB.tables().contains( "task" ) )
 	{
-		mDB.exec( "CREATE TABLE task ( "
+		pDB.exec( "CREATE TABLE task ( "
 				  "id INTEGER,"
 				  "timestamp INTEGER,"
 				  "command TEXT,"
@@ -120,7 +118,7 @@ ODBSQL::ODBSQL()
 				  "connection INTEGER DEFAULT -1"
 				  ")" );
 
-		QSqlError		DBE = mDB.lastError();
+		QSqlError		DBE = pDB.lastError();
 
 		if( DBE.type() != QSqlError::NoError )
 		{
@@ -129,21 +127,38 @@ ODBSQL::ODBSQL()
 			return;
 		}
 	}
-
-	QSqlQuery		Q = mDB.exec( "UPDATE verb SET code = ''" );
 }
 
-void ODBSQL::load()
+ODBSQL::ODBSQL()
 {
-	ObjectManager				&OM = *ObjectManager::instance();
-	ObjectManagerData			&Data = data( OM );
+	QSqlDatabase		DB = QSqlDatabase::addDatabase( "QSQLITE" );
 
-	if( !mDB.isOpen() )
+	DB.setDatabaseName( "moo.db" );
+
+	if( !DB.open() )
 	{
 		return;
 	}
 
-	QSqlQuery	Q1 = mDB.exec( "SELECT MAX( id ) FROM object" );
+	initialiseDatabase( DB );
+
+	// clear all verb code
+
+	QSqlQuery		Q = DB.exec( "UPDATE verb SET code = ''" );
+}
+
+void ODBSQL::load()
+{
+	QSqlDatabase				 DB = QSqlDatabase::database();
+	ObjectManager				&OM = *ObjectManager::instance();
+	ObjectManagerData			&Data = data( OM );
+
+	if( !DB.isOpen() )
+	{
+		return;
+	}
+
+	QSqlQuery	Q1 = DB.exec( "SELECT MAX( id ) FROM object" );
 
 	if( Q1.next() )
 	{
@@ -154,7 +169,7 @@ void ODBSQL::load()
 
 	// Load all the player objects that were previously connected
 
-	QSqlQuery	Q2 = mDB.exec( "SELECT id FROM object WHERE player AND connection != -1 AND !recycled" );
+	QSqlQuery	Q2 = DB.exec( "SELECT id FROM object WHERE player AND connection != -1 AND !recycled" );
 
 	while( Q2.next() )
 	{
@@ -240,20 +255,7 @@ Object *ODBSQL::object( ObjectId pIndex ) const
 
 	ObjectData	&D = data( *O );
 
-	D.mId = Q.value( "id" ).toInt();
-	D.mLocation = Q.value( "location" ).toInt();
-	D.mName = Q.value( "name" ).toString();
-	D.mAliases = Q.value( "aliases" ).toString().split( ',', QString::SkipEmptyParts );
-	D.mFertile = Q.value( "fertile" ).toBool();
-	D.mOwner = Q.value( "owner" ).toInt();
-	D.mParent = Q.value( "parent" ).toInt();
-	D.mPlayer = Q.value( "player" ).toBool();
-	D.mConnection = Q.value( "connection" ).toInt();
-	D.mProgrammer = Q.value( "programmer" ).toBool();
-	D.mRead = Q.value( "read" ).toBool();
-	D.mWizard = Q.value( "wizard" ).toBool();
-	D.mWrite = Q.value( "write" ).toBool();
-	D.mRecycled = Q.value( "recycled" ).toBool();
+	queryToObjectData( Q, D );
 
 	D.mLastRead = ObjectManager::timestamp();
 
@@ -297,24 +299,7 @@ Object *ODBSQL::object( ObjectId pIndex ) const
 			FuncData	&FD = funcdata( V );
 			VerbData	&VD = verbdata( V );
 
-			V.setObject( O->id() );
-			V.setName( Q.value( "name" ).toString() );
-
-			FD.mExecute = Q.value( "execute" ).toBool();
-			FD.mObject  = Q.value( "object" ).toInt();
-			FD.mOwner   = Q.value( "owner" ).toInt();
-			FD.mRead    = Q.value( "read" ).toBool();
-			FD.mScript  = Q.value( "script" ).toString();
-			FD.mWrite   = Q.value( "write" ).toBool();
-
-			FD.mCompiled = Q.value( "code" ).toByteArray();
-			FD.mDirty    = FD.mCompiled.isEmpty();
-
-			VD.mAliases = Q.value( "aliases" ).toString().split( ',', QString::SkipEmptyParts );
-			VD.mDirectObject = Verb::argobj_from( Q.value( "dobj" ).toString().toLatin1() );
-			VD.mIndirectObject = Verb::argobj_from( Q.value( "iobj" ).toString().toLatin1() );
-			VD.mPrepositionType = Verb::argobj_from( Q.value( "preptype" ).toString().toLatin1() );
-			VD.mPreposition = Q.value( "prep" ).toString();
+			queryToVerbData( Q, FD, VD );
 
 			if( FD.mDirty && !V.compile() )
 			{
@@ -340,90 +325,7 @@ Object *ODBSQL::object( ObjectId pIndex ) const
 			Property		 P;
 			PropertyData	&PD = data( P );
 
-			P.setObject( O->id() );
-			P.setName( Q.value( "name" ).toString() );
-
-			PD.mChange = Q.value( "change" ).toBool();
-			PD.mOwner  = Q.value( "owner" ).toInt();
-			PD.mParent = Q.value( "parent" ).toInt();
-			PD.mRead   = Q.value( "read" ).toBool();
-			PD.mWrite  = Q.value( "write" ).toBool();
-
-			QString			 PropType = Q.value( "type" ).toString();
-
-			if( PropType == "object" )
-			{
-				lua_object::luaHandle		LH;
-
-				LH.O = Q.value( "value" ).toInt();
-
-				PD.mValue = QVariant::fromValue( LH );
-			}
-			else if( PropType == "json" )
-			{
-				QJsonDocument		JSON = QJsonDocument::fromJson( Q.value( "value" ).toByteArray() );
-
-				PD.mValue = JSON.toVariant();
-
-				if( QMetaType::Type( PD.mValue.type() ) == QMetaType::QVariantMap )
-				{
-					QVariantMap		VM = PD.mValue.toMap();
-
-					stringsToObjects( VM );
-
-					PD.mValue = VM;
-				}
-			}
-			else
-			{
-				QMetaType::Type	 PT = QMetaType::Type( QMetaType::type( PropType.toLatin1() ) );
-
-				switch( PT )
-				{
-					case QMetaType::QString:
-						PD.mValue = Q.value( "value" ).toString();
-						break;
-
-					case QMetaType::Bool:
-						PD.mValue = Q.value( "value" ).toBool();
-						break;
-
-					case QMetaType::Double:
-						PD.mValue = Q.value( "value" ).toDouble();
-						break;
-
-					case QMetaType::Int:
-						PD.mValue = Q.value( "value" ).toInt();
-						break;
-
-					case QMetaType::Float:
-						PD.mValue = Q.value( "value" ).toFloat();
-						break;
-
-					case QMetaType::Long:
-						PD.mValue = Q.value( "value" ).toInt();
-						break;
-
-					case QMetaType::LongLong:
-						PD.mValue = Q.value( "value" ).toLongLong();
-						break;
-
-					default:
-						{
-							QByteArray		Buffer = QByteArray::fromBase64( Q.value( "value" ).toString().toLatin1() );
-
-							QBuffer		ReadBuffer( &Buffer );
-
-							ReadBuffer.open( QIODevice::ReadOnly );
-
-							QDataStream	ReadStream( &ReadBuffer );
-
-							ReadStream >> PD.mValue;
-						}
-						break;
-
-				}
-			}
+			queryToPropertyData( Q, PD );
 
 			D.mProperties.insert( P.name(), P );
 		}
@@ -461,6 +363,7 @@ void bindObject( const ObjectData &D, QSqlQuery &Q )
 {
 	Q.bindValue( ":id", D.mId );
 	Q.bindValue( ":parent", D.mParent );
+	Q.bindValue( ":module", D.mModule );
 	Q.bindValue( ":name", D.mName );
 	Q.bindValue( ":aliases", D.mAliases.join( ',' ) );
 	Q.bindValue( ":player", D.mPlayer );
@@ -608,20 +511,52 @@ void bindProperty( const PropertyData &D, QSqlQuery &Q )
 	}
 }
 
+void ODBSQL::insertObjectData( QSqlQuery &Q, const ObjectData &OD )
+{
+	Q.prepare( "INSERT INTO object "
+			   "( id, parent, module, name, aliases, player, connection, owner, location, programmer, wizard, read, write, fertile, recycled ) "
+			   "VALUES "
+			   "( :id, :parent, :module, :name, :aliases, :player, :connection, :owner, :location, :programmer, :wizard, :read, :write, :fertile, :recycled )" );
+
+	bindObject( OD, Q );
+
+	Q.exec();
+}
+
+void ODBSQL::insertVerbData( QSqlQuery &Q, const FuncData &FD, const VerbData &VD )
+{
+	Q.prepare( "INSERT INTO verb "
+				"( name, object, owner, read, write, execute, script, dobj, preptype, iobj, prep, aliases, code )"
+				"VALUES "
+				"( :name, :object, :owner, :read, :write, :execute, :script, :dobj, :preptype, :iobj, :prep, :aliases, :code )"
+				);
+
+	bindFunc( FD, Q );
+	bindVerb( VD, Q );
+
+	Q.exec();
+}
+
+void ODBSQL::insertPropertyData( QSqlQuery &Q, const PropertyData &PD )
+{
+	Q.prepare( "INSERT INTO property "
+			   "( name, object, parent, owner, read, write, change, type, value )"
+			   "VALUES "
+			   "( :name, :object, :parent, :owner, :read, :write, :change, :type, :value )"
+			   );
+
+	bindProperty( PD, Q );
+
+	Q.exec();
+}
+
 void ODBSQL::addObject( Object &pObject )
 {
 	ObjectData	&D = data( pObject );
 
 	QSqlQuery			 Q;
 
-	Q.prepare( "INSERT INTO object "
-			   "( id, parent, name, aliases, player, connection, owner, location, programmer, wizard, read, write, fertile, recycled ) "
-			   "VALUES "
-			   "( :id, :parent, :name, :aliases, :player, :connection, :owner, :location, :programmer, :wizard, :read, :write, :fertile, :recycled )" );
-
-	bindObject( D, Q );
-
-	Q.exec();
+	insertObjectData( Q, D );
 
 	ObjectManager::instance()->recordWrite();
 
@@ -664,7 +599,7 @@ void ODBSQL::updateObject( Object &pObject )
 	QSqlQuery			 Q;
 
 	Q.prepare( "UPDATE object SET "
-			   "parent = :parent, name = :name, aliases = :aliases, player = :player, connection = :connection, "
+			   "parent = :parent, module = :module, name = :name, aliases = :aliases, player = :player, connection = :connection, "
 			   "owner = :owner, location = :location, programmer = :programmer, wizard = :wizard, read = :read, "
 			   "write = :write, fertile = :fertile, recycled = :recycled "
 			   "WHERE id = :id" );
@@ -697,22 +632,9 @@ void ODBSQL::addVerb( Object &pObject, QString pName )
 	FuncData	&FD = funcdata( *V );
 	VerbData	&VD = verbdata( *V );
 
-	static QSqlQuery			 Q;
-	static bool					 B = false;
+	QSqlQuery			 Q;
 
-	if( !B )
-	{
-		B = Q.prepare( "INSERT INTO verb "
-					"( name, object, owner, read, write, execute, script, dobj, preptype, iobj, prep, aliases, code )"
-					"VALUES "
-					"( :name, :object, :owner, :read, :write, :execute, :script, :dobj, :preptype, :iobj, :prep, :aliases, :code )"
-					);
-	}
-
-	bindFunc( FD, Q );
-	bindVerb( VD, Q );
-
-	Q.exec();
+	insertVerbData( Q, FD, VD );
 
 	ObjectManager::instance()->recordWrite();
 
@@ -799,22 +721,9 @@ void ODBSQL::addProperty(Object &pObject, QString pName)
 
 	PropertyData	&PD = data( *P );
 
-	static QSqlQuery			 Q;
-	static bool					 B = false;
+	QSqlQuery		 Q;
 
-	if( !B )
-	{
-		B = Q.prepare( "INSERT INTO property "
-					   "( name, object, parent, owner, read, write, change, type, value )"
-					   "VALUES "
-					   "( :name, :object, :parent, :owner, :read, :write, :change, :type, :value )"
-					   );
-
-	}
-
-	bindProperty( PD, Q );
-
-	Q.exec();
+	insertPropertyData( Q, PD );
 
 	ObjectManager::instance()->recordWrite();
 
@@ -889,14 +798,14 @@ void ODBSQL::updateProperty( Object &pObject, QString pName )
 
 ObjectId ODBSQL::findPlayer( QString pName ) const
 {
-	if( !mDB.isOpen() )
+	if( !QSqlDatabase::database().isOpen() )
 	{
 		return( OBJECT_NONE );
 	}
 
 	QSqlQuery	Q1;
 
-	Q1.prepare( "SELECT id FROM object WHERE lower( name ) = lower( :name ) AND player" );
+	Q1.prepare( "SELECT id FROM object WHERE lower( name ) = lower( :name ) AND player AND recycled = false" );
 
 	Q1.bindValue( ":name", pName );
 
@@ -917,7 +826,7 @@ ObjectId ODBSQL::findPlayer( QString pName ) const
 
 ObjectId ODBSQL::findByProp( QString pName, const QVariant &pValue ) const
 {
-	if( !mDB.isOpen() )
+	if( !QSqlDatabase::database().isOpen() )
 	{
 		return( OBJECT_NONE );
 	}
@@ -1053,7 +962,7 @@ ObjectIdVector ODBSQL::children( ObjectId pParentId ) const
 {
 	ObjectIdVector		ChildVector;
 
-	if( !mDB.isOpen() )
+	if( !QSqlDatabase::database().isOpen() )
 	{
 		return( ChildVector );
 	}
@@ -1079,7 +988,7 @@ ObjectIdVector ODBSQL::children( ObjectId pParentId ) const
 
 int ODBSQL::childrenCount( ObjectId pParentId ) const
 {
-	if( !mDB.isOpen() )
+	if( !QSqlDatabase::database().isOpen() )
 	{
 		return( 0 );
 	}
@@ -1102,7 +1011,7 @@ QMap<ObjectId,QString> ODBSQL::objectNames( ObjectIdVector pIds ) const
 {
 	QMap<ObjectId,QString>		ObjectNames;
 
-	if( !mDB.isOpen() )
+	if( !QSqlDatabase::database().isOpen() )
 	{
 		return( ObjectNames );
 	}
@@ -1135,7 +1044,7 @@ QMap<ObjectId,QString> ODBSQL::objectNames( ObjectIdVector pIds ) const
 
 QString ODBSQL::objectName( ObjectId pId ) const
 {
-	if( !mDB.isOpen() )
+	if( !QSqlDatabase::database().isOpen() )
 	{
 		return( 0 );
 	}
@@ -1156,7 +1065,7 @@ QString ODBSQL::objectName( ObjectId pId ) const
 
 ObjectId ODBSQL::objectParent(ObjectId pId) const
 {
-	if( !mDB.isOpen() )
+	if( !QSqlDatabase::database().isOpen() )
 	{
 		return( 0 );
 	}
@@ -1174,3 +1083,426 @@ ObjectId ODBSQL::objectParent(ObjectId pId) const
 
 	return( Q.value( 0 ).toInt() );
 }
+
+void ODBSQL::updateObjectAddModule( QSqlDatabase &pDB )
+{
+	if( !pDB.isOpen() )
+	{
+		return;
+	}
+
+	if( findColumn( pDB, "object", "module" ) )
+	{
+		return;
+	}
+
+	QSqlQuery	Q( pDB );
+
+	Q.prepare( "ALTER TABLE object ADD COLUMN module INTEGER DEFAULT -1" );
+
+	if( !Q.exec() )
+	{
+		throw std::exception( "Can't add column module to object" );
+	}
+
+	Q_ASSERT( findColumn( pDB, "object", "module" ) );
+}
+
+bool ODBSQL::findColumn( const QString &pTable, const QString &pColumn ) const
+{
+	return( ODBSQL::findColumn( QSqlDatabase::database(), pTable, pColumn ) );
+}
+
+bool ODBSQL::findColumn( const QSqlDatabase &pDB, const QString &pTable, const QString &pColumn )
+{
+	QSqlQuery	Q( pDB );
+
+	Q.exec( QString( "PRAGMA table_info( %1 );" ).arg( pTable ) );
+
+	while( Q.next() )
+	{
+		if( Q.value( "name" ).toString() == pColumn )
+		{
+			return( true );
+		}
+	}
+
+	return( false );
+}
+
+void ODBSQL::queryToObjectData( const QSqlQuery &Q, ObjectData &D )
+{
+	D.mId = Q.value( "id" ).toInt();
+	D.mLocation = Q.value( "location" ).toInt();
+	D.mName = Q.value( "name" ).toString();
+	D.mAliases = Q.value( "aliases" ).toString().split( ',', QString::SkipEmptyParts );
+	D.mFertile = Q.value( "fertile" ).toBool();
+	D.mOwner = Q.value( "owner" ).toInt();
+	D.mParent = Q.value( "parent" ).toInt();
+	D.mModule = Q.value( "module" ).toInt();
+	D.mPlayer = Q.value( "player" ).toBool();
+	D.mConnection = Q.value( "connection" ).toInt();
+	D.mProgrammer = Q.value( "programmer" ).toBool();
+	D.mRead = Q.value( "read" ).toBool();
+	D.mWizard = Q.value( "wizard" ).toBool();
+	D.mWrite = Q.value( "write" ).toBool();
+	D.mRecycled = Q.value( "recycled" ).toBool();
+}
+
+void ODBSQL::queryToVerbData( const QSqlQuery &Q, FuncData &FD, VerbData &VD )
+{
+	FD.mObject = Q.value( "object" ).toInt();
+	FD.mName   = Q.value( "name" ).toString();
+
+	FD.mExecute = Q.value( "execute" ).toBool();
+	FD.mObject  = Q.value( "object" ).toInt();
+	FD.mOwner   = Q.value( "owner" ).toInt();
+	FD.mRead    = Q.value( "read" ).toBool();
+	FD.mScript  = Q.value( "script" ).toString();
+	FD.mWrite   = Q.value( "write" ).toBool();
+
+	FD.mCompiled = Q.value( "code" ).toByteArray();
+	FD.mDirty    = FD.mCompiled.isEmpty();
+
+	VD.mAliases = Q.value( "aliases" ).toString().split( ',', QString::SkipEmptyParts );
+	VD.mDirectObject = Verb::argobj_from( Q.value( "dobj" ).toString().toLatin1() );
+	VD.mIndirectObject = Verb::argobj_from( Q.value( "iobj" ).toString().toLatin1() );
+	VD.mPrepositionType = Verb::argobj_from( Q.value( "preptype" ).toString().toLatin1() );
+	VD.mPreposition = Q.value( "prep" ).toString();
+}
+
+void ODBSQL::queryToPropertyData( const QSqlQuery &Q, PropertyData &PD )
+{
+	PD.mObject = Q.value( "object" ).toInt();
+	PD.mName   = Q.value( "name" ).toString();
+	PD.mChange = Q.value( "change" ).toBool();
+	PD.mOwner  = Q.value( "owner" ).toInt();
+	PD.mParent = Q.value( "parent" ).toInt();
+	PD.mRead   = Q.value( "read" ).toBool();
+	PD.mWrite  = Q.value( "write" ).toBool();
+
+	QString			 PropType = Q.value( "type" ).toString();
+
+	if( PropType == "object" )
+	{
+		lua_object::luaHandle		LH;
+
+		LH.O = Q.value( "value" ).toInt();
+
+		PD.mValue = QVariant::fromValue( LH );
+	}
+	else if( PropType == "json" )
+	{
+		QJsonDocument		JSON = QJsonDocument::fromJson( Q.value( "value" ).toByteArray() );
+
+		PD.mValue = JSON.toVariant();
+
+		if( QMetaType::Type( PD.mValue.type() ) == QMetaType::QVariantMap )
+		{
+			QVariantMap		VM = PD.mValue.toMap();
+
+			stringsToObjects( VM );
+
+			PD.mValue = VM;
+		}
+	}
+	else
+	{
+		QMetaType::Type	 PT = QMetaType::Type( QMetaType::type( PropType.toLatin1() ) );
+
+		switch( PT )
+		{
+			case QMetaType::QString:
+				PD.mValue = Q.value( "value" ).toString();
+				break;
+
+			case QMetaType::Bool:
+				PD.mValue = Q.value( "value" ).toBool();
+				break;
+
+			case QMetaType::Double:
+				PD.mValue = Q.value( "value" ).toDouble();
+				break;
+
+			case QMetaType::Int:
+				PD.mValue = Q.value( "value" ).toInt();
+				break;
+
+			case QMetaType::Float:
+				PD.mValue = Q.value( "value" ).toFloat();
+				break;
+
+			case QMetaType::Long:
+				PD.mValue = Q.value( "value" ).toInt();
+				break;
+
+			case QMetaType::LongLong:
+				PD.mValue = Q.value( "value" ).toLongLong();
+				break;
+
+			default:
+				{
+					QByteArray		Buffer = QByteArray::fromBase64( Q.value( "value" ).toString().toLatin1() );
+
+					QBuffer		ReadBuffer( &Buffer );
+
+					ReadBuffer.open( QIODevice::ReadOnly );
+
+					QDataStream	ReadStream( &ReadBuffer );
+
+					ReadStream >> PD.mValue;
+				}
+				break;
+
+		}
+	}
+}
+
+void ODBSQL::exportModule( ObjectId pModuleId, const QString &pFileName ) const
+{
+	QSqlDatabase		DB1 = QSqlDatabase::database();
+	QSqlDatabase		DB2 = QSqlDatabase::addDatabase( "QSQLITE", "EXPORT" );
+
+	DB2.setDatabaseName( pFileName );
+
+	if( !DB2.open() )
+	{
+		return;
+	}
+
+	initialiseDatabase( DB2 );
+
+	QSqlQuery			Q1( DB1 );
+	QSqlQuery			V1( DB1 );
+	QSqlQuery			P1( DB1 );
+
+	Q1.prepare( "SELECT * FROM object WHERE module = :module AND recycled = false" );
+	V1.prepare( "SELECT * FROM verb WHERE object = :object" );
+	P1.prepare( "SELECT * FROM property WHERE object = :object" );
+
+	Q1.bindValue( ":module", pModuleId );
+
+	if( !Q1.exec() )
+	{
+		return;
+	}
+
+	QSqlQuery		Q2( DB2 );
+
+	ObjectData		OD;
+
+	while( Q1.next() )
+	{
+		queryToObjectData( Q1, OD );
+
+		insertObjectData( Q2, OD );
+
+		V1.bindValue( ":object", OD.mId );
+
+		if( V1.exec() )
+		{
+			while( V1.next() )
+			{
+				FuncData		FD;
+				VerbData		VD;
+
+				queryToVerbData( V1, FD, VD );
+
+				insertVerbData( Q2, FD, VD );
+			}
+		}
+
+		P1.bindValue( ":object", OD.mId );
+
+		if( P1.exec() )
+		{
+			while( P1.next() )
+			{
+				PropertyData	PD;
+
+				queryToPropertyData( P1, PD );
+
+				insertPropertyData( Q2, PD );
+			}
+		}
+	}
+
+	DB2.close();
+}
+
+ObjectId ODBSQL::importModule( ObjectId pParentId, ObjectId pOwnerId, const QString &pFileName )
+{
+	QSqlDatabase		DB1 = QSqlDatabase::database();
+	QSqlDatabase		DB2 = QSqlDatabase::addDatabase( "QSQLITE", "IMPORT" );
+
+	DB2.setDatabaseName( pFileName );
+
+	if( !DB2.open() )
+	{
+		return( OBJECT_NONE );
+	}
+
+	ObjectId			NewModuleId = OBJECT_NONE;
+
+	try
+	{
+		NewModuleId = ObjectManager::instance()->newObjectId();
+
+		//-----------------------------------------------------------------------
+		// get the original module id
+
+		QSqlQuery			O2( DB2 );
+
+		if( !O2.exec(  "SELECT * FROM object WHERE id = module"  ) || !O2.next() )
+		{
+			throw std::exception();
+		}
+
+		ObjectData			OD;
+
+		queryToObjectData( O2, OD );
+
+		ObjectId			OldModuleId = OD.mId;
+
+		OD.mId       = NewModuleId;
+		OD.mParent   = pParentId;
+		OD.mModule   = NewModuleId;
+		OD.mLocation = OBJECT_NONE;
+		OD.mOwner    = pOwnerId;
+
+		QMap<ObjectId,ObjectId>		ObjectIdMap;
+
+		ObjectIdMap.insert( OldModuleId, NewModuleId );
+
+		//-----------------------------------------------------------------------
+		//
+
+		if( !DB1.transaction() )
+		{
+			throw std::exception();
+		}
+
+		QSqlQuery			O1( DB1 );
+
+		insertObjectData( O1, OD );
+
+		//-----------------------------------------------------------------------
+		//
+
+		if( !O2.exec( "SELECT * from object WHERE id != module" ) )
+		{
+			throw std::exception();
+		}
+
+		while( O2.next() )
+		{
+			ObjectId			NID = ObjectManager::instance()->newObjectId();
+
+			queryToObjectData( O2, OD );
+
+			ObjectIdMap.insert( OD.mId, NID );
+
+			OD.mId       = NID;
+			OD.mModule   = NewModuleId;
+
+			insertObjectData( O1, OD );
+		}
+
+		//-----------------------------------------------------------------------
+		// update parent, owner, and location on imported objects
+
+		if( !O2.exec( "SELECT * from object" ) )
+		{
+			throw std::exception();
+		}
+
+		QSqlQuery		UO;
+
+		UO.prepare( "UPDATE object SET parent = :parent, owner = :owner, location = :location WHERE id = :id" );
+
+		while( O2.next() )
+		{
+			queryToObjectData( O2, OD );
+
+			OD.mId       = ObjectIdMap.value( OD.mId, OBJECT_NONE );
+			OD.mParent   = ObjectIdMap.value( OD.mParent, OBJECT_NONE );
+			OD.mOwner    = ObjectIdMap.value( OD.mOwner, pOwnerId );
+			OD.mLocation = ObjectIdMap.value( OD.mLocation, OBJECT_NONE );
+
+			UO.bindValue( ":id",       OD.mId );
+			UO.bindValue( ":parent",   OD.mParent );
+			UO.bindValue( ":owner",    OD.mOwner );
+			UO.bindValue( ":location", OD.mLocation );
+
+			if( !UO.exec() )
+			{
+				throw std::exception();
+			}
+		}
+
+		//-----------------------------------------------------------------------
+		// insert verbs
+
+		QSqlQuery			V1( DB1 );
+		QSqlQuery			V2( DB2 );
+
+		if( !V2.exec( "SELECT * FROM verb" ) )
+		{
+			throw std::exception();
+		}
+
+		while( V2.next() )
+		{
+			FuncData		FD;
+			VerbData		VD;
+
+			queryToVerbData( V2, FD, VD );
+
+			FD.mOwner  = ObjectIdMap.value( FD.mOwner, pOwnerId );
+			FD.mObject = ObjectIdMap.value( FD.mObject, OBJECT_NONE );
+
+			if( FD.mObject != OBJECT_NONE )
+			{
+				insertVerbData( V1, FD, VD );
+			}
+		}
+
+		//-----------------------------------------------------------------------
+		// insert properties
+
+		QSqlQuery			P1( DB1 );
+		QSqlQuery			P2( DB2 );
+
+		if( !P2.exec( "SELECT * FROM property" ) )
+		{
+			throw std::exception();
+		}
+
+		while( P2.next() )
+		{
+			PropertyData	PD;
+
+			queryToPropertyData( P2, PD );
+
+			PD.mOwner  = ObjectIdMap.value( PD.mOwner, pOwnerId );
+			PD.mObject = ObjectIdMap.value( PD.mObject, OBJECT_NONE );
+			PD.mParent = ObjectIdMap.value( PD.mParent, OBJECT_NONE );
+
+			if( PD.mObject != OBJECT_NONE )
+			{
+				insertPropertyData( P1, PD );
+			}
+		}
+
+		DB1.commit();
+	}
+	catch( ... )
+	{
+		DB1.rollback();
+	}
+
+	DB2.close();
+
+	return( NewModuleId );
+}
+

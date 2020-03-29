@@ -97,6 +97,7 @@ private:
 		NAME,
 		OWNER,
 		PARENT,
+		MODULE,
 		LOCATION,
 		CONNECTION,
 		CONTENTS,

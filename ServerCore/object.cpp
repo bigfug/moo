@@ -6,11 +6,12 @@
 
 Object::Object( void )
 {
-	mData.mId = -1;
-	mData.mParent = -1;
-	mData.mOwner = -1;
+	mData.mId = OBJECT_NONE;
+	mData.mParent = OBJECT_NONE;
+	mData.mOwner = OBJECT_NONE;
 	mData.mPlayer = false;
-	mData.mLocation = -1;
+	mData.mLocation = OBJECT_NONE;
+	mData.mModule = OBJECT_NONE;
 	mData.mProgrammer = false;
 	mData.mWizard = false;
 	mData.mRead = false;
@@ -48,7 +49,7 @@ void Object::verbDelete( const QString &pName )
 
 Property * Object::propParent( const QString &pName ) const
 {
-	if( mData.mParent == -1 )
+	if( mData.mParent == OBJECT_NONE )
 	{
 		return( 0 );
 	}
@@ -685,6 +686,16 @@ void Object::setConnection(ConnectionId pConnectionId)
 	if( mData.mConnection != pConnectionId )
 	{
 		mData.mConnection = pConnectionId;
+
+		setUpdated();
+	}
+}
+
+void Object::setModule( ObjectId pObjectId )
+{
+	if( mData.mModule != pObjectId )
+	{
+		mData.mModule = pObjectId;
 
 		setUpdated();
 	}
