@@ -74,7 +74,7 @@ void ServerTest::luaParentBasic( void )
 
 	if( true )
 	{
-		lua_task::process( QString( "o( %1 ).parent = %2" ).arg( objObject->id() ).arg( Parent->id() ), CID, Programmer->id() );
+		lua_task::process( QString( "o( %1 ).parent = o( %2 )" ).arg( objObject->id() ).arg( Parent->id() ), CID, Programmer->id() );
 
 		//lua_moo::stackDump( Com.L() );
 
@@ -103,7 +103,7 @@ void ServerTest::luaParentBasicReparent( void )
 
 	if( true )
 	{
-		TD.process( QString( "o( %1 ).parent = %2" ).arg( objObject->id() ).arg( Parent2->id() ) );
+		TD.process( QString( "o( %1 ).parent = o( %2 )" ).arg( objObject->id() ).arg( Parent2->id() ) );
 
 		//lua_moo::stackDump( Com.L() );
 

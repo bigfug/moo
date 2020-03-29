@@ -638,9 +638,7 @@ int lua_object::luaSet( lua_State *L )
 						throw( mooException( E_PERM, "programmer is not owner or wizard" ) );
 					}
 
-					Object				*V = argObj( L, 3 );
-
-					Command->changeAdd( new change::ObjectSetOwner( O, V->id() ) );
+					Command->changeAdd( new change::ObjectSetOwner( O, argId( L, 3 ) ) );
 
 					return( 0 );
 				}
@@ -648,36 +646,7 @@ int lua_object::luaSet( lua_State *L )
 
 			case PARENT:
 				{
-					ObjectId			 NewParentId = -1;
-					Object				*NewParent   = 0;
-
-					luaL_checkany( L, 3 );
-
-					if( lua_isnumber( L, 3 ) )
-					{
-						if( ( NewParentId = lua_tointeger( L, 3 ) ) != -1 )
-						{
-							if( ( NewParent = ObjectManager::o( NewParentId ) ) == 0 )
-							{
-								throw( mooException( E_TYPE, QString( "unknown object %1" ).arg( NewParentId ) ) );
-							}
-						}
-					}
-					else if( lua_isuserdata( L, 3 ) )
-					{
-						if( ( NewParent = argObj( L, 3 ) ) == 0 )
-						{
-							throw( mooException( E_VARNF, QString( "unknown parent object" ) ) );
-						}
-
-						NewParentId = NewParent->id();
-					}
-					else
-					{
-						throw( mooException( E_TYPE, QString( "ObjectId or Object expected %1" ).arg( 2 ) ) );
-					}
-
-					ObjectLogic::chparent( *Command, T.programmer(), O->id(), NewParentId );
+					ObjectLogic::chparent( *Command, T.programmer(), O->id(), argId( L, 3 ) );
 
 					return( 0 );
 				}
@@ -685,34 +654,7 @@ int lua_object::luaSet( lua_State *L )
 
 			case LOCATION:
 				{
-					Object				*ObjWhere   = 0;
-					ObjectId			 ObjWhereId = -1;
-
-					if( lua_isnumber( L, 3 ) )
-					{
-						if( ( ObjWhereId = lua_tointeger( L, 3 ) ) != -1 )
-						{
-							if( ( ObjWhere = ObjectManager::o( ObjWhereId ) ) == 0 )
-							{
-								throw( mooException( E_TYPE, QString( "unknown object %1" ).arg( ObjWhereId ) ) );
-							}
-						}
-					}
-					else if( lua_isuserdata( L, 3 ) )
-					{
-						if( ( ObjWhere = argObj( L, 3 ) ) == 0 )
-						{
-							throw( mooException( E_VARNF, QString( "unknown location object" ) ) );
-						}
-
-						ObjWhereId = ObjWhere->id();
-					}
-					else
-					{
-						throw( mooException( E_TYPE, QString( "ObjectId or Object expected %1" ).arg( 2 ) ) );
-					}
-
-					ObjectLogic::move( *Command, T.programmer(), O->id(), ObjWhereId );
+					ObjectLogic::move( *Command, T.programmer(), O->id(), argId( L, 3 ) );
 
 					return( 0 );
 				}

@@ -44,12 +44,12 @@ void ServerTest::luaMoveToRoot( void )
 
 	if( true )
 	{
-		lua_task::process( QString( "o( %1 ).location = -1" ).arg( Object->id() ), CID, Programmer->id() );
+		lua_task::process( QString( "o( %1 ).location = O_NONE" ).arg( Object->id() ), CID, Programmer->id() );
 
 		//lua_moo::stackDump( Com.L() );
 
 		QVERIFY( Programmer->children().isEmpty() );
-		QCOMPARE( Object->location(), -1 );
+		QCOMPARE( Object->location(), OBJECT_NONE );
 	}
 
 	ObjectManager::reset();
