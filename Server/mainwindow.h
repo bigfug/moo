@@ -140,8 +140,8 @@ private:
 	bool event( QEvent *pEvent );
 
 private:
-	Ui::MainWindow		*ui;
-	QSystemTrayIcon		*mTrayIcon;
+	Ui::MainWindow			*ui;
+	QSystemTrayIcon			*mTrayIcon;
 };
 
 #endif // MAINWINDOW_H

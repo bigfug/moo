@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1218</width>
-    <height>758</height>
+    <height>771</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -633,7 +633,7 @@
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_6">
           <item>
-           <widget class="QPlainTextEdit" name="mTextEditor">
+           <widget class="CodeEditor" name="mTextEditor">
             <property name="font">
              <font>
               <family>Courier New</family>
@@ -751,7 +751,7 @@
      <x>0</x>
      <y>0</y>
      <width>1218</width>
-     <height>26</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -782,6 +782,11 @@
    <extends>QWidget</extends>
    <header>objectselector.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>CodeEditor</class>
+   <extends>QPlainTextEdit</extends>
+   <header>codeeditor.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

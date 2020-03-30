@@ -19,6 +19,13 @@ set( SOURCE_FILES
 	mooitemmodel.cpp
 	mooitemmodel.h
 
+	codeeditor.cpp
+	codeeditor.h
+	linenumberarea.cpp
+	linenumberarea.h
+	syntaxhighlighterlua.cpp
+	syntaxhighlighterlua.h
+
 	Info.plist
 
 	../ServerCore/mooapplication.cpp

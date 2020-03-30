@@ -34,6 +34,10 @@ MainWindow::MainWindow( QWidget *pParent )
 	
 	ui->mPropertyParent->setEditorEnabled( false );
 
+	QFontMetrics metrics( ui->mTextEditor->font() );
+
+	ui->mTextEditor->setTabStopDistance( 4 * metrics.horizontalAdvance( ' ' ) );
+
 	connect( ui->mCurrentObject, &ObjectSelector::objectSelectedForEdit, [=]( ObjectId pId )
 	{
 		setCurrentObject( pId );
@@ -896,6 +900,8 @@ void MainWindow::updateVerb()
 		}
 
 		ui->mTextEditor->setPlainText( V->script() );
+
+		ui->mTextEditor->updateHighlighter();
 
 		ui->mBottomTabs->setCurrentIndex( 1 );
 
