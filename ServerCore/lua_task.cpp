@@ -460,13 +460,13 @@ int lua_task::eval( void )
 	const int		 OldTop		= lua_gettop( LS );
 	int				 Error;
 
-	if( ( Error = luaL_loadstring( LS, T.command().toLatin1() ) ) == 0 )
+	if( ( Error = luaL_loadstring( LS, T.command().toLatin1() ) ) == LUA_OK )
 	{
 		lua_getglobal( LS, "moo_sandbox" );
 
 		lua_setupvalue( LS, -2, 1 );
 
-		if( ( Error = lua_pcall( LS, 0, LUA_MULTRET, 0 ) ) == 0 )
+		if( ( Error = lua_pcall( LS, 0, LUA_MULTRET, 0 ) ) == LUA_OK )
 		{
 
 		}
@@ -483,7 +483,7 @@ int lua_task::eval( void )
 			CON->notify( Err );
 		}
 
-		std::cerr << "eval" << Err.toStdString() << std::endl;
+		std::cerr << "eval: " << Err.toStdString() << std::endl;
 
 		lua_pop( LS, 1 );
 
@@ -852,7 +852,7 @@ int lua_task::verbCallCode( Verb *V, int pArgCnt )
 
 	if( !Error )
 	{
-//		qDebug() << "verbCallCode " << V->name() << "with" << pArgCnt << " args (before args):";
+//		std::cout << "verbCallCode " << V->name().toStdString() << " with " << pArgCnt << " args (before args):" << std::endl;
 
 //		lua_moo::stackReverseDump( mL );
 
@@ -861,7 +861,7 @@ int lua_task::verbCallCode( Verb *V, int pArgCnt )
 			lua_insert( mL, -1 - pArgCnt );
 		}
 
-//		qDebug() << "verbCallCode " << V->name() << "with" << pArgCnt << " args (before):";
+//		std::cout << "verbCallCode " << V->name().toStdString() << " with " << pArgCnt << " args (before call):" << std::endl;
 
 //		lua_moo::stackReverseDump( mL );
 
@@ -869,6 +869,10 @@ int lua_task::verbCallCode( Verb *V, int pArgCnt )
 		{
 
 		}
+
+//		std::cout << "verbCallCode " << V->name().toStdString() << " with " << pArgCnt << " args (after):" << std::endl;
+
+//		lua_moo::stackReverseDump( mL );
 	}
 
 	if( Error )

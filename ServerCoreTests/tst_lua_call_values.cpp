@@ -133,7 +133,7 @@ void ServerTest::luaCallValueObjectFirst( void )
 
 	Property	*R = O->prop( "result" );
 
-	QVERIFY( R != 0 );
+	QVERIFY( R );
 	QVERIFY( R->type() == QVariant::String );
 	QCOMPARE( R->value().toString(), QString( "%1" ).arg( OBJECT_NONE ) );	// moo.eval sets object to -1
 }

@@ -14,7 +14,11 @@ LuaTestData::LuaTestData( void ) :
 
 	Con = CM.connection( CID );
 
+	Q_ASSERT( Con );
+
 	Programmer = OM.object( Con->player() );
+
+	Q_ASSERT( Programmer );
 }
 
 LuaTestData::~LuaTestData()

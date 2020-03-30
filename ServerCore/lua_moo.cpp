@@ -288,8 +288,6 @@ void lua_moo::luaSetEnv( lua_State *L )
 
 	//--------------------------------------------------
 
-	// Create the moo.object metatables that is used for all objects
-
 	luaL_newmetatable( L, "moo" );
 
 	// metatable.__index = metatable
@@ -297,6 +295,15 @@ void lua_moo::luaSetEnv( lua_State *L )
 	lua_setfield( L, -2, "__index" );
 
 	luaL_setfuncs( L, mLuaMeta, 0 );
+
+	lua_pop( L, 1 );
+
+	//--------------------------------------------------
+
+	lua_newtable( L );
+
+	luaL_getmetatable( L, "moo" );
+	lua_setmetatable( L, -2 );
 
 	lua_setfield( L, -2, "moo" );
 
@@ -447,26 +454,9 @@ void lua_moo::luaSetEnv( lua_State *L )
 
 	//--------------------------------------------------
 
-	lua_newtable( L );
-
-	lua_pushcfunction( L, lua_moo::luaGlobalIndex );
-	lua_setfield( L, -2, "__index" );
-
-	lua_setmetatable( L, -2 );
+//	stackDump( L );
 
 	lua_setglobal( L, "moo_sandbox" );
-
-	lua_pop( L, 1 );
-
-	qDebug() << lua_gettop( L );
-
-	//Q_ASSERT( lua_gettop( L ) == 0 );
-
-#if LUA_VERSION_NUM >= 502
-//	lua_pushvalue( L, -1 );		// copy sandbox for upvalue
-//	lua_setupvalue( L, -3, 1 );
-#endif
-
 }
 
 int lua_moo::luaGlobalIndex( lua_State *L )
