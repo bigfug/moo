@@ -22,7 +22,7 @@ ServerTest::ServerTest()
 
 ConnectionId ServerTest::initLua( qint64 pTimeStamp )
 {
-	if( ObjectManager::instance()->maxId() == 0 )
+	if( !ObjectManager::instance()->maxId() )
 	{
 		ObjectManager::instance()->luaMinimal();
 	}
@@ -51,11 +51,9 @@ void ServerTest::luaRegistration( void )
 {
 	try
 	{
-		lua_State		*L  = luaL_newstate();
+		lua_State		*L  = lua_moo::luaNewState();
 
 		QVERIFY( L );
-
-		lua_moo::luaNewState( L );
 
 		lua_close( L );
 	}

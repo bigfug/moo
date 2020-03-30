@@ -207,6 +207,19 @@ void lua_moo::initialiseAll()
 	lua_text::initialise();
 }
 
+void lua_moo::luaNewState( lua_State *L )
+{
+	lua_atpanic( L, lua_moo::luaPanic );
+
+	// load all Lua libraries into global
+
+	luaL_openlibs( L );
+
+	luaRegisterAllStates( L );
+
+	luaSetEnv( L );
+}
+
 void lua_moo::setSettingsFilePath( QString pFilePath )
 {
 	mSettingsFilePath = pFilePath;
@@ -221,28 +234,28 @@ void lua_moo::luaRegisterAllStates(lua_State *L)
 {
 	Q_ASSERT( lua_gettop( L ) == 0 );
 
-//	lua_moo::luaRegisterState( L );
-//	Q_ASSERT( lua_gettop( L ) == 0 );
+	lua_moo::luaRegisterState( L );
+	Q_ASSERT( lua_gettop( L ) == 0 );
 
-//	lua_task::luaRegisterState( L );
-//	Q_ASSERT( lua_gettop( L ) == 0 );
+	lua_object::luaRegisterState( L );
+	Q_ASSERT( lua_gettop( L ) == 0 );
 
-//	lua_object::luaRegisterState( L );
-//	Q_ASSERT( lua_gettop( L ) == 0 );
+	lua_task::luaRegisterState( L );
+	Q_ASSERT( lua_gettop( L ) == 0 );
 
-//	lua_connection::luaRegisterState( L );
-//	Q_ASSERT( lua_gettop( L ) == 0 );
+	lua_connection::luaRegisterState( L );
+	Q_ASSERT( lua_gettop( L ) == 0 );
 
-//	lua_verb::luaRegisterState( L );
-//	Q_ASSERT( lua_gettop( L ) == 0 );
+	lua_verb::luaRegisterState( L );
+	Q_ASSERT( lua_gettop( L ) == 0 );
 
-//	lua_prop::luaRegisterState( L );
-//	Q_ASSERT( lua_gettop( L ) == 0 );
+	lua_prop::luaRegisterState( L );
+	Q_ASSERT( lua_gettop( L ) == 0 );
+
+	lua_json::luaRegisterState( L );
+	Q_ASSERT( lua_gettop( L ) == 0 );
 
 //	lua_osc::luaRegisterState( L );
-//	Q_ASSERT( lua_gettop( L ) == 0 );
-
-//	lua_json::luaRegisterState( L );
 //	Q_ASSERT( lua_gettop( L ) == 0 );
 
 //	lua_serialport::luaRegisterState( L );
@@ -255,19 +268,26 @@ void lua_moo::luaRegisterAllStates(lua_State *L)
 //	Q_ASSERT( lua_gettop( L ) == 0 );
 }
 
-void lua_moo::luaNewState( lua_State *L )
+lua_State *lua_moo::luaNewState( void )
 {
-	// load all Lua libraries into global
+	lua_State		*L = luaL_newstate();
 
-	luaL_openlibs( L );
+	luaNewState( L );
 
-//	luaRegisterAllStates( L );
-
-	luaSetEnv( L );
+	return( L );
 }
 
 void lua_moo::luaRegisterState( lua_State *L )
 {
+	Q_UNUSED( L )
+}
+
+void lua_moo::luaSetEnv( lua_State *L )
+{
+	lua_newtable( L );
+
+	//--------------------------------------------------
+
 	// Create the moo.object metatables that is used for all objects
 
 	luaL_newmetatable( L, "moo" );
@@ -278,18 +298,13 @@ void lua_moo::luaRegisterState( lua_State *L )
 
 	luaL_setfuncs( L, mLuaMeta, 0 );
 
-	luaL_newlib( L, mLuaStatic );
+	lua_setfield( L, -2, "moo" );
 
-	lua_pop( L, 1 );
+	//--------------------------------------------------
 
-	Q_ASSERT( lua_gettop( L ) == 0 );
-}
+	lua_pushcfunction( L, lua_object::luaObject );
+	lua_setfield( L, -2, "o" );
 
-void lua_moo::luaSetEnv( lua_State *L )
-{
-	lua_newtable( L );
-
-	/*
 	//--------------------------------------------------
 
 	lua_getglobal( L, "assert" );
@@ -365,14 +380,6 @@ void lua_moo::luaSetEnv( lua_State *L )
 
 	//--------------------------------------------------
 
-	lua_getglobal( L, "moo" );
-	lua_setfield( L, -2, "moo" );
-
-	lua_getglobal( L, "o" );
-	lua_setfield( L, -2, "o" );
-
-	//--------------------------------------------------
-
 	lua_object::lua_pushobjectid( L, OBJECT_NONE );
 	lua_setfield( L, -2, "O_NONE" );
 
@@ -439,7 +446,7 @@ void lua_moo::luaSetEnv( lua_State *L )
 	lua_setfield( L, -2, "E_FLOAT" );
 
 	//--------------------------------------------------
-*/
+
 	lua_newtable( L );
 
 	lua_pushcfunction( L, lua_moo::luaGlobalIndex );
@@ -1174,6 +1181,8 @@ int lua_moo::luaPanic( lua_State *L )
 	Q_UNUSED( L )
 
 	qDebug() << "**** LUA PANIC ****";
+
+	throw std::runtime_error( "**** LUA PANIC ****" );
 
 	return( 0 );
 }

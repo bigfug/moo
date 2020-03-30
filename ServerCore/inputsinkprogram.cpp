@@ -19,9 +19,7 @@ bool InputSinkProgram::input( const QString &pData )
 {
 	if( pData.compare( "." ) == 0 )
 	{
-		lua_State		*L = luaL_newstate();
-
-		lua_moo::luaNewState( L );
+		lua_State		*L = lua_moo::luaNewState();
 
 		QByteArray		 P = mProgram.join( "\n" ).toUtf8();
 

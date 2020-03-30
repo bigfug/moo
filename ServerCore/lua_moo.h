@@ -145,7 +145,7 @@ public:
 
 	static void luaNewState( lua_State *L );
 
-	static void luaSetEnv( lua_State *L );
+	static lua_State *luaNewState( void );
 
 	static void stackDump (lua_State *L)
 	{
@@ -184,6 +184,8 @@ public:
 	static void addSet( const luaL_Reg *pFuncs );
 
 protected:
+	static void luaSetEnv( lua_State *L );
+
 	static QVariantMap parseReadArgs( lua_State *L, int pIndex );
 };
 

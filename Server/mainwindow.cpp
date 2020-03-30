@@ -1320,9 +1320,7 @@ bool MainWindow::verifyVerb()
 		return( false );
 	}
 
-	lua_State		*L = luaL_newstate();
-
-	lua_moo::luaNewState( L );
+	lua_State		*L = lua_moo::luaNewState();
 
 	QByteArray		 P = ui->mTextEditor->document()->toPlainText().toUtf8();
 

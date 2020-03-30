@@ -52,9 +52,7 @@ void InputSinkEditor::output( const QString &pData )
 
 void InputSinkEditor::test()
 {
-	lua_State		*L = luaL_newstate();
-
-	lua_moo::luaNewState( L );
+	lua_State		*L = lua_moo::luaNewState();
 
 	QByteArray		 P = mEditor.text().join( "\n" ).toUtf8();
 
@@ -78,9 +76,7 @@ void InputSinkEditor::test()
 
 void InputSinkEditor::save()
 {
-	lua_State		*L = luaL_newstate();
-
-	lua_moo::luaNewState( L );
+	lua_State		*L = lua_moo::luaNewState();
 
 	QByteArray		 P = mEditor.text().join( "\n" ).toUtf8();
 

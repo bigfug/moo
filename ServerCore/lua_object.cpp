@@ -115,24 +115,15 @@ const QMap<QString,lua_object::Fields>		lua_object::mFieldMap =
 
 void lua_object::luaRegisterState( lua_State *L )
 {
-	// Create our global 'o()' function for fast object access
-
-	lua_pushcfunction( L, lua_object::luaObject );
-	lua_setglobal( L, "o" );
-
 	// Create the moo.object metatables that is used for all objects
 
-	luaL_newmetatable( L, lua_object::luaHandle::mLuaName );
+	luaL_newmetatable( L, luaHandle::mLuaName );
 
-	lua_pushstring( L, "__index" );
-	lua_pushvalue( L, -2 );  /* pushes the metatable */
-	lua_settable( L, -3 );  /* metatable.__index = metatable */
+	// metatable.__index = metatable
+	lua_pushvalue( L, -1 ); // duplicates the metatable
+	lua_setfield( L, -2, "__index" );
 
-	lua_pushstring( L, "__tostring" );
-	lua_pushcfunction( L, lua_object::luaToString );
-	lua_settable( L, -3 );  /* metatable.__tostring = luaToString */
-
-//	luaL_openlib( L, NULL, lua_object::mLuaInstance, 0 );
+	luaL_setfuncs( L, mLuaInstance, 0 );
 
 	lua_pop( L, 1 );
 }
@@ -914,12 +905,11 @@ int lua_object::luaEQ(lua_State *L)
 int lua_object::luaObject( lua_State *L )
 {
 	bool		LuaErr = false;
-
-	luaL_checkinteger( L, 1 );
+	ObjectId	OID = luaL_checkinteger( L, 1 );
 
 	try
 	{
-		lua_pushobjectid( L, lua_tointeger( L, 1 ) );
+		lua_pushobjectid( L, OID );
 
 		return( 1 );
 	}
@@ -1928,7 +1918,7 @@ ObjectId lua_object::argId( lua_State *L, int pIndex )
 {
 	luaHandle *H = (luaHandle *)luaL_testudata( L, pIndex, lua_object::luaHandle::mLuaName );
 
-	if( H == 0 )
+	if( !H )
 	{
 		throw( mooException( E_VARNF, "unknown object id" ) );
 	}
@@ -1952,7 +1942,7 @@ int lua_object::lua_pushobjectid( lua_State *L, ObjectId I )
 {
 	luaHandle			*H = (luaHandle *)lua_newuserdata( L, sizeof( luaHandle ) );
 
-	if( H == 0 )
+	if( !H )
 	{
 		throw( mooException( E_MEMORY, "out of memory" ) );
 	}

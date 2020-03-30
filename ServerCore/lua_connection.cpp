@@ -59,8 +59,6 @@ void lua_connection::luaRegisterState( lua_State *L )
 
 	luaL_setfuncs( L, mLuaInstance, 0 );
 
-	luaL_newlib( L, mLuaStatic );
-
 	lua_pop( L, 1 );
 }
 

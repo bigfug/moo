@@ -309,13 +309,13 @@ lua_State *lua_task::L()
 			return( Q_NULLPTR );
 		}
 
-		mTimeStamp = QDateTime::currentMSecsSinceEpoch();
-
 		lua_moo::luaNewState( mL );
 
 		lua_sethook( mL, &lua_task::luaHook, LUA_MASKCOUNT, 10 );
 
 		luaSetTask( mL, this );
+
+		mTimeStamp = QDateTime::currentMSecsSinceEpoch();
 	}
 
 	return( mL );
