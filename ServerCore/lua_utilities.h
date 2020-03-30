@@ -11,7 +11,9 @@
 
 typedef QMap<QString,lua_CFunction>		LuaMap;
 
+#if LUA_VERSION_NUM < 502
 extern void *luaL_testudata( lua_State *L, int ud, const char *tname );
+#endif
 
 extern int luaL_pushvariant( lua_State *L, const QVariant &pV );
 

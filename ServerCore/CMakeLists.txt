@@ -153,7 +153,6 @@ include_directories(
 	../Editor
 	../libs/libtelnet
 	../libs/SMTPEmail/src
-	../libs/lua/src
-	../libs/lua/etc
+	${CMAKE_SOURCE_DIR}/libs/lua
 	${CMAKE_BINARY_DIR}/libs
 )

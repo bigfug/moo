@@ -39,8 +39,7 @@ add_test( ServerCore ${PROJECT_NAME} )
 include_directories(
 	../ServerCore
 	../libs/libtelnet
-	../libs/lua/src
-	../libs/lua/etc
+	${CMAKE_SOURCE_DIR}/libs/lua
 	${CMAKE_BINARY_DIR}/libs
 )
 

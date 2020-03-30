@@ -31,42 +31,44 @@ int Func::writer( lua_State *L, const void* p, size_t sz )
 
 int Func::compile()
 {
-	if( !mData.mName.isEmpty() )
-	{
-		qDebug() << "Compiling" << QString( "%1:%2" ).arg( mData.mObject ).arg( mData.mName );
-	}
+//	if( !mData.mName.isEmpty() )
+//	{
+//		qDebug() << "Compiling" << QString( "%1:%2" ).arg( mData.mObject ).arg( mData.mName );
+//	}
 
 	mData.mCompiled.clear();
 
-	lua_State		*L = luaL_newstate();
+//	lua_State		*L = luaL_newstate();
 
-	if( !L )
-	{
-		return( 0 );
-	}
+//	if( !L )
+//	{
+//		return( 0 );
+//	}
 
-	qint64		CompileStart = QDateTime::currentMSecsSinceEpoch();
+//	qint64		CompileStart = QDateTime::currentMSecsSinceEpoch();
 
-	lua_moo::luaNewState( L );
+//	lua_moo::luaNewState( L );
 
-	int Error = luaL_loadstring( L, mData.mScript.toLatin1() );
+//	int Error = luaL_loadstring( L, mData.mScript.toLatin1() );
 
-	if( !Error )
-	{
-		lua_dump( L, &Func::writerStatic, this );
+//	if( !Error )
+//	{
+//		lua_dump( L, &Func::writerStatic, this );
 
-		mData.mDirty = false;
-	}
+//		mData.mDirty = false;
+//	}
 
-	qint64		CompileEnd = QDateTime::currentMSecsSinceEpoch();
+//	qint64		CompileEnd = QDateTime::currentMSecsSinceEpoch();
 
-	ObjectManager::instance()->recordCompilationTime( CompileEnd - CompileStart );
+//	ObjectManager::instance()->recordCompilationTime( CompileEnd - CompileStart );
 
-	//lua_moo::stackDump( L );
+//	//lua_moo::stackDump( L );
 
-	lua_close( L );
+//	lua_close( L );
 
-	return( Error );
+//	return( Error );
+
+	return( 0 );
 }
 
 void Func::setPermissions( quint16 pPerms )
@@ -183,11 +185,20 @@ void Func::setUpdated()
 
 int Func::lua_pushverb( lua_State *L )
 {
-	if( !mData.mDirty && mData.mCompiled.size() > 0 )
+//	if( !mData.mDirty && mData.mCompiled.size() > 0 )
+//	{
+//		return( lua_load( L, &Func::readerStatic, this, "verb" ) );
+//	}
+
+	if( luaL_loadstring( L, mData.mScript.toUtf8() ) != 0 )
 	{
-		return( lua_load( L, &Func::readerStatic, this, "verb" ) );
+		return( -1 );
 	}
 
-	return( luaL_loadstring( L, mData.mScript.toUtf8() ) );
+	lua_getglobal( L, "moo_sandbox" );
+
+	lua_setupvalue( L, -2, 1 );
+
+	return( 0 );
 }
 

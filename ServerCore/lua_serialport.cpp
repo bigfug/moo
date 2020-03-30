@@ -68,11 +68,13 @@ void lua_serialport::luaRegisterState( lua_State *L )
 
 	luaL_newmetatable( L, mLuaName );
 
-	lua_pushstring( L, "__index" );
-	lua_pushvalue( L, -2 );  /* pushes the metatable */
-	lua_settable( L, -3 );  /* metatable.__index = metatable */
+	// metatable.__index = metatable
+	lua_pushvalue( L, -1 ); // duplicates the metatable
+	lua_setfield( L, -2, "__index" );
 
-	luaL_openlib( L, NULL, lua_serialport::mLuaInstance, 0 );
+	luaL_setfuncs( L, mLuaInstance, 0 );
+
+	luaL_newlib( L, mLuaStatic );
 
 	lua_pop( L, 1 );
 }

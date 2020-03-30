@@ -33,21 +33,21 @@ void ServerTest::verbGetSet( void )
 	V.setExecute( true );	QCOMPARE( V.execute(), true );
 	V.setExecute( false );	QCOMPARE( V.execute(), false );
 
-	QVERIFY( V.dirty() == false );
+//	QVERIFY( V.dirty() == false );
 
-	V.setScript( "asdasd" );	QCOMPARE( V.script(), QString( "asdasd" ) );
+//	V.setScript( "asdasd" );	QCOMPARE( V.script(), QString( "asdasd" ) );
 
-	QVERIFY( V.dirty() == true );
+//	QVERIFY( V.dirty() == true );
 
-	QCOMPARE( V.compile(), 3 );
+//	QCOMPARE( V.compile(), 3 );
 
-	QVERIFY( V.dirty() == true );
+//	QVERIFY( V.dirty() == true );
 
-	V.setScript( "print( \"Hello, World!\\n\" );" );
+//	V.setScript( "print( \"Hello, World!\\n\" );" );
 
-	QVERIFY( V.compile() == 0 );
+//	QVERIFY( V.compile() == 0 );
 
-	QVERIFY( V.dirty() == false );
+//	QVERIFY( V.dirty() == false );
 
 	QVERIFY( V.directObject() == ANY );
 	QVERIFY( V.indirectObject() == ANY );

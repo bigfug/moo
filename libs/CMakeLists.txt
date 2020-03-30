@@ -39,33 +39,25 @@ add_library( telnet STATIC
 	libtelnet/libtelnet.h
 )
 
-if( MSVC )
-	set( LUA_DIRSEP "\\\\" )
-else()
-	set( LUA_DIRSEP "/" )
-endif()
-
-set( LUA_PATH "LUA_PATH" CACHE STRING "Environment variable to use as package.path." )
-set( LUA_CPATH "LUA_CPATH" CACHE STRING "Environment variable to use as package.cpath." )
-set( LUA_IDSIZE 60 CACHE STRING "gives the maximum size for the description of the source." )
-
-configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/luaconf.h.in ${CMAKE_CURRENT_BINARY_DIR}/luaconf.h )
+configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/lua/luaconf.h ${CMAKE_CURRENT_BINARY_DIR}/luaconf.h )
 
 SET_SOURCE_FILES_PROPERTIES(
-	lua/src/lapi.c lua/src/lcode.c lua/src/ldebug.c lua/src/ldo.c lua/src/ldump.c lua/src/lfunc.c lua/src/lgc.c lua/src/llex.c
-	lua/src/lmem.c lua/src/lobject.c lua/src/lopcodes.c lua/src/lparser.c lua/src/lstate.c lua/src/lstring.c
-	lua/src/ltable.c lua/src/ltm.c lua/src/lundump.c lua/src/lvm.c lua/src/lzio.c
-	lua/src/lauxlib.c lua/src/lbaselib.c lua/src/ldblib.c lua/src/liolib.c lua/src/lmathlib.c lua/src/loslib.c
-	lua/src/ltablib.c lua/src/lstrlib.c lua/src/loadlib.c lua/src/linit.c
+	lua/lapi.c lua/lcode.c lua/lctype.c lua/ldebug.c lua/ldo.c lua/ldump.c lua/lfunc.c lua/lgc.c lua/llex.c
+	lua/lmem.c lua/lobject.c lua/lopcodes.c lua/lparser.c lua/lstate.c lua/lstring.c lua/ltable.c
+	lua/ltm.c lua/lundump.c lua/lvm.c lua/lzio.c lua/ltests.c
+	lua/lauxlib.c
+	lua/lbaselib.c lua/ldblib.c lua/liolib.c lua/lmathlib.c lua/loslib.c lua/ltablib.c lua/lstrlib.c
+	lua/lutf8lib.c lua/lbitlib.c lua/loadlib.c lua/lcorolib.c lua/linit.c
 	PROPERTIES LANGUAGE CXX
 	)
 
 add_library( lua STATIC
-	lua/src/lapi.c lua/src/lcode.c lua/src/ldebug.c lua/src/ldo.c lua/src/ldump.c lua/src/lfunc.c lua/src/lgc.c lua/src/llex.c
-	lua/src/lmem.c lua/src/lobject.c lua/src/lopcodes.c lua/src/lparser.c lua/src/lstate.c lua/src/lstring.c
-	lua/src/ltable.c lua/src/ltm.c lua/src/lundump.c lua/src/lvm.c lua/src/lzio.c
-	lua/src/lauxlib.c lua/src/lbaselib.c lua/src/ldblib.c lua/src/liolib.c lua/src/lmathlib.c lua/src/loslib.c
-	lua/src/ltablib.c lua/src/lstrlib.c lua/src/loadlib.c lua/src/linit.c
+	lua/lapi.c lua/lcode.c lua/lctype.c lua/ldebug.c lua/ldo.c lua/ldump.c lua/lfunc.c lua/lgc.c lua/llex.c
+	lua/lmem.c lua/lobject.c lua/lopcodes.c lua/lparser.c lua/lstate.c lua/lstring.c lua/ltable.c
+	lua/ltm.c lua/lundump.c lua/lvm.c lua/lzio.c lua/ltests.c
+	lua/lauxlib.c
+	lua/lbaselib.c lua/ldblib.c lua/liolib.c lua/lmathlib.c lua/loslib.c lua/ltablib.c lua/lstrlib.c
+	lua/lutf8lib.c lua/lbitlib.c lua/loadlib.c lua/lcorolib.c lua/linit.c
 	${CMAKE_CURRENT_BINARY_DIR}/luaconf.h
 	)
 

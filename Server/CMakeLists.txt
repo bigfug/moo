@@ -43,8 +43,7 @@ target_compile_definitions( ${PROJECT_NAME} PRIVATE MOO_VERSION=${MOO_VERSION} )
 include_directories(
 	../ServerCore
 	../libs/libtelnet
-	../libs/lua/src
-	../libs/lua/etc
+	${CMAKE_SOURCE_DIR}/libs/lua
 	${CMAKE_BINARY_DIR}/libs
 )
 

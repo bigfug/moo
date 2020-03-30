@@ -123,7 +123,7 @@ int luaTableIndexOf( lua_State *L )
 					break;
 
 				case LUA_TNUMBER:
-					DstKey = luaL_optint( L, -3, 0 );
+					DstKey = luaL_optinteger( L, -3, 0 );
 					break;
 			}
 		}
@@ -221,56 +221,64 @@ void lua_moo::luaRegisterAllStates(lua_State *L)
 {
 	Q_ASSERT( lua_gettop( L ) == 0 );
 
-	lua_moo::luaRegisterState( L );
-	Q_ASSERT( lua_gettop( L ) == 0 );
+//	lua_moo::luaRegisterState( L );
+//	Q_ASSERT( lua_gettop( L ) == 0 );
 
-	lua_task::luaRegisterState( L );
-	Q_ASSERT( lua_gettop( L ) == 0 );
+//	lua_task::luaRegisterState( L );
+//	Q_ASSERT( lua_gettop( L ) == 0 );
 
-	lua_object::luaRegisterState( L );
-	Q_ASSERT( lua_gettop( L ) == 0 );
+//	lua_object::luaRegisterState( L );
+//	Q_ASSERT( lua_gettop( L ) == 0 );
 
-	lua_connection::luaRegisterState( L );
-	Q_ASSERT( lua_gettop( L ) == 0 );
+//	lua_connection::luaRegisterState( L );
+//	Q_ASSERT( lua_gettop( L ) == 0 );
 
-	lua_verb::luaRegisterState( L );
-	Q_ASSERT( lua_gettop( L ) == 0 );
+//	lua_verb::luaRegisterState( L );
+//	Q_ASSERT( lua_gettop( L ) == 0 );
 
-	lua_prop::luaRegisterState( L );
-	Q_ASSERT( lua_gettop( L ) == 0 );
+//	lua_prop::luaRegisterState( L );
+//	Q_ASSERT( lua_gettop( L ) == 0 );
 
-	lua_osc::luaRegisterState( L );
-	Q_ASSERT( lua_gettop( L ) == 0 );
+//	lua_osc::luaRegisterState( L );
+//	Q_ASSERT( lua_gettop( L ) == 0 );
 
-	lua_json::luaRegisterState( L );
-	Q_ASSERT( lua_gettop( L ) == 0 );
+//	lua_json::luaRegisterState( L );
+//	Q_ASSERT( lua_gettop( L ) == 0 );
 
-	lua_serialport::luaRegisterState( L );
-	Q_ASSERT( lua_gettop( L ) == 0 );
+//	lua_serialport::luaRegisterState( L );
+//	Q_ASSERT( lua_gettop( L ) == 0 );
 
-	lua_smtp::luaRegisterState( L );
-	Q_ASSERT( lua_gettop( L ) == 0 );
+//	lua_smtp::luaRegisterState( L );
+//	Q_ASSERT( lua_gettop( L ) == 0 );
 
-	lua_text::luaRegisterState( L );
-	Q_ASSERT( lua_gettop( L ) == 0 );
+//	lua_text::luaRegisterState( L );
+//	Q_ASSERT( lua_gettop( L ) == 0 );
 }
 
 void lua_moo::luaNewState( lua_State *L )
 {
+	// load all Lua libraries into global
+
 	luaL_openlibs( L );
 
-	luaRegisterAllStates( L );
+//	luaRegisterAllStates( L );
+
+	luaSetEnv( L );
 }
 
 void lua_moo::luaRegisterState( lua_State *L )
 {
-	luaL_openlib( L, "moo", mLuaGlobal, 0 );
+	// Create the moo.object metatables that is used for all objects
 
 	luaL_newmetatable( L, "moo" );
 
-	luaL_openlib( L, 0, mLuaMeta, 0 );
+	// metatable.__index = metatable
+	lua_pushvalue( L, -1 ); // duplicates the metatable
+	lua_setfield( L, -2, "__index" );
 
-	lua_setmetatable( L, -2 );
+	luaL_setfuncs( L, mLuaMeta, 0 );
+
+	luaL_newlib( L, mLuaStatic );
 
 	lua_pop( L, 1 );
 
@@ -281,6 +289,7 @@ void lua_moo::luaSetEnv( lua_State *L )
 {
 	lua_newtable( L );
 
+	/*
 	//--------------------------------------------------
 
 	lua_getglobal( L, "assert" );
@@ -323,7 +332,7 @@ void lua_moo::luaSetEnv( lua_State *L )
 
 	lua_getglobal( L, "table" );
 
-	luaL_register( L, NULL, luaTableFuncs );	// leaves table on stack
+//	luaL_register( L, NULL, luaTableFuncs );	// leaves table on stack
 
 	lua_setfield( L, -2, "table" );
 
@@ -430,7 +439,7 @@ void lua_moo::luaSetEnv( lua_State *L )
 	lua_setfield( L, -2, "E_FLOAT" );
 
 	//--------------------------------------------------
-
+*/
 	lua_newtable( L );
 
 	lua_pushcfunction( L, lua_moo::luaGlobalIndex );
@@ -438,7 +447,19 @@ void lua_moo::luaSetEnv( lua_State *L )
 
 	lua_setmetatable( L, -2 );
 
-	lua_setfenv( L, -2 );
+	lua_setglobal( L, "moo_sandbox" );
+
+	lua_pop( L, 1 );
+
+	qDebug() << lua_gettop( L );
+
+	//Q_ASSERT( lua_gettop( L ) == 0 );
+
+#if LUA_VERSION_NUM >= 502
+//	lua_pushvalue( L, -1 );		// copy sandbox for upvalue
+//	lua_setupvalue( L, -3, 1 );
+#endif
+
 }
 
 int lua_moo::luaGlobalIndex( lua_State *L )
@@ -454,11 +475,15 @@ int lua_moo::luaGlobalIndex( lua_State *L )
 
 	t.findObject( s, l );
 
-	if( l.size() == 0 )
+	if( l.isEmpty() )
 	{
 		lua_pushnil( L );
 	}
-	else if( l.size() > 1 )
+	else if( l.size() == 1 )
+	{
+		lua_object::lua_pushobjectid( L, l.first() );
+	}
+	else
 	{
 		lua_newtable( L );
 
@@ -468,10 +493,6 @@ int lua_moo::luaGlobalIndex( lua_State *L )
 			lua_object::lua_pushobjectid( L, l[ i ] );
 			lua_settable( L, -3 );
 		}
-	}
-	else
-	{
-		lua_object::lua_pushobjectid( L, l.first() );
 	}
 
 	return( 1 );

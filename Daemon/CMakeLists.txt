@@ -10,8 +10,7 @@ add_executable( ${PROJECT_NAME} WIN32 MACOSX_BUNDLE
 include_directories(
 	../ServerCore
 	../libs/libtelnet
-	../libs/lua/src
-	../libs/lua/etc
+	${CMAKE_SOURCE_DIR}/libs/lua
 	${CMAKE_BINARY_DIR}/libs
 	)
 

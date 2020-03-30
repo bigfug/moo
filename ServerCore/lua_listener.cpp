@@ -26,15 +26,19 @@ void lua_listener::initialise()
 
 void lua_listener::luaRegisterState( lua_State *L )
 {
-	// Create the moo.connection metatables that is used for all objects
+	// Create the moo.object metatables that is used for all objects
 
 	luaL_newmetatable( L, mLuaName );
 
-	lua_pushstring( L, "__index" );
-	lua_pushvalue( L, -2 );  /* pushes the metatable */
-	lua_settable( L, -3 );  /* metatable.__index = metatable */
+	// metatable.__index = metatable
+	lua_pushvalue( L, -1 ); // duplicates the metatable
+	lua_setfield( L, -2, "__index" );
 
-	luaL_openlib( L, NULL, lua_listener::mLuaInstance, 0 );
+	luaL_setfuncs( L, mLuaInstance, 0 );
+
+	luaL_newlib( L, mLuaStatic );
+
+	lua_pop( L, 1 );
 }
 
 void lua_listener::lua_pushlistener( lua_State *L, ListenerServer *O )

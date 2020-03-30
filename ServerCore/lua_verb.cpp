@@ -90,15 +90,13 @@ void lua_verb::luaRegisterState( lua_State *L )
 
 	luaL_newmetatable( L, mLuaName );
 
-	lua_pushstring( L, "__index" );
-	lua_pushvalue( L, -2 );  /* pushes the metatable */
-	lua_settable( L, -3 );  /* metatable.__index = metatable */
+	// metatable.__index = metatable
+	lua_pushvalue( L, -1 ); // duplicates the metatable
+	lua_setfield( L, -2, "__index" );
 
-#if LUA_VERSION_NUM == 501
-	luaL_openlib( L, NULL, lua_verb::mLuaInstance, 0 );
-#else
-#error LUA 5.1
-#endif
+	luaL_setfuncs( L, mLuaInstance, 0 );
+
+	luaL_newlib( L, mLuaStatic );
 
 	lua_pop( L, 1 );
 

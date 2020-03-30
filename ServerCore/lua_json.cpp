@@ -182,11 +182,11 @@ void lua_json::luaRegisterState( lua_State *L )
 
 	luaL_newmetatable( L, luaJsonDocument::mLuaName );
 
-	lua_pushstring( L, "__index" );
-	lua_pushvalue( L, -2 );  /* pushes the metatable */
-	lua_settable( L, -3 );  /* metatable.__index = metatable */
+	// metatable.__index = metatable
+	lua_pushvalue( L, -1 ); // duplicates the metatable
+	lua_setfield( L, -2, "__index" );
 
-	luaL_openlib( L, NULL, lua_json::mLuaDocumentInstance, 0 );
+	luaL_setfuncs( L, lua_json::mLuaDocumentInstance, 0 );
 
 	lua_pop( L, 1 );
 
@@ -194,11 +194,11 @@ void lua_json::luaRegisterState( lua_State *L )
 
 	luaL_newmetatable( L, luaJsonArray::mLuaName );
 
-	lua_pushstring( L, "__index" );
-	lua_pushvalue( L, -2 );  /* pushes the metatable */
-	lua_settable( L, -3 );  /* metatable.__index = metatable */
+	// metatable.__index = metatable
+	lua_pushvalue( L, -1 ); // duplicates the metatable
+	lua_setfield( L, -2, "__index" );
 
-	luaL_openlib( L, NULL, lua_json::mLuaArrayInstance, 0 );
+	luaL_setfuncs( L, lua_json::mLuaArrayInstance, 0 );
 
 	lua_pop( L, 1 );
 
@@ -206,11 +206,11 @@ void lua_json::luaRegisterState( lua_State *L )
 
 	luaL_newmetatable( L, luaJsonObject::mLuaName );
 
-	lua_pushstring( L, "__index" );
-	lua_pushvalue( L, -2 );  /* pushes the metatable */
-	lua_settable( L, -3 );  /* metatable.__index = metatable */
+	// metatable.__index = metatable
+	lua_pushvalue( L, -1 ); // duplicates the metatable
+	lua_setfield( L, -2, "__index" );
 
-	luaL_openlib( L, NULL, lua_json::mLuaObjectInstance, 0 );
+	luaL_setfuncs( L, lua_json::mLuaObjectInstance, 0 );
 
 	lua_pop( L, 1 );
 }

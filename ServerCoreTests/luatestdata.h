@@ -30,7 +30,7 @@ public:
 
 	inline ObjectId programmerId( void ) const
 	{
-		return( Programmer->id() );
+		return( Programmer ? Programmer->id() : OBJECT_NONE );
 	}
 
 public:

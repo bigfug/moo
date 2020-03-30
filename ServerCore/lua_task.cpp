@@ -462,7 +462,9 @@ int lua_task::eval( void )
 
 	if( ( Error = luaL_loadstring( LS, T.command().toLatin1() ) ) == 0 )
 	{
-		lua_moo::luaSetEnv( LS );
+		lua_getglobal( LS, "moo_sandbox" );
+
+		lua_setupvalue( LS, -2, 1 );
 
 		if( ( Error = lua_pcall( LS, 0, LUA_MULTRET, 0 ) ) == 0 )
 		{

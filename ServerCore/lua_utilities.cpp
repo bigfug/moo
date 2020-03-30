@@ -1,6 +1,8 @@
 #include "lua_utilities.h"
 #include "lua_object.h"
 
+#if LUA_VERSION_NUM < 502
+
 void *luaL_testudata( lua_State *L, int ud, const char *tname )
 {
 	void *p = lua_touserdata(L, ud);
@@ -20,6 +22,8 @@ void *luaL_testudata( lua_State *L, int ud, const char *tname )
 	}
 	return NULL;  /* to avoid warnings */
 }
+
+#endif
 
 int luaL_pushvariant( lua_State *L, const QVariant &pV )
 {

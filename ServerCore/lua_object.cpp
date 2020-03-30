@@ -51,7 +51,7 @@ const luaL_Reg lua_object::mLuaStatic[] =
 	{ 0, 0 }
 };
 
-const luaL_reg lua_object::mLuaInstance[] =
+const luaL_Reg lua_object::mLuaInstance[] =
 {
 	{ "__index", lua_object::luaGet },
 	{ "__newindex", lua_object::luaSet },
@@ -132,7 +132,7 @@ void lua_object::luaRegisterState( lua_State *L )
 	lua_pushcfunction( L, lua_object::luaToString );
 	lua_settable( L, -3 );  /* metatable.__tostring = luaToString */
 
-	luaL_openlib( L, NULL, lua_object::mLuaInstance, 0 );
+//	luaL_openlib( L, NULL, lua_object::mLuaInstance, 0 );
 
 	lua_pop( L, 1 );
 }
