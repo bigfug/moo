@@ -80,15 +80,15 @@ private:
 		switch (t)
 		{
 			case LUA_TSTRING:  /* strings */
-				printf( "%d: \"%s\"", i, lua_tostring(L, i));
+				std::cout << i << ": \"" << lua_tostring(L, i) << "\"";
 				break;
 
 			case LUA_TBOOLEAN:  /* booleans */
-				printf( "%d: %s", i, lua_toboolean(L, i) ? "true" : "false");
+				std::cout << i << ": " << lua_toboolean(L, i) ? "true" : "false";
 				break;
 
 			case LUA_TNUMBER:  /* numbers */
-				printf("%d: %g", i, lua_tonumber(L, i));
+				std::cout << i << ": " << lua_tonumber(L, i);
 				break;
 
 			case LUA_TTABLE:
@@ -96,7 +96,7 @@ private:
 				break;
 
 			default:  /* other values */
-				printf("%d: %s", i, lua_typename(L, t));
+				std::cout << i << ": " << lua_typename(L, t);
 				break;
 
 		}
@@ -106,7 +106,7 @@ private:
 	{
 		//printf( "enter: %d\n", lua_gettop( L ) );
 
-		printf( "%d: table\n{\n", t );
+		std::cout << t << ": table" << std::endl << "{" << std::endl;
 
 		lua_pushvalue( L, t );
 
@@ -116,18 +116,18 @@ private:
 		{
 			typeDump( L, -2 );
 
-			printf( "%s", lua_typename( L, lua_type( L, -1 ) ) );
+			std::cout << " " << lua_typename( L, lua_type( L, -1 ) );
 
 			//typeDump( L, -1 );
 
-			printf( "\n" );
+			std::cout << std::endl;
 
 			/* removes 'value'; keeps 'key' for next iteration */
 
 			lua_pop( L, 1 );
 		}
 
-		printf( "}\n" );
+		std::cout << "}" << std::endl;
 
 		//printf( "exit: %d\n", lua_gettop( L ) );
 
@@ -156,17 +156,15 @@ public:
 		{
 			typeDump( L, i );
 
-			printf("  ");  /* put a separator */
+			std::cout << "  ";  /* put a separator */
 		}
 
-		printf("\n");  /* end the listing */
-
-		std::cout.flush();
+		std::cout << std::endl << std::endl;
 	}
 
 	static void stackReverseDump (lua_State *L)
 	{
-		printf( "stackReverseDump:\n" );
+		std::cout << "stackReverseDump:" << std::endl;
 
 		int i;
 		int top = lua_gettop(L);
@@ -175,12 +173,10 @@ public:
 		{
 			typeDump( L, -i );
 
-			printf("  ");  /* put a separator */
+			std::cout << "  ";  /* put a separator */
 		}
 
-		printf("\n");  /* end the listing */
-
-		std::cout.flush();
+		std::cout << std::endl << std::endl;
 	}
 
 	static void addFunctions( const luaL_Reg *pFuncs );
