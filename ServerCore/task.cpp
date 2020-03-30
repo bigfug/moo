@@ -109,7 +109,7 @@ void Task::findObject( const QString &pName, QList<ObjectId> &pId ) const
 
 	if( pName.startsWith( "$" ) )
 	{
-		Object		*R = ObjectManager::o( 0 );
+		Object		*R = ObjectManager::instance()->rootObject();
 
 		if( R )
 		{

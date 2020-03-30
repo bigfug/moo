@@ -64,8 +64,6 @@ void lua_serialport::initialise()
 
 void lua_serialport::luaRegisterState( lua_State *L )
 {
-	// Create the moo.connection metatables that is used for all objects
-
 	luaL_newmetatable( L, mLuaName );
 
 	// metatable.__index = metatable
@@ -73,8 +71,6 @@ void lua_serialport::luaRegisterState( lua_State *L )
 	lua_setfield( L, -2, "__index" );
 
 	luaL_setfuncs( L, mLuaInstance, 0 );
-
-	luaL_newlib( L, mLuaStatic );
 
 	lua_pop( L, 1 );
 }

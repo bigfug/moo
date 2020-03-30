@@ -698,7 +698,7 @@ void OSC::processInput( qint64 pTimeStamp )
 		{
 			QStringList		 Path = it.key().split( '/', QString::SkipEmptyParts );
 
-			Object			*O = ObjectManager::o( 0 );
+			Object		*O = ObjectManager::instance()->rootObject();
 
 			while( O && !Path.isEmpty() )
 			{

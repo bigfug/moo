@@ -54,17 +54,13 @@ void lua_smtp::initialise()
 
 void lua_smtp::luaRegisterState( lua_State *L )
 {
-	// Create the moo.connection metatables that is used for all objects
-
 	luaL_newmetatable( L, luaMimeMessage::mLuaName );
 
 	// metatable.__index = metatable
 	lua_pushvalue( L, -1 ); // duplicates the metatable
 	lua_setfield( L, -2, "__index" );
 
-//	luaL_setfuncs( L, mLuaInstance, 0 );
-
-	luaL_newlib( L, mLuaStatic );
+	luaL_setfuncs( L, mLuaMimeMessageInstance, 0 );
 
 	lua_pop( L, 1 );
 }

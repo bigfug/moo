@@ -255,17 +255,17 @@ void lua_moo::luaRegisterAllStates(lua_State *L)
 	lua_json::luaRegisterState( L );
 	Q_ASSERT( lua_gettop( L ) == 0 );
 
-//	lua_osc::luaRegisterState( L );
-//	Q_ASSERT( lua_gettop( L ) == 0 );
+	lua_osc::luaRegisterState( L );
+	Q_ASSERT( lua_gettop( L ) == 0 );
 
-//	lua_serialport::luaRegisterState( L );
-//	Q_ASSERT( lua_gettop( L ) == 0 );
+	lua_serialport::luaRegisterState( L );
+	Q_ASSERT( lua_gettop( L ) == 0 );
 
-//	lua_smtp::luaRegisterState( L );
-//	Q_ASSERT( lua_gettop( L ) == 0 );
+	lua_smtp::luaRegisterState( L );
+	Q_ASSERT( lua_gettop( L ) == 0 );
 
-//	lua_text::luaRegisterState( L );
-//	Q_ASSERT( lua_gettop( L ) == 0 );
+	lua_text::luaRegisterState( L );
+	Q_ASSERT( lua_gettop( L ) == 0 );
 }
 
 lua_State *lua_moo::luaNewState( void )
@@ -320,6 +320,9 @@ void lua_moo::luaSetEnv( lua_State *L )
 	lua_getglobal( L, "ipairs" );
 	lua_setfield( L, -2, "ipairs" );
 
+	lua_getglobal( L, "error" );
+	lua_setfield( L, -2, "error" );
+
 	lua_getglobal( L, "next" );
 	lua_setfield( L, -2, "next" );
 
@@ -341,14 +344,19 @@ void lua_moo::luaSetEnv( lua_State *L )
 	lua_getglobal( L, "type" );
 	lua_setfield( L, -2, "type" );
 
-	lua_getglobal( L, "unpack" );
-	lua_setfield( L, -2, "unpack" );
-
 	lua_getglobal( L, "_VERSION" );
 	lua_setfield( L, -2, "_VERSION" );
 
 	lua_getglobal( L, "xpcall" );
 	lua_setfield( L, -2, "xpcall" );
+
+#if defined( QT_DEBUG )
+	lua_getglobal( L, "print" );
+	lua_setfield( L, -2, "print" );
+
+	lua_getglobal( L, "getmetatable" );
+	lua_setfield( L, -2, "getmetatable" );
+#endif
 
 	//--------------------------------------------------
 
@@ -465,6 +473,8 @@ int lua_moo::luaGlobalIndex( lua_State *L )
 	luaL_checktype( L, 2, LUA_TSTRING );
 
 	QString		 s( lua_tostring( L, 2 ) );
+
+	qDebug() << "luaGlobalIndex:" << s;
 
 	lua_task			*lt = lua_task::luaGetTask( L );
 	const Task			&t  = lt->task();
