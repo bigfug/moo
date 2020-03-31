@@ -327,7 +327,15 @@ bool MainWindow::event( QEvent *pEvent )
 
 void MainWindow::on_actionAbout_triggered()
 {
-
+	QMessageBox::about( this, "About ArtMOO",
+						QString( "ArtMOO v%1\n"
+								 "\n"
+								 "A text-only Multiuser Object Orientated server with technology extensions designed for art projects\n"
+								 "\n"
+								 "Written by Alex May\n"
+								 "\n"
+								 "https://github.com/bigfug/moo"
+								 ).arg( QCoreApplication::applicationVersion() ) );
 }
 
 void MainWindow::setCurrentObject( ObjectId pId )
@@ -1354,7 +1362,14 @@ void MainWindow::on_mButtonObjectExport_clicked()
 
 	if( !N.isEmpty() )
 	{
-		ObjectManager::instance()->exportModule( O->module(), N );
+		TransferInformation		TrnInf;
+
+		ObjectManager::instance()->exportModule( O->module(), N, TrnInf );
+
+		QMessageBox::information( this, "Export Information",
+								  QString( "Exported %1 objects, %2 verbs, and %3 properties in %4 milliseconds" )
+								  .arg( TrnInf.mObjects ).arg( TrnInf.mVerbs ).arg( TrnInf.mProperties )
+								  .arg( TrnInf.mMilliseconds ) );
 
 		S.setValue( "export_module_directory", QFileInfo( N ).path() );
 	}
@@ -1374,7 +1389,14 @@ void MainWindow::on_mButtonObjectImport_clicked()
 
 	if( !N.isEmpty() )
 	{
-		ObjectManager::instance()->importModule( O->id(), ui->mCurrentOwner->objectId(), N );
+		TransferInformation		TrnInf;
+
+		ObjectManager::instance()->importModule( O->id(), ui->mCurrentOwner->objectId(), N, TrnInf );
+
+		QMessageBox::information( this, "Import Information",
+								  QString( "Imported %1 objects, %2 verbs, and %3 properties in %4 milliseconds" )
+								  .arg( TrnInf.mObjects ).arg( TrnInf.mVerbs ).arg( TrnInf.mProperties )
+								  .arg( TrnInf.mMilliseconds ) );
 
 		S.setValue( "import_module_directory", QFileInfo( N ).path() );
 	}
