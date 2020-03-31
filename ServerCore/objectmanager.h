@@ -44,6 +44,20 @@ typedef struct ObjectManagerStats
 	qint64		mCompilationTime;
 } ObjectManagerStats;
 
+typedef struct TransferInformation
+{
+	int			mObjects;
+	int			mVerbs;
+	int			mProperties;
+	int			mMilliseconds;
+
+	TransferInformation( void )
+		: mObjects( 0 ), mVerbs( 0 ), mProperties( 0 ), mMilliseconds( 0 )
+	{
+
+	}
+} TransferInformation;
+
 class ObjectManager : public QObject
 {
 	Q_OBJECT
@@ -122,9 +136,9 @@ public:
 
 	ObjectId objectParent( ObjectId pId ) const;
 
-	void exportModule( ObjectId pModuleId, const QString &pFileName ) const;
+	void exportModule( ObjectId pModuleId, const QString &pFileName, TransferInformation &pTrnInf ) const;
 
-	ObjectId importModule( ObjectId pParentId, ObjectId pOwnerId, const QString &pFileName );
+	ObjectId importModule( ObjectId pParentId, ObjectId pOwnerId, const QString &pFileName, TransferInformation &pTrnInf );
 
 signals:
 	void stats( const ObjectManagerStats &pStats );

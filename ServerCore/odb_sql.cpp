@@ -1258,84 +1258,103 @@ void ODBSQL::queryToPropertyData( const QSqlQuery &Q, PropertyData &PD )
 	}
 }
 
-void ODBSQL::exportModule( ObjectId pModuleId, const QString &pFileName ) const
+void ODBSQL::exportModule( ObjectId pModuleId, const QString &pFileName, TransferInformation &pTrnInf ) const
 {
 	QSqlDatabase		DB1 = QSqlDatabase::database();
 	QSqlDatabase		DB2 = QSqlDatabase::addDatabase( "QSQLITE", "EXPORT" );
 
 	DB2.setDatabaseName( pFileName );
 
+	qint64	s = QDateTime::currentMSecsSinceEpoch();
+
 	if( !DB2.open() )
 	{
 		return;
 	}
 
-	initialiseDatabase( DB2 );
-
-	QSqlQuery			Q1( DB1 );
-	QSqlQuery			V1( DB1 );
-	QSqlQuery			P1( DB1 );
-
-	Q1.prepare( "SELECT * FROM object WHERE module = :module AND recycled = false" );
-	V1.prepare( "SELECT * FROM verb WHERE object = :object" );
-	P1.prepare( "SELECT * FROM property WHERE object = :object" );
-
-	Q1.bindValue( ":module", pModuleId );
-
-	if( !Q1.exec() )
+	try
 	{
-		return;
+		initialiseDatabase( DB2 );
+
+		QSqlQuery			Q1( DB1 );
+		QSqlQuery			V1( DB1 );
+		QSqlQuery			P1( DB1 );
+
+		Q1.prepare( "SELECT * FROM object WHERE module = :module AND recycled = false" );
+		V1.prepare( "SELECT * FROM verb WHERE object = :object" );
+		P1.prepare( "SELECT * FROM property WHERE object = :object" );
+
+		Q1.bindValue( ":module", pModuleId );
+
+		if( !Q1.exec() )
+		{
+			return;
+		}
+
+		QSqlQuery		Q2( DB2 );
+
+		ObjectData		OD;
+
+		while( Q1.next() )
+		{
+			queryToObjectData( Q1, OD );
+
+			insertObjectData( Q2, OD );
+
+			pTrnInf.mObjects++;
+
+			V1.bindValue( ":object", OD.mId );
+
+			if( V1.exec() )
+			{
+				while( V1.next() )
+				{
+					FuncData		FD;
+					VerbData		VD;
+
+					queryToVerbData( V1, FD, VD );
+
+					insertVerbData( Q2, FD, VD );
+
+					pTrnInf.mVerbs++;
+				}
+			}
+
+			P1.bindValue( ":object", OD.mId );
+
+			if( P1.exec() )
+			{
+				while( P1.next() )
+				{
+					PropertyData	PD;
+
+					queryToPropertyData( P1, PD );
+
+					insertPropertyData( Q2, PD );
+
+					pTrnInf.mProperties++;
+				}
+			}
+		}
 	}
-
-	QSqlQuery		Q2( DB2 );
-
-	ObjectData		OD;
-
-	while( Q1.next() )
+	catch( const std::exception &e )
 	{
-		queryToObjectData( Q1, OD );
-
-		insertObjectData( Q2, OD );
-
-		V1.bindValue( ":object", OD.mId );
-
-		if( V1.exec() )
-		{
-			while( V1.next() )
-			{
-				FuncData		FD;
-				VerbData		VD;
-
-				queryToVerbData( V1, FD, VD );
-
-				insertVerbData( Q2, FD, VD );
-			}
-		}
-
-		P1.bindValue( ":object", OD.mId );
-
-		if( P1.exec() )
-		{
-			while( P1.next() )
-			{
-				PropertyData	PD;
-
-				queryToPropertyData( P1, PD );
-
-				insertPropertyData( Q2, PD );
-			}
-		}
+		qWarning() << "export:" << QString::fromLatin1( e.what() );
 	}
 
 	DB2.close();
+
+	pTrnInf.mMilliseconds = QDateTime::currentMSecsSinceEpoch() - s;
 }
 
-ObjectId ODBSQL::importModule( ObjectId pParentId, ObjectId pOwnerId, const QString &pFileName )
+ObjectId ODBSQL::importModule( ObjectId pParentId, ObjectId pOwnerId, const QString &pFileName, TransferInformation &pTrnInf )
 {
 	QSqlDatabase		DB1 = QSqlDatabase::database();
 	QSqlDatabase		DB2 = QSqlDatabase::addDatabase( "QSQLITE", "IMPORT" );
 
 	DB2.setDatabaseName( pFileName );
+
+	qint64	s = QDateTime::currentMSecsSinceEpoch();
 
 	if( !DB2.open() )
 	{
@@ -1355,7 +1374,7 @@ ObjectId ODBSQL::importModule( ObjectId pParentId, ObjectId pOwnerId, const QStr
 
 		if( !O2.exec(  "SELECT * FROM object WHERE id = module"  ) || !O2.next() )
 		{
-			throw std::exception();
+			throw std::runtime_error( "Can't get original module id" );
 		}
 
 		ObjectData			OD;
@@ -1385,6 +1404,8 @@ ObjectId ODBSQL::importModule( ObjectId pParentId, ObjectId pOwnerId, const QStr
 		QSqlQuery			O1( DB1 );
 
 		insertObjectData( O1, OD );
+
+		pTrnInf.mObjects++;
 
 		//-----------------------------------------------------------------------
 		//
@@ -1464,6 +1485,8 @@ ObjectId ODBSQL::importModule( ObjectId pParentId, ObjectId pOwnerId, const QStr
 			if( FD.mObject != OBJECT_NONE )
 			{
 				insertVerbData( V1, FD, VD );
+
+				pTrnInf.mVerbs++;
 			}
 		}
 
@@ -1504,10 +1527,18 @@ ObjectId ODBSQL::importModule( ObjectId pParentId, ObjectId pOwnerId, const QStr
 			if( PD.mObject != OBJECT_NONE )
 			{
 				insertPropertyData( P1, PD );
+
+				pTrnInf.mProperties++;
 			}
 		}
 
 		DB1.commit();
+	}
+	catch( const std::exception &e )
+	{
+		qWarning() << "import:" << QString::fromLatin1( e.what() );
+
+		DB1.rollback();
 	}
 	catch( ... )
 	{
@@ -1515,6 +1546,8 @@ ObjectId ODBSQL::importModule( ObjectId pParentId, ObjectId pOwnerId, const QStr
 	}
 
 	DB2.close();
+
+	pTrnInf.mMilliseconds = QDateTime::currentMSecsSinceEpoch() - s;
 
 	return( NewModuleId );
 }

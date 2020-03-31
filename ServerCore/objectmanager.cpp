@@ -204,17 +204,17 @@ ObjectId ObjectManager::objectParent(ObjectId pId) const
 	return( mODB ? mODB->objectParent( pId ) : OBJECT_NONE );
 }
 
-void ObjectManager::exportModule( ObjectId pModuleId, const QString &pFileName ) const
+void ObjectManager::exportModule( ObjectId pModuleId, const QString &pFileName, TransferInformation &pTrnInf ) const
 {
 	if( mODB )
 	{
-		mODB->exportModule( pModuleId, pFileName );
+		mODB->exportModule( pModuleId, pFileName, pTrnInf );
 	}
 }
 
-ObjectId ObjectManager::importModule( ObjectId pParentId, ObjectId pOwnerId, const QString &pFileName )
+ObjectId ObjectManager::importModule( ObjectId pParentId, ObjectId pOwnerId, const QString &pFileName, TransferInformation &pTrnInf )
 {
-	return( mODB ? mODB->importModule( pParentId, pOwnerId, pFileName ) : OBJECT_NONE );
+	return( mODB ? mODB->importModule( pParentId, pOwnerId, pFileName, pTrnInf ) : OBJECT_NONE );
 }
 
 void ObjectManager::reset( void )

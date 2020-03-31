@@ -67,9 +67,9 @@ public:
 
 	virtual ObjectId objectParent( ObjectId pId ) const Q_DECL_OVERRIDE;
 
-	virtual void exportModule( ObjectId pModuleId, const QString &pFileName ) const Q_DECL_OVERRIDE;
+	virtual void exportModule( ObjectId pModuleId, const QString &pFileName, TransferInformation &pTrnInf ) const Q_DECL_OVERRIDE;
 
-	virtual ObjectId importModule( ObjectId pParentId, ObjectId pOwnerId, const QString &pFileName ) Q_DECL_OVERRIDE;
+	virtual ObjectId importModule( ObjectId pParentId, ObjectId pOwnerId, const QString &pFileName, TransferInformation &pTrnInf ) Q_DECL_OVERRIDE;
 
 private:
 	//void updateObject( const Object &O );
