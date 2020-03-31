@@ -106,9 +106,9 @@ endif()
 
 # Set the output package filename
 
-#set( CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${MOO_VERSION}" )
-
 set( CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}" )
+
+set( CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_FILE_NAME}-${MOO_VERSION}" )
 
 # If we're running on a UNIX system, try to ascertain the type and version
 
