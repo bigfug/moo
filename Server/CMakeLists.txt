@@ -27,6 +27,7 @@ set( SOURCE_FILES
 	syntaxhighlighterlua.h
 
 	Info.plist
+	Server.rc
 
 	../ServerCore/mooapplication.cpp
 	../ServerCore/mooapplication.h
