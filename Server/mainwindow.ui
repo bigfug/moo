@@ -600,7 +600,7 @@
     <item>
      <widget class="QTabWidget" name="mBottomTabs">
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="mTabLog">
        <attribute name="title">
@@ -639,6 +639,9 @@
               <family>Courier New</family>
               <pointsize>11</pointsize>
              </font>
+            </property>
+            <property name="lineWrapMode">
+             <enum>QPlainTextEdit::NoWrap</enum>
             </property>
            </widget>
           </item>
