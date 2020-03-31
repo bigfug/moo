@@ -77,8 +77,6 @@ MainWindow::MainWindow( QWidget *pParent )
 		{
 			O->setModule( pId );
 		}
-
-		setCurrentObject( pId );
 	} );
 
 	connect( ui->mObjectLocation, &ObjectSelector::objectSelectedForEdit, [=]( ObjectId pId )
