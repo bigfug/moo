@@ -277,14 +277,13 @@ void MainWindow::installModel( QAbstractItemModel *pModel )
 
 void MainWindow::stats( const ObjectManagerStats &pStats )
 {
-	ui->mStatusBar->showMessage( tr( "Tasks: %1 - Objects: %2 - Reads: %3 - Writes: %4 - MaxId: %5 - Execution: %6 - Compile: %7" )
+	ui->mStatusBar->showMessage( tr( "Tasks: %1 - Objects: %2 - Reads: %3 - Writes: %4 - MaxId: %5 - Execution: %6" )
 								 .arg( pStats.mTasks )
 								 .arg( pStats.mObjectCount )
 								 .arg( pStats.mReads )
 								 .arg( pStats.mWrites )
 								 .arg( ObjectManager::instance()->maxId() )
-								 .arg( pStats.mExecutionTime )
-								 .arg( pStats.mCompilationTime ) );
+								 .arg( pStats.mExecutionTime ) );
 }
 
 void MainWindow::trayActivated( QSystemTrayIcon::ActivationReason pReason )
