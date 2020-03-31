@@ -84,7 +84,7 @@ private:
 				break;
 
 			case LUA_TBOOLEAN:  /* booleans */
-				std::cout << i << ": " << lua_toboolean(L, i) ? "true" : "false";
+				std::cout << i << ": " << ( lua_toboolean( L, i ) ? "true" : "false" );
 				break;
 
 			case LUA_TNUMBER:  /* numbers */
