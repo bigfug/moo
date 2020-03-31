@@ -999,6 +999,8 @@ void MainWindow::updateProperty( void )
 			}
 		}
 
+		ui->mBottomTabs->setCurrentIndex( 1 );
+
 		ui->mTabEditor->setEnabled( true );
 	}
 	else
