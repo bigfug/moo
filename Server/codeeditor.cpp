@@ -11,6 +11,16 @@ CodeEditor::CodeEditor(QWidget *parent) : QPlainTextEdit(parent)
 	connect(this, SIGNAL(updateRequest(QRect,int)), this, SLOT(updateLineNumberArea(QRect,int)));
 	connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(highlightCurrentLine()));
 
+	QFontMetrics metrics( font() );
+
+	constexpr int TabWidth = 4;
+
+#if QT_VERSION > QT_VERSION_CHECK( 5, 10, 0 )
+	setTabStopDistance( TabWidth * metrics.horizontalAdvance( ' ' ) );
+#else
+	setTabStopWidth( TabWidth * metrics.width( ' ' ) );
+#endif
+
 	mHighlighter = new SyntaxHighlighterLua( document() );
 
 	updateLineNumberAreaWidth( 0 );
