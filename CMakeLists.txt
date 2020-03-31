@@ -77,6 +77,7 @@ add_subdirectory( Daemon )
 #------------------------------------------------------------------------------
 
 install( FILES moo.ini DESTINATION ${PATH_SHARE} )
+install( FILES Core/moo.db DESTINATION ${PATH_SHARE} )
 
 #install( DIRECTORY share/ DESTINATION ${PATH_SHARE} )
 
