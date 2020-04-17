@@ -24,7 +24,7 @@ ObjectManager			*ObjectManager::mInstance  = Q_NULLPTR;
 qint64					 ObjectManager::mTimeStamp = 0;
 
 ObjectManager::ObjectManager( QObject *pParent )
-	: QObject( pParent ), mODB( Q_NULLPTR )
+	: QObject( pParent ), mODB( Q_NULLPTR ), mTempObjectId( TemporaryObjectIdStart )
 {
 	mData.mObjNum = 0;
 
@@ -108,7 +108,7 @@ QList<Object *> ObjectManager::connectedPlayers() const
 	{
 		Object		*O = it.value();
 
-		if( !O->player() || O->connection() == -1 )
+		if( !O->player() || O->connection() == CONNECTION_NONE )
 		{
 			continue;
 		}
@@ -131,13 +131,23 @@ qint64 ObjectManager::timeToNextTask() const
 	return( NextTaskTime );
 }
 
-ObjectIdVector ObjectManager::children(ObjectId pParentId) const
+ObjectIdVector ObjectManager::children( ObjectId pParentId ) const
 {
+	if( isTemporaryObjectId( pParentId ) )
+	{
+		return( ObjectIdVector() );
+	}
+
 	return( mODB ? mODB->children( pParentId ) : ObjectIdVector() );
 }
 
-int ObjectManager::childrenCount(ObjectId pParentId) const
+int ObjectManager::childrenCount( ObjectId pParentId ) const
 {
+	if( isTemporaryObjectId( pParentId ) )
+	{
+		return( 0 );
+	}
+
 	return( mODB ? mODB->childrenCount( pParentId ) : 0 );
 }
 
@@ -148,6 +158,11 @@ QMap<ObjectId,QString> ObjectManager::objectNames( ObjectIdVector pIds ) const
 
 	for( ObjectId OID : pIds )
 	{
+		if( isTemporaryObjectId( OID ) )
+		{
+			continue;
+		}
+
 		Object *O = mData.mObjMap.value( OID, Q_NULLPTR );
 
 		if( O )
@@ -182,6 +197,11 @@ QMap<ObjectId,QString> ObjectManager::objectNames( ObjectIdVector pIds ) const
 
 QString ObjectManager::objectName( ObjectId pId ) const
 {
+	if( isTemporaryObjectId( pId ) )
+	{
+		return( QStringLiteral() );
+	}
+
 	Object *O = mData.mObjMap.value( pId, Q_NULLPTR );
 
 	if( O )
@@ -192,8 +212,13 @@ QString ObjectManager::objectName( ObjectId pId ) const
 	return( mODB ? mODB->objectName( pId ) : QString() );
 }
 
-ObjectId ObjectManager::objectParent(ObjectId pId) const
+ObjectId ObjectManager::objectParent( ObjectId pId ) const
 {
+	if( isTemporaryObjectId( pId ) )
+	{
+		return( OBJECT_NONE );
+	}
+
 	Object *O = mData.mObjMap.value( pId, Q_NULLPTR );
 
 	if( O )
@@ -241,9 +266,14 @@ ObjectId ObjectManager::findByProp( QString pName, QVariant pValue ) const
 
 Object *ObjectManager::object( ObjectId pIndex )
 {
+	if( isTemporaryObjectId( pIndex ) )
+	{
+		return( Q_NULLPTR );
+	}
+
 	Object		*O = objectIncludingRecycled( pIndex );
 
-	return( !O || O->recycle() ? nullptr : O );
+	return( !O || O->recycle() ? Q_NULLPTR : O );
 }
 
 Object *ObjectManager::objectIncludingRecycled( ObjectId pIndex )
@@ -336,16 +366,31 @@ Object *ObjectManager::newObject( void )
 	return( O );
 }
 
+Object *ObjectManager::newTemporaryObject()
+{
+	Object		*O = new Object();
+
+	if( O )
+	{
+		O->mData.mId = newTemporaryObjectId();
+	}
+
+	return( O );
+}
+
 void ObjectManager::recycle( Object *pObject )
 {
 	pObject->setRecycled( true );
 
-	mAddedObjects.removeAll( pObject->id() );
-	mUpdatedObjects.removeAll( pObject->id() );
+	if( !isTemporaryObjectId( pObject->id() ) )
+	{
+		mAddedObjects.removeAll( pObject->id() );
+		mUpdatedObjects.removeAll( pObject->id() );
 
-	// TODO: Verbs, Props
+		// TODO: Verbs, Props
 
-	mDeletedObjects << pObject->id();
+		mDeletedObjects << pObject->id();
+	}
 }
 
 void ObjectManager::restore( ObjectId pObjectId )
@@ -353,21 +398,24 @@ void ObjectManager::restore( ObjectId pObjectId )
 	restore( objectIncludingRecycled( pObjectId ) );
 }
 
-void ObjectManager::restore(Object *pObject)
+void ObjectManager::restore( Object *pObject )
 {
 	pObject->setRecycled( false );
 
-	mDeletedObjects.removeAll( pObject->id() );
-
-	if( mODB )
+	if( !isTemporaryObjectId( pObject->id() ) )
 	{
-		if( mODB->hasObject( pObject->id() ) )
+		mDeletedObjects.removeAll( pObject->id() );
+
+		if( mODB )
 		{
-			mUpdatedObjects << pObject->id();
-		}
-		else
-		{
-			mAddedObjects << pObject->id();
+			if( mODB->hasObject( pObject->id() ) )
+			{
+				mUpdatedObjects << pObject->id();
+			}
+			else
+			{
+				mAddedObjects << pObject->id();
+			}
 		}
 	}
 }
@@ -375,6 +423,11 @@ void ObjectManager::restore(Object *pObject)
 ObjectId ObjectManager::newObjectId( void )
 {
 	return( mData.mObjNum++ );
+}
+
+ObjectId ObjectManager::newTemporaryObjectId()
+{
+	return( mTempObjectId-- );
 }
 
 void ObjectManager::recycleObjects( void )
@@ -405,14 +458,22 @@ void ObjectManager::recycleObjects( void )
 	mDeletedObjects.clear();
 }
 
-void ObjectManager::updateObject(Object *pObject)
+void ObjectManager::updateObject( Object *pObject )
 {
-	mUpdatedObjects.removeAll( pObject->id() );
-	mUpdatedObjects.append( pObject->id() );
+	if( !isTemporaryObjectId( pObject->id() ) )
+	{
+		mUpdatedObjects.removeAll( pObject->id() );
+		mUpdatedObjects.append( pObject->id() );
+	}
 }
 
 void ObjectManager::addVerb( Object *pObject, QString pName )
 {
+	if( isTemporaryObjectId( pObject->id() ) )
+	{
+		return;
+	}
+
 	QStringList		StrLst = mAddedVerbs.value( pObject->id() );
 
 	StrLst.removeAll( pName );
@@ -423,6 +484,11 @@ void ObjectManager::addVerb( Object *pObject, QString pName )
 
 void ObjectManager::deleteVerb( Object *pObject, QString pName )
 {
+	if( isTemporaryObjectId( pObject->id() ) )
+	{
+		return;
+	}
+
 	QStringList		StrLst = mDeletedVerbs.value( pObject->id() );
 
 	StrLst.removeAll( pName );
@@ -433,6 +499,11 @@ void ObjectManager::deleteVerb( Object *pObject, QString pName )
 
 void ObjectManager::updateVerb( Object *pObject, QString pName )
 {
+	if( isTemporaryObjectId( pObject->id() ) )
+	{
+		return;
+	}
+
 	QStringList		StrLst = mUpdatedVerbs.value( pObject->id() );
 
 	StrLst.removeAll( pName );
@@ -443,6 +514,11 @@ void ObjectManager::updateVerb( Object *pObject, QString pName )
 
 void ObjectManager::addProperty(Object *pObject, QString pName)
 {
+	if( isTemporaryObjectId( pObject->id() ) )
+	{
+		return;
+	}
+
 	QStringList		StrLst = mAddedProperties.value( pObject->id() );
 
 	StrLst.removeAll( pName );
@@ -453,6 +529,11 @@ void ObjectManager::addProperty(Object *pObject, QString pName)
 
 void ObjectManager::deleteProperty(Object *pObject, QString pName)
 {
+	if( isTemporaryObjectId( pObject->id() ) )
+	{
+		return;
+	}
+
 	QStringList		StrLst = mDeletedProperties.value( pObject->id() );
 
 	StrLst.removeAll( pName );
@@ -463,6 +544,11 @@ void ObjectManager::deleteProperty(Object *pObject, QString pName)
 
 void ObjectManager::updateProperty(Object *pObject, QString pName)
 {
+	if( isTemporaryObjectId( pObject->id() ) )
+	{
+		return;
+	}
+
 	QStringList		StrLst = mUpdatedProperties.value( pObject->id() );
 
 	StrLst.removeAll( pName );

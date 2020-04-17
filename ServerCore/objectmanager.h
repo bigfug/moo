@@ -69,6 +69,8 @@ class ObjectManager : public QObject
 	friend class ODB;
 
 public:
+	static constexpr ObjectId	TemporaryObjectIdStart = -100;
+
 	static ObjectManager *instance( void );
 
 	inline static qint64 timestamp( void )
@@ -81,12 +83,21 @@ public:
 		return( instance()->object( pId ) );
 	}
 
+	static bool isTemporaryObjectId( ObjectId pId )
+	{
+		return( pId <= TemporaryObjectIdStart );
+	}
+
 	static void reset( void );
 
 public:
 	ObjectId newObjectId( void );
 
+	ObjectId newTemporaryObjectId( void );
+
 	Object *newObject( void );
+
+	Object *newTemporaryObject( void );
 
 	Object *object( ObjectId pIndex );
 
@@ -225,6 +236,8 @@ private:
 
 	ODB							*mODB;
 	ObjectManagerData			 mData;
+
+	int							 mTempObjectId;
 
 	ObjectManagerStats			 mStats;
 
