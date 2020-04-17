@@ -77,10 +77,12 @@ private:
 	static void queryToObjectData( const QSqlQuery &Q, ObjectData &D );
 	static void queryToVerbData( const QSqlQuery &Q, FuncData &FD, VerbData &VD );
 	static void queryToPropertyData( const QSqlQuery &Q, PropertyData &PD );
+	static void queryToTaskData( const QSqlQuery &Q, TaskEntryData &D );
 
 	static void insertObjectData( QSqlQuery &Q, const ObjectData &OD );
 	static void insertVerbData( QSqlQuery &Q, const FuncData &FD, const VerbData &VD );
 	static void insertPropertyData( QSqlQuery &Q, const PropertyData &PD );
+	static void insertTaskData( QSqlQuery &Q, const TaskEntryData &PD );
 
 	static void initialiseDatabase( QSqlDatabase &pDB );
 

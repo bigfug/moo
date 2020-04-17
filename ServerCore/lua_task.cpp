@@ -179,7 +179,112 @@ int lua_task::luaKill(lua_State *L)
 
 int lua_task::luaSchedule( lua_State *L )
 {
-	return( 0 );
+	bool		LuaErr = false;
+
+	try
+	{
+		lua_task			*LT = lua_task::luaGetTask( L );
+		const Task			&T = LT->task();
+
+		TaskEntrySchedule	 TS;
+		QString				 TaskCode;
+
+		if( lua_gettop( L ) == 1 )
+		{
+			if( lua_istable( L, 1 ) )
+			{
+				TS.mMinute = TS.mHour = TS.mDayOfWeek = TS.mDayOfMonth = TS.mMonth = TS.mYear = "*";
+
+				lua_pushvalue( L, 1 );
+
+				lua_pushnil( L );
+
+				while( lua_next( L, -2 ) )
+				{
+					lua_pushvalue( L, -2 );
+
+					const char *key   = lua_tostring( L, -1 );
+					const char *value = lua_tostring( L, -2 );
+
+					if( !strcmp( key, "minute" ) )
+					{
+						TS.mMinute = QString::fromLatin1( value );
+					}
+					else if( !strcmp( key, "hour" ) )
+					{
+						TS.mHour = QString::fromLatin1( value );
+					}
+					else if( !strcmp( key, "day_of_week" ) )
+					{
+						TS.mDayOfWeek = QString::fromLatin1( value );
+					}
+					else if( !strcmp( key, "day_of_month" ) )
+					{
+						TS.mDayOfMonth = QString::fromLatin1( value );
+					}
+					else if( !strcmp( key, "month" ) )
+					{
+						TS.mMonth = QString::fromLatin1( value );
+					}
+					else if( !strcmp( key, "year" ) )
+					{
+						TS.mYear = QString::fromLatin1( value );
+					}
+					else if( !strcmp( key, "task" ) )
+					{
+						TaskCode= QString::fromLatin1( value );
+					}
+
+					lua_pop( L, 2 );
+				}
+
+				lua_pop( L, 1 );
+			}
+		}
+		else if( lua_gettop( L ) == 7 )
+		{
+			const char		*Minute     = luaL_checkstring( L, 1 );
+			const char		*Hour       = luaL_checkstring( L, 2 );
+			const char		*DayOfWeek  = luaL_checkstring( L, 3 );
+			const char		*DayOfMonth = luaL_checkstring( L, 4 );
+			const char		*Month      = luaL_checkstring( L, 5 );
+			const char		*Year       = luaL_checkstring( L, 6 );
+			const char		*Task       = luaL_checkstring( L, 7 );
+
+			TS.mMinute     = QString::fromLatin1( Minute );
+			TS.mHour       = QString::fromLatin1( Hour );
+			TS.mDayOfWeek  = QString::fromLatin1( DayOfWeek );
+			TS.mDayOfMonth = QString::fromLatin1( DayOfMonth );
+			TS.mMonth      = QString::fromLatin1( Month );
+			TS.mYear       = QString::fromLatin1( Year );
+
+			TaskCode       = QString::fromLatin1( Task );
+		}
+
+		TaskEntry			E( TaskCode, LT->connectionId(), T.programmer() );
+
+		E.setSchedule( TS );
+
+		E.updateTimestampFromSchedule( QDateTime::currentMSecsSinceEpoch() );
+
+		ObjectManager::instance()->queueTask( E );
+
+		lua_pushinteger( L, E.id() );
+
+		return( 1 );
+	}
+	catch( mooException &e )
+	{
+		e.lua_pushexception( L );
+
+		LuaErr = true;
+	}
+	catch( ... )
+	{
+		LuaErr = true;
+	}
+
+	return( LuaErr ? lua_error( L ) : lua_gettop( L ) );
 }
 
 int lua_task::luaDirectObject( lua_State *L )

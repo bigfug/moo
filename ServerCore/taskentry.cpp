@@ -12,8 +12,6 @@ TaskEntry::TaskEntry( void )
 	mData.mId			= 0;
 	mData.mPlayerId		= OBJECT_NONE;
 	mData.mTimeStamp	= 0;
-
-	initialiseSchedule( mData.mSchedule );
 }
 
 TaskEntry::TaskEntry( const QString &pCommand, ConnectionId pConnectionId, ObjectId pPlayerId )
@@ -23,18 +21,6 @@ TaskEntry::TaskEntry( const QString &pCommand, ConnectionId pConnectionId, Objec
 	mData.mCommand		= pCommand;
 	mData.mConnectionId	= pConnectionId;
 	mData.mPlayerId		= pPlayerId;
-
-	initialiseSchedule( mData.mSchedule );
-}
-
-void TaskEntry::initialiseSchedule( TaskEntrySchedule &TS )
-{
-	TS.mMinute = -1;
-	TS.mHour = -1;
-	TS.mDayOfWeek = -1;
-	TS.mDayOfMonth = -1;
-	TS.mMonth = -1;
-	TS.mYear = -1;
 }
 
 bool TaskEntry::matchScheduleRange( int pValue, const QString &pRange )
@@ -79,10 +65,17 @@ bool TaskEntry::matchScheduleRange( int pValue, const QString &pRange )
 
 void TaskEntry::updateTimestampFromSchedule( qint64 pTimeStamp )
 {
+	if( mData.mSchedule.mYear.isEmpty() )
+	{
+		return;
+	}
+
 	QDateTime					 DT = QDateTime::fromMSecsSinceEpoch( pTimeStamp );
 	const TaskEntrySchedule		&TS = mData.mSchedule;
 
 	DT = DT.addSecs( 60 );
+
+	DT.setTime( QTime( DT.time().hour(), DT.time().minute() ) );
 
 	while( true )
 	{

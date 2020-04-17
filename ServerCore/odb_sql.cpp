@@ -116,12 +116,12 @@ void ODBSQL::initialiseDatabase( QSqlDatabase &pDB )
 				  "command TEXT,"
 				  "player INTEGER DEFAULT -1,"
 				  "connection INTEGER DEFAULT -1,"
-				  "minute TEXT DEFAULT '*',"
-				  "hour TEXT DEFAULT '*',"
-				  "day_of_week TEXT DEFAULT '*',"
-				  "day_of_month TEXT DEFAULT '*',"
-				  "month TEXT DEFAULT '*',"
-				  "year TEXT DEFAULT '*'"
+				  "minute TEXT,"
+				  "hour TEXT,"
+				  "day_of_week TEXT,"
+				  "day_of_month TEXT,"
+				  "month TEXT,"
+				  "year TEXT"
 				  ")" );
 
 		QSqlError		DBE = pDB.lastError();
@@ -189,6 +189,47 @@ void ODBSQL::load()
 
 		ObjectManager::instance()->object( Q2.value( 0 ).toInt() );
 	}
+
+	// Set any scheduled tasks to their next time
+
+	qint64						CurrTime = QDateTime::currentMSecsSinceEpoch();
+
+	QSqlQuery					 Q3;
+
+	Q3.prepare( "SELECT * FROM task WHERE timestamp <= :timestamp ORDER BY timestamp ASC" );
+
+	Q3.bindValue( ":timestamp", CurrTime );
+
+	Q3.exec();
+
+	while( Q3.next() )
+	{
+		TaskEntry		TE;
+
+		queryToTaskData( Q3, data( TE ) );
+
+		TE.updateTimestampFromSchedule( CurrTime );
+
+		if( TE.timestamp() > CurrTime )
+		{
+			QSqlQuery			UpdateQuery;
+
+			UpdateQuery.prepare( "UPDATE task SET timestamp = :timestamp WHERE id = :id" );
+
+			UpdateQuery.bindValue( ":timestamp", TE.timestamp() );
+			UpdateQuery.bindValue( ":id", TE.id() );
+
+			UpdateQuery.exec();
+		}
+	}
+
+	QSqlQuery			 Q4;
+
+	Q4.prepare( "DELETE FROM task WHERE timestamp <= :timestamp" );
+
+	Q4.bindValue( ":timestamp", CurrTime );
+
+	Q4.exec();
 }
 
 void ODBSQL::save()
@@ -562,6 +603,32 @@ void ODBSQL::insertPropertyData( QSqlQuery &Q, const PropertyData &PD )
 	Q.exec();
 }
 
+void ODBSQL::insertTaskData( QSqlQuery &Q, const TaskEntryData &D )
+{
+	Q.prepare( "INSERT INTO task "
+			   "( id, timestamp, command, player, connection, minute, hour, day_of_week, day_of_month, month, year )"
+			   "VALUES "
+			   "( :id, :timestamp, :command, :player, :connection, :minute, :hour, :day_of_week, :day_of_month, :month, :year )"
+			   );
+
+	Q.bindValue( ":id", D.mId );
+	Q.bindValue( ":timestamp", D.mTimeStamp );
+	Q.bindValue( ":command", D.mCommand );
+	Q.bindValue( ":player", D.mPlayerId );
+	Q.bindValue( ":connection", D.mConnectionId );
+
+	const TaskEntrySchedule	&S = D.mSchedule;
+
+	Q.bindValue( ":minute", S.mMinute );
+	Q.bindValue( ":hour", S.mHour );
+	Q.bindValue( ":day_of_week", S.mDayOfWeek );
+	Q.bindValue( ":day_of_month", S.mDayOfMonth );
+	Q.bindValue( ":month", S.mMonth );
+	Q.bindValue( ":year", S.mYear );
+
+	Q.exec();
+}
+
 void ODBSQL::addObject( Object &pObject )
 {
 	ObjectData	&D = data( pObject );
@@ -867,38 +934,15 @@ ObjectId ODBSQL::findByProp( QString pName, const QVariant &pValue ) const
 
 void ODBSQL::addTask( TaskEntry &TE )
 {
-	static QSqlQuery			 Q;
-	static bool					 B = false;
+	QSqlQuery			 Q;
 
-	if( !B )
-	{
-		B = Q.prepare( "INSERT INTO task "
-					"( id, timestamp, command, player, connection, minute, hour, day_of_week, day_of_month, month, year )"
-					"VALUES "
-					"( :id, :timestamp, :command, :player, :connection, :minute, :hour, :day_of_week, :day_of_month, :month, :year )"
-					);
-	}
-
-	Q.bindValue( ":id", TE.id() );
-	Q.bindValue( ":timestamp", TE.timestamp() );
-	Q.bindValue( ":command", TE.command() );
-	Q.bindValue( ":player", TE.playerid() );
-	Q.bindValue( ":connection", TE.connectionid() );
-
-	TaskEntrySchedule	Schedule = TE.schedule();
-
-	Q.bindValue( ":minute", Schedule.mMinute );
-	Q.bindValue( ":hour", Schedule.mHour );
-	Q.bindValue( ":day_of_week", Schedule.mDayOfWeek );
-	Q.bindValue( ":day_of_month", Schedule.mDayOfMonth );
-	Q.bindValue( ":month", Schedule.mMonth );
-	Q.bindValue( ":year", Schedule.mYear );
-
-	Q.exec();
+	insertTaskData( Q, data( TE ) );
 }
 
 QList<TaskEntry> ODBSQL::tasks( qint64 pTimeStamp )
 {
+	QSqlDatabase				DB = QSqlDatabase::database();
+
 	QList<TaskEntry>			TskLst;
 
 	static QSqlQuery			 Q1;
@@ -916,22 +960,8 @@ QList<TaskEntry> ODBSQL::tasks( qint64 pTimeStamp )
 	while( Q1.next() )
 	{
 		TaskEntry		TE;
-		TaskEntryData	&TD = data( TE );
 
-		TD.mId        = Q1.value( "id" ).toInt();
-		TD.mTimeStamp = Q1.value( "timestamp" ).toLongLong();
-		TD.mCommand   = Q1.value( "command" ).toString();
-		TD.mPlayerId  = Q1.value( "player" ).toInt();
-		TD.mConnectionId = Q1.value( "connection" ).toInt();
-
-		TD.mSchedule.mMinute = Q1.value( "minute" ).toString();
-		TD.mSchedule.mHour = Q1.value( "hour" ).toString();
-		TD.mSchedule.mDayOfWeek = Q1.value( "day_of_week" ).toString();
-		TD.mSchedule.mDayOfMonth = Q1.value( "day_of_month" ).toString();
-		TD.mSchedule.mMonth = Q1.value( "month" ).toString();
-		TD.mSchedule.mYear = Q1.value( "year" ).toString();
-
-		TD.TID = qMax( TD.TID, TD.mId + 1 );
+		queryToTaskData( Q1, data( TE ) );
 
 		TskLst << TE;
 
@@ -939,7 +969,14 @@ QList<TaskEntry> ODBSQL::tasks( qint64 pTimeStamp )
 
 		if( TE.timestamp() > pTimeStamp )
 		{
-			addTask( TE );
+			QSqlQuery			UpdateQuery;
+
+			UpdateQuery.prepare( "UPDATE task SET timestamp = :timestamp WHERE id = :id" );
+
+			UpdateQuery.bindValue( ":timestamp", TE.timestamp() );
+			UpdateQuery.bindValue( ":id", TE.id() );
+
+			UpdateQuery.exec();
 		}
 	}
 
@@ -1152,32 +1189,32 @@ void ODBSQL::updateTaskAddSchedule( QSqlDatabase &pDB )
 
 	if( !findColumn( pDB, "task", "minute" ) )
 	{
-		pDB.exec( "ALTER TABLE task ADD COLUMN minute TEXT DEFAULT '*'" );
+		pDB.exec( "ALTER TABLE task ADD COLUMN minute TEXT" );
 	}
 
 	if( !findColumn( pDB, "task", "hour" ) )
 	{
-		pDB.exec( "ALTER TABLE task ADD COLUMN hour TEXT DEFAULT '*'" );
+		pDB.exec( "ALTER TABLE task ADD COLUMN hour TEXT" );
 	}
 
 	if( !findColumn( pDB, "task", "day_of_week" ) )
 	{
-		pDB.exec( "ALTER TABLE task ADD COLUMN day_of_week TEXT DEFAULT '*'" );
+		pDB.exec( "ALTER TABLE task ADD COLUMN day_of_week TEXT" );
 	}
 
 	if( !findColumn( pDB, "task", "day_of_month" ) )
 	{
-		pDB.exec( "ALTER TABLE task ADD COLUMN day_of_month TEXT DEFAULT '*'" );
+		pDB.exec( "ALTER TABLE task ADD COLUMN day_of_month TEXT" );
 	}
 
 	if( !findColumn( pDB, "task", "month" ) )
 	{
-		pDB.exec( "ALTER TABLE task ADD COLUMN month TEXT DEFAULT '*'" );
+		pDB.exec( "ALTER TABLE task ADD COLUMN month TEXT" );
 	}
 
 	if( !findColumn( pDB, "task", "year" ) )
 	{
-		pDB.exec( "ALTER TABLE task ADD COLUMN year TEXT DEFAULT '*'" );
+		pDB.exec( "ALTER TABLE task ADD COLUMN year TEXT" );
 	}
 
 	Q_ASSERT( findColumn( pDB, "task", "minute" ) );
@@ -1336,6 +1373,24 @@ void ODBSQL::queryToPropertyData( const QSqlQuery &Q, PropertyData &PD )
 
 		}
 	}
+}
+
+void ODBSQL::queryToTaskData( const QSqlQuery &Q, TaskEntryData &D )
+{
+	D.mId        = Q.value( "id" ).toInt();
+	D.mTimeStamp = Q.value( "timestamp" ).toLongLong();
+	D.mCommand   = Q.value( "command" ).toString();
+	D.mPlayerId  = Q.value( "player" ).toInt();
+	D.mConnectionId = Q.value( "connection" ).toInt();
+
+	D.mSchedule.mMinute = Q.value( "minute" ).toString();
+	D.mSchedule.mHour = Q.value( "hour" ).toString();
+	D.mSchedule.mDayOfWeek = Q.value( "day_of_week" ).toString();
+	D.mSchedule.mDayOfMonth = Q.value( "day_of_month" ).toString();
+	D.mSchedule.mMonth = Q.value( "month" ).toString();
+	D.mSchedule.mYear = Q.value( "year" ).toString();
+
+	D.TID = qMax( D.TID, D.mId + 1 );
 }
 
 void ODBSQL::exportModule( ObjectId pModuleId, const QString &pFileName, TransferInformation &pTrnInf ) const

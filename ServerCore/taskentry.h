@@ -96,8 +96,6 @@ protected:
 		return( mData );
 	}
 
-	void initialiseSchedule( TaskEntrySchedule &TS );
-
 	bool matchScheduleRange( int pValue, const QString &pRange );
 
 private:

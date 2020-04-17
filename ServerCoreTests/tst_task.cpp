@@ -32,11 +32,31 @@ void ServerTest::taskSchedule( void )
 	TaskEntrySchedule	TS;
 
 	QDateTime			DT;
+	QDateTime			DTT;
 
 	DT.setDate( QDate( 2020, 04, 17 ) );
 	DT.setTime( QTime( 14, 22, 48 ) );
 
 	qint64				CT = DT.toMSecsSinceEpoch();
+
+	TE.setTimeStamp( CT );
+
+	//--
+
+	TE.setSchedule( TS );
+
+	TE.updateTimestampFromSchedule( CT );
+
+	DTT.setMSecsSinceEpoch( TE.timestamp() );
+
+	QCOMPARE( DTT.date().year(), 2020 );
+	QCOMPARE( DTT.date().month(), 4 );
+	QCOMPARE( DTT.date().day(), 17 );
+	QCOMPARE( DTT.time().hour(), 14 );
+	QCOMPARE( DTT.time().minute(), 22 );
+	QCOMPARE( DTT.time().second(), 48 );
+
+	//--
 
 	TS.mYear       = "2021";
 	TS.mMonth      = "*";
@@ -48,8 +68,6 @@ void ServerTest::taskSchedule( void )
 	TE.setSchedule( TS );
 
 	TE.updateTimestampFromSchedule( CT );
-
-	QDateTime			DTT;
 
 	DTT.setMSecsSinceEpoch( TE.timestamp() );
 

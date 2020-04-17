@@ -24,7 +24,7 @@ ObjectManager			*ObjectManager::mInstance  = Q_NULLPTR;
 qint64					 ObjectManager::mTimeStamp = 0;
 
 ObjectManager::ObjectManager( QObject *pParent )
-	: QObject( pParent ), mLastTimeStamp( -1 ), mODB( Q_NULLPTR ), mTempObjectId( TemporaryObjectIdStart )
+	: QObject( pParent ), mODB( Q_NULLPTR ), mTempObjectId( TemporaryObjectIdStart )
 {
 	mData.mObjNum = 0;
 
