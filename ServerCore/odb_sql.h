@@ -85,6 +85,7 @@ private:
 	static void initialiseDatabase( QSqlDatabase &pDB );
 
 	static void updateObjectAddModule( QSqlDatabase &pDB );
+	static void updateTaskAddSchedule( QSqlDatabase &pDB );
 
 	bool findColumn( const QString &pTable, const QString &pColumn ) const;
 

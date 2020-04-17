@@ -96,6 +96,10 @@ private:
 
 	static void luaRegisterState( lua_State *L );
 
+	static int luaTask( lua_State *L );
+	static int luaKill( lua_State *L );
+	static int luaSchedule( lua_State *L );
+
 	static int luaObject( lua_State *L );
 	static int luaVerb( lua_State *L );
 	static int luaArgs( lua_State *L );
@@ -104,8 +108,6 @@ private:
 	static int luaPlayer( lua_State *L );
 	static int luaHere( lua_State *L );
 	static int luaMe( lua_State *L );
-	static int luaTask( lua_State *L );
-	static int luaKill( lua_State *L );
 	static int luaDirectObject( lua_State *L );
 	static int luaDirectObjectString( lua_State *L );
 	static int luaIndirectObject( lua_State *L );

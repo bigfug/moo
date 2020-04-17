@@ -7,6 +7,16 @@
 
 class QDataStream;
 
+typedef struct TaskEntrySchedule
+{
+	QString				 mMinute;
+	QString				 mHour;
+	QString				 mDayOfWeek;
+	QString				 mDayOfMonth;
+	QString				 mMonth;
+	QString				 mYear;
+} TaskEntrySchedule;
+
 typedef struct TaskEntryData
 {
 	static TaskId		 TID;
@@ -16,6 +26,7 @@ typedef struct TaskEntryData
 	QString				 mCommand;				// the command
 	ObjectId			 mPlayerId;				// the player who typed the command
 	ConnectionId		 mConnectionId;
+	TaskEntrySchedule	 mSchedule;
 } TaskEntryData;
 
 class TaskEntry
@@ -27,32 +38,34 @@ public:
 
 	TaskEntry( const QString &pCommand, ConnectionId pConnectionId, ObjectId pPlayerId = OBJECT_NONE );
 
-	inline TaskId id( void ) const
+	void updateTimestampFromSchedule( qint64 pTimeStamp );
+
+	TaskId id( void ) const
 	{
 		return( mData.mId );
 	}
 
-	inline qint64 timestamp( void ) const
+	qint64 timestamp( void ) const
 	{
 		return( mData.mTimeStamp );
 	}
 
-	inline const QString &command( void ) const
+	const QString &command( void ) const
 	{
 		return( mData.mCommand );
 	}
 
-	inline ObjectId playerid( void ) const
+	ObjectId playerid( void ) const
 	{
 		return( mData.mPlayerId );
 	}
 
-	inline ConnectionId connectionid( void ) const
+	ConnectionId connectionid( void ) const
 	{
 		return( mData.mConnectionId );
 	}
 
-	inline void setTimeStamp( qint64 pTimeStamp )
+	void setTimeStamp( qint64 pTimeStamp )
 	{
 		mData.mTimeStamp = pTimeStamp;
 	}
@@ -61,6 +74,16 @@ public:
 	{
 		return s1.mData.mTimeStamp < s2.mData.mTimeStamp;
 	}
+
+	TaskEntrySchedule schedule( void ) const
+	{
+		return( mData.mSchedule );
+	}
+
+	void setSchedule( const TaskEntrySchedule &pSchedule )
+	{
+		mData.mSchedule = pSchedule;
+ 	}
 
 protected:
 	TaskEntryData &data( void )
@@ -72,6 +95,10 @@ protected:
 	{
 		return( mData );
 	}
+
+	void initialiseSchedule( TaskEntrySchedule &TS );
+
+	bool matchScheduleRange( int pValue, const QString &pRange );
 
 private:
 	TaskEntryData		mData;

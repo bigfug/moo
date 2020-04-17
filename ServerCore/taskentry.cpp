@@ -2,6 +2,7 @@
 #include "connection.h"
 #include <QDateTime>
 #include <QDataStream>
+#include <QDateTime>
 
 TaskId	TaskEntryData::TID = 0;
 
@@ -11,6 +12,8 @@ TaskEntry::TaskEntry( void )
 	mData.mId			= 0;
 	mData.mPlayerId		= OBJECT_NONE;
 	mData.mTimeStamp	= 0;
+
+	initialiseSchedule( mData.mSchedule );
 }
 
 TaskEntry::TaskEntry( const QString &pCommand, ConnectionId pConnectionId, ObjectId pPlayerId )
@@ -20,4 +23,129 @@ TaskEntry::TaskEntry( const QString &pCommand, ConnectionId pConnectionId, Objec
 	mData.mCommand		= pCommand;
 	mData.mConnectionId	= pConnectionId;
 	mData.mPlayerId		= pPlayerId;
+
+	initialiseSchedule( mData.mSchedule );
 }
+
+void TaskEntry::initialiseSchedule( TaskEntrySchedule &TS )
+{
+	TS.mMinute = -1;
+	TS.mHour = -1;
+	TS.mDayOfWeek = -1;
+	TS.mDayOfMonth = -1;
+	TS.mMonth = -1;
+	TS.mYear = -1;
+}
+
+bool TaskEntry::matchScheduleRange( int pValue, const QString &pRange )
+{
+	if( !pRange.trimmed().compare( "*" ) )
+	{
+		return( true );
+	}
+
+	QStringList		CommaEntries = pRange.split( ',', QString::SkipEmptyParts );
+
+	for( QString CE : CommaEntries )
+	{
+		CE = CE.trimmed();
+
+		if( CE.contains( '-' ) )
+		{
+			QStringList		RangeEntries = CE.split( '-' );
+
+			if( RangeEntries.size() == 2 )
+			{
+				int			RangeStart = RangeEntries.at( 0 ).trimmed().toInt();
+				int			RangeEnd   = RangeEntries.at( 1 ).trimmed().toInt();
+
+				if( pValue >= RangeStart && pValue <= RangeEnd )
+				{
+					return( true );
+				}
+			}
+		}
+		else if( CE.toInt() == pValue )
+		{
+			return( true );
+		}
+	}
+
+	return( false );
+}
+
+//-----------------------------------------------------------------------------
+// updateTimestampFromSchedule - update timestamp with the next schedule
+
+void TaskEntry::updateTimestampFromSchedule( qint64 pTimeStamp )
+{
+	QDateTime					 DT = QDateTime::fromMSecsSinceEpoch( pTimeStamp );
+	const TaskEntrySchedule		&TS = mData.mSchedule;
+
+	DT = DT.addSecs( 60 );
+
+	while( true )
+	{
+		if( !matchScheduleRange( DT.date().year(), TS.mYear ) )
+		{
+			DT = DT.addYears( 1 );
+
+			DT.setDate( QDate( DT.date().year(), 1, 1 ) );
+
+			DT.setTime( QTime( 0, 0 ) );
+
+			continue;
+		}
+
+		if( !matchScheduleRange( DT.date().month(), TS.mMonth ) )
+		{
+			DT = DT.addMonths( 1 );
+
+			DT.setDate( QDate( DT.date().year(), DT.date().month(), 1 ) );
+
+			DT.setTime( QTime( 0, 0 ) );
+
+			continue;
+		}
+
+		if( !matchScheduleRange( DT.date().day(), TS.mDayOfMonth ) )
+		{
+			DT = DT.addDays( 1 );
+
+			DT.setTime( QTime( 0, 0 ) );
+
+			continue;
+		}
+
+		if( !matchScheduleRange( DT.date().dayOfWeek(), TS.mDayOfWeek ) )
+		{
+			DT = DT.addDays( 1 );
+
+			DT.setTime( QTime( 0, 0 ) );
+
+			continue;
+		}
+
+		if( !matchScheduleRange( DT.time().hour(), TS.mHour ) )
+		{
+			DT = DT.addSecs( 60 * 60 );
+
+			DT.setTime( QTime( DT.time().hour(), 0 ) );
+
+			continue;
+		}
+
+		if( !matchScheduleRange( DT.time().minute(), TS.mMinute ) )
+		{
+			DT = DT.addSecs( 60 );
+
+			continue;
+		}
+
+		break;
+	}
+
+	mData.mTimeStamp = DT.toMSecsSinceEpoch();
+}
+
+

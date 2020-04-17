@@ -24,6 +24,7 @@ private Q_SLOTS:
 
 	void taskDefaults( void );
 	void taskGetSet( void );
+	void taskSchedule( void );
 
 	void propGetSet( void );
 	void propInherit( void );

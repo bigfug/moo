@@ -24,6 +24,7 @@ const luaL_Reg lua_task::mLuaStatic[] =
 {
 	{ "task", lua_task::luaTask },
 	{ "kill", lua_task::luaKill },
+	{ "schedule", lua_task::luaSchedule },
 	{ 0, 0 }
 };
 
@@ -174,6 +175,11 @@ int lua_task::luaKill(lua_State *L)
 	lua_pushboolean( L, ObjectManager::instance()->killTask( tid ) );
 
 	return( 1 );
+}
+
+int lua_task::luaSchedule( lua_State *L )
+{
+	return( 0 );
 }
 
 int lua_task::luaDirectObject( lua_State *L )
