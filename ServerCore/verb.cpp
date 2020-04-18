@@ -30,13 +30,13 @@ QStringList Verb::parse( const QString &pInput, QString &pArgStr )
 	switch( pInput.at( 0 ).toLatin1() )
 	{
 		case '"':
-			pArgStr = pInput.mid( 1 ).toHtmlEscaped();
+			pArgStr = pInput.mid( 1 );
 			Words << "say";
 			Words << pArgStr;
 			return( Words );
 
 		case ':':
-			pArgStr = pInput.mid( 1 ).toHtmlEscaped();
+			pArgStr = pInput.mid( 1 );
 			Words << "emote";
 			Words << pArgStr;
 			return( Words );
@@ -81,20 +81,16 @@ QStringList Verb::parse( const QString &pInput, QString &pArgStr )
 			{
 				if( Words.isEmpty() )
 				{
-					pArgStr = pInput.mid( i + 1 ).toHtmlEscaped();
+					pArgStr = pInput.mid( i + 1 );
 				}
 
 				if( !Word.isEmpty() )
 				{
-					Words << Word.toHtmlEscaped();
+					Words << Word;
 
 					Word.clear();
 				}
 			}
-//			else if( !InQuote && ch == '$' )
-//			{
-//				Word.append( "o(0):" );
-//			}
 			else
 			{
 				Word.append( ch );
@@ -104,30 +100,9 @@ QStringList Verb::parse( const QString &pInput, QString &pArgStr )
 
 	if( !Word.isEmpty() )
 	{
-		Words << Word.toHtmlEscaped();
-	}
-/*
-	QStringList		ArgLst;
-
-	for( QStringList::const_iterator it = Words.begin() ; it != Words.end() ; it++ )
-	{
-		if( it == Words.begin() )
-		{
-			continue;
-		}
-
-		if( it->contains( " " ) )
-		{
-			ArgLst.append( QString( "\"%1\"" ).arg( *it ) );
-		}
-		else
-		{
-			ArgLst.append( *it );
-		}
+		Words << Word;
 	}
 
-	pArgStr = ArgLst.join( " " );
-*/
 	return( Words );
 }
 
