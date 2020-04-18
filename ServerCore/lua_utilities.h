@@ -9,6 +9,8 @@
 #include <QMap>
 #include <QVariant>
 #include <QXmlDefaultHandler>
+#include <QXmlAttributes>
+#include <QVector>
 
 typedef QMap<QString,lua_CFunction>		LuaMap;
 
