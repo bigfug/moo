@@ -669,6 +669,8 @@ int lua_moo::luaBroadcast( lua_State *L )
 			throw mooException( E_PERM, "only wizards can broadcast" );
 		}
 
+		Msg = lua_util::processOutputTags( L, Msg );
+
 		for( Connection *C : CM->connectionList().values() )
 		{
 			if( C )
@@ -705,6 +707,8 @@ int lua_moo::luaNotify( lua_State *L )
 
 		if( C )
 		{
+			Msg = lua_util::processOutputTags( L, Msg );
+
 			Command->changeAdd( new change::ConnectionNotify( C, Msg ) );
 		}
 

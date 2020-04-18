@@ -1,5 +1,10 @@
 #include "lua_utilities.h"
 #include "lua_object.h"
+#include "lua_task.h"
+#include "objectmanager.h"
+
+#include "verb.h"
+#include "property.h"
 
 #if LUA_VERSION_NUM < 502
 
@@ -88,4 +93,200 @@ int luaL_pushvariant( lua_State *L, const QVariant &pV )
 	}
 
 	return( 1 );
+}
+
+QString lua_util::processOutputTags( lua_State *L, QString pText )
+{
+	return( XmlOutputParser( L, pText ).result() );
+}
+
+bool XmlOutputParser::startElement( const QString &namespaceURI, const QString &localName, const QString &qName, const QXmlAttributes &atts )
+{
+	Q_UNUSED( namespaceURI )
+	Q_UNUSED( qName )
+	Q_UNUSED( atts )
+
+	Element		E;
+
+	E.mNamespaceUri = namespaceURI;
+	E.mLocalName    = localName;
+	E.mName         = qName;
+	E.mAttrs        = atts;
+
+	QStringList		NameList = qName.split( ':', QString::SkipEmptyParts );
+
+	if( NameList.size() == 2 )
+	{
+		const QString		&ObjectName = NameList.at( 0 );
+
+		lua_task		*T = lua_task::luaGetTask( mL );
+
+		Object			*O = Q_NULLPTR;
+
+		if( !ObjectName.compare( "player" ) )
+		{
+			O = ObjectManager::o( T->task().player() );
+		}
+		else if( !ObjectName.compare( "object" ) )
+		{
+			O = ObjectManager::o( T->task().object() );
+		}
+		else if( !ObjectName.compare( "direct" ) )
+		{
+			O = ObjectManager::o( T->task().directObjectId() );
+		}
+		else if( !ObjectName.compare( "indirect" ) )
+		{
+			O = ObjectManager::o( T->task().indirectObjectId() );
+		}
+		else if( !ObjectName.compare( "location" ) )
+		{
+			O = ObjectManager::o( T->task().player() );
+
+			if( O )
+			{
+				O = ObjectManager::o( O->location() );
+			}
+		}
+
+		if( O )
+		{
+			if( !localName.compare( "name" ) )
+			{
+				E.mContent = O->name();
+			}
+			else
+			{
+				Verb			*V = O->verb( localName );
+
+				if( V )
+				{
+					int r = T->verbCall( O->id(), V );
+
+					if( r > 0 )
+					{
+						if( lua_isstring( T->L(), -1 ) )
+						{
+							const char *r = lua_tostring( T->L(), -1 );
+
+							E.mContent = QString::fromLatin1( r );
+						}
+
+						lua_pop( T->L(), r );
+					}
+				}
+				else
+				{
+					Property	*P = O->prop( localName );
+
+					if( P )
+					{
+						if( P->type() == QVariant::String )
+						{
+							E.mContent = P->value().toString();
+						}
+						else if( P->type() == QVariant::Double )
+						{
+							E.mContent = QString::number( P->value().toDouble() );
+						}
+						else if( P->type() == QVariant::Bool )
+						{
+							E.mContent = ( P->value().toBool() ? "true" : "false" );
+						}
+						else
+						{
+							E.mContent = P->value().toString();
+						}
+					}
+				}
+			}
+		}
+	}
+
+	mElementStack.push_back( E );
+
+	return( true );
+}
+
+bool XmlOutputParser::endElement( const QString &namespaceURI, const QString &localName, const QString &qName )
+{
+	Q_UNUSED( namespaceURI )
+	Q_UNUSED( localName )
+	Q_UNUSED( qName )
+
+	Element		E = mElementStack.takeLast();
+
+	QString		C;
+
+	if( !E.mContent.isEmpty() )
+	{
+		C = QString( "<%1>%2</%1>" ).arg( E.mLocalName ).arg( E.mContent ).arg( E.mLocalName );
+	}
+	else
+	{
+		C = QString( "<%1 />" ).arg( E.mLocalName );
+	}
+
+	if( mElementStack.isEmpty() )
+	{
+		mXML.append( C );
+	}
+	else
+	{
+		Element		&E2 = mElementStack.last();
+
+		E2.mContent.append( C );
+	}
+
+	return( true );
+}
+
+QString XmlOutputParser::errorString() const
+{
+	return( QString() );
+}
+
+bool XmlOutputParser::characters(const QString &ch)
+{
+	Element		&E = mElementStack.last();
+
+	E.mContent.append( ch );
+
+	return( true );
+}
+
+bool XmlOutputParser::skippedEntity(const QString &name)
+{
+	mXML.append( name );
+
+	return( true );
+}
+
+bool XmlOutputParser::warning(const QXmlParseException &exception)
+{
+	mXML.append( QString( "\x1b[0m\nWARNING (%1):" ).arg( exception.columnNumber() ) );
+	mXML.append( exception.message() );
+
+	return( false );
+}
+
+bool XmlOutputParser::error(const QXmlParseException &exception)
+{
+	mXML.append( QString( "\x1b[0m\nERROR (%1):" ).arg( exception.columnNumber() ) );
+	mXML.append( exception.message() );
+
+	return( false );
+}
+
+bool XmlOutputParser::fatalError(const QXmlParseException &exception)
+{
+	mXML.append( QString( "\x1b[0m\nFATAL (%1):" ).arg( exception.columnNumber() ) );
+	mXML.append( exception.message() );
+
+	return( false );
+}
+
+bool XmlOutputParser::endDocument()
+{
+	return( true );
 }

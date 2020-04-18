@@ -1447,11 +1447,13 @@ int lua_object::luaNotify( lua_State *L )
 		ConnectionManager	&CM  = *ConnectionManager::instance();
 		ConnectionId		 CID = CM.fromPlayer( O->id() );
 		Connection			*CON = ConnectionManager::instance()->connection( CID );
-		QString				 MSG = QString( lua_tostring( L, 2 ) );
+		QString				 Msg = QString( lua_tostring( L, 2 ) );
 
 		if( CON )
 		{
-			Command->changeAdd( new change::ConnectionNotify( CON, MSG ) );
+			Msg = lua_util::processOutputTags( L, Msg );
+
+			Command->changeAdd( new change::ConnectionNotify( CON, Msg ) );
 		}
 
 		return( 0 );

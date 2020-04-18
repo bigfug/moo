@@ -100,7 +100,9 @@ int lua_connection::luaNotify( lua_State *L )
 		{
 			lua_task			*Command = lua_task::luaGetTask( L );
 
-			Command->changeAdd( new change::ConnectionNotify( Con->mConnection, QString::fromLatin1( Msg ) ) );
+			QString				 Message = lua_util::processOutputTags( L, QString::fromLatin1( Msg ) );
+
+			Command->changeAdd( new change::ConnectionNotify( Con->mConnection, Message ) );
 
 //			Con->mConnection->notify( QString( Msg ) );
 		}
