@@ -199,7 +199,7 @@ QString ObjectManager::objectName( ObjectId pId ) const
 {
 	if( isTemporaryObjectId( pId ) )
 	{
-		return( QStringLiteral() );
+		return( QString() );
 	}
 
 	Object *O = mData.mObjMap.value( pId, Q_NULLPTR );
