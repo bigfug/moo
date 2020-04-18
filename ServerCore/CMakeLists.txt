@@ -33,7 +33,6 @@ set( SOURCE_FILES
 	odb.cpp
 	odb_sql.cpp
 	lua_json.cpp
-	serialport.cpp
 	lua_serialport.cpp
 	listenertelnet.cpp
 	listenertelnetsocket.cpp
@@ -80,7 +79,6 @@ set( HEADER_FILES
 	odb.h
 	odb_sql.h
 	lua_json.h
-	serialport.h
 	lua_serialport.h
 	listenertelnet.h
 	listenertelnetsocket.h
