@@ -18,9 +18,7 @@ class XmlParser : private QXmlDefaultHandler
 public:
 	XmlParser( const QString &pText )
 	{
-		QXmlInputSource		XmlSrc;
-
-		XmlSrc.setData( "<moo>" + pText + "</moo>" );
+		mSRC.setData( "<moo>" + pText + "</moo>" );
 
 		QXmlSimpleReader	Reader;
 
@@ -28,7 +26,7 @@ public:
 		Reader.setEntityResolver( this );
 		Reader.setErrorHandler( this );
 
-		Reader.parse( XmlSrc );
+		Reader.parse( mSRC );
 	}
 
 	QString result( void ) const
@@ -44,6 +42,7 @@ public:
 	virtual bool skippedEntity(const QString &name) Q_DECL_OVERRIDE;
 
 private:
+	QXmlInputSource		mSRC;
 	QString				mXML;
 	QStringList			mStyles;
 

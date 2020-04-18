@@ -591,7 +591,7 @@ int lua_task::eval( void )
 
 		if( CON )
 		{
-			CON->notify( Err );
+			CON->notify( Err.toHtmlEscaped() );
 		}
 
 		std::cerr << "eval: " << Err.toStdString() << std::endl;

@@ -377,7 +377,9 @@ bool XmlParser::skippedEntity(const QString &name)
 
 bool XmlParser::warning(const QXmlParseException &exception)
 {
-	mXML.append( QString( "\x1b[0m\nWARNING (%1):" ).arg( exception.columnNumber() ) );
+	mXML.clear();
+
+	mXML.append( QString( "\x1b[0m\rWARNING (%1):" ).arg( exception.columnNumber() ) );
 	mXML.append( exception.message() );
 
 	return( false );
@@ -385,7 +387,9 @@ bool XmlParser::warning(const QXmlParseException &exception)
 
 bool XmlParser::error(const QXmlParseException &exception)
 {
-	mXML.append( QString( "\x1b[0m\nERROR (%1):" ).arg( exception.columnNumber() ) );
+	mXML.clear();
+
+	mXML.append( QString( "\x1b[0m\rERROR (%1):" ).arg( exception.columnNumber() ) );
 	mXML.append( exception.message() );
 
 	return( false );
@@ -393,8 +397,11 @@ bool XmlParser::error(const QXmlParseException &exception)
 
 bool XmlParser::fatalError(const QXmlParseException &exception)
 {
-	mXML.append( QString( "\x1b[0m\nFATAL (%1):" ).arg( exception.columnNumber() ) );
-	mXML.append( exception.message() );
+	mXML.clear();
+	mXML.append( QString( "\r\x1b[0m%1\n" ).arg( mSRC.data() ) );
+	mXML.append( QString( ' ' ).repeated( exception.columnNumber() ).append( "^\n" ) );
+	mXML.append( QString( "FATAL (%1):" ).arg( exception.columnNumber() ) );
+	mXML.append( exception.message().trimmed() );
 
 	return( false );
 }

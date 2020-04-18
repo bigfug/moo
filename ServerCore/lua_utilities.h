@@ -24,9 +24,7 @@ public:
 	XmlOutputParser( lua_State *L, QString pText )
 		: mL( L )
 	{
-		QXmlInputSource		XmlSrc;
-
-		XmlSrc.setData( "<moo>" + pText + "</moo>" );
+		mSRC.setData( "<moo>" + pText + "</moo>" );
 
 		QXmlSimpleReader	Reader;
 
@@ -34,7 +32,7 @@ public:
 		Reader.setEntityResolver( this );
 		Reader.setErrorHandler( this );
 
-		Reader.parse( XmlSrc );
+		Reader.parse( mSRC );
 	}
 
 	QString result( void ) const
@@ -66,6 +64,7 @@ private:
 
 private:
 	lua_State			*mL;
+	QXmlInputSource		 mSRC;
 	QString				 mXML;
 	QVector<Element>	 mElementStack;
 };

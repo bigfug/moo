@@ -1153,7 +1153,7 @@ int lua_object::luaVerbCall( lua_State *L )
 
 			if( CON )
 			{
-				CON->notify( ErrMsg );
+				CON->notify( ErrMsg.toHtmlEscaped() );
 			}
 
 			lua_pop( L, 1 );

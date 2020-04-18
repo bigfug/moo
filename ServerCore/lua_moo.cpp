@@ -1333,7 +1333,7 @@ int lua_moo::luaImport( lua_State *L )
 				continue;
 			}
 
-			C->notify( FL );
+			C->notify( FL.toHtmlEscaped() );
 
 			ImportTask.taskPush( TaskEntry( FL, T->connectionId(), T->programmer() ) );
 

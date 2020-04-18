@@ -30,13 +30,13 @@ QStringList Verb::parse( const QString &pInput, QString &pArgStr )
 	switch( pInput.at( 0 ).toLatin1() )
 	{
 		case '"':
-			pArgStr = pInput.mid( 1 );
+			pArgStr = pInput.mid( 1 ).toHtmlEscaped();
 			Words << "say";
 			Words << pArgStr;
 			return( Words );
 
 		case ':':
-			pArgStr = pInput.mid( 1 );
+			pArgStr = pInput.mid( 1 ).toHtmlEscaped();
 			Words << "emote";
 			Words << pArgStr;
 			return( Words );
@@ -81,12 +81,12 @@ QStringList Verb::parse( const QString &pInput, QString &pArgStr )
 			{
 				if( Words.isEmpty() )
 				{
-					pArgStr = pInput.mid( i + 1 );
+					pArgStr = pInput.mid( i + 1 ).toHtmlEscaped();
 				}
 
 				if( !Word.isEmpty() )
 				{
-					Words << Word;
+					Words << Word.toHtmlEscaped();
 
 					Word.clear();
 				}
@@ -104,7 +104,7 @@ QStringList Verb::parse( const QString &pInput, QString &pArgStr )
 
 	if( !Word.isEmpty() )
 	{
-		Words << Word;
+		Words << Word.toHtmlEscaped();
 	}
 /*
 	QStringList		ArgLst;

@@ -220,7 +220,7 @@ bool XmlOutputParser::endElement( const QString &namespaceURI, const QString &lo
 
 	if( !E.mContent.isEmpty() )
 	{
-		C = QString( "<%1>%2</%1>" ).arg( E.mLocalName ).arg( E.mContent ).arg( E.mLocalName );
+		C = QString( "<%1>%2</%1>" ).arg( E.mLocalName ).arg( E.mContent );
 	}
 	else
 	{
@@ -250,7 +250,7 @@ bool XmlOutputParser::characters(const QString &ch)
 {
 	Element		&E = mElementStack.last();
 
-	E.mContent.append( ch );
+	E.mContent.append( ch.toHtmlEscaped() );
 
 	return( true );
 }
@@ -280,8 +280,11 @@ bool XmlOutputParser::error(const QXmlParseException &exception)
 
 bool XmlOutputParser::fatalError(const QXmlParseException &exception)
 {
-	mXML.append( QString( "\x1b[0m\nFATAL (%1):" ).arg( exception.columnNumber() ) );
-	mXML.append( exception.message() );
+	mXML.clear();
+	mXML.append( QString( "\r\x1b[0m%1\n" ).arg( mSRC.data() ) );
+	mXML.append( QString( ' ' ).repeated( exception.columnNumber() ).append( "^\n" ) );
+	mXML.append( QString( "FATAL (%1):" ).arg( exception.columnNumber() ) );
+	mXML.append( exception.message().trimmed() );
 
 	return( false );
 }
