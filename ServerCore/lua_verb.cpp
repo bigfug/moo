@@ -169,11 +169,11 @@ int lua_verb::luaCall( lua_State *L )
 		T.setObject( V->object() );
 		T.setVerb( V->name() );
 
-		Object		*Wizard = ( T.programmer() == OBJECT_NONE ? nullptr : ObjectManager::o( T.programmer() ) );
+		Object		*Wizard = ( T.permissions() == OBJECT_NONE ? nullptr : ObjectManager::o( T.permissions() ) );
 
-		if( T.programmer() != OBJECT_NONE && ( !Wizard || !Wizard->wizard() ) )
+		if( T.permissions() != OBJECT_NONE && ( !Wizard || !Wizard->wizard() ) )
 		{
-			T.setProgrammer( V->owner() );
+			T.setPermissions( V->owner() );
 		}
 
 		return( Command->verbCall( T, V, lua_gettop( L ) - 1 ) );
@@ -358,7 +358,7 @@ int lua_verb::luaSet( lua_State *L )
 	{
 		lua_task			*Command = lua_task::luaGetTask( L );
 		const Task			&T = Command->task();
-		Object				*Player = ObjectManager::o( T.programmer() );
+		Object				*Player = ObjectManager::o( T.permissions() );
 
 		if( Player == 0 )
 		{
@@ -598,7 +598,7 @@ int lua_verb::luaAliasAdd( lua_State *L )
 	{
 		lua_task			*Command = lua_task::luaGetTask( L );
 		const Task			&T = Command->task();
-		Object				*Player = ObjectManager::o( T.programmer() );
+		Object				*Player = ObjectManager::o( T.permissions() );
 
 		if( Player == 0 )
 		{
@@ -646,7 +646,7 @@ int lua_verb::luaAliasRem(lua_State *L)
 	{
 		lua_task			*Command = lua_task::luaGetTask( L );
 		const Task			&T = Command->task();
-		Object				*Player = ObjectManager::o( T.programmer() );
+		Object				*Player = ObjectManager::o( T.permissions() );
 
 		if( Player == 0 )
 		{

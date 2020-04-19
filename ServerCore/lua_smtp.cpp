@@ -216,7 +216,7 @@ int lua_smtp::luaSend( lua_State *L )
 	{
 		lua_task			*Command = lua_task::luaGetTask( L );
 		const Task			&T = Command->task();
-		Object				*PRG = ObjectManager::o( T.programmer() );
+		Object				*PRG = ObjectManager::o( T.permissions() );
 
 		if( !PRG || !PRG->wizard() )
 		{

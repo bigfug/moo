@@ -148,7 +148,7 @@ int lua_prop::luaGet( lua_State *L )
 		luaProp				*LP = arg( L );
 		Property			*P = LP->mProperty;
 		const char			*s = luaL_checkstring( L, 2 );
-		Object				*PRG = ObjectManager::o( T.programmer() );
+		Object				*PRG = ObjectManager::o( T.permissions() );
 
 		if( P == 0 )
 		{

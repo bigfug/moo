@@ -184,7 +184,7 @@ bool InputSinkRead::input( const QString &pData )
 		{
 			lua_task	 L( mConnection->id(), mTask );
 
-			L.setProgrammer( V->owner() );
+			L.setPermissions( V->owner() );
 
 			int			ArgCnt = 1;
 

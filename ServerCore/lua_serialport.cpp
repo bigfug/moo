@@ -171,8 +171,8 @@ int lua_serialport::luaOpenSerialPort( lua_State *L )
 		ObjectManager		&OM = *ObjectManager::instance();
 		lua_task			*Command = lua_task::luaGetTask( L );
 		const Task			&T = Command->task();
-		Object				*objUser       = OM.object( T.programmer() );
-		const bool			 UserIsValid    = ( T.programmer() == OBJECT_NONE || ( objUser != 0 && objUser->valid() ) );
+		Object				*objUser       = OM.object( T.permissions() );
+		const bool			 UserIsValid    = ( T.permissions() == OBJECT_NONE || ( objUser != 0 && objUser->valid() ) );
 		const bool			 UserIsWizard   = ( UserIsValid && ( objUser == 0 || objUser->wizard() ) );
 
 		if( !UserIsWizard )
@@ -228,8 +228,8 @@ int lua_serialport::luaPort( lua_State *L )
 		ObjectManager		&OM = *ObjectManager::instance();
 		lua_task			*Command = lua_task::luaGetTask( L );
 		const Task			&T = Command->task();
-		Object				*objUser       = OM.object( T.programmer() );
-		const bool			 UserIsValid    = ( T.programmer() == OBJECT_NONE || ( objUser != 0 && objUser->valid() ) );
+		Object				*objUser       = OM.object( T.permissions() );
+		const bool			 UserIsValid    = ( T.permissions() == OBJECT_NONE || ( objUser != 0 && objUser->valid() ) );
 		const bool			 UserIsWizard   = ( UserIsValid && ( objUser == 0 || objUser->wizard() ) );
 
 		if( !UserIsWizard )

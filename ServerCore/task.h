@@ -31,7 +31,7 @@ private:
 	QString				 mIndirectObjectName;	// the indirect object string
 	ObjectId			 mIndirectObjectId;		// the indirect object value
 	QString				 mPreposition;			// the prepositional phrase found during parsing
-	ObjectId			 mProgrammerId;
+	ObjectId			 mPermissions;			// the current object that defines the permissions
 
 	ObjectId			 mPassObject;
 	ObjectId			 mPassVerbObject;
@@ -50,7 +50,7 @@ public:
 
 	Task( const Task &t ) = default;
 
-	virtual ~Task( void );
+	virtual ~Task( void ) {}
 
 	Task &operator =( const Task &T );
 
@@ -189,14 +189,14 @@ public:
 		mPreposition = pName;
 	}
 
-	inline ObjectId programmer( void ) const
+	inline ObjectId permissions( void ) const
 	{
-		return( mProgrammerId );
+		return( mPermissions );
 	}
 
-	inline void setProgrammer( ObjectId pObjectId )
+	inline void setPermissions( ObjectId pObjectId )
 	{
-		mProgrammerId = pObjectId;
+		mPermissions = pObjectId;
 	}
 
 	inline ObjectId passObject( void ) const

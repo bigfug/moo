@@ -128,7 +128,7 @@ int lua_connection::luaBoot( lua_State *L )
 	lua_task			*Command = lua_task::luaGetTask( L );
 	const Task			&T = Command->task();
 
-	Object				*PRG = ObjectManager::o( T.programmer() );
+	Object				*PRG = ObjectManager::o( T.permissions() );
 
 	if( !PRG || !PRG->wizard() )
 	{
@@ -264,7 +264,7 @@ int lua_connection::luaSet(lua_State *L)
 
 		if( strcmp( s, "player" ) == 0 )
 		{
-			Object				*PRG = ObjectManager::o( T.programmer() );
+			Object				*PRG = ObjectManager::o( T.permissions() );
 
 			if( !PRG || !PRG->wizard() )
 			{

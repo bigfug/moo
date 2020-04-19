@@ -47,7 +47,7 @@ const QList<QString>	 Task::mPrepositionList =
 
 Task::Task( const QString &pCommand ) : mCommand( pCommand )
 {
-	mProgrammerId = OBJECT_NONE;
+	mPermissions = OBJECT_NONE;
 
 	mTimeStamp = QDateTime::currentMSecsSinceEpoch();
 
@@ -64,7 +64,7 @@ Task::Task( const QString &pCommand ) : mCommand( pCommand )
 
 Task::Task( const TaskEntry &pEntry )
 {
-	mProgrammerId = pEntry.playerid();
+	mPermissions = pEntry.playerid();
 
 	mId			= pEntry.id();
 	mTimeStamp	= pEntry.timestamp();
@@ -79,10 +79,6 @@ Task::Task( const TaskEntry &pEntry )
 
 	mPassObject     = OBJECT_NONE;
 	mPassVerbObject = OBJECT_NONE;
-}
-
-Task::~Task( void )
-{
 }
 
 void Task::findObject( const QString &pName, QList<ObjectId> &pId ) const

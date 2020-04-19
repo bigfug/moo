@@ -231,7 +231,7 @@ void ServerTest::luaCallValueProgrammerFirst( void )
 
 	// Call test
 
-	TD.execute( QString( ";o( %1 ).result = moo.programmer.id" ).arg( O->id() ) );
+	TD.execute( QString( ";o( %1 ).result = moo.permissions.id" ).arg( O->id() ) );
 
 	// Check result
 
@@ -407,7 +407,7 @@ void ServerTest::luaCallValueProgrammerSecond( void )
 	V.initialise();
 
 	V.setOwner( 2 );
-	V.setScript( "moo.object.result = tostring( moo.programmer.id )" );
+	V.setScript( "moo.object.result = tostring( moo.permissions.id )" );
 
 	O->verbAdd( "test", V );
 
@@ -645,7 +645,7 @@ void ServerTest::luaCallValueProgrammerThird()
 	V2.initialise();
 
 	V2.setOwner( O2->id() );
-	V2.setScript( QString( "o( %1 ).result = tostring( moo.programmer.id )" ).arg( O2->id() ) );
+	V2.setScript( QString( "o( %1 ).result = tostring( moo.permissions.id )" ).arg( O2->id() ) );
 
 	O2->verbAdd( "test", V2 );
 
@@ -777,7 +777,7 @@ void ServerTest::luaCallValueProgrammerFirstWizard( void )
 
 	// Call test
 
-	TD.execute( QString( ";o( %1 ).result = moo.programmer.id" ).arg( O->id() ) );
+	TD.execute( QString( ";o( %1 ).result = moo.permissions.id" ).arg( O->id() ) );
 
 	// Check result
 
@@ -939,7 +939,7 @@ void ServerTest::luaCallValueProgrammerSecondWizard( void )
 	V.initialise();
 
 	V.setOwner( 2 );
-	V.setScript( "moo.object.result = tostring( moo.programmer.id )" );
+	V.setScript( "moo.object.result = tostring( moo.permissions.id )" );
 
 	O->verbAdd( "test", V );
 
@@ -1161,7 +1161,7 @@ void ServerTest::luaCallValueProgrammerThirdWizard()
 	V2.initialise();
 
 	V2.setOwner( O2->id() );
-	V2.setScript( QString( "o( %1 ).result = tostring( moo.programmer.id )" ).arg( O2->id() ) );
+	V2.setScript( QString( "o( %1 ).result = tostring( moo.permissions.id )" ).arg( O2->id() ) );
 
 	O2->verbAdd( "test", V2 );
 

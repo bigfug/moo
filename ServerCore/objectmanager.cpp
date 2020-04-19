@@ -600,7 +600,7 @@ void ObjectManager::onFrame( qint64 pTimeStamp )
 
 		lua_pushlstring( L.L(), NRE.mData.constData(), NRE.mData.size() );
 
-		L.setProgrammer( V->owner() );
+		L.setPermissions( V->owner() );
 
 		L.verbCall( NRE.mObjectId, V, 1 );
 

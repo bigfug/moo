@@ -70,14 +70,14 @@ public:
 		return( mTimeStamp );
 	}
 
-	inline ObjectId programmer( void ) const
+	inline ObjectId permissions( void ) const
 	{
-		return( mTasks.first().programmer() );
+		return( mTasks.first().permissions() );
 	}
 
-	inline void setProgrammer( ObjectId pObjectId )
+	inline void setPermissions( ObjectId pObjectId )
 	{
-		mTasks.first().setProgrammer( pObjectId );
+		mTasks.first().setPermissions( pObjectId );
 	}
 
 	QStringList taskVerbStack( void ) const;
@@ -114,8 +114,8 @@ private:
 	static int luaIndirectObjectString( lua_State *L );
 	static int luaPreposition( lua_State *L );
 
-	static int luaGetProgrammer( lua_State *L );
-	static int luaSetProgrammer( lua_State *L );
+	static int luaPermissions( lua_State *L );
+	static int luaSetPermissions( lua_State *L );
 
 	static void luaHook( lua_State *L, lua_Debug *ar );
 

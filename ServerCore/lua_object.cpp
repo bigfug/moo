@@ -239,7 +239,7 @@ int lua_object::luaCreate( lua_State *L )
 
 		//qDebug() << "create: ParentId:" << ParentId << "OwnerId:" << OwnerId;
 
-		ObjectId id = ObjectLogic::create( *Command, T.programmer(), ParentId, OwnerId );
+		ObjectId id = ObjectLogic::create( *Command, T.permissions(), ParentId, OwnerId );
 
 		if( ( objObject = OM.object( id ) ) != 0 )
 		{
@@ -319,7 +319,7 @@ int lua_object::luaGet( lua_State *L )
 	{
 		const Task			&T = lua_task::luaGetTask( L )->task();
 
-		Object				*PRG = ObjectManager::o( T.programmer() );
+		Object				*PRG = ObjectManager::o( T.permissions() );
 
 		if( !PRG )
 		{
@@ -578,7 +578,7 @@ int lua_object::luaSet( lua_State *L )
 	{
 		lua_task			*Command = lua_task::luaGetTask( L );
 		const Task			&T = Command->task();
-		Object				*PRG = ObjectManager::o( Command->programmer() );
+		Object				*PRG = ObjectManager::o( Command->permissions() );
 
 		if( !PRG )
 		{
@@ -647,7 +647,7 @@ int lua_object::luaSet( lua_State *L )
 
 			case PARENT:
 				{
-					ObjectLogic::chparent( *Command, T.programmer(), O->id(), argId( L, 3 ) );
+					ObjectLogic::chparent( *Command, T.permissions(), O->id(), argId( L, 3 ) );
 
 					return( 0 );
 				}
@@ -655,7 +655,7 @@ int lua_object::luaSet( lua_State *L )
 
 			case LOCATION:
 				{
-					ObjectLogic::move( *Command, T.programmer(), O->id(), argId( L, 3 ) );
+					ObjectLogic::move( *Command, T.permissions(), O->id(), argId( L, 3 ) );
 
 					return( 0 );
 				}
@@ -790,7 +790,7 @@ int lua_object::luaSet( lua_State *L )
 
 		if( !O->write() && FndPrp->owner() != PRG->id() && !isWizard )
 		{
-			throw( mooException( E_PERM, QString( "programmer (#%1) is not owner (#%2) or wizard of property (#%3)" ).arg( T.programmer() ).arg( O->owner() ).arg( FndPrp->owner() ) ) );
+			throw( mooException( E_PERM, QString( "programmer (#%1) is not owner (#%2) or wizard of property (#%3)" ).arg( T.permissions() ).arg( O->owner() ).arg( FndPrp->owner() ) ) );
 		}
 
 		if( !FndPrp->write() && PRG->id() != FndPrp->owner() && !isWizard )
@@ -936,7 +936,7 @@ int lua_object::luaVerb( lua_State *L )
 	try
 	{
 		const Task			&T = lua_task::luaGetTask( L )->task();
-		Object				*PRG = ObjectManager::o( T.programmer() );
+		Object				*PRG = ObjectManager::o( T.permissions() );
 
 		if( !PRG )
 		{
@@ -1009,7 +1009,7 @@ int lua_object::luaVerbAdd( lua_State *L )
 
 		V.initialise();
 
-		V.setOwner( T.programmer() );
+		V.setOwner( T.permissions() );
 		V.setObject( O->id() );
 
 		Command->changeAdd( new change::ObjectVerbAdd( O, VerbName, V ) );
@@ -1136,11 +1136,11 @@ int lua_object::luaVerbCall( lua_State *L )
 		CurT.setVerb( n );
 		CurT.setCaller( PrvT.object() );
 
-		Object		*Wizard = ( CurT.programmer() == OBJECT_NONE ? 0 : ObjectManager::o( CurT.programmer() ) );
+		Object		*Wizard = ( CurT.permissions() == OBJECT_NONE ? Q_NULLPTR : ObjectManager::o( CurT.permissions() ) );
 
-		if( CurT.programmer() != OBJECT_NONE && ( Wizard == 0 || !Wizard->wizard() ) )
+		if( CurT.permissions() != OBJECT_NONE && ( !Wizard || !Wizard->wizard() ) )
 		{
-			CurT.setProgrammer( v->mVerb->owner() );
+			CurT.setPermissions( v->mVerb->owner() );
 		}
 
 		Command->taskPush( CurT );
@@ -1212,7 +1212,7 @@ int lua_object::luaPropAdd( lua_State *L )
 		lua_task			*Command = lua_task::luaGetTask( L );
 		const Task			&T = Command->task();
 		Object				*O = argObj( L );
-		Object				*PRG = ObjectManager::o( Command->programmer() );
+		Object				*PRG = ObjectManager::o( Command->permissions() );
 		Property			 P;
 		QString				 PropName( lua_tostring( L, 2 ) );
 		Object				*O2;
@@ -1276,7 +1276,7 @@ int lua_object::luaPropAdd( lua_State *L )
 
 		P.initialise();
 
-		P.setOwner( T.programmer() );
+		P.setOwner( T.permissions() );
 
 		P.setValue( V );
 
@@ -1313,7 +1313,7 @@ int lua_object::luaPropDel( lua_State *L )
 		const Task			&T = Command->task();
 		//ObjectManager		&OM	= *ObjectManager::instance();
 		Object				*O = argObj( L );
-		Object				*PRG = ObjectManager::o( T.programmer() );
+		Object				*PRG = ObjectManager::o( T.permissions() );
 		QString				 PropName = QString( lua_tostring( L, 2 ) );
 		Property			*P;
 
@@ -1327,7 +1327,7 @@ int lua_object::luaPropDel( lua_State *L )
 		// If the programmer does not have write permission on object
 		// then E_PERM is raised.
 
-		if( T.programmer() != OBJECT_NONE && ( PRG == 0 || !PRG->valid() ) )
+		if( T.permissions() != OBJECT_NONE && ( PRG == 0 || !PRG->valid() ) )
 		{
 			throw mooException( E_PERM, "programmer is not valid" );
 		}
@@ -1376,7 +1376,7 @@ int lua_object::luaPropClear(lua_State *L)
 		const Task			&T = Command->task();
 		//ObjectManager		&OM	= *ObjectManager::instance();
 		Object				*O = argObj( L );
-		Object				*PRG = ObjectManager::o( T.programmer() );
+		Object				*PRG = ObjectManager::o( T.permissions() );
 		QString				 PropName = QString( lua_tostring( L, 2 ) );
 		Property			*P;
 
@@ -1390,7 +1390,7 @@ int lua_object::luaPropClear(lua_State *L)
 		// If the programmer does not have write permission on object
 		// then E_PERM is raised.
 
-		if( T.programmer() != OBJECT_NONE && ( PRG == 0 || !PRG->valid() ) )
+		if( T.permissions() != OBJECT_NONE && ( PRG == 0 || !PRG->valid() ) )
 		{
 			throw mooException( E_PERM, "programmer is not valid" );
 		}
@@ -1896,7 +1896,7 @@ int lua_object::luaRecycle( lua_State *L )
 		const Task			&T = Command->task();
 		Object				*O = argObj( L );
 
-		ObjectLogic::recycle( *Command, T.programmer(), O->id() );
+		ObjectLogic::recycle( *Command, T.permissions(), O->id() );
 	}
 	catch( mooException &e )
 	{
@@ -1964,7 +1964,7 @@ int lua_object::luaProperty( lua_State *L )
 	try
 	{
 		const Task			&T = lua_task::luaGetTask( L )->task();
-		Object				*PRG = ObjectManager::o( T.programmer() );
+		Object				*PRG = ObjectManager::o( T.permissions() );
 
 		if( !PRG )
 		{
@@ -2012,7 +2012,7 @@ int lua_object::luaAliasAdd(lua_State *L)
 		lua_task			*Command = lua_task::luaGetTask( L );
 		const Task			&T = Command->task();
 		Object				*O = argObj( L );
-		Object				*Player = ObjectManager::o( T.programmer() );
+		Object				*Player = ObjectManager::o( T.permissions() );
 
 		if( Player == 0 )
 		{
@@ -2051,7 +2051,7 @@ int lua_object::luaAliasDel(lua_State *L)
 		lua_task			*Command = lua_task::luaGetTask( L );
 		const Task			&T = Command->task();
 		Object				*O = argObj( L );
-		Object				*Player = ObjectManager::o( T.programmer() );
+		Object				*Player = ObjectManager::o( T.permissions() );
 
 		if( Player == 0 )
 		{

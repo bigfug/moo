@@ -43,13 +43,13 @@ const luaL_Reg lua_task::mLuaGet[] =
 	{ "iobj", lua_task::luaIndirectObject },
 	{ "iobjstr", lua_task::luaIndirectObjectString },
 	{ "prepstr", lua_task::luaPreposition },
-	{ "programmer", lua_task::luaGetProgrammer },
+	{ "permissions", lua_task::luaPermissions },
 	{ 0, 0 }
 };
 
 const luaL_Reg lua_task::mLuaSet[] =
 {
-	{ "programmer", lua_task::luaSetProgrammer },
+	{ "permissions", lua_task::luaSetPermissions },
 	{ 0, 0 }
 };
 
@@ -155,7 +155,7 @@ int lua_task::luaTask( lua_State *L )
 
 	lua_task			*lt = lua_task::luaGetTask( L );
 
-	TaskEntry			E( QString( lua_tostring( L, 2 ) ), lt->connectionId(), T.programmer() );
+	TaskEntry			E( QString( lua_tostring( L, 2 ) ), lt->connectionId(), T.permissions() );
 
 	E.setTimeStamp( E.timestamp() + ( lua_tonumber( L, 1 ) * 1000.0 ) );
 
@@ -261,7 +261,7 @@ int lua_task::luaSchedule( lua_State *L )
 			TaskCode       = QString::fromLatin1( Task );
 		}
 
-		TaskEntry			E( TaskCode, LT->connectionId(), T.programmer() );
+		TaskEntry			E( TaskCode, LT->connectionId(), T.permissions() );
 
 		E.setSchedule( TS );
 
@@ -332,24 +332,24 @@ int lua_task::luaPreposition( lua_State *L )
 	return( 1 );
 }
 
-int lua_task::luaGetProgrammer( lua_State *L )
+int lua_task::luaPermissions( lua_State *L )
 {
 	const lua_task			*LT = lua_task::luaGetTask( L );
 
-	lua_object::lua_pushobjectid( L, LT->programmer() );
+	lua_object::lua_pushobjectid( L, LT->permissions() );
 
 	return( 1 );
 }
 
-int lua_task::luaSetProgrammer( lua_State *L )
+int lua_task::luaSetPermissions( lua_State *L )
 {
 	lua_task			*LT = lua_task::luaGetTask( L );
 	ObjectId			 WID = lua_object::argId( L, -1 );
-	Object				*PRG = ObjectManager::o( LT->programmer() );
+	Object				*PRG = ObjectManager::o( LT->permissions() );
 
 	if( PRG->id() == WID || PRG->wizard() )
 	{
-		LT->setProgrammer( WID );
+		LT->setPermissions( WID );
 	}
 	else
 	{
@@ -629,7 +629,7 @@ int lua_task::executeLogin( void )
 			return( 0 );
 		}
 
-		T.setProgrammer( System->owner() );
+		T.setPermissions( System->owner() );
 
 		QStringList		ArgLst = T.args();
 		QString			ArgVrb = T.verb();
@@ -908,7 +908,7 @@ int lua_task::execute( void )
 		// verb runs; that is, the program in a verb can do whatever operations
 		// the owner of that verb is allowed to do and no others.
 
-		T.setProgrammer( FndVrb->owner() );
+		T.setPermissions( FndVrb->owner() );
 
 		return( verbCallCode( FndVrb ) );
 	}
@@ -929,7 +929,7 @@ int lua_task::verbCall( ObjectId pObjectId, Verb *V, int pArgCnt )
 {
 	Task		T = task();
 
-	T.setProgrammer( V->owner() );
+	T.setPermissions( V->owner() );
 	T.setCaller( T.object() );
 	T.setObject( pObjectId );
 

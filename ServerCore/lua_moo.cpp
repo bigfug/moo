@@ -662,7 +662,7 @@ int lua_moo::luaBroadcast( lua_State *L )
 		const Task			&T = Command->task();
 		ConnectionManager	*CM = ConnectionManager::instance();
 
-		Object				*PRG = ObjectManager::o( T.programmer() );
+		Object				*PRG = ObjectManager::o( T.permissions() );
 
 		if( !PRG || !PRG->wizard() )
 		{
@@ -878,14 +878,14 @@ int lua_moo::luaEval( lua_State *L )
 		const char			*C = luaL_checkstring( L, -1 );
 		Task				 E( C );
 		int					 Results;
-		Object				*PRG = ObjectManager::o( T.programmer() );
+		Object				*PRG = ObjectManager::o( T.permissions() );
 
-		if( PRG == 0 || !PRG->programmer() )
+		if( !PRG || !PRG->programmer() )
 		{
 			throw mooException( E_PERM, "programmer is not a programmer!" );
 		}
 
-		E.setProgrammer( T.programmer() );
+		E.setPermissions( T.permissions() );
 		E.setPlayer( T.player() );
 		E.setCaller( T.object() );
 		E.setObject( OBJECT_NONE );
@@ -1054,7 +1054,7 @@ int lua_moo::luaCheckPoint( lua_State *L )
 	{
 		lua_task			*Command = lua_task::luaGetTask( L );
 		const Task			&T = Command->task();
-		Object				*PRG = ObjectManager::o( T.programmer() );
+		Object				*PRG = ObjectManager::o( T.permissions() );
 
 		if( PRG == 0 || !PRG->wizard() )
 		{
@@ -1125,7 +1125,7 @@ int lua_moo::luaNetworkGet( lua_State *L )
 		Object				*O = lua_object::argObj( L, 2 );
 		const char			*V = luaL_checkstring( L, 3 );
 
-		Object				*PRG = ObjectManager::o( T.programmer() );
+		Object				*PRG = ObjectManager::o( T.permissions() );
 
 		if( !PRG || !PRG->wizard() )
 		{
@@ -1301,7 +1301,7 @@ int lua_moo::luaImport( lua_State *L )
 		lua_task	*T = lua_task::luaGetTask( L );
 		Connection	*C = T->connection();
 
-		Object		*P = ObjectManager::o( T->programmer() );
+		Object		*P = ObjectManager::o( T->permissions() );
 
 		if( !P || !P->wizard() )
 		{
@@ -1322,7 +1322,7 @@ int lua_moo::luaImport( lua_State *L )
 			throw mooException( E_NACC, "import script doesn't begin with correct header" );
 		}
 
-		lua_task		ImportTask( T->connectionId(), TaskEntry( "", T->connectionId(), T->programmer() ) );
+		lua_task		ImportTask( T->connectionId(), TaskEntry( "", T->connectionId(), T->permissions() ) );
 
 		while( !FH.atEnd() )
 		{
@@ -1335,7 +1335,7 @@ int lua_moo::luaImport( lua_State *L )
 
 			C->notify( FL.toHtmlEscaped() );
 
-			ImportTask.taskPush( TaskEntry( FL, T->connectionId(), T->programmer() ) );
+			ImportTask.taskPush( TaskEntry( FL, T->connectionId(), T->permissions() ) );
 
 			ImportTask.execute( T->timestamp() );
 
