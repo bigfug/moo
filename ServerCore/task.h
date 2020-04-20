@@ -54,67 +54,67 @@ public:
 
 	Task &operator =( const Task &T );
 
-	inline TaskId id( void ) const
+	TaskId id( void ) const
 	{
 		return( mId );
 	}
 
-	inline ObjectId player( void ) const
+	ObjectId player( void ) const
 	{
 		return( mPlayer );
 	}
 
-	inline ObjectId object( void ) const
+	ObjectId object( void ) const
 	{
 		return( mObject );
 	}
 
-	inline ObjectId caller( void ) const
+	ObjectId caller( void ) const
 	{
 		return( mCaller );
 	}
 
-	inline const QString &verb( void ) const
+	const QString &verb( void ) const
 	{
 		return( mVerb );
 	}
 
-	inline const QString argstr( void ) const
+	const QString argstr( void ) const
 	{
 		return( mArgStr );
 	}
 
-	inline const QStringList &args( void ) const
+	const QStringList &args( void ) const
 	{
 		return( mArgs );
 	}
 
-	inline qint64 timestamp( void ) const
+	qint64 timestamp( void ) const
 	{
 		return( mTimeStamp );
 	}
 
-	inline void setId( TaskId pId )
+	void setId( TaskId pId )
 	{
 		mId = pId;
 	}
 
-	inline void setPlayer( ObjectId pPlayer )
+	void setPlayer( ObjectId pPlayer )
 	{
 		mPlayer = pPlayer;
 	}
 
-	inline void setArgStr( const QString &pArgStr )
+	void setArgStr( const QString &pArgStr )
 	{
 		mArgStr = pArgStr;
 	}
 
-	inline void setArgs( const QStringList &pArgs )
+	void setArgs( const QStringList &pArgs )
 	{
 		mArgs = pArgs;
 	}
 
-	inline void setVerb( const QString &pVerb )
+	void setVerb( const QString &pVerb )
 	{
 		mVerb = pVerb;
 	}
@@ -124,107 +124,107 @@ public:
 		mCaller = pId;
 	}
 
-	inline void setObject( ObjectId pId )
+	void setObject( ObjectId pId )
 	{
 		mObject = pId;
 	}
 
-	inline void setTimeStamp( qint64 pTime )
+	void setTimeStamp( qint64 pTime )
 	{
 		mTimeStamp = pTime;
 	}
 
-	inline const QString &command( void ) const
+	const QString &command( void ) const
 	{
 		return( mCommand );
 	}
 
-	inline const QString &directObjectName( void ) const
+	const QString &directObjectName( void ) const
 	{
 		return( mDirectObjectName );
 	}
 
-	inline ObjectId directObjectId( void ) const
+	ObjectId directObjectId( void ) const
 	{
 		return( mDirectObjectId );
 	}
 
-	inline const QString &indirectObjectName( void ) const
+	const QString &indirectObjectName( void ) const
 	{
 		return( mIndirectObjectName );
 	}
 
-	inline ObjectId indirectObjectId( void ) const
+	ObjectId indirectObjectId( void ) const
 	{
 		return( mIndirectObjectId );
 	}
 
-	inline const QString &preposition( void ) const
+	const QString &preposition( void ) const
 	{
 		return( mPreposition );
 	}
 
-	inline void setDirectObjectName( const QString &pName )
+	void setDirectObjectName( const QString &pName )
 	{
 		mDirectObjectName = pName;
 	}
 
-	inline void setDirectObjectId( ObjectId pId )
+	void setDirectObjectId( ObjectId pId )
 	{
 		mDirectObjectId = pId;
 	}
 
-	inline void setIndirectObjectName( const QString &pName )
+	void setIndirectObjectName( const QString &pName )
 	{
 		mIndirectObjectName = pName;
 	}
 
-	inline void setIndirectObjectId( ObjectId pId )
+	void setIndirectObjectId( ObjectId pId )
 	{
 		mIndirectObjectId = pId;
 	}
 
-	inline void setPreposition( const QString &pName )
+	void setPreposition( const QString &pName )
 	{
 		mPreposition = pName;
 	}
 
-	inline ObjectId permissions( void ) const
+	ObjectId permissions( void ) const
 	{
 		return( mPermissions );
 	}
 
-	inline void setPermissions( ObjectId pObjectId )
+	void setPermissions( ObjectId pObjectId )
 	{
 		mPermissions = pObjectId;
 	}
 
-	inline ObjectId passObject( void ) const
+	ObjectId passObject( void ) const
 	{
 		return( mPassObject );
 	}
 
-	inline void setPassObject( ObjectId pObjectId )
+	void setPassObject( ObjectId pObjectId )
 	{
 		mPassObject = pObjectId;
 	}
 
-	inline ObjectId passVerbObject( void ) const
+	ObjectId passVerbObject( void ) const
 	{
 		return( mPassVerbObject );
 	}
 
-	inline void setPassVerbObject( ObjectId pObjectId )
+	void setPassVerbObject( ObjectId pObjectId )
 	{
 		mPassVerbObject = pObjectId;
 	}
 
-	inline QString passVerb( void ) const
+	QString passVerb( void ) const
 	{
 		return( mPassVerb );
 	}
 
-	inline void setPassVerb( const QString &pVerb )
+	void setPassVerb( const QString &pVerb )
 	{
 		mPassVerb = pVerb;
 	}
