@@ -66,7 +66,7 @@ void lua_connection::lua_pushconnection( lua_State *L, Connection *O )
 {
 	luaConnection			*H = (luaConnection *)lua_newuserdata( L, sizeof( luaConnection ) );
 
-	if( H == 0 )
+	if( !H )
 	{
 		throw( mooException( E_MEMORY, "out of memory" ) );
 	}
@@ -126,11 +126,8 @@ int lua_connection::luaNotify( lua_State *L )
 int lua_connection::luaBoot( lua_State *L )
 {
 	lua_task			*Command = lua_task::luaGetTask( L );
-	const Task			&T = Command->task();
 
-	Object				*PRG = ObjectManager::o( T.permissions() );
-
-	if( !PRG || !PRG->wizard() )
+	if( !Command->isWizard() )
 	{
 		throw mooException( E_PERM, "only wizards can boot" );
 	}
@@ -179,16 +176,11 @@ int lua_connection::luaGet( lua_State *L )
 
 	try
 	{
-		//		const Task			&T = lua_task::luaGetTask( L )->task();
 		luaConnection		*LC = arg( L );
 		Connection			*C = LC->mConnection;
 		const char			*s = luaL_checkstring( L, 2 );
-		//		Object				*O = ObjectManager::o( LP->mObjectId );
-		//		Object				*Player = ObjectManager::o( T.player() );
-		//		const bool			 isOwner  = ( Player != 0 && O != 0 ? Player->id() == O->owner() : false );
-		//		const bool			 isWizard = ( Player != 0 ? Player->wizard() : false );
 
-		if( C == 0 )
+		if( !C )
 		{
 			throw( mooException( E_TYPE, "invalid connection" ) );
 		}
@@ -204,21 +196,21 @@ int lua_connection::luaGet( lua_State *L )
 			return( 1 );
 		}
 
-		if( strcmp( s, "id" ) == 0 )
+		if( !strcmp( s, "id" ) )
 		{
 			lua_pushinteger( L, C->id() );
 
 			return( 1 );
 		}
 
-		if( strcmp( s, "name" ) == 0 )
+		if( !strcmp( s, "name" ) )
 		{
 			lua_pushstring( L, C->name().toLatin1() );
 
 			return( 1 );
 		}
 
-		if( strcmp( s, "player" ) == 0 )
+		if( !strcmp( s, "player" ) )
 		{
 			lua_object::lua_pushobjectid( L, C->player() );
 
@@ -250,7 +242,6 @@ int lua_connection::luaSet(lua_State *L)
 	try
 	{
 		lua_task			*Command = lua_task::luaGetTask( L );
-		const Task			&T = Command->task();
 		luaConnection		*LC = arg( L );
 		Connection			*C = LC->mConnection;
 		const char			*s = luaL_checkstring( L, 2 );
@@ -262,11 +253,9 @@ int lua_connection::luaSet(lua_State *L)
 			throw( mooException( E_TYPE, "invalid connection" ) );
 		}
 
-		if( strcmp( s, "player" ) == 0 )
+		if( !strcmp( s, "player" ) )
 		{
-			Object				*PRG = ObjectManager::o( T.permissions() );
-
-			if( !PRG || !PRG->wizard() )
+			if( !Command->isWizard() )
 			{
 				throw mooException( E_PERM, "only wizards can do that" );
 			}
@@ -311,7 +300,7 @@ lua_connection::luaConnection * lua_connection::arg( lua_State *L, int pIndex )
 {
 	luaConnection *H = (luaConnection *)luaL_testudata( L, pIndex, mLuaName );
 
-	if( H == 0 )
+	if( !H )
 	{
 		throw( mooException( E_TYPE, QString( "'connection' expected for argument %1" ).arg( pIndex ) ) );
 	}

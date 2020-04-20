@@ -13,6 +13,8 @@
 
 class Connection;
 class Verb;
+class Object;
+class Property;
 
 namespace change {
 class Change;
@@ -28,7 +30,7 @@ public:
 	static void luaSetTask( lua_State *L, lua_task *T );
 
 public:
-	lua_task( ConnectionId pConnectionId, const Task &pTask );
+	lua_task( ConnectionId pConnectionId, const Task &pTask, bool pElevated = false );
 
 	lua_task( lua_task &&t );
 
@@ -72,12 +74,12 @@ public:
 
 	inline ObjectId permissions( void ) const
 	{
-		return( mTasks.first().permissions() );
+		return( mPermissions );
 	}
 
-	inline void setPermissions( ObjectId pObjectId )
+	void setPermissions( ObjectId pObjectId )
 	{
-		mTasks.first().setPermissions( pObjectId );
+		mPermissions = pObjectId;
 	}
 
 	QStringList taskVerbStack( void ) const;
@@ -87,7 +89,31 @@ public:
 		mChanges.add( pChange );
 	}
 
-	static int process( QString pCommand, ConnectionId pConnectionId = CONNECTION_NONE, ObjectId pPlayerId = OBJECT_NONE );
+	void setElevated( bool pElevated )
+	{
+		mElevated = pElevated;
+	}
+
+	bool elevated( void ) const
+	{
+		return( mElevated );
+	}
+
+	static int process( QString pCommand, ConnectionId pConnectionId = CONNECTION_NONE, ObjectId pPlayerId = OBJECT_NONE, bool pElevated = false );
+
+	bool isWizard( void ) const;
+
+	bool isProgrammer( void ) const;
+
+	bool isOwner( ObjectId pObjectId ) const;
+
+	bool isPermValid( void ) const;
+
+	bool isOwner( Object *O ) const;
+
+	bool isOwner( Verb *V ) const;
+
+	bool isOwner( Property *P ) const;
 
 private:
 	int subeval( void );
@@ -145,6 +171,8 @@ private:
 	size_t						 mMemUse;
 	change::ChangeSet			 mChanges;
 	bool						 mError;
+	ObjectId					 mPermissions;			// the current object that defines the permissions
+	bool						 mElevated;
 
 	static const luaL_Reg		 mLuaStatic[];
 	static const luaL_Reg		 mLuaGet[];

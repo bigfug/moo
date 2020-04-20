@@ -55,6 +55,7 @@ const luaL_Reg lua_moo::mLuaStatic[] =
 	{ "notify", lua_moo::luaNotify },
 	{ "pass", lua_moo::luaPass },
 	{ "eval", lua_moo::luaEval },
+	{ "elevate", lua_moo::luaElevate },
 	{ "debug", lua_moo::luaDebug },
 	{ "hash", lua_moo::luaHash },
 	{ "findPlayer", lua_moo::luaFindPlayer },
@@ -659,12 +660,9 @@ int lua_moo::luaBroadcast( lua_State *L )
 	{
 		QString				 Msg = parseNotify( L );
 		lua_task			*Command = lua_task::luaGetTask( L );
-		const Task			&T = Command->task();
 		ConnectionManager	*CM = ConnectionManager::instance();
 
-		Object				*PRG = ObjectManager::o( T.permissions() );
-
-		if( !PRG || !PRG->wizard() )
+		if( !Command->isWizard() )
 		{
 			throw mooException( E_PERM, "only wizards can broadcast" );
 		}
@@ -736,7 +734,7 @@ int lua_moo::luaRoot( lua_State *L )
 	{
 		Object		*O = ObjectManager::instance()->rootObject();
 
-		if( O == 0 )
+		if( !O )
 		{
 			throw( mooException( E_INVARG, "root object has not been defined yet" ) );
 		}
@@ -878,9 +876,8 @@ int lua_moo::luaEval( lua_State *L )
 		const char			*C = luaL_checkstring( L, -1 );
 		Task				 E( C );
 		int					 Results;
-		Object				*PRG = ObjectManager::o( T.permissions() );
 
-		if( !PRG || !PRG->programmer() )
+		if( !Command->isProgrammer() )
 		{
 			throw mooException( E_PERM, "programmer is not a programmer!" );
 		}
@@ -912,7 +909,83 @@ int lua_moo::luaEval( lua_State *L )
 	return( LuaErr ? lua_error( L ) : 0 );
 }
 
-int lua_moo::luaHash(lua_State *L)
+int lua_moo::luaElevate( lua_State *L )
+{
+	bool                 LuaErr = false;
+
+	const char            *ArgStr = luaL_checkstring( L, 1 );
+
+	try
+	{
+		lua_task            *LT = lua_task::luaGetTask( L );
+		const Task          &T  = LT->task();
+		Object				*O  = ObjectManager::o( LT->permissions() );
+
+		if( LT->permissions() != OBJECT_NONE && ( !O || !O->wizard() ) )
+		{
+			throw mooException( E_PERM, "programmer is not a wizard!" );
+		}
+
+//		Connection            *C = ConnectionManager::instance()->connection( LT->connectionId() );
+
+//        if( !T.elevated() )
+//        {
+//            if( C && LT->timestamp() - C->lastElevationTime() > 60000 )
+//            {
+//                InputSinkRead        *IS = new InputSinkRead( C, T, ReadOpts, VerbArgs );
+
+//                if( IS )
+//                {
+//                    C->pushInputSink( IS );
+
+//                    return( 0 );
+//                }
+//            }
+//        }
+//        else
+		{
+			Task                 E( ArgStr );
+
+			E.setPermissions( T.player() );
+			E.setPlayer( T.player() );
+			E.setCaller( T.object() );
+			E.setObject( OBJECT_NONE );
+
+			bool	CurE = LT->elevated();
+
+			LT->setElevated( true );
+
+			LT->taskPush( E );
+
+			int Results = LT->eval();
+
+			LT->taskPop();
+
+			LT->setElevated( CurE );
+
+//            if( C )
+//            {
+//                C->setLastElevationTime( T.timestamp() );
+//            }
+
+			return( Results );
+		}
+	}
+	catch( const mooException &e )
+	{
+		e.lua_pushexception( L );
+
+		LuaErr = true;
+	}
+	catch( ... )
+	{
+
+	}
+
+	return( LuaErr ? lua_error( L ) : 0 );
+}
+
+int lua_moo::luaHash( lua_State *L )
 {
 	const char	*S = luaL_checkstring( L, -1 );
 
@@ -1052,18 +1125,12 @@ int lua_moo::luaCheckPoint( lua_State *L )
 
 	try
 	{
-		lua_task			*Command = lua_task::luaGetTask( L );
-		const Task			&T = Command->task();
-		Object				*PRG = ObjectManager::o( T.permissions() );
-
-		if( PRG == 0 || !PRG->wizard() )
+		if( !lua_task::luaGetTask( L )->isWizard() )
 		{
 			throw mooException( E_PERM, "wizard is not a wizard!" );
 		}
 
-		ObjectManager			&OM = *ObjectManager::instance();
-
-		OM.checkpoint();
+		ObjectManager::instance()->checkpoint();
 	}
 	catch( mooException &e )
 	{
@@ -1120,14 +1187,11 @@ int lua_moo::luaNetworkGet( lua_State *L )
 	try
 	{
 		lua_task			*Command = lua_task::luaGetTask( L );
-		const Task			&T = Command->task();
 		const char			*R = luaL_checkstring( L, 1 );
 		Object				*O = lua_object::argObj( L, 2 );
 		const char			*V = luaL_checkstring( L, 3 );
 
-		Object				*PRG = ObjectManager::o( T.permissions() );
-
-		if( !PRG || !PRG->wizard() )
+		if( !Command->isWizard() )
 		{
 			throw mooException( E_PERM, "only wizards can make network requests" );
 		}
@@ -1301,9 +1365,7 @@ int lua_moo::luaImport( lua_State *L )
 		lua_task	*T = lua_task::luaGetTask( L );
 		Connection	*C = T->connection();
 
-		Object		*P = ObjectManager::o( T->permissions() );
-
-		if( !P || !P->wizard() )
+		if( !T->isWizard() )
 		{
 			throw mooException( E_PERM, "you have to be a wizard to do that!" );
 		}

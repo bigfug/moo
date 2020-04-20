@@ -77,7 +77,7 @@ void ServerTest::luaCreate( void )
 		ObjectId		 oid = OM.maxId();
 		Object			*O   = 0;
 
-		lua_task::process( QString( "moo.create( o( %1 ), -1 )" ).arg( Parent->id() ), CID );
+		lua_task::process( QString( "moo.create( o( %1 ), O_NONE )" ).arg( Parent->id() ), CID );
 
 		O = OM.object( oid );
 
@@ -149,6 +149,8 @@ void ServerTest::luaCreate( void )
 		TaskEntry		 TE( CMD, CID, Programmer->id() );
 		lua_task		 Com( CID, TE );
 
+		Com.setElevated( true );
+
 		ObjectId		 oid = OM.maxId();
 		Object			*O   = 0;
 
@@ -183,6 +185,8 @@ void ServerTest::luaCreate( void )
 		TaskEntry		 TE( CMD, CID, Programmer->id() );
 		lua_task		 Com( CID, TE );
 
+		Com.setElevated( true );
+
 		ObjectId		 oid = OM.maxId();
 		Object			*O   = 0;
 
@@ -209,6 +213,8 @@ void ServerTest::luaCreate( void )
 		QString			 CMD = QString( "moo.create( o( %1 ), o( %2 ) )" ).arg( Parent->id() ).arg( Owner->id() );
 		TaskEntry		 TE( CMD, CID, Programmer->id() );
 		lua_task		 Com( CID, TE );
+
+		Com.setElevated( true );
 
 		ObjectId		 oid = OM.maxId();
 		Object			*O   = 0;

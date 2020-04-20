@@ -168,14 +168,7 @@ int lua_serialport::luaOpenSerialPort( lua_State *L )
 
 	try
 	{
-		ObjectManager		&OM = *ObjectManager::instance();
-		lua_task			*Command = lua_task::luaGetTask( L );
-		const Task			&T = Command->task();
-		Object				*objUser       = OM.object( T.permissions() );
-		const bool			 UserIsValid    = ( T.permissions() == OBJECT_NONE || ( objUser != 0 && objUser->valid() ) );
-		const bool			 UserIsWizard   = ( UserIsValid && ( objUser == 0 || objUser->wizard() ) );
-
-		if( !UserIsWizard )
+		if( !lua_task::luaGetTask( L )->isWizard() )
 		{
 			throw( mooException( E_NACC, "programmer is not wizard" ) );
 		}
@@ -225,14 +218,7 @@ int lua_serialport::luaPort( lua_State *L )
 
 	try
 	{
-		ObjectManager		&OM = *ObjectManager::instance();
-		lua_task			*Command = lua_task::luaGetTask( L );
-		const Task			&T = Command->task();
-		Object				*objUser       = OM.object( T.permissions() );
-		const bool			 UserIsValid    = ( T.permissions() == OBJECT_NONE || ( objUser != 0 && objUser->valid() ) );
-		const bool			 UserIsWizard   = ( UserIsValid && ( objUser == 0 || objUser->wizard() ) );
-
-		if( !UserIsWizard )
+		if( !lua_task::luaGetTask( L )->isWizard() )
 		{
 			throw( mooException( E_NACC, "programmer is not wizard" ) );
 		}

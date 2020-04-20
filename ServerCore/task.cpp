@@ -49,6 +49,7 @@ Task::Task( const QString &pCommand ) : mCommand( pCommand )
 {
 	mPermissions = OBJECT_NONE;
 
+	mId = 0;
 	mTimeStamp = QDateTime::currentMSecsSinceEpoch();
 
 	mPlayer = OBJECT_NONE;

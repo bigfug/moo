@@ -11,6 +11,8 @@
 #include "lua_verb.h"
 #include "lua_connection.h"
 #include "verb.h"
+#include "object.h"
+#include "property.h"
 #include "mooexception.h"
 #include "connectionmanager.h"
 #include "taskentry.h"
@@ -148,14 +150,12 @@ int lua_task::luaMe( lua_State *L )
 
 int lua_task::luaTask( lua_State *L )
 {
-	const Task			&T = lua_task::luaGetTask( L )->task();
-
 	luaL_checkinteger( L, 1 );
 	luaL_checkstring( L, 2 );
 
-	lua_task			*lt = lua_task::luaGetTask( L );
+	lua_task			*LT = lua_task::luaGetTask( L );
 
-	TaskEntry			E( QString( lua_tostring( L, 2 ) ), lt->connectionId(), T.permissions() );
+	TaskEntry			E( QString( lua_tostring( L, 2 ) ), LT->connectionId(), LT->permissions() );
 
 	E.setTimeStamp( E.timestamp() + ( lua_tonumber( L, 1 ) * 1000.0 ) );
 
@@ -184,7 +184,6 @@ int lua_task::luaSchedule( lua_State *L )
 	try
 	{
 		lua_task			*LT = lua_task::luaGetTask( L );
-		const Task			&T = LT->task();
 
 		TaskEntrySchedule	 TS;
 		QString				 TaskCode;
@@ -261,7 +260,7 @@ int lua_task::luaSchedule( lua_State *L )
 			TaskCode       = QString::fromLatin1( Task );
 		}
 
-		TaskEntry			E( TaskCode, LT->connectionId(), T.permissions() );
+		TaskEntry			E( TaskCode, LT->connectionId(), LT->permissions() );
 
 		E.setSchedule( TS );
 
@@ -343,26 +342,44 @@ int lua_task::luaPermissions( lua_State *L )
 
 int lua_task::luaSetPermissions( lua_State *L )
 {
-	lua_task			*LT = lua_task::luaGetTask( L );
-	ObjectId			 WID = lua_object::argId( L, -1 );
-	Object				*PRG = ObjectManager::o( LT->permissions() );
+	bool				 LuaErr = false;
 
-	if( PRG->id() == WID || PRG->wizard() )
+	try
 	{
-		LT->setPermissions( WID );
+		lua_task			*LT = lua_task::luaGetTask( L );
+		Object				*O  = lua_object::argObj( L, -1 );
+
+		if( !O )
+		{
+			throw mooException( E_ARGS, "invalid object" );
+		}
+
+		if( LT->permissions() != O->id() && !LT->isWizard() )
+		{
+			throw mooException( E_PERM, "can't set permissions" );
+		}
+
+		LT->setPermissions( O->id() );
 	}
-	else
+	catch( mooException &e )
 	{
-		luaL_error( L, "bad permissions" );
+		e.lua_pushexception( L );
+
+		LuaErr = true;
+	}
+	catch( ... )
+	{
+
 	}
 
-	return( 0 );
+	return( LuaErr ? lua_error( L ) : 0 );
 }
 
-lua_task::lua_task( ConnectionId pConnectionId, const Task &pTask )
-	: mL( Q_NULLPTR ), mConnectionId( pConnectionId ), mTimeStamp( 0 ), mMemUse( 0 ), mError( false )
+lua_task::lua_task(ConnectionId pConnectionId, const Task &pTask, bool pElevated )
+	: mL( Q_NULLPTR ), mConnectionId( pConnectionId ), mTimeStamp( 0 ), mMemUse( 0 ), mError( false ),
+	  mPermissions( OBJECT_NONE ), mElevated( pElevated )
 {
-	mTasks.push_front( pTask );
+	taskPush( pTask );
 }
 
 lua_task::lua_task( lua_task &&t )
@@ -372,7 +389,9 @@ lua_task::lua_task( lua_task &&t )
 	  mTimeStamp( std::move( t.mTimeStamp ) ),
 	  mMemUse( std::move( t.mMemUse ) ),
 	  mChanges( std::move( t.mChanges ) ),
-	  mError( std::move( t.mError ) )
+	  mError( std::move( t.mError ) ),
+	  mPermissions( std::move( t.mPermissions ) ),
+	  mElevated( std::move( t.mElevated ) )
 {
 	lua_setallocf( mL, lua_task::luaAlloc, this );
 
@@ -929,7 +948,6 @@ int lua_task::verbCall( ObjectId pObjectId, Verb *V, int pArgCnt )
 {
 	Task		T = task();
 
-	T.setPermissions( V->owner() );
 	T.setCaller( T.object() );
 	T.setObject( pObjectId );
 
@@ -1022,11 +1040,15 @@ void lua_task::taskPush( const Task &T )
 	}
 
 	mTasks.push_front( T );
+
+	setPermissions( T.mPermissions );
 }
 
 void lua_task::taskPop()
 {
 	mTasks.pop_front();
+
+	setPermissions( mTasks.front().mPermissions );
 }
 
 void lua_task::luaHook( lua_State *L, lua_Debug *ar )
@@ -1076,10 +1098,12 @@ QStringList lua_task::taskVerbStack() const
 	return( VrbLst );
 }
 
-int lua_task::process( QString pCommand, ConnectionId pConnectionId, ObjectId pPlayerId )
+int lua_task::process( QString pCommand, ConnectionId pConnectionId, ObjectId pPlayerId, bool pElevated )
 {
 	lua_task		 Com( pConnectionId, TaskEntry( pCommand, pConnectionId, pPlayerId ) );
 	int				 Ret = 0;
+
+	Com.setElevated( pElevated );
 
 	try
 	{
@@ -1090,4 +1114,62 @@ int lua_task::process( QString pCommand, ConnectionId pConnectionId, ObjectId pP
 	}
 
 	return( Ret );
+}
+
+bool lua_task::isWizard() const
+{
+	ObjectId	 I = permissions();
+
+	if( I == OBJECT_NONE )
+	{
+		return( true );
+	}
+
+	if( !mElevated )
+	{
+		return( false );
+	}
+
+	Object		*O = ObjectManager::o( I );
+
+	return( O && O->wizard() );
+}
+
+bool lua_task::isProgrammer() const
+{
+	ObjectId	 I = permissions();
+
+	if( I == OBJECT_NONE )
+	{
+		return( true );
+	}
+
+	Object		*O = ObjectManager::o( permissions() );
+
+	return( O && O->programmer() );
+}
+
+bool lua_task::isOwner( ObjectId pObjectId ) const
+{
+	return( pObjectId == permissions() );
+}
+
+bool lua_task::isPermValid() const
+{
+	return( permissions() == OBJECT_NONE || ObjectManager::o( permissions() ) );
+}
+
+bool lua_task::isOwner( Object *O ) const
+{
+	return( isOwner( O->owner() ) );
+}
+
+bool lua_task::isOwner(Verb *V) const
+{
+	return( isOwner( V->owner() ) );
+}
+
+bool lua_task::isOwner( Property *P ) const
+{
+	return( isOwner( P->owner() ) );
 }

@@ -45,7 +45,7 @@ void lua_listener::lua_pushlistener( lua_State *L, ListenerServer *O )
 {
 	luaListener			*H = (luaListener *)lua_newuserdata( L, sizeof( luaListener ) );
 
-	if( H == 0 )
+	if( !H )
 	{
 		throw( mooException( E_MEMORY, "out of memory" ) );
 	}

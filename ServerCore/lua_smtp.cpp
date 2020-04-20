@@ -215,10 +215,8 @@ int lua_smtp::luaSend( lua_State *L )
 	try
 	{
 		lua_task			*Command = lua_task::luaGetTask( L );
-		const Task			&T = Command->task();
-		Object				*PRG = ObjectManager::o( T.permissions() );
 
-		if( !PRG || !PRG->wizard() )
+		if( !Command->isWizard() )
 		{
 			throw mooException( E_PERM, "only wizards can send email" );
 		}

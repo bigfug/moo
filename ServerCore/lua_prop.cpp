@@ -144,18 +144,17 @@ int lua_prop::luaGet( lua_State *L )
 
 	try
 	{
-		const Task			&T = lua_task::luaGetTask( L )->task();
+		lua_task			*LT = lua_task::luaGetTask( L );
 		luaProp				*LP = arg( L );
 		Property			*P = LP->mProperty;
 		const char			*s = luaL_checkstring( L, 2 );
-		Object				*PRG = ObjectManager::o( T.permissions() );
 
-		if( P == 0 )
+		if( !P )
 		{
 			throw( mooException( E_TYPE, "invalid property" ) );
 		}
 
-		if( PRG == 0 || ( PRG->id() != P->owner() && !PRG->wizard() ) )
+		if( !LT->isOwner( P ) && !LT->isWizard() )
 		{
 			throw mooException( E_PERM, "no access" );
 		}
@@ -627,15 +626,13 @@ int lua_prop::luaValue( lua_State *L )
 
 		Property			*P = LP->mProperty;
 		Object				*O = ObjectManager::o( LP->mObjectId );
-		const bool			 isOwner  = ( Player != 0 && O != 0 ? Player->id() == O->owner() : false );
-		const bool			 isWizard = ( Player != 0 ? Player->wizard() : false );
 
-		if( P == 0 )
+		if( !P )
 		{
 			throw( mooException( E_TYPE, "invalid property" ) );
 		}
 
-		if( !isWizard && !isOwner && !P->read() )
+		if( !Command->isWizard() && !Command->isOwner( P ) && !P->read() )
 		{
 			throw( mooException( E_TYPE, "not allowed to read property" ) );
 		}

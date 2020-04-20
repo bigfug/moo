@@ -30,7 +30,7 @@ LuaTestData::~LuaTestData()
 
 lua_task LuaTestData::execute(const QString &pCmd)
 {
-	lua_task	t( CID, TaskEntry( pCmd, CID, programmerId() ) );
+	lua_task	t( CID, TaskEntry( pCmd, CID, programmerId() ), true );
 
 	t.execute( TimeStamp );
 
@@ -44,7 +44,7 @@ lua_task LuaTestData::task(const QString &pCmd)
 
 lua_task LuaTestData::task( const QString &pCmd, ObjectId pProgrammerId )
 {
-	return( lua_task( CID, TaskEntry( pCmd, pProgrammerId ) ) );
+	return( lua_task( CID, TaskEntry( pCmd, pProgrammerId ), true ) );
 }
 
 lua_task LuaTestData::eval(const QString &pCmd)
@@ -55,6 +55,8 @@ lua_task LuaTestData::eval(const QString &pCmd)
 lua_task LuaTestData::eval(const QString &pCmd, ObjectId pProgrammerId)
 {
 	lua_task	t( CID, TaskEntry( pCmd, CID, pProgrammerId ) );
+
+	t.setElevated( true );
 
 	t.eval();
 
@@ -68,5 +70,5 @@ void LuaTestData::process( const QString &pCmd )
 
 void LuaTestData::process( const QString &pCmd, ObjectId pProgrammerId )
 {
-	lua_task::process( pCmd, CID, pProgrammerId );
+	lua_task::process( pCmd, CID, pProgrammerId, true );
 }

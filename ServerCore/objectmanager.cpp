@@ -95,9 +95,21 @@ void ObjectManager::luaMinimal( void )
 
 	Eval.setOwner( Wizard->id() );
 	Eval.setObject( FirstRoom->id() );
-	Eval.setScript( "moo.programmer = moo.player;\n\nmoo.notify( moo.eval( moo.argstr ) );" );
+	Eval.setScript( "moo.permissions = moo.player\n\nmoo.notify( moo.eval( moo.argstr ) )" );
 
 	FirstRoom->verbAdd( "eval", Eval );
+
+	// Define the most basic elevate verb to allow further programming
+
+	Verb			Elevate;
+
+	Elevate.initialise();
+
+	Elevate.setOwner( Wizard->id() );
+	Elevate.setObject( FirstRoom->id() );
+	Elevate.setScript( "moo.permissions = moo.player\n\nmoo.notify( moo.elevate( moo.argstr ) )" );
+
+	FirstRoom->verbAdd( "elevate", Elevate );
 }
 
 QList<Object *> ObjectManager::connectedPlayers() const

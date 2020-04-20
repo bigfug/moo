@@ -27,10 +27,10 @@ ObjectId ObjectLogic::create( lua_task &pTask, ObjectId pUserId, ObjectId pParen
 	Object			*objParent = OM.object( pParentId );
 	Object			*objOwner  = OM.object( pOwnerId );
 
-	const bool		 UserIsValid    = ( pUserId == OBJECT_NONE || ( objUser != 0 && objUser->valid() ) );
+	const bool		 UserIsValid   = ( pUserId == OBJECT_NONE || ( objUser != 0 && objUser->valid() ) );
 	const bool		 ParentIsValid = ( objParent != 0 && objParent->valid() );
 	const bool		 OwnerIsValid  = ( objOwner != 0 && objOwner->valid() );
-	const bool		 UserIsWizard   = ( UserIsValid && ( objUser == 0 || objUser->wizard() ) );
+	const bool		 UserIsWizard  = pTask.isWizard();
 //	const bool		 UserIsOwner = ( UserIsValid && OwnerIsValid && pUserId == objOwner->id() );
 	const bool		 UserOwnsParent = ( UserIsValid && ParentIsValid && pUserId == objParent->owner() );
 
@@ -145,13 +145,13 @@ void ObjectLogic::chparent( lua_task &pTask, ObjectId pUserId, ObjectId pObjectI
 
 	Object			*objUser       = OM.object( pUserId );
 	Object			*objObject     = OM.object( pObjectId );
-	Object			*objOldParent = ( objObject != 0 ? OM.object( objObject->parent() ) : 0 );
+//	Object			*objOldParent = ( objObject != 0 ? OM.object( objObject->parent() ) : 0 );
 	Object			*objNewParent = OM.object( pNewParentId );
 
 	const bool		 UserIsValid    = ( pUserId == OBJECT_NONE || ( objUser != 0 && objUser->valid() ) );
 	const bool		 ObjectIsValid  = ( objObject != 0 && objObject->valid() );
 	const bool		 NewParentIsValid = ( objNewParent != 0 && objNewParent->valid() );
-	const bool		 UserIsWizard   = ( UserIsValid && ( objUser == 0 || objUser->wizard() ) );
+	const bool		 UserIsWizard   = pTask.isWizard();
 	const bool		 UserOwnsObject = ( UserIsValid && ObjectIsValid && pUserId == objObject->owner() );
 	const bool		 UserOwnsNewParent = ( UserIsValid && NewParentIsValid && pUserId == objNewParent->owner() );
 
@@ -408,7 +408,7 @@ void ObjectLogic::recycle( lua_task &pTask, ObjectId pUserId, ObjectId pObjectId
 
 	const bool		 UserIsValid    = ( pUserId == OBJECT_NONE || ( objUser != 0 && objUser->valid() ) );
 	const bool		 ObjectIsValid  = ( objObject != 0 && objObject->valid() );
-	const bool		 UserIsWizard   = ( UserIsValid && ( objUser == 0 || objUser->wizard() ) );
+	const bool		 UserIsWizard   = pTask.isWizard();
 	const bool		 UserOwnsObject = ( UserIsValid && ObjectIsValid && pUserId == objObject->owner() );
 
 	// If object is not valid, then E_INVARG is raised
@@ -498,7 +498,7 @@ void ObjectLogic::move( lua_task &pTask, ObjectId pUserId, ObjectId pObjectId, O
 	const bool		 ObjectIsValid  = ( objObject != 0 && objObject->valid() );
 	const bool		 WhereIsValid   = ( objWhere != 0 && objWhere->valid() );
 	const bool		 FromIsValid    = ( objFrom != 0 && objFrom->valid() );
-	const bool		 UserIsWizard   = ( UserIsValid && ( objUser == 0 || objUser->wizard() ) );
+	const bool		 UserIsWizard   = pTask.isWizard();
 	const bool		 UserOwnsObject = ( UserIsValid && ObjectIsValid && pUserId == objObject->owner() );
 
 	// what should be a valid object

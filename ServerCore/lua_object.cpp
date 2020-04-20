@@ -175,11 +175,8 @@ int lua_object::luaCreate( lua_State *L )
 	{
 		ObjectManager		&OM = *ObjectManager::instance();
 		lua_task			*Command = lua_task::luaGetTask( L );
-		const Task			&T = Command->task();
 		ObjectId			 ParentId = OBJECT_UNSPECIFIED;
 		ObjectId			 OwnerId = OBJECT_UNSPECIFIED;
-		Object				*objOwner = 0;
-		Object				*objParent = 0;
 		const int			 argc = lua_gettop( L );
 		Object				*objObject;
 
@@ -187,9 +184,9 @@ int lua_object::luaCreate( lua_State *L )
 		{
 			if( lua_isnumber( L, 1 ) )
 			{
-				if( ( ParentId = lua_tointeger( L, 1 ) ) != -1 )
+				if( ( ParentId = lua_tointeger( L, 1 ) ) != OBJECT_NONE )
 				{
-					if( ( objParent = OM.object( ParentId ) ) == 0 )
+					if( !OM.object( ParentId ) )
 					{
 						throw( mooException( E_VARNF, QString( "unknown parent object id: %1" ).arg( ParentId ) ) );
 					}
@@ -197,12 +194,12 @@ int lua_object::luaCreate( lua_State *L )
 			}
 			else if( lua_isuserdata( L, 1 ) )
 			{
-				if( ( objParent = argObj( L, 1 ) ) == 0 )
+				ParentId = argId( L, 1 );
+
+				if( ParentId != OBJECT_NONE && !OM.object( ParentId ) )
 				{
 					throw( mooException( E_VARNF, QString( "unknown parent object" ) ) );
 				}
-
-				ParentId  = objParent->id();
 			}
 			else
 			{
@@ -214,9 +211,9 @@ int lua_object::luaCreate( lua_State *L )
 		{
 			if( lua_isnumber( L, 2 ) )
 			{
-				if( ( OwnerId = lua_tointeger( L, 2 ) ) != -1 )
+				if( ( OwnerId = lua_tointeger( L, 2 ) ) != OBJECT_NONE )
 				{
-					if( ( objOwner = OM.object( OwnerId ) ) == 0 )
+					if( !OM.object( OwnerId ) )
 					{
 						throw( mooException( E_VARNF, QString( "unknown owner object id: %1" ).arg( ParentId ) ) );
 					}
@@ -224,12 +221,12 @@ int lua_object::luaCreate( lua_State *L )
 			}
 			else if( lua_isuserdata( L, 2 ) )
 			{
-				if( ( objOwner = argObj( L, 2 ) ) == 0 )
+				OwnerId = argId( L, 2 );
+
+				if( OwnerId != OBJECT_NONE && !OM.object( OwnerId ) )
 				{
 					throw( mooException( E_VARNF, QString( "unknown owner object" ) ) );
 				}
-
-				OwnerId  = objOwner->id();
 			}
 			else
 			{
@@ -239,7 +236,7 @@ int lua_object::luaCreate( lua_State *L )
 
 		//qDebug() << "create: ParentId:" << ParentId << "OwnerId:" << OwnerId;
 
-		ObjectId id = ObjectLogic::create( *Command, T.permissions(), ParentId, OwnerId );
+		ObjectId id = ObjectLogic::create( *Command, Command->permissions(), ParentId, OwnerId );
 
 		if( ( objObject = OM.object( id ) ) != 0 )
 		{
@@ -317,15 +314,6 @@ int lua_object::luaGet( lua_State *L )
 
 	try
 	{
-		const Task			&T = lua_task::luaGetTask( L )->task();
-
-		Object				*PRG = ObjectManager::o( T.permissions() );
-
-		if( !PRG )
-		{
-			throw( mooException( E_TYPE, "invalid programmer" ) );
-		}
-
 		const char			*s = luaL_checkstring( L, 2 );
 		lua_object::Fields	 Field = mFieldMap.value( QString::fromLatin1( s ) );
 
@@ -549,7 +537,7 @@ int lua_object::luaGet( lua_State *L )
 
 		Property                *P = O->prop( s );
 
-		if( P != 0 || ( P = O->propParent( QString( s ) ) ) != 0 )
+		if( P || ( P = O->propParent( QString( s ) ) ) != 0 )
 		{
 			return( luaL_pushvariant( L, P->value() ) );
 		}
@@ -577,7 +565,6 @@ int lua_object::luaSet( lua_State *L )
 	try
 	{
 		lua_task			*Command = lua_task::luaGetTask( L );
-		const Task			&T = Command->task();
 		Object				*PRG = ObjectManager::o( Command->permissions() );
 
 		if( !PRG )
@@ -594,8 +581,6 @@ int lua_object::luaSet( lua_State *L )
 		}
 
 		const char			*N = luaL_checkstring( L, 2 );
-		const bool			 isOwner  = ( PRG->id() == O->owner() );
-		const bool			 isWizard = ( PRG->wizard() );
 
 		switch( mFieldMap.value( QString::fromLatin1( N ) ) )
 		{
@@ -619,7 +604,7 @@ int lua_object::luaSet( lua_State *L )
 
 			case NAME:
 				{
-					if( !isOwner && !isWizard )
+					if( !Command->isOwner( O ) && !Command->isWizard() )
 					{
 						throw( mooException( E_PERM, "programmer is not owner or wizard" ) );
 					}
@@ -634,7 +619,7 @@ int lua_object::luaSet( lua_State *L )
 
 			case OWNER:
 				{
-					if( !isOwner && !isWizard )
+					if( !Command->isOwner( O ) && !Command->isWizard() )
 					{
 						throw( mooException( E_PERM, "programmer is not owner or wizard" ) );
 					}
@@ -647,7 +632,7 @@ int lua_object::luaSet( lua_State *L )
 
 			case PARENT:
 				{
-					ObjectLogic::chparent( *Command, T.permissions(), O->id(), argId( L, 3 ) );
+					ObjectLogic::chparent( *Command, Command->permissions(), O->id(), argId( L, 3 ) );
 
 					return( 0 );
 				}
@@ -655,7 +640,7 @@ int lua_object::luaSet( lua_State *L )
 
 			case LOCATION:
 				{
-					ObjectLogic::move( *Command, T.permissions(), O->id(), argId( L, 3 ) );
+					ObjectLogic::move( *Command, Command->permissions(), O->id(), argId( L, 3 ) );
 
 					return( 0 );
 				}
@@ -669,7 +654,7 @@ int lua_object::luaSet( lua_State *L )
 
 			case MODULE:
 				{
-					if( !isOwner && !isWizard )
+					if( !Command->isOwner( O ) && !Command->isWizard() )
 					{
 						throw( mooException( E_PERM, "programmer is not owner or wizard" ) );
 					}
@@ -688,7 +673,7 @@ int lua_object::luaSet( lua_State *L )
 
 			case PLAYER:
 				{
-					if( !isWizard )
+					if( !Command->isWizard() )
 					{
 						throw( mooException( E_PERM, "programmer is not wizard" ) );
 					}
@@ -703,7 +688,7 @@ int lua_object::luaSet( lua_State *L )
 
 			case PROGRAMMER:
 				{
-					if( !isWizard )
+					if( !Command->isWizard() )
 					{
 						throw( mooException( E_PERM, "programmer is not wizard" ) );
 					}
@@ -718,7 +703,7 @@ int lua_object::luaSet( lua_State *L )
 
 			case WIZARD:
 				{
-					if( !isWizard )
+					if( !Command->isWizard() )
 					{
 						throw( mooException( E_PERM, "programmer is not wizard" ) );
 					}
@@ -733,7 +718,7 @@ int lua_object::luaSet( lua_State *L )
 
 			case READ:
 				{
-					if( !isOwner && !isWizard )
+					if( !Command->isOwner( O ) && !Command->isWizard() )
 					{
 						throw( mooException( E_PERM, "programmer is not owner or wizard" ) );
 					}
@@ -748,7 +733,7 @@ int lua_object::luaSet( lua_State *L )
 
 			case WRITE:
 				{
-					if( !isOwner && !isWizard )
+					if( !Command->isOwner( O ) && !Command->isWizard() )
 					{
 						throw( mooException( E_PERM, "programmer is not owner or wizard" ) );
 					}
@@ -763,7 +748,7 @@ int lua_object::luaSet( lua_State *L )
 
 			case FERTILE:
 				{
-					if( !isOwner && !isWizard )
+					if( !Command->isOwner( O ) && !Command->isWizard() )
 					{
 						throw( mooException( E_PERM, "programmer is not owner or wizard" ) );
 					}
@@ -788,12 +773,12 @@ int lua_object::luaSet( lua_State *L )
 			throw( mooException( E_PROPNF, QString( "property '%1' is not defined" ).arg( N ) ) );
 		}
 
-		if( !O->write() && FndPrp->owner() != PRG->id() && !isWizard )
+		if( !O->write() && !Command->isOwner( FndPrp ) && !Command->isWizard())
 		{
-			throw( mooException( E_PERM, QString( "programmer (#%1) is not owner (#%2) or wizard of property (#%3)" ).arg( T.permissions() ).arg( O->owner() ).arg( FndPrp->owner() ) ) );
+			throw( mooException( E_PERM, QString( "programmer (#%1) is not owner (#%2) or wizard of property (#%3)" ).arg( Command->permissions() ).arg( O->owner() ).arg( FndPrp->owner() ) ) );
 		}
 
-		if( !FndPrp->write() && PRG->id() != FndPrp->owner() && !isWizard )
+		if( !FndPrp->write() && !Command->isOwner( FndPrp ) && !Command->isWizard() )
 		{
 			throw mooException( E_PERM, "no access to property" );
 		}
@@ -935,8 +920,8 @@ int lua_object::luaVerb( lua_State *L )
 
 	try
 	{
-		const Task			&T = lua_task::luaGetTask( L )->task();
-		Object				*PRG = ObjectManager::o( T.permissions() );
+		lua_task			*LT = lua_task::luaGetTask( L );
+		Object				*PRG = ObjectManager::o( LT->permissions() );
 
 		if( !PRG )
 		{
@@ -945,7 +930,7 @@ int lua_object::luaVerb( lua_State *L )
 
 		Object				*O = argObj( L );
 
-		if( !O->read() && PRG->id() != O->owner() && !PRG->wizard() )
+		if( !O->read() && !LT->isOwner( O ) && !LT->isWizard() )
 		{
 			throw mooException( E_PERM, "bad access" );
 		}
@@ -985,14 +970,11 @@ int lua_object::luaVerbAdd( lua_State *L )
 	try
 	{
 		lua_task			*Command = lua_task::luaGetTask( L );
-		const Task			&T = Command->task();
 		Object				*O = argObj( L );
-		Object				*Player = ObjectManager::instance()->object( T.player() );
-		const bool			 PlayerOwnsObject = ( Player == 0 ? false : Player->id() == O->owner() || Player->wizard() );
 		QString				 VerbName( lua_tostring( L, 2 ) );
 		Verb				 V;
 
-		if( !PlayerOwnsObject )
+		if( !Command->isOwner( O ) )
 		{
 			throw mooException( E_PERM, "programmer doesn't own object" );
 		}
@@ -1009,14 +991,10 @@ int lua_object::luaVerbAdd( lua_State *L )
 
 		V.initialise();
 
-		V.setOwner( T.permissions() );
+		V.setOwner( Command->permissions() );
 		V.setObject( O->id() );
 
 		Command->changeAdd( new change::ObjectVerbAdd( O, VerbName, V ) );
-
-		lua_verb::lua_pushverb( L, O->verb( VerbName ) );
-
-		return( 1 );
 	}
 	catch( mooException &e )
 	{
@@ -1032,7 +1010,7 @@ int lua_object::luaVerbAdd( lua_State *L )
 	return( LuaErr ? lua_error( L ) : 0 );
 }
 
-int lua_object::luaVerbDel(lua_State *L)
+int lua_object::luaVerbDel( lua_State *L )
 {
 	bool		LuaErr = false;
 
@@ -1041,13 +1019,10 @@ int lua_object::luaVerbDel(lua_State *L)
 	try
 	{
 		lua_task			*Command = lua_task::luaGetTask( L );
-		const Task			&T = Command->task();
 		Object				*O = argObj( L );
-		Object				*Player = ObjectManager::instance()->object( T.player() );
-		const bool			 PlayerOwnsObject = ( Player == 0 ? false : Player->id() == O->owner() || Player->wizard() );
 		QString				 VerbName( lua_tostring( L, 2 ) );
 
-		if( !PlayerOwnsObject )
+		if( !Command->isOwner( O ) )
 		{
 			throw mooException( E_PERM, "programmer doesn't own object" );
 		}
@@ -1065,8 +1040,6 @@ int lua_object::luaVerbDel(lua_State *L)
 		}
 
 		Command->changeAdd( new change::ObjectVerbDelete( O, VerbName ) );
-
-		return( 0 );
 	}
 	catch( mooException &e )
 	{
@@ -1136,9 +1109,7 @@ int lua_object::luaVerbCall( lua_State *L )
 		CurT.setVerb( n );
 		CurT.setCaller( PrvT.object() );
 
-		Object		*Wizard = ( CurT.permissions() == OBJECT_NONE ? Q_NULLPTR : ObjectManager::o( CurT.permissions() ) );
-
-		if( CurT.permissions() != OBJECT_NONE && ( !Wizard || !Wizard->wizard() ) )
+		if( !Command->isWizard() )
 		{
 			CurT.setPermissions( v->mVerb->owner() );
 		}
@@ -1276,7 +1247,7 @@ int lua_object::luaPropAdd( lua_State *L )
 
 		P.initialise();
 
-		P.setOwner( T.permissions() );
+		P.setOwner( Command->permissions() );
 
 		P.setValue( V );
 
@@ -1310,16 +1281,13 @@ int lua_object::luaPropDel( lua_State *L )
 	try
 	{
 		lua_task			*Command = lua_task::luaGetTask( L );
-		const Task			&T = Command->task();
-		//ObjectManager		&OM	= *ObjectManager::instance();
 		Object				*O = argObj( L );
-		Object				*PRG = ObjectManager::o( T.permissions() );
 		QString				 PropName = QString( lua_tostring( L, 2 ) );
 		Property			*P;
 
 		// If object is not valid, then E_INVARG is raised.
 
-		if( O == 0 || !O->valid() )
+		if( !O || !O->valid() )
 		{
 			throw mooException( E_INVARG, "object is invalid" );
 		}
@@ -1327,12 +1295,12 @@ int lua_object::luaPropDel( lua_State *L )
 		// If the programmer does not have write permission on object
 		// then E_PERM is raised.
 
-		if( T.permissions() != OBJECT_NONE && ( PRG == 0 || !PRG->valid() ) )
+		if( !Command->isPermValid() )
 		{
 			throw mooException( E_PERM, "programmer is not valid" );
 		}
 
-		if( PRG != 0 && !PRG->wizard() && PRG->id() != O->owner() )
+		if( !Command->isWizard() && !Command->isOwner( O ) )
 		{
 			throw mooException( E_PERM, "programmer doesn't have access" );
 		}
@@ -1343,7 +1311,7 @@ int lua_object::luaPropDel( lua_State *L )
 
 		P = O->prop( PropName );
 
-		if( P == 0 || P->parent() != OBJECT_NONE )
+		if( !P || P->parent() != OBJECT_NONE )
 		{
 			throw mooException( E_PROPNF, "prop not defined on this object" );
 		}
@@ -1373,16 +1341,13 @@ int lua_object::luaPropClear(lua_State *L)
 	try
 	{
 		lua_task			*Command = lua_task::luaGetTask( L );
-		const Task			&T = Command->task();
-		//ObjectManager		&OM	= *ObjectManager::instance();
 		Object				*O = argObj( L );
-		Object				*PRG = ObjectManager::o( T.permissions() );
 		QString				 PropName = QString( lua_tostring( L, 2 ) );
 		Property			*P;
 
 		// If object is not valid, then E_INVARG is raised.
 
-		if( O == 0 || !O->valid() )
+		if( !O || !O->valid() )
 		{
 			throw mooException( E_INVARG, "object is invalid" );
 		}
@@ -1390,12 +1355,12 @@ int lua_object::luaPropClear(lua_State *L)
 		// If the programmer does not have write permission on object
 		// then E_PERM is raised.
 
-		if( T.permissions() != OBJECT_NONE && ( PRG == 0 || !PRG->valid() ) )
+		if( !Command->isPermValid() )
 		{
 			throw mooException( E_PERM, "programmer is not valid" );
 		}
 
-		if( PRG != 0 && !PRG->wizard() && PRG->id() != O->owner() )
+		if( !Command->isWizard() && !Command->isOwner( O ) )
 		{
 			throw mooException( E_PERM, "programmer doesn't have access" );
 		}
@@ -1406,7 +1371,7 @@ int lua_object::luaPropClear(lua_State *L)
 
 		P = O->prop( PropName );
 
-		if( P == 0 )
+		if( !P )
 		{
 			throw mooException( E_PROPNF, "prop not defined on this object" );
 		}
@@ -1655,7 +1620,8 @@ int lua_object::luaIsChildOf( lua_State *L )
 
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );}
+	return( LuaErr ? lua_error( L ) : 0 );
+}
 
 int lua_object::luaIsParentOf( lua_State *L )
 {
@@ -1893,10 +1859,9 @@ int lua_object::luaRecycle( lua_State *L )
 	try
 	{
 		lua_task			*Command = lua_task::luaGetTask( L );
-		const Task			&T = Command->task();
 		Object				*O = argObj( L );
 
-		ObjectLogic::recycle( *Command, T.permissions(), O->id() );
+		ObjectLogic::recycle( *Command, Command->permissions(), O->id() );
 	}
 	catch( mooException &e )
 	{
@@ -1963,17 +1928,16 @@ int lua_object::luaProperty( lua_State *L )
 
 	try
 	{
-		const Task			&T = lua_task::luaGetTask( L )->task();
-		Object				*PRG = ObjectManager::o( T.permissions() );
+		lua_task			*LT = lua_task::luaGetTask( L );
 
-		if( !PRG )
+		if( !LT->isPermValid() )
 		{
 			throw mooException( E_PERM, "invalid programmer" );
 		}
 
 		Object				*O = argObj( L );
 
-		if( !O->read() && PRG->id() != O->owner() && !PRG->wizard() )
+		if( !O->read() && !LT->isOwner( O ) && !LT->isWizard() )
 		{
 			throw mooException( E_PERM, "bad access" );
 		}
@@ -2010,18 +1974,10 @@ int lua_object::luaAliasAdd(lua_State *L)
 	try
 	{
 		lua_task			*Command = lua_task::luaGetTask( L );
-		const Task			&T = Command->task();
 		Object				*O = argObj( L );
-		Object				*Player = ObjectManager::o( T.permissions() );
-
-		if( Player == 0 )
-		{
-			throw mooException( E_PERM, "programmer is invalid" );
-		}
-
 		const char			*N = luaL_checkstring( L, -1 );
 
-		if( Player->id() != O->owner() && !Player->wizard() )
+		if( !Command->isOwner( O ) && !Command->isWizard() )
 		{
 			throw mooException( E_PERM, "programmer has no access" );
 		}
@@ -2049,18 +2005,10 @@ int lua_object::luaAliasDel(lua_State *L)
 	try
 	{
 		lua_task			*Command = lua_task::luaGetTask( L );
-		const Task			&T = Command->task();
 		Object				*O = argObj( L );
-		Object				*Player = ObjectManager::o( T.permissions() );
-
-		if( Player == 0 )
-		{
-			throw mooException( E_PERM, "programmer is invalid" );
-		}
-
 		const char			*N = luaL_checkstring( L, -1 );
 
-		if( Player->id() != O->owner() && !Player->wizard() )
+		if( !Command->isOwner( O ) && !Command->isWizard() )
 		{
 			throw mooException( E_PERM, "programmer has no access" );
 		}

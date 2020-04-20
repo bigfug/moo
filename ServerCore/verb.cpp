@@ -46,6 +46,12 @@ QStringList Verb::parse( const QString &pInput, QString &pArgStr )
 			Words << "eval";
 			Words << pArgStr;
 			return( Words );
+
+		case '!':
+			pArgStr = pInput.mid( 1 );
+			Words << "elevate";
+			Words << pArgStr;
+			return( Words );
 	}
 
 	for( int i = 0 ; i < pInput.size() ; i++ )

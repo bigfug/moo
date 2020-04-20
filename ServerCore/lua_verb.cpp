@@ -169,9 +169,7 @@ int lua_verb::luaCall( lua_State *L )
 		T.setObject( V->object() );
 		T.setVerb( V->name() );
 
-		Object		*Wizard = ( T.permissions() == OBJECT_NONE ? nullptr : ObjectManager::o( T.permissions() ) );
-
-		if( T.permissions() != OBJECT_NONE && ( !Wizard || !Wizard->wizard() ) )
+		if( !Command->isWizard() )
 		{
 			T.setPermissions( V->owner() );
 		}
@@ -358,16 +356,15 @@ int lua_verb::luaSet( lua_State *L )
 	{
 		lua_task			*Command = lua_task::luaGetTask( L );
 		const Task			&T = Command->task();
-		Object				*Player = ObjectManager::o( T.permissions() );
 
-		if( Player == 0 )
+		if( !Command->isPermValid() )
 		{
 			throw mooException( E_PERM, "programmer is invalid" );
 		}
 
 		luaVerb				*LV = arg( L );
 
-		if( LV == 0 )
+		if( !LV )
 		{
 			throw( mooException( E_PERM, "verb is invalid" ) );
 		}
@@ -375,8 +372,6 @@ int lua_verb::luaSet( lua_State *L )
 		Verb				*V = LV->mVerb;
 		Object				*O = ObjectManager::o( V->object() );
 		const char			*N = luaL_checkstring( L, 2 );
-		const bool			 isOwner  = ( Player != 0 && O != 0 ? Player->id() == O->owner() : false );
-		const bool			 isWizard = ( Player != 0 ? Player->wizard() : false );
 
 		switch( mFieldMap.value( QString( N ) ) )
 		{
@@ -394,7 +389,7 @@ int lua_verb::luaSet( lua_State *L )
 
 			case OWNER:
 				{
-					if( !isWizard && !isOwner )
+					if( !Command->isWizard() && !Command->isOwner( O ) )
 					{
 						throw( mooException( E_PERM, "player is not owner or wizard" ) );
 					}
@@ -409,7 +404,7 @@ int lua_verb::luaSet( lua_State *L )
 
 			case READ:
 				{
-					if( !isWizard && !isOwner )
+					if( !Command->isWizard() && !Command->isOwner( O ) )
 					{
 						throw( mooException( E_PERM, "player is not owner or wizard" ) );
 					}
@@ -424,7 +419,7 @@ int lua_verb::luaSet( lua_State *L )
 
 			case WRITE:
 				{
-					if( !isWizard && !isOwner )
+					if( !Command->isWizard() && !Command->isOwner( O ) )
 					{
 						throw( mooException( E_PERM, "player is not owner or wizard" ) );
 					}
@@ -439,7 +434,7 @@ int lua_verb::luaSet( lua_State *L )
 
 			case EXECUTE:
 				{
-					if( !isWizard && !isOwner )
+					if( !Command->isWizard() && !Command->isOwner( O ) )
 					{
 						throw( mooException( E_PERM, "player is not owner or wizard" ) );
 					}
@@ -454,7 +449,7 @@ int lua_verb::luaSet( lua_State *L )
 
 			case SCRIPT:
 				{
-					if( !isWizard && !isOwner )
+					if( !Command->isWizard() && !Command->isOwner( O ) )
 					{
 						throw( mooException( E_PERM, "player is not owner or wizard" ) );
 					}
@@ -469,7 +464,7 @@ int lua_verb::luaSet( lua_State *L )
 
 			case DIRECT_OBJECT:
 				{
-					if( !isWizard && !isOwner )
+					if( !Command->isWizard() && !Command->isOwner( O ) )
 					{
 						throw( mooException( E_PERM, "player is not owner or wizard" ) );
 					}
@@ -505,7 +500,7 @@ int lua_verb::luaSet( lua_State *L )
 
 			case INDIRECT_OBJECT:
 				{
-					if( !isWizard && !isOwner )
+					if( !Command->isWizard() && !Command->isOwner( O ) )
 					{
 						throw( mooException( E_PERM, "player is not owner or wizard" ) );
 					}
@@ -535,7 +530,7 @@ int lua_verb::luaSet( lua_State *L )
 
 			case PREPOSITION:
 				{
-					if( !isWizard && !isOwner )
+					if( !Command->isWizard() && !Command->isOwner( O ) )
 					{
 						throw( mooException( E_PERM, "player is not owner or wizard" ) );
 					}
@@ -598,16 +593,15 @@ int lua_verb::luaAliasAdd( lua_State *L )
 	{
 		lua_task			*Command = lua_task::luaGetTask( L );
 		const Task			&T = Command->task();
-		Object				*Player = ObjectManager::o( T.permissions() );
 
-		if( Player == 0 )
+		if( !Command->isPermValid() )
 		{
 			throw mooException( E_PERM, "programmer is invalid" );
 		}
 
 		luaVerb				*LV = arg( L );
 
-		if( LV == 0 )
+		if( !LV )
 		{
 			throw( mooException( E_PERM, "verb is invalid" ) );
 		}
@@ -615,7 +609,7 @@ int lua_verb::luaAliasAdd( lua_State *L )
 		Verb				*V = LV->mVerb;
 		const char			*N = luaL_checkstring( L, 2 );
 
-		if( Player->id() != V->owner() && !Player->wizard() )
+		if( !Command->isOwner( V ) && !Command->isWizard() )
 		{
 			throw mooException( E_PERM, "programmer has no access" );
 		}
@@ -646,16 +640,15 @@ int lua_verb::luaAliasRem(lua_State *L)
 	{
 		lua_task			*Command = lua_task::luaGetTask( L );
 		const Task			&T = Command->task();
-		Object				*Player = ObjectManager::o( T.permissions() );
 
-		if( Player == 0 )
+		if( !Command->isPermValid() )
 		{
 			throw mooException( E_PERM, "programmer is invalid" );
 		}
 
 		luaVerb				*LV = arg( L );
 
-		if( LV == 0 )
+		if( !LV )
 		{
 			throw( mooException( E_PERM, "verb is invalid" ) );
 		}
@@ -663,14 +656,12 @@ int lua_verb::luaAliasRem(lua_State *L)
 		Verb				*V = LV->mVerb;
 		const char			*N = luaL_checkstring( L, 2 );
 
-		if( Player->id() != V->owner() && !Player->wizard() )
+		if( !Command->isOwner( V ) && !Command->isWizard() )
 		{
 			throw mooException( E_PERM, "programmer has no access" );
 		}
 
 		Command->changeAdd( new change::VerbAliasDelete( V, N ) );
-
-		V->remAlias( QString( N ) );
 	}
 	catch( mooException &e )
 	{
