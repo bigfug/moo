@@ -78,8 +78,7 @@ void ObjectManager::luaMinimal( void )
 
 	Login.initialise();
 
-	Login.setOwner( Wizard->id() );
-	Login.setObject( System->id() );
+	Login.setOwner( OBJECT_NONE );
 	Login.setScript( QString( "return( o( %1 ) )" ).arg( Wizard->id() ) );
 	Login.setDirectObjectArgument( THIS );
 	Login.setPrepositionArgument( NONE );
@@ -94,10 +93,9 @@ void ObjectManager::luaMinimal( void )
 	Eval.initialise();
 
 	Eval.setOwner( Wizard->id() );
-	Eval.setObject( FirstRoom->id() );
 	Eval.setScript( "moo.permissions = moo.player\n\nmoo.notify( moo.eval( moo.argstr ) )" );
 
-	FirstRoom->verbAdd( "eval", Eval );
+	Root->verbAdd( "eval", Eval );
 
 	// Define the most basic elevate verb to allow further programming
 
@@ -106,10 +104,9 @@ void ObjectManager::luaMinimal( void )
 	Elevate.initialise();
 
 	Elevate.setOwner( Wizard->id() );
-	Elevate.setObject( FirstRoom->id() );
 	Elevate.setScript( "moo.permissions = moo.player\n\nmoo.notify( moo.elevate( moo.argstr ) )" );
 
-	FirstRoom->verbAdd( "elevate", Elevate );
+	Root->verbAdd( "elevate", Elevate );
 }
 
 QList<Object *> ObjectManager::connectedPlayers() const
@@ -658,7 +655,7 @@ void ObjectManager::onFrame( qint64 pTimeStamp )
 						size_t				 StrLen;
 						const char			*StrDat = lua_tolstring( L.L(), -1, &StrLen );
 
-						S = QString::fromLatin1( StrDat, StrLen );
+						S = QString::fromLatin1( StrDat, int( StrLen ) );
 					}
 					else if( lua_isnumber( L.L(), -1 ) )
 					{

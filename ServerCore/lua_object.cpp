@@ -565,14 +565,12 @@ int lua_object::luaSet( lua_State *L )
 	try
 	{
 		lua_task			*Command = lua_task::luaGetTask( L );
-		Object				*PRG = ObjectManager::o( Command->permissions() );
 
-		if( !PRG )
+		if( !Command->isPermValid() )
 		{
 			throw mooException( E_PERM, "programmer is invalid" );
 		}
 
-//		Object				*Player = ObjectManager::instance()->object( T.player() );
 		Object				*O = argObj( L );
 
 		if( !O || !O->valid() )
@@ -773,7 +771,7 @@ int lua_object::luaSet( lua_State *L )
 			throw( mooException( E_PROPNF, QString( "property '%1' is not defined" ).arg( N ) ) );
 		}
 
-		if( !O->write() && !Command->isOwner( FndPrp ) && !Command->isWizard())
+		if( !O->write() && !Command->isOwner( FndPrp ) && !Command->isWizard() )
 		{
 			throw( mooException( E_PERM, QString( "programmer (#%1) is not owner (#%2) or wizard of property (#%3)" ).arg( Command->permissions() ).arg( O->owner() ).arg( FndPrp->owner() ) ) );
 		}
@@ -921,9 +919,8 @@ int lua_object::luaVerb( lua_State *L )
 	try
 	{
 		lua_task			*LT = lua_task::luaGetTask( L );
-		Object				*PRG = ObjectManager::o( LT->permissions() );
 
-		if( !PRG )
+		if( !LT->isPermValid() )
 		{
 			throw mooException( E_PERM, "invalid programmer" );
 		}
@@ -992,7 +989,6 @@ int lua_object::luaVerbAdd( lua_State *L )
 		V.initialise();
 
 		V.setOwner( Command->permissions() );
-		V.setObject( O->id() );
 
 		Command->changeAdd( new change::ObjectVerbAdd( O, VerbName, V ) );
 	}
@@ -1181,21 +1177,19 @@ int lua_object::luaPropAdd( lua_State *L )
 	{
 		ObjectManager		&OM = *ObjectManager::instance();
 		lua_task			*Command = lua_task::luaGetTask( L );
-		const Task			&T = Command->task();
 		Object				*O = argObj( L );
-		Object				*PRG = ObjectManager::o( Command->permissions() );
 		Property			 P;
 		QString				 PropName( lua_tostring( L, 2 ) );
 		Object				*O2;
 		Property			*P2;
 		QList<ObjectId>		 ObjLst;
 
-		if( !O->write() && PRG != 0 && !PRG->wizard() && PRG->id() != O->owner() )
+		if( !O->write() && !Command->isOwner( O ) && !Command->isWizard() )
 		{
 			throw mooException( E_INVARG, "programmer does not have write permission on object" );
 		}
 
-		if( O->prop( PropName ) != 0 )
+		if( O->prop( PropName ) )
 		{
 			throw mooException( E_INVARG, "property already exists" );
 		}
