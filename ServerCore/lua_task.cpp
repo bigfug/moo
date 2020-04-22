@@ -633,6 +633,88 @@ int lua_task::subeval()
 	return( 0 );
 }
 
+int lua_task::login( Object *pPlayer )
+{
+	try
+	{
+		Task						&T	= mTasks.front();
+		ConnectionManager			&CM = *ConnectionManager::instance();
+		const ConnectionNodeMap		&NM = CM.connectionList();
+		ObjectManager				&OM	= *ObjectManager::instance();
+		Object						*System = OM.systemObject();
+		bool						 UR = false;
+		Verb						*V;
+		ObjectId					 MaxId			= OM.maxId();
+
+		for( ConnectionNodeMap::const_iterator it = NM.begin() ; it != NM.end() ; it++ )
+		{
+			Connection		*C = it.value();
+
+			if( C->player() == pPlayer->id() )
+			{
+				if( C->object() )
+				{
+					if( ( V = System->verbMatch( "user_client_disconnected" ) ) != Q_NULLPTR )
+					{
+						lua_object::lua_pushobject( mL, pPlayer );
+
+						verbCall( System->id(), V, 1 );
+					}
+				}
+				else
+				{
+					UR = true;
+				}
+
+				C->setPlayerId( OBJECT_NONE );
+			}
+		}
+
+		CM.logon( connectionId(), pPlayer->id() );
+
+		pPlayer->setConnection( connectionId() );
+
+		T.setPlayer( pPlayer->id() );
+
+		if( OM.maxId() > MaxId )
+		{
+			if( ( V = System->verbMatch( "user_created" ) ) != 0 )
+			{
+				lua_object::lua_pushobject( mL, pPlayer );
+
+				verbCall( System->id(), V, 1 );
+			}
+		}
+		else if( UR )
+		{
+			if( ( V = System->verbMatch( "user_reconnected" ) ) != 0 )
+			{
+				lua_object::lua_pushobject( mL, pPlayer );
+
+				verbCall( System->id(), V, 1 );
+			}
+		}
+		else
+		{
+			if( ( V = System->verbMatch( "user_connected" ) ) != 0 )
+			{
+				lua_object::lua_pushobject( mL, pPlayer );
+
+				verbCall( System->id(), V, 1 );
+			}
+		}
+	}
+	catch( const mooException &e )
+	{
+		setException( e );
+	}
+	catch( ... )
+	{
+	}
+
+	return( lua_pushexception( lua_gettop( mL ) ) );
+}
+
 int lua_task::executeLogin( void )
 {
 	try
@@ -641,8 +723,6 @@ int lua_task::executeLogin( void )
 		ObjectManager	&OM				= *ObjectManager::instance();
 		Object			*System			= OM.systemObject();
 		Verb			*LoginCommand	= ( System ? System->verbMatch( "do_login_command" ) : Q_NULLPTR );
-		ObjectId		 MaxId			= OM.maxId();
-		Verb			*V;
 
 		if( !LoginCommand )
 		{
@@ -688,67 +768,7 @@ int lua_task::executeLogin( void )
 			return( 0 );
 		}
 
-		ConnectionManager			&CM = *ConnectionManager::instance();
-		const ConnectionNodeMap		&NM = CM.connectionList();
-		bool						 UR = false;
-
-		for( ConnectionNodeMap::const_iterator it = NM.begin() ; it != NM.end() ; it++ )
-		{
-			Connection		*C = it.value();
-
-			if( C->player() == Player->id() )
-			{
-				if( C->object() != 0 )
-				{
-					if( ( V = System->verbMatch( "user_client_disconnected" ) ) != Q_NULLPTR )
-					{
-						lua_object::lua_pushobject( mL, Player );
-
-						verbCall( System->id(), V, 1 );
-					}
-				}
-				else
-				{
-					UR = true;
-				}
-
-				C->setPlayerId( OBJECT_NONE );
-			}
-		}
-
-		CM.logon( connectionId(), Player->id() );
-
-		Player->setConnection( connectionId() );
-
-		T.setPlayer( Player->id() );
-
-		if( OM.maxId() > MaxId )
-		{
-			if( ( V = System->verbMatch( "user_created" ) ) != 0 )
-			{
-				lua_object::lua_pushobject( mL, Player );
-
-				verbCall( System->id(), V, 1 );
-			}
-		}
-		else if( UR )
-		{
-			if( ( V = System->verbMatch( "user_reconnected" ) ) != 0 )
-			{
-				lua_object::lua_pushobject( mL, Player );
-
-				verbCall( System->id(), V, 1 );
-			}
-		}
-		else
-		{
-			if( ( V = System->verbMatch( "user_connected" ) ) != 0 )
-			{
-				lua_object::lua_pushobject( mL, Player );
-
-				verbCall( System->id(), V, 1 );
-			}
-		}
+		return( login( Player ) );
 	}
 	catch( const mooException &e )
 	{
@@ -927,6 +947,8 @@ int lua_task::execute( void )
 		T.setPermissions( FndVrb->owner() );
 
 		T.setObject( FndVrb->object() );
+
+		setPermissions( T.permissions() );
 
 		taskDump( "execute-verbCall", T );
 

@@ -135,6 +135,8 @@ public:
 
 	int lua_pushexception( int pRetVal = 0 );
 
+	int login( Object *pPlayer );
+
 private:
 	int subeval( void );
 

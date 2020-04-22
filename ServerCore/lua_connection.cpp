@@ -119,19 +119,30 @@ int lua_connection::luaBoot( lua_State *L )
 {
 	lua_task			*Command = lua_task::luaGetTask( L );
 
-	if( !Command->isWizard() )
+	try
 	{
-		throw mooException( E_PERM, "only wizards can boot" );
+		if( !Command->isWizard() )
+		{
+			throw mooException( E_PERM, "only wizards can boot" );
+		}
+
+		Connection			*C = ConnectionManager::instance()->connection( Command->connectionId() );
+
+		if( C )
+		{
+			Command->changeAdd( new change::ConnectionClose( C ) );
+		}
+	}
+	catch( const mooException &e )
+	{
+		Command->setException( e );
+	}
+	catch( const std::exception &e )
+	{
+		Command->setException( mooException( E_EXCEPTION, e.what() ) );
 	}
 
-	Connection			*C = ConnectionManager::instance()->connection( Command->connectionId() );
-
-	if( C )
-	{
-		Command->changeAdd( new change::ConnectionClose( C ) );
-	}
-
-	return( 0 );
+	return( Command->lua_pushexception() );
 }
 
 int lua_connection::luaConnections( lua_State *L )
@@ -256,13 +267,7 @@ int lua_connection::luaSet(lua_State *L)
 				throw mooException( E_INVARG, "object is not valid, or not a player" );
 			}
 
-			ConnectionManager			&CM = *ConnectionManager::instance();
-
-			CM.logon( C->id(), Player->id() );
-
-			Player->setConnection( C->id() );
-
-			return( 0 );
+			return( Command->login( Player ) );
 		}
 
 		// Nothing found
