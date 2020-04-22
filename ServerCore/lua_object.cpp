@@ -526,6 +526,11 @@ int lua_object::luaGet( lua_State *L )
 
 //			lua_moo::stackReverseDump( L );
 
+			if( !FndVrb->execute() )
+			{
+				throw mooException( E_PERM, "verb doesn't have execute bit set" );
+			}
+
 			lua_pushstring( L, s );
 			lua_verb::lua_pushverb( L, FndVrb );
 			lua_pushcclosure( L, lua_object::luaVerbCall, 2 );
@@ -565,6 +570,8 @@ int lua_object::luaSet( lua_State *L )
 	try
 	{
 		lua_task			*Command = lua_task::luaGetTask( L );
+
+		Command->taskDump( "luaSet()", Command->task() );
 
 		if( !Command->isPermValid() )
 		{
@@ -630,7 +637,7 @@ int lua_object::luaSet( lua_State *L )
 
 			case PARENT:
 				{
-					ObjectLogic::chparent( *Command, Command->permissions(), O->id(), argId( L, 3 ) );
+					ObjectLogic::chparent( *Command, O->id(), argId( L, 3 ) );
 
 					return( 0 );
 				}
@@ -925,14 +932,14 @@ int lua_object::luaVerb( lua_State *L )
 			throw mooException( E_PERM, "invalid programmer" );
 		}
 
+		const QString		 VerbName = luaL_checkstring( L, 2 );
+
 		Object				*O = argObj( L );
 
 		if( !O->read() && !LT->isOwner( O ) && !LT->isWizard() )
 		{
-			throw mooException( E_PERM, "bad access" );
+			throw mooException( E_PERM, QString( "can't read verb '%1' (not owner or elevated)" ).arg( VerbName ) );
 		}
-
-		const QString		 VerbName = luaL_checkstring( L, 2 );
 
 		Object				*FO;
 		Verb				*FV;
@@ -971,7 +978,7 @@ int lua_object::luaVerbAdd( lua_State *L )
 		QString				 VerbName( lua_tostring( L, 2 ) );
 		Verb				 V;
 
-		if( !Command->isOwner( O ) )
+		if( !Command->isOwner( O ) && !Command->isWizard() )
 		{
 			throw mooException( E_PERM, "programmer doesn't own object" );
 		}
@@ -1018,7 +1025,7 @@ int lua_object::luaVerbDel( lua_State *L )
 		Object				*O = argObj( L );
 		QString				 VerbName( lua_tostring( L, 2 ) );
 
-		if( !Command->isOwner( O ) )
+		if( !Command->isOwner( O ) && !Command->isWizard() )
 		{
 			throw mooException( E_PERM, "programmer doesn't own object" );
 		}
@@ -1109,6 +1116,8 @@ int lua_object::luaVerbCall( lua_State *L )
 		{
 			CurT.setPermissions( v->mVerb->owner() );
 		}
+
+		Command->taskDump( "luaVerbCall()", CurT );
 
 		Command->taskPush( CurT );
 
@@ -1929,14 +1938,15 @@ int lua_object::luaProperty( lua_State *L )
 			throw mooException( E_PERM, "invalid programmer" );
 		}
 
+		const char			*N = luaL_checkstring( L, 2 );
+
 		Object				*O = argObj( L );
 
 		if( !O->read() && !LT->isOwner( O ) && !LT->isWizard() )
 		{
-			throw mooException( E_PERM, "bad access" );
+			throw mooException( E_PERM, QString( "can't read property '%1' (not owner or elevated)" ).arg( QString::fromLatin1( N ) ) );
 		}
 
-		const char			*N = luaL_checkstring( L, 2 );
 		Object				*FO;
 		Property			*FP;
 

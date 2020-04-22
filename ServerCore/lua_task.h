@@ -115,6 +115,8 @@ public:
 
 	bool isOwner( Property *P ) const;
 
+	void taskDump( const QString &S, const Task &T );
+
 private:
 	int subeval( void );
 

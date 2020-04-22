@@ -19,8 +19,6 @@ typedef struct TaskEntrySchedule
 
 typedef struct TaskEntryData
 {
-	static TaskId		 TID;
-
 	TaskId				 mId;					// the task id
 	qint64				 mTimeStamp;			// when the task was created
 	QString				 mCommand;				// the command
@@ -33,7 +31,19 @@ class TaskEntry
 {
 	friend class ODB;
 
+	static TaskId TID;
+
 public:
+	static TaskId newTaskId( void )
+	{
+		return( ++TID );
+	}
+
+	static void setMaxTaskId( TaskId pTaskId )
+	{
+		TID = std::max( TID, pTaskId );
+	}
+
 	TaskEntry( void );
 
 	TaskEntry( const QString &pCommand, ConnectionId pConnectionId, ObjectId pPlayerId = OBJECT_NONE );

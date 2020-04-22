@@ -137,23 +137,19 @@ ObjectId ObjectLogic::create( lua_task &pTask, ObjectId pUserId, ObjectId pParen
 	return( objNew->id() );
 }
 
-void ObjectLogic::chparent( lua_task &pTask, ObjectId pUserId, ObjectId pObjectId, ObjectId pNewParentId )
+void ObjectLogic::chparent( lua_task &pTask, ObjectId pObjectId, ObjectId pNewParentId )
 {
-	Q_UNUSED( pTask )
-
 	ObjectManager	&OM           = *ObjectManager::instance();
 
-	Object			*objUser       = OM.object( pUserId );
-	Object			*objObject     = OM.object( pObjectId );
-//	Object			*objOldParent = ( objObject != 0 ? OM.object( objObject->parent() ) : 0 );
+	Object			*objObject    = OM.object( pObjectId );
 	Object			*objNewParent = OM.object( pNewParentId );
 
-	const bool		 UserIsValid    = ( pUserId == OBJECT_NONE || ( objUser != 0 && objUser->valid() ) );
-	const bool		 ObjectIsValid  = ( objObject != 0 && objObject->valid() );
-	const bool		 NewParentIsValid = ( objNewParent != 0 && objNewParent->valid() );
-	const bool		 UserIsWizard   = pTask.isWizard();
-	const bool		 UserOwnsObject = ( UserIsValid && ObjectIsValid && pUserId == objObject->owner() );
-	const bool		 UserOwnsNewParent = ( UserIsValid && NewParentIsValid && pUserId == objNewParent->owner() );
+	const bool		 UserIsValid       = pTask.isPermValid();
+	const bool		 ObjectIsValid     = ( objObject    && objObject->valid() );
+	const bool		 NewParentIsValid  = ( objNewParent && objNewParent->valid() );
+	const bool		 UserIsWizard      = pTask.isWizard();
+	const bool		 UserOwnsObject    = pTask.isOwner( objObject );
+	const bool		 UserOwnsNewParent = pTask.isOwner( objNewParent );
 
 	// If object is not valid, or if new-parent is neither valid
 	// nor equal to #-1, then E_INVARG is raised.
@@ -168,28 +164,27 @@ void ObjectLogic::chparent( lua_task &pTask, ObjectId pUserId, ObjectId pObjectI
 		throw( mooException( E_INVARG, "object is not valid" ) );
 	}
 
-	if( pNewParentId != -1 && !NewParentIsValid )
+	if( pNewParentId != OBJECT_NONE && !NewParentIsValid )
 	{
 		throw( mooException( E_INVARG, "new parent is not valid" ) );
 	}
 
 	// If the programmer is neither a wizard or the owner of object,
-	//   or if new-parent is not fertile (i.e., its `f' bit is not set)
-	//   and the programmer is neither the owner of new-parent nor a
-	//   wizard, then E_PERM is raised.
+	// or if new-parent is not fertile (i.e., its `f' bit is not set) and the programmer is neither the owner of new-parent nor a wizard,
+	// then E_PERM is raised.
 
-	if( !UserIsWizard || !UserOwnsObject || ( pNewParentId != -1 && !objNewParent->fertile() ) )
+	if( NewParentIsValid && !objNewParent->fertile() )
 	{
-		if( !UserOwnsNewParent && !UserIsWizard )
+		if( !UserIsWizard && !UserOwnsObject )
 		{
-			throw( mooException( E_PERM, "" ) );
+			throw( mooException( E_PERM, "programmer doesn't own new parent" ) );
 		}
 	}
 
 	// If new-parent is equal to object or one of its current ancestors,
 	//   E_RECMOVE is raised.
 
-	if( objNewParent != 0 )
+	if( objNewParent )
 	{
 		if( pNewParentId == objObject->id() )
 		{
@@ -443,7 +438,7 @@ void ObjectLogic::recycle( lua_task &pTask, ObjectId pUserId, ObjectId pObjectId
 
 	for( ObjectId idChild : Children )
 	{
-		chparent( pTask, pUserId, idChild, idParent );
+		chparent( pTask, idChild, idParent );
 	}
 
 	// Before object is recycled, each object in its contents is moved to #-1 (implying a call to object's exitfunc verb, if any)

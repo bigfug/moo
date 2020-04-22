@@ -1,5 +1,7 @@
 cmake_minimum_required( VERSION 2.8 )
 
+set( MOO_DEBUG_TASKS	FALSE CACHE BOOL "Print lots of task debug" )
+
 project( ServerCore )
 
 set( SOURCE_FILES
@@ -133,6 +135,10 @@ set( HEADER_FILES
 )
 
 add_library( ${PROJECT_NAME} STATIC ${SOURCE_FILES} ${HEADER_FILES} )
+
+if( MOO_DEBUG_TASKS )
+	target_compile_definitions( ${PROJECT_NAME} PRIVATE MOO_DEBUG_TASKS )
+endif()
 
 add_dependencies( ${PROJECT_NAME} SMTPEmail telnet lua Editor )
 

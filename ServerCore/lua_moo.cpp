@@ -882,10 +882,13 @@ int lua_moo::luaEval( lua_State *L )
 			throw mooException( E_PERM, "programmer is not a programmer!" );
 		}
 
+		Command->taskDump( "luaEval( T )", T );
+
 		E.setPermissions( T.permissions() );
 		E.setPlayer( T.player() );
 		E.setCaller( T.object() );
-		E.setObject( OBJECT_NONE );
+
+		Command->taskDump( "luaEval( E )", E );
 
 		Command->taskPush( E );
 
@@ -955,6 +958,8 @@ int lua_moo::luaElevate( lua_State *L )
 
 			LT->setElevated( true );
 
+			LT->taskDump( "luaElevate()", E );
+
 			LT->taskPush( E );
 
 			int Results = LT->eval();
@@ -1011,16 +1016,8 @@ int lua_moo::luaFindPlayer( lua_State *L )
 	const char				*S = luaL_checkstring( L, -1 );
 
 	ObjectManager			&OM = *ObjectManager::instance();
-	ObjectId				 PID = OM.findPlayer( QString::fromLatin1( S ) );
 
-	if( PID == OBJECT_NONE )
-	{
-		lua_pushnil( L );
-	}
-	else
-	{
-		lua_object::lua_pushobjectid( L, PID );
-	}
+	lua_object::lua_pushobjectid( L, OM.findPlayer( QString::fromLatin1( S ) ) );
 
 	return( 1 );
 }
@@ -1049,16 +1046,7 @@ int lua_moo::luaFindByProp( lua_State *L )
 			break;
 	}
 
-	ObjectId				 PID = OM.findByProp( QString::fromLatin1( S ), V );
-
-	if( PID == OBJECT_NONE )
-	{
-		lua_pushnil( L );
-	}
-	else
-	{
-		lua_object::lua_pushobjectid( L, PID );
-	}
+	lua_object::lua_pushobjectid( L, OM.findByProp( QString::fromLatin1( S ), V ) );
 
 	return( 1 );
 }
@@ -1089,14 +1077,7 @@ int lua_moo::luaFind( lua_State *L )
 		}
 	}
 
-	if( PID == OBJECT_NONE )
-	{
-		lua_pushnil( L );
-	}
-	else
-	{
-		lua_object::lua_pushobjectid( L, PID );
-	}
+	lua_object::lua_pushobjectid( L, PID );
 
 	return( 1 );
 }

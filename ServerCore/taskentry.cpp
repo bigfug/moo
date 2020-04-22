@@ -4,7 +4,7 @@
 #include <QDataStream>
 #include <QDateTime>
 
-TaskId	TaskEntryData::TID = 0;
+TaskId	TaskEntry::TID = 0;
 
 TaskEntry::TaskEntry( void )
 {
@@ -16,7 +16,7 @@ TaskEntry::TaskEntry( void )
 
 TaskEntry::TaskEntry( const QString &pCommand, ConnectionId pConnectionId, ObjectId pPlayerId )
 {
-	mData.mId			= ++TaskEntryData::TID;
+	mData.mId			= newTaskId();
 	mData.mTimeStamp	= QDateTime::currentMSecsSinceEpoch();
 	mData.mCommand		= pCommand;
 	mData.mConnectionId	= pConnectionId;

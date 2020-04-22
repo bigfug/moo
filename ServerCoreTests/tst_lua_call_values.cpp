@@ -170,7 +170,7 @@ void ServerTest::luaCallValueCallerFirst( void )
 
 	QVERIFY( R != 0 );
 	QVERIFY( R->type() == QVariant::String );
-	QCOMPARE( R->value().toString(), QString( "%1" ).arg( 2 ) );	 // #2.eval is the defined verb
+	QCOMPARE( R->value().toString(), QString( "%1" ).arg( 1 ) );	 // #1.eval is the defined verb
 }
 
 void ServerTest::luaCallValuePlayerFirst( void )
@@ -724,7 +724,7 @@ void ServerTest::luaCallValueCallerFirstWizard( void )
 
 	QVERIFY( R != 0 );
 	QVERIFY( R->type() == QVariant::String );
-	QCOMPARE( R->value().toString(), QString( "%1" ).arg( 2 ) );
+	QCOMPARE( R->value().toString(), QString( "%1" ).arg( 1 ) );
 }
 
 void ServerTest::luaCallValuePlayerFirstWizard( void )

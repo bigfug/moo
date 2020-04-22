@@ -1390,7 +1390,7 @@ void ODBSQL::queryToTaskData( const QSqlQuery &Q, TaskEntryData &D )
 	D.mSchedule.mMonth = Q.value( "month" ).toString();
 	D.mSchedule.mYear = Q.value( "year" ).toString();
 
-	D.TID = qMax( D.TID, D.mId + 1 );
+	TaskEntry::setMaxTaskId( D.mId + 1 );
 }
 
 void ODBSQL::exportModule( ObjectId pModuleId, const QString &pFileName, TransferInformation &pTrnInf ) const

@@ -406,6 +406,11 @@ lua_task::lua_task( lua_task &&t )
 
 lua_task::~lua_task( void )
 {
+	while( !mTasks.isEmpty() )
+	{
+		taskPop();
+	}
+
 	if( mL )
 	{
 		lua_close( mL );
@@ -512,6 +517,8 @@ int lua_task::execute( qint64 pTimeStamp )
 	QStringList		Words	= Verb::parse( T.command(), ArgStr );
 	const QString	First	= ( Words.isEmpty() ? "" : Words.takeFirst() );
 
+//	qDebug() << "First:" << First << "ArgStr:" << ArgStr << "Words:" << Words;
+
 	mTimeStamp = pTimeStamp;
 
 	// the server next checks to see if the first word names any of the six "built-in" commands:
@@ -522,6 +529,8 @@ int lua_task::execute( qint64 pTimeStamp )
 	T.setVerb( First );
 	T.setArgStr( ArgStr );
 	T.setArgs( Words );
+
+	taskDump( "execute()", T );
 
 	// check for the built-in commands
 
@@ -929,6 +938,10 @@ int lua_task::execute( void )
 
 		T.setPermissions( FndVrb->owner() );
 
+		T.setObject( FndVrb->object() );
+
+		taskDump( "execute-verbCall", T );
+
 		return( verbCallCode( FndVrb ) );
 	}
 	catch( mooException &e )
@@ -948,8 +961,10 @@ int lua_task::verbCall( ObjectId pObjectId, Verb *V, int pArgCnt )
 {
 	Task		T = task();
 
+	lua_task::taskDump( QString( "verbCall( %1, %2, %3 )" ).arg( pObjectId ).arg( V->name() ).arg( pArgCnt ), T );
+
 	T.setCaller( T.object() );
-	T.setObject( pObjectId );
+	T.setObject( V->object() );
 
 	if( T.verb().isEmpty() )
 	{
@@ -962,6 +977,8 @@ int lua_task::verbCall( ObjectId pObjectId, Verb *V, int pArgCnt )
 int lua_task::verbCall( Task &pTask, Verb *V, int pArgCnt  )
 {
 	int			Result;
+
+	lua_task::taskDump( "verbCall()", pTask );
 
 	taskPush( pTask );
 
@@ -1031,6 +1048,25 @@ int lua_task::verbCallCode( Verb *V, int pArgCnt )
 	return( ResCnt );
 }
 
+void lua_task::taskDump( const QString &S, const Task &T )
+{
+#if defined( QT_DEBUG ) && defined( MOO_DEBUG_TASKS )
+	if( true )
+#else
+	if( false )
+#endif
+	{
+		qDebug() << S << "id:" << T.id()
+				 << "plr:" << T.player()
+				 << "obj:" << T.object()
+				 << "clr:" << T.caller()
+				 << "prm:" << T.permissions()
+				 << "argstr:" << T.argstr()
+				 << "cmd:" << T.command()
+				 << "elv:" << elevated()
+				 << "verb:" << T.verb();
+	}
+}
 
 void lua_task::taskPush( const Task &T )
 {
@@ -1046,9 +1082,21 @@ void lua_task::taskPush( const Task &T )
 
 void lua_task::taskPop()
 {
+#if defined( QT_DEBUG )
+	if( false )
+	{
+		const Task &T = mTasks.front();
+
+		qDebug() << "taskPop(" << T.id() << ")";
+	}
+#endif
+
 	mTasks.pop_front();
 
-	setPermissions( mTasks.front().mPermissions );
+	if( !mTasks.isEmpty() )
+	{
+		setPermissions( mTasks.front().mPermissions );
+	}
 }
 
 void lua_task::luaHook( lua_State *L, lua_Debug *ar )
@@ -1161,7 +1209,7 @@ bool lua_task::isPermValid() const
 
 bool lua_task::isOwner( Object *O ) const
 {
-	return( isOwner( O->owner() ) );
+	return( O ? isOwner( O->owner() ) : false );
 }
 
 bool lua_task::isOwner(Verb *V) const
