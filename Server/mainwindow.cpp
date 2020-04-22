@@ -115,6 +115,16 @@ MainWindow::MainWindow( QWidget *pParent )
 		setCurrentObject( pId );
 	} );
 
+	connect( ui->mVerbOwner, &ObjectSelector::objectSelected, [=]( ObjectId pId )
+	{
+		Verb			*V = currentVerb();
+
+		if( V )
+		{
+			V->setOwner( pId );
+		}
+	} );
+
 	connect( ui->mPropertyOwner, &ObjectSelector::objectSelected, [=]( ObjectId pId )
 	{
 		Property		*P = currentProperty();
