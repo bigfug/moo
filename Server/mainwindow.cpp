@@ -889,6 +889,10 @@ void MainWindow::updateVerb()
 		ui->mVerbDirect->setCurrentIndex( V->directObject() );
 		ui->mVerbIndirect->setCurrentIndex( V->indirectObject() );
 
+		ui->mVerbRead->setChecked( V->read() );
+		ui->mVerbWrite->setChecked( V->write() );
+		ui->mVerbExecute->setChecked( V->execute() );
+
 		QString		P = V->preposition();
 
 		if( P.isEmpty() )
@@ -1394,5 +1398,35 @@ void MainWindow::on_mButtonObjectImport_clicked()
 								  .arg( TrnInf.mMilliseconds ) );
 
 		S.setValue( "import_module_directory", QFileInfo( N ).path() );
+	}
+}
+
+void MainWindow::on_mVerbRead_clicked(bool checked)
+{
+	Verb		*V = currentVerb();
+
+	if( V )
+	{
+		V->setRead( checked );
+	}
+}
+
+void MainWindow::on_mVerbWrite_clicked(bool checked)
+{
+	Verb		*V = currentVerb();
+
+	if( V )
+	{
+		V->setWrite( checked );
+	}
+}
+
+void MainWindow::on_mVerbExecute_clicked(bool checked)
+{
+	Verb		*V = currentVerb();
+
+	if( V )
+	{
+		V->setExecute( checked );
 	}
 }

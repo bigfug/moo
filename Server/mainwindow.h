@@ -136,6 +136,12 @@ private slots:
 
 	void on_mButtonObjectImport_clicked();
 
+	void on_mVerbRead_clicked(bool checked);
+
+	void on_mVerbWrite_clicked(bool checked);
+
+	void on_mVerbExecute_clicked(bool checked);
+
 private:
 	bool event( QEvent *pEvent );
 
