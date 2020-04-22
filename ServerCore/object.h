@@ -97,14 +97,21 @@ public:
 
 	void setParent( ObjectId pNewParentId );
 
-	bool matchName( const QString &pName ) const;
-
 	typedef enum Permissions
 	{
 		READ    = ( 1 << 0 ),
 		WRITE   = ( 1 << 1 ),
 		FERTILE = ( 1 << 2 )
 	} Permissions;
+
+	typedef enum
+	{
+		MATCH_NONE,
+		MATCH_EXACT,
+		MATCH_PARTIAL
+	} MatchResult;
+
+	MatchResult matchName( const QString &pName ) const;
 
 	quint16 permissions( void ) const;
 	void setPermissions( quint16 pPerms );

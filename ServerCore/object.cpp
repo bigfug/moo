@@ -515,11 +515,16 @@ void Object::aliasDelete(const QString &pName)
 	}
 }
 
-bool Object::matchName( const QString &pName ) const
+Object::MatchResult Object::matchName( const QString &pName ) const
 {
+	if( !mData.mName.compare( pName, Qt::CaseInsensitive ) )
+	{
+		return( Object::MATCH_EXACT );
+	}
+
 	if( mData.mName.startsWith( pName, Qt::CaseInsensitive ) )
 	{
-		return( true );
+		return( Object::MATCH_PARTIAL );
 	}
 
 	const Object			*O = this;
@@ -528,16 +533,21 @@ bool Object::matchName( const QString &pName ) const
 	{
 		for( const QString &S : O->aliases() )
 		{
+			if( !S.compare( pName, Qt::CaseInsensitive ) )
+			{
+				return( Object::MATCH_EXACT );
+			}
+
 			if( S.startsWith( pName, Qt::CaseInsensitive ) )
 			{
-				return( true );
+				return( Object::MATCH_PARTIAL );
 			}
 		}
 
 		O = ObjectManager::o( O->parent() );
 	}
 
-	return( false );
+	return( Object::MATCH_NONE );
 }
 
 Verb * Object::verbMatch( const QString &pName, ObjectId DirectObjectId, const QString &pPreposition, ObjectId IndirectObjectId )

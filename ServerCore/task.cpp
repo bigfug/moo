@@ -169,9 +169,19 @@ void Task::findObject( const QString &pName, QList<ObjectId> &pId ) const
 
 			if( ( Object = ObjectManager::instance()->object( id ) ) != Q_NULLPTR )
 			{
-				if( Object->matchName( pName ) )
+				switch( Object->matchName( pName ) )
 				{
-					pId.append( id );
+					case Object::MATCH_EXACT:
+						pId.clear();
+						pId.append( id );
+						return;
+
+					case Object::MATCH_PARTIAL:
+						pId.append( id );
+						break;
+
+					case Object::MATCH_NONE:
+						break;
 				}
 			}
 		}
@@ -184,9 +194,19 @@ void Task::findObject( const QString &pName, QList<ObjectId> &pId ) const
 
 		if( ( Location = ObjectManager::instance()->object( Player->location() ) ) != Q_NULLPTR )
 		{
-			if( Location->matchName( pName ) )
+			switch( Location->matchName( pName ) )
 			{
-				pId.append( Location->id() );
+				case Object::MATCH_EXACT:
+					pId.clear();
+					pId.append( Location->id() );
+					return;
+
+				case Object::MATCH_PARTIAL:
+					pId.append( Location->id() );
+					break;
+
+				case Object::MATCH_NONE:
+					break;
 			}
 
 			const QList<ObjectId>	&Contents = Location->contents();
@@ -197,9 +217,19 @@ void Task::findObject( const QString &pName, QList<ObjectId> &pId ) const
 
 				if( ( Object = ObjectManager::instance()->object( id ) ) != Q_NULLPTR )
 				{
-					if( Object->matchName( pName ) )
+					switch( Object->matchName( pName ) )
 					{
-						pId.append( id );
+						case Object::MATCH_EXACT:
+							pId.clear();
+							pId.append( id );
+							return;
+
+						case Object::MATCH_PARTIAL:
+							pId.append( id );
+							break;
+
+						case Object::MATCH_NONE:
+							break;
 					}
 				}
 			}
