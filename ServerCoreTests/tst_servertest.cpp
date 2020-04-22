@@ -16,37 +16,6 @@
 #include "lua_prop.h"
 #include "connectionmanager.h"
 
-ServerTest::ServerTest()
-{
-}
-
-ConnectionId ServerTest::initLua( qint64 pTimeStamp )
-{
-	if( !ObjectManager::instance()->maxId() )
-	{
-		ObjectManager::instance()->luaMinimal();
-	}
-
-	ConnectionId	CID = ConnectionManager::instance()->doConnect( 0 );
-
-	Task			 Tsk;
-	lua_task		 Com( CID, Tsk );
-
-	Com.execute( pTimeStamp );
-
-	return( CID );
-}
-
-void ServerTest::initTestCase( void )
-{
-	lua_moo::initialiseAll();
-}
-
-void ServerTest::cleanupTestCase()
-{
-	ConnectionManager::reset();
-}
-
 void ServerTest::luaRegistration( void )
 {
 	try

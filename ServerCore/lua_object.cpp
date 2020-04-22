@@ -169,12 +169,11 @@ void lua_object::initialise( void )
 
 int lua_object::luaCreate( lua_State *L )
 {
-	bool		LuaErr = false;
+	lua_task				*Command = lua_task::luaGetTask( L );
 
 	try
 	{
 		ObjectManager		&OM = *ObjectManager::instance();
-		lua_task			*Command = lua_task::luaGetTask( L );
 		ObjectId			 ParentId = OBJECT_UNSPECIFIED;
 		ObjectId			 OwnerId = OBJECT_UNSPECIFIED;
 		const int			 argc = lua_gettop( L );
@@ -283,18 +282,15 @@ int lua_object::luaCreate( lua_State *L )
 
 		return( 1 );
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
 	}
 	catch( ... )
 	{
-
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
+	return( Command->lua_pushexception() );
 }
 
 int lua_object::luaGC( lua_State *L )
@@ -310,7 +306,7 @@ int lua_object::luaGC( lua_State *L )
 
 int lua_object::luaGet( lua_State *L )
 {
-	bool		LuaErr = false;
+	lua_task				*Command = lua_task::luaGetTask( L );
 
 	try
 	{
@@ -549,28 +545,23 @@ int lua_object::luaGet( lua_State *L )
 
 		// Nothing found
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
 	}
 	catch( ... )
 	{
-
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
+	return( Command->lua_pushexception() );
 }
 
 int lua_object::luaSet( lua_State *L )
 {
-	bool		LuaErr = false;
+	lua_task				*Command = lua_task::luaGetTask( L );
 
 	try
 	{
-		lua_task			*Command = lua_task::luaGetTask( L );
-
 		Command->taskDump( "luaSet()", Command->task() );
 
 		if( !Command->isPermValid() )
@@ -845,19 +836,20 @@ int lua_object::luaSet( lua_State *L )
 
 		Command->changeAdd( new change::ObjectSetProperty( O, FndPrp->name(), V ) );
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
+	}
+	catch( ... )
+	{
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
+	return( Command->lua_pushexception() );
 }
 
 int lua_object::luaToString( lua_State *L )
 {
-	bool		LuaErr = false;
+	lua_task				*Command = lua_task::luaGetTask( L );
 
 	try
 	{
@@ -868,18 +860,15 @@ int lua_object::luaToString( lua_State *L )
 
 		return( 1 );
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
 	}
 	catch( ... )
 	{
-
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
+	return( Command->lua_pushexception() );
 }
 
 int lua_object::luaEQ(lua_State *L)
@@ -894,7 +883,8 @@ int lua_object::luaEQ(lua_State *L)
 
 int lua_object::luaObject( lua_State *L )
 {
-	bool		LuaErr = false;
+	lua_task				*Command = lua_task::luaGetTask( L );
+
 	ObjectId	OID = luaL_checkinteger( L, 1 );
 
 	try
@@ -903,31 +893,26 @@ int lua_object::luaObject( lua_State *L )
 
 		return( 1 );
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
 	}
 	catch( ... )
 	{
-
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
+	return( Command->lua_pushexception() );
 }
 
 int lua_object::luaVerb( lua_State *L )
 {
-	bool		LuaErr = false;
+	lua_task				*Command = lua_task::luaGetTask( L );
 
 	luaL_checkstring( L, 2 );
 
 	try
 	{
-		lua_task			*LT = lua_task::luaGetTask( L );
-
-		if( !LT->isPermValid() )
+		if( !Command->isPermValid() )
 		{
 			throw mooException( E_PERM, "invalid programmer" );
 		}
@@ -936,7 +921,7 @@ int lua_object::luaVerb( lua_State *L )
 
 		Object				*O = argObj( L );
 
-		if( !O->read() && !LT->isOwner( O ) && !LT->isWizard() )
+		if( !O->read() && !Command->isOwner( O ) && !Command->isWizard() )
 		{
 			throw mooException( E_PERM, QString( "can't read verb '%1' (not owner or elevated)" ).arg( VerbName ) );
 		}
@@ -953,27 +938,23 @@ int lua_object::luaVerb( lua_State *L )
 	}
 	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
 	}
 	catch( ... )
 	{
-
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
+	return( Command->lua_pushexception() );
 }
 
 int lua_object::luaVerbAdd( lua_State *L )
 {
-	bool		LuaErr = false;
+	lua_task				*Command = lua_task::luaGetTask( L );
 
 	luaL_checkstring( L, 2 );
 
 	try
 	{
-		lua_task			*Command = lua_task::luaGetTask( L );
 		Object				*O = argObj( L );
 		QString				 VerbName( lua_tostring( L, 2 ) );
 		Verb				 V;
@@ -999,29 +980,25 @@ int lua_object::luaVerbAdd( lua_State *L )
 
 		Command->changeAdd( new change::ObjectVerbAdd( O, VerbName, V ) );
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
 	}
 	catch( ... )
 	{
-
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
+	return( Command->lua_pushexception() );
 }
 
 int lua_object::luaVerbDel( lua_State *L )
 {
-	bool		LuaErr = false;
+	lua_task				*Command = lua_task::luaGetTask( L );
 
 	luaL_checkstring( L, 2 );
 
 	try
 	{
-		lua_task			*Command = lua_task::luaGetTask( L );
 		Object				*O = argObj( L );
 		QString				 VerbName( lua_tostring( L, 2 ) );
 
@@ -1044,27 +1021,23 @@ int lua_object::luaVerbDel( lua_State *L )
 
 		Command->changeAdd( new change::ObjectVerbDelete( O, VerbName ) );
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
 	}
 	catch( ... )
 	{
-
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
+	return( Command->lua_pushexception() );
 }
 
 int lua_object::luaVerbCall( lua_State *L )
 {
-	bool		LuaErr = false;
+	lua_task				*Command = lua_task::luaGetTask( L );
 
 	try
 	{
-		lua_task			*Command = lua_task::luaGetTask( L );
 		const Task			&PrvT = Command->task();
 		Task				 CurT = PrvT;
 		Object              *O = argObj( L );
@@ -1149,20 +1122,16 @@ int lua_object::luaVerbCall( lua_State *L )
 
 		return( ResCnt );
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
 	}
 	catch( ... )
 	{
-
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
+	return( Command->lua_pushexception() );
 }
-
 
 // Defines a new property on the given object, inherited by all
 // of its descendants
@@ -1177,7 +1146,7 @@ int lua_object::luaVerbCall( lua_State *L )
 
 int lua_object::luaPropAdd( lua_State *L )
 {
-	bool				 LuaErr = false;
+	lua_task			*Command = lua_task::luaGetTask( L );
 
 	luaL_checkstring( L, 2 );
 	luaL_checkany( L, 3 );
@@ -1185,7 +1154,6 @@ int lua_object::luaPropAdd( lua_State *L )
 	try
 	{
 		ObjectManager		&OM = *ObjectManager::instance();
-		lua_task			*Command = lua_task::luaGetTask( L );
 		Object				*O = argObj( L );
 		Property			 P;
 		QString				 PropName( lua_tostring( L, 2 ) );
@@ -1262,16 +1230,14 @@ int lua_object::luaPropAdd( lua_State *L )
 	}
 	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
 	}
 	catch( ... )
 	{
 
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
+	return( Command->lua_pushexception() );
 }
 
 // Removes the property named prop-name from the given object and
@@ -1279,11 +1245,10 @@ int lua_object::luaPropAdd( lua_State *L )
 
 int lua_object::luaPropDel( lua_State *L )
 {
-	bool				 LuaErr = false;
+	lua_task			*Command = lua_task::luaGetTask( L );
 
 	try
 	{
-		lua_task			*Command = lua_task::luaGetTask( L );
 		Object				*O = argObj( L );
 		QString				 PropName = QString( lua_tostring( L, 2 ) );
 		Property			*P;
@@ -1323,27 +1288,24 @@ int lua_object::luaPropDel( lua_State *L )
 
 		return( 0 );
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
 	}
 	catch( ... )
 	{
 
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
+	return( Command->lua_pushexception() );
 }
 
 int lua_object::luaPropClear(lua_State *L)
 {
-	bool				 LuaErr = false;
+	lua_task			*Command = lua_task::luaGetTask( L );
 
 	try
 	{
-		lua_task			*Command = lua_task::luaGetTask( L );
 		Object				*O = argObj( L );
 		QString				 PropName = QString( lua_tostring( L, 2 ) );
 		Property			*P;
@@ -1388,29 +1350,26 @@ int lua_object::luaPropClear(lua_State *L)
 
 		return( 0 );
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
 	}
 	catch( ... )
 	{
 
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
+	return( Command->lua_pushexception() );
 }
 
 int lua_object::luaNotify( lua_State *L )
 {
-	bool				 LuaErr = false;
+	lua_task			*Command = lua_task::luaGetTask( L );
 
 	luaL_checkstring( L, 2 );
 
 	try
 	{
-		lua_task			*Command = lua_task::luaGetTask( L );
 		Object				*O = argObj( L );
 		ConnectionManager	&CM  = *ConnectionManager::instance();
 		ConnectionId		 CID = CM.fromPlayer( O->id() );
@@ -1426,23 +1385,21 @@ int lua_object::luaNotify( lua_State *L )
 
 		return( 0 );
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
 	}
 	catch( ... )
 	{
 
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
+	return( Command->lua_pushexception() );
 }
 
 int lua_object::luaProps( lua_State *L )
 {
-	bool				 LuaErr = false;
+	lua_task			*Command = lua_task::luaGetTask( L );
 
 	try
 	{
@@ -1461,23 +1418,21 @@ int lua_object::luaProps( lua_State *L )
 
 		return( 1 );
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
 	}
 	catch( ... )
 	{
 
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
+	return( Command->lua_pushexception() );
 }
 
 int lua_object::luaVerbs( lua_State *L )
 {
-	bool				 LuaErr = false;
+	lua_task			*Command = lua_task::luaGetTask( L );
 
 	try
 	{
@@ -1496,23 +1451,21 @@ int lua_object::luaVerbs( lua_State *L )
 
 		return( 1 );
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
 	}
 	catch( ... )
 	{
 
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
+	return( Command->lua_pushexception() );
 }
 
 int lua_object::luaFind( lua_State *L )
 {
-	bool				 LuaErr = false;
+	lua_task			*Command = lua_task::luaGetTask( L );
 
 	try
 	{
@@ -1573,23 +1526,21 @@ int lua_object::luaFind( lua_State *L )
 
 		return( 1 );
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
 	}
 	catch( ... )
 	{
 
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
+	return( Command->lua_pushexception() );
 }
 
 int lua_object::luaIsChildOf( lua_State *L )
 {
-	bool				 LuaErr = false;
+	lua_task			*Command = lua_task::luaGetTask( L );
 
 	try
 	{
@@ -1612,23 +1563,21 @@ int lua_object::luaIsChildOf( lua_State *L )
 
 		return( 1 );
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
 	}
 	catch( ... )
 	{
 
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
+	return( Command->lua_pushexception() );
 }
 
 int lua_object::luaIsParentOf( lua_State *L )
 {
-	bool				 LuaErr = false;
+	lua_task			*Command = lua_task::luaGetTask( L );
 
 	try
 	{
@@ -1651,18 +1600,16 @@ int lua_object::luaIsParentOf( lua_State *L )
 
 		return( 1 );
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
 	}
 	catch( ... )
 	{
 
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
+	return( Command->lua_pushexception() );
 }
 
 int lua_object::luaIsValid( lua_State *L )
@@ -1678,7 +1625,7 @@ int lua_object::luaIsValid( lua_State *L )
 
 int lua_object::luaHasVerb( lua_State *L )
 {
-	bool				 LuaErr = false;
+	lua_task			*Command = lua_task::luaGetTask( L );
 
 	luaL_checkstring( L, 2 );
 
@@ -1693,23 +1640,21 @@ int lua_object::luaHasVerb( lua_State *L )
 
 		return( 1 );
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
 	}
 	catch( ... )
 	{
 
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
+	return( Command->lua_pushexception() );
 }
 
 int lua_object::luaHasProp( lua_State *L )
 {
-	bool				 LuaErr = false;
+	lua_task			*Command = lua_task::luaGetTask( L );
 
 	luaL_checkstring( L, 2 );
 
@@ -1724,23 +1669,21 @@ int lua_object::luaHasProp( lua_State *L )
 
 		return( 1 );
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
 	}
 	catch( ... )
 	{
 
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
+	return( Command->lua_pushexception() );
 }
 
 int lua_object::luaChildren( lua_State *L )
 {
-	bool				 LuaErr = false;
+	lua_task			*Command = lua_task::luaGetTask( L );
 
 	try
 	{
@@ -1759,23 +1702,21 @@ int lua_object::luaChildren( lua_State *L )
 
 		return( 1 );
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
 	}
 	catch( ... )
 	{
 
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
+	return( Command->lua_pushexception() );
 }
 
 int lua_object::luaPlayers( lua_State *L )
 {
-	bool				 LuaErr = false;
+	lua_task			*Command = lua_task::luaGetTask( L );
 
 	try
 	{
@@ -1799,23 +1740,21 @@ int lua_object::luaPlayers( lua_State *L )
 
 		return( 1 );
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
 	}
 	catch( ... )
 	{
 
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
+	return( Command->lua_pushexception() );
 }
 
 int lua_object::luaChild( lua_State *L )
 {
-	bool				 LuaErr = false;
+	lua_task			*Command = lua_task::luaGetTask( L );
 
 	luaL_checkstring( L, 2 );
 
@@ -1839,45 +1778,40 @@ int lua_object::luaChild( lua_State *L )
 			return( 1 );
 		}
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
 	}
 	catch( ... )
 	{
 
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
+	return( Command->lua_pushexception() );
 }
 
 // The given object is destroyed, irrevocably
 
 int lua_object::luaRecycle( lua_State *L )
 {
-	bool				 LuaErr = false;
+	lua_task			*Command = lua_task::luaGetTask( L );
 
 	try
 	{
-		lua_task			*Command = lua_task::luaGetTask( L );
 		Object				*O = argObj( L );
 
 		ObjectLogic::recycle( *Command, Command->permissions(), O->id() );
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
 	}
 	catch( ... )
 	{
 
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
+	return( Command->lua_pushexception() );
 }
 
 //-----------------------------------------------------------------------------
@@ -1927,13 +1861,11 @@ int lua_object::lua_pushobjectid( lua_State *L, ObjectId I )
 
 int lua_object::luaProperty( lua_State *L )
 {
-	bool				 LuaErr = false;
+	lua_task			*Command = lua_task::luaGetTask( L );
 
 	try
 	{
-		lua_task			*LT = lua_task::luaGetTask( L );
-
-		if( !LT->isPermValid() )
+		if( !Command->isPermValid() )
 		{
 			throw mooException( E_PERM, "invalid programmer" );
 		}
@@ -1942,7 +1874,7 @@ int lua_object::luaProperty( lua_State *L )
 
 		Object				*O = argObj( L );
 
-		if( !O->read() && !LT->isOwner( O ) && !LT->isWizard() )
+		if( !O->read() && !Command->isOwner( O ) && !Command->isWizard() )
 		{
 			throw mooException( E_PERM, QString( "can't read property '%1' (not owner or elevated)" ).arg( QString::fromLatin1( N ) ) );
 		}
@@ -1957,27 +1889,24 @@ int lua_object::luaProperty( lua_State *L )
 			return( 1 );
 		}
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
 	}
 	catch( ... )
 	{
 
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
+	return( Command->lua_pushexception() );
 }
 
 int lua_object::luaAliasAdd(lua_State *L)
 {
-	bool		LuaErr = false;
+	lua_task				*Command = lua_task::luaGetTask( L );
 
 	try
 	{
-		lua_task			*Command = lua_task::luaGetTask( L );
 		Object				*O = argObj( L );
 		const char			*N = luaL_checkstring( L, -1 );
 
@@ -1988,27 +1917,23 @@ int lua_object::luaAliasAdd(lua_State *L)
 
 		Command->changeAdd( new change::ObjectAliasAdd( O, N ) );
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
 	}
 	catch( ... )
 	{
-
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
+	return( Command->lua_pushexception() );
 }
 
 int lua_object::luaAliasDel(lua_State *L)
 {
-	bool		LuaErr = false;
+	lua_task				*Command = lua_task::luaGetTask( L );
 
 	try
 	{
-		lua_task			*Command = lua_task::luaGetTask( L );
 		Object				*O = argObj( L );
 		const char			*N = luaL_checkstring( L, -1 );
 
@@ -2019,16 +1944,13 @@ int lua_object::luaAliasDel(lua_State *L)
 
 		Command->changeAdd( new change::ObjectAliasDelete( O, N ) );
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
 	}
 	catch( ... )
 	{
-
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
+	return( Command->lua_pushexception() );
 }

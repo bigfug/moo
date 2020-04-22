@@ -10,6 +10,7 @@
 #include <QList>
 #include "task.h"
 #include "changeset/changeset.h"
+#include "mooexception.h"
 
 class Connection;
 class Verb;
@@ -117,6 +118,23 @@ public:
 
 	void taskDump( const QString &S, const Task &T );
 
+	bool error( void ) const
+	{
+		return( mException.mError != E_NONE );
+	}
+
+	mooException exception( void ) const
+	{
+		return( mException );
+	}
+
+	void setException( const mooException &e )
+	{
+		mException = e;
+	}
+
+	int lua_pushexception( int pRetVal = 0 );
+
 private:
 	int subeval( void );
 
@@ -172,9 +190,9 @@ private:
 	qint64						 mTimeStamp; // when the current task was started
 	size_t						 mMemUse;
 	change::ChangeSet			 mChanges;
-	bool						 mError;
 	ObjectId					 mPermissions;			// the current object that defines the permissions
 	bool						 mElevated;
+	mooException				 mException;
 
 	static const luaL_Reg		 mLuaStatic[];
 	static const luaL_Reg		 mLuaGet[];

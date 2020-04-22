@@ -179,12 +179,11 @@ int lua_task::luaKill(lua_State *L)
 
 int lua_task::luaSchedule( lua_State *L )
 {
-	bool		LuaErr = false;
+	lua_task				*Command = lua_task::luaGetTask( L );
+
 
 	try
 	{
-		lua_task			*LT = lua_task::luaGetTask( L );
-
 		TaskEntrySchedule	 TS;
 		QString				 TaskCode;
 
@@ -260,7 +259,7 @@ int lua_task::luaSchedule( lua_State *L )
 			TaskCode       = QString::fromLatin1( Task );
 		}
 
-		TaskEntry			E( TaskCode, LT->connectionId(), LT->permissions() );
+		TaskEntry			E( TaskCode, Command->connectionId(), Command->permissions() );
 
 		E.setSchedule( TS );
 
@@ -272,18 +271,16 @@ int lua_task::luaSchedule( lua_State *L )
 
 		return( 1 );
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
 	}
 	catch( ... )
 	{
-		LuaErr = true;
+
 	}
 
-	return( LuaErr ? lua_error( L ) : lua_gettop( L ) );
+	return( Command->lua_pushexception( lua_gettop( L ) ) );
 }
 
 int lua_task::luaDirectObject( lua_State *L )
@@ -342,11 +339,10 @@ int lua_task::luaPermissions( lua_State *L )
 
 int lua_task::luaSetPermissions( lua_State *L )
 {
-	bool				 LuaErr = false;
+	lua_task			*Command = lua_task::luaGetTask( L );
 
 	try
 	{
-		lua_task			*LT = lua_task::luaGetTask( L );
 		Object				*O  = lua_object::argObj( L, -1 );
 
 		if( !O )
@@ -354,29 +350,27 @@ int lua_task::luaSetPermissions( lua_State *L )
 			throw mooException( E_ARGS, "invalid object" );
 		}
 
-		if( LT->permissions() != O->id() && !LT->isWizard() )
+		if( Command->permissions() != O->id() && !Command->isWizard() )
 		{
 			throw mooException( E_PERM, "can't set permissions" );
 		}
 
-		LT->setPermissions( O->id() );
+		Command->setPermissions( O->id() );
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
 	}
 	catch( ... )
 	{
 
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
+	return( Command->lua_pushexception() );
 }
 
 lua_task::lua_task(ConnectionId pConnectionId, const Task &pTask, bool pElevated )
-	: mL( Q_NULLPTR ), mConnectionId( pConnectionId ), mTimeStamp( 0 ), mMemUse( 0 ), mError( false ),
+	: mL( Q_NULLPTR ), mConnectionId( pConnectionId ), mTimeStamp( 0 ), mMemUse( 0 ),
 	  mPermissions( OBJECT_NONE ), mElevated( pElevated )
 {
 	taskPush( pTask );
@@ -389,9 +383,9 @@ lua_task::lua_task( lua_task &&t )
 	  mTimeStamp( std::move( t.mTimeStamp ) ),
 	  mMemUse( std::move( t.mMemUse ) ),
 	  mChanges( std::move( t.mChanges ) ),
-	  mError( std::move( t.mError ) ),
 	  mPermissions( std::move( t.mPermissions ) ),
-	  mElevated( std::move( t.mElevated ) )
+	  mElevated( std::move( t.mElevated ) ),
+	  mException( std::move( t.mException ) )
 {
 	lua_setallocf( mL, lua_task::luaAlloc, this );
 
@@ -400,7 +394,7 @@ lua_task::lua_task( lua_task &&t )
 	t.mL = nullptr;
 	t.mConnectionId = CONNECTION_NONE;
 	t.mMemUse = 0;
-	t.mError  = false;
+	t.mException = mooException();
 	t.mTimeStamp = 0;
 }
 
@@ -425,7 +419,7 @@ lua_task::~lua_task( void )
 		ObjectManager::instance()->recordExecutionTime( D );
 	}
 
-	if( !mError )
+	if( !error() )
 	{
 		mChanges.commit();
 	}
@@ -626,7 +620,7 @@ int lua_task::eval( void )
 
 		lua_pop( LS, 1 );
 
-		mError = true;
+		mException = mooException( E_EXCEPTION, Err );
 	}
 
 	const int			 NewTop = lua_gettop( LS );
@@ -641,8 +635,6 @@ int lua_task::subeval()
 
 int lua_task::executeLogin( void )
 {
-	bool		LuaErr = false;
-
 	try
 	{
 		Task			&T				= mTasks.front();
@@ -758,23 +750,19 @@ int lua_task::executeLogin( void )
 			}
 		}
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
-		e.lua_pushexception( mL );
-
-		LuaErr = true;
+		setException( e );
 	}
 	catch( ... )
 	{
 	}
 
-	return( LuaErr ? lua_error( mL ) : lua_gettop( mL ) );
+	return( lua_pushexception( lua_gettop( mL ) ) );
 }
 
 int lua_task::execute( void )
 {
-	bool		LuaErr = false;
-
 	try
 	{
 		Task			&T = mTasks.front();
@@ -944,17 +932,15 @@ int lua_task::execute( void )
 
 		return( verbCallCode( FndVrb ) );
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
-		e.lua_pushexception( mL );
-
-		LuaErr = true;
+		setException( e );
 	}
 	catch( ... )
 	{
 	}
 
-	return( LuaErr ? lua_error( mL ) : lua_gettop( mL ) );
+	return( lua_pushexception( lua_gettop( mL ) ) );
 }
 
 int lua_task::verbCall( ObjectId pObjectId, Verb *V, int pArgCnt )
@@ -1034,7 +1020,7 @@ int lua_task::verbCallCode( Verb *V, int pArgCnt )
 
 		lua_pop( mL, 1 );
 
-		mError = true;
+		mException = mooException( E_EXCEPTION, S );
 	}
 
 	int				c2 = lua_gettop( mL );
@@ -1066,6 +1052,18 @@ void lua_task::taskDump( const QString &S, const Task &T )
 				 << "elv:" << elevated()
 				 << "verb:" << T.verb();
 	}
+}
+
+int lua_task::lua_pushexception( int pRetVal )
+{
+	if( mException.error() != E_NONE )
+	{
+		mException.lua_pushexception( L() );
+
+		return( lua_error( L() ) );
+	}
+
+	return( pRetVal );
 }
 
 void lua_task::taskPush( const Task &T )

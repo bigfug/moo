@@ -1,10 +1,10 @@
 
-#include "tst_servertest.h"
+#include "tst_object.h"
 
 #include "object.h"
 #include "objectmanager.h"
 
-void ServerTest::objectDefaults( void )
+void TestObject::objectDefaults( void )
 {
 	ObjectManager	&OM = *ObjectManager::instance();
 	Object			*O;
@@ -69,7 +69,7 @@ void ServerTest::objectDefaults( void )
 	ObjectManager::reset();
 }
 
-void ServerTest::objectGetSet( void )
+void TestObject::objectGetSet( void )
 {
 	ObjectManager	&OM = *ObjectManager::instance();
 	Object			*O  = OM.newObject();
@@ -119,7 +119,7 @@ void ServerTest::objectGetSet( void )
 	ObjectManager::reset();
 }
 
-void ServerTest::objectTree( void )
+void TestObject::objectTree( void )
 {
 	ObjectManager	&OM = *ObjectManager::instance();
 	Object			*O1 = OM.newObject();
@@ -173,7 +173,7 @@ void ServerTest::objectTree( void )
 	ObjectManager::reset();
 }
 
-void ServerTest::objectLocation( void )
+void TestObject::objectLocation( void )
 {
 	ObjectManager	&OM = *ObjectManager::instance();
 	Object			*O1 = OM.newObject();
@@ -235,7 +235,7 @@ void ServerTest::objectLocation( void )
 		4
 */
 
-void ServerTest::objectVerbs( void )
+void TestObject::objectVerbs( void )
 {
 	ObjectManager	&OM = *ObjectManager::instance();
 	Object			*O1 = OM.newObject();
@@ -326,7 +326,7 @@ void ServerTest::objectVerbs( void )
 	ObjectManager::reset();
 }
 
-void ServerTest::objectProps( void )
+void TestObject::objectProps( void )
 {
 	ObjectManager	&OM = *ObjectManager::instance();
 	Object			*O1 = OM.newObject();
@@ -398,7 +398,7 @@ void ServerTest::objectProps( void )
 	ObjectManager::reset();
 }
 
-void ServerTest::objectPropsInherit( void )
+void TestObject::objectPropsInherit( void )
 {
 	ObjectManager	&OM = *ObjectManager::instance();
 	Object			*O1 = OM.newObject();
@@ -476,3 +476,6 @@ void ServerTest::objectPropsInherit( void )
 	ObjectManager::reset();
 }
 
+QTEST_GUILESS_MAIN( TestObject )
+
+#include "tst_object.moc"

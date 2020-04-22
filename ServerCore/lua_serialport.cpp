@@ -92,7 +92,7 @@ void lua_serialport::lua_pushserialport( lua_State *L, int pSerialId )
 
 int lua_serialport::luaGet( lua_State *L )
 {
-	bool		LuaErr = false;
+	lua_task				*Command = lua_task::luaGetTask( L );
 
 	try
 	{
@@ -134,18 +134,15 @@ int lua_serialport::luaGet( lua_State *L )
 
 		throw( mooException( E_PROPNF, QString( "property '%1' is not defined" ).arg( QString( s ) ) ) );
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
 	}
 	catch( ... )
 	{
-
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
+	return( Command->lua_pushexception() );
 }
 
 //-----------------------------------------------------------------------------
@@ -164,11 +161,11 @@ lua_serialport::luaSerialPort * lua_serialport::arg( lua_State *L, int pIndex )
 
 int lua_serialport::luaOpenSerialPort( lua_State *L )
 {
-	bool		LuaErr = false;
+	lua_task				*Command = lua_task::luaGetTask( L );
 
 	try
 	{
-		if( !lua_task::luaGetTask( L )->isWizard() )
+		if( !Command->isWizard() )
 		{
 			throw( mooException( E_NACC, "programmer is not wizard" ) );
 		}
@@ -198,27 +195,24 @@ int lua_serialport::luaOpenSerialPort( lua_State *L )
 
 		return( 1 );
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
 	}
 	catch( ... )
 	{
-
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
+	return( Command->lua_pushexception() );
 }
 
 int lua_serialport::luaPort( lua_State *L )
 {
-	bool		LuaErr = false;
+	lua_task				*Command = lua_task::luaGetTask( L );
 
 	try
 	{
-		if( !lua_task::luaGetTask( L )->isWizard() )
+		if( !Command->isWizard() )
 		{
 			throw( mooException( E_NACC, "programmer is not wizard" ) );
 		}
@@ -232,18 +226,15 @@ int lua_serialport::luaPort( lua_State *L )
 			return( 1 );
 		}
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
 	}
 	catch( ... )
 	{
-
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
+	return( Command->lua_pushexception() );
 }
 
 int lua_serialport::luaSetBaudRate( lua_State *L )

@@ -28,11 +28,10 @@ void lua_text::luaRegisterState( lua_State *L )
 
 int lua_text::luaPronounSubstitution( lua_State *L )
 {
-	bool				 LuaErr = false;
+	lua_task			*Command = lua_task::luaGetTask( L );
 
 	try
 	{
-		lua_task			*Command = lua_task::luaGetTask( L );
 		const char			*S = luaL_checkstring( L, 1 );
 
 		QString				 D;
@@ -193,18 +192,16 @@ int lua_text::luaPronounSubstitution( lua_State *L )
 
 		return( 1 );
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
 	}
 	catch( ... )
 	{
 
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
+	return( Command->lua_pushexception() );
 }
 
 int lua_text::luaBold( lua_State *L )

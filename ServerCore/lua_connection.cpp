@@ -79,7 +79,7 @@ void lua_connection::lua_pushconnection( lua_State *L, Connection *O )
 
 int lua_connection::luaNotify( lua_State *L )
 {
-	bool		LuaErr = false;
+	lua_task				*Command = lua_task::luaGetTask( L );
 
 	try
 	{
@@ -98,29 +98,21 @@ int lua_connection::luaNotify( lua_State *L )
 
 		if( Con && Con->mConnection )
 		{
-			lua_task			*Command = lua_task::luaGetTask( L );
-
 			QString				 Message = lua_util::processOutputTags( L, QString::fromLatin1( Msg ) );
 
 			Command->changeAdd( new change::ConnectionNotify( Con->mConnection, Message ) );
-
-//			Con->mConnection->notify( QString( Msg ) );
 		}
-
-		return( 0 );
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
 	}
-	catch( ... )
+	catch( const std::exception &e )
 	{
-
+		Command->setException( mooException( E_EXCEPTION, e.what() ) );
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
+	return( Command->lua_pushexception() );
 }
 
 int lua_connection::luaBoot( lua_State *L )
@@ -172,7 +164,7 @@ int lua_connection::luaCon( lua_State *L )
 
 int lua_connection::luaGet( lua_State *L )
 {
-	bool		LuaErr = false;
+	lua_task				*Command = lua_task::luaGetTask( L );
 
 	try
 	{
@@ -221,27 +213,24 @@ int lua_connection::luaGet( lua_State *L )
 
 		throw( mooException( E_PROPNF, QString( "property '%1' is not defined" ).arg( QString( s ) ) ) );
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
 	}
-	catch( ... )
+	catch( const std::exception &e )
 	{
-
+		Command->setException( mooException( E_EXCEPTION, e.what() ) );
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
+	return( Command->lua_pushexception() );
 }
 
 int lua_connection::luaSet(lua_State *L)
 {
-	bool		LuaErr = false;
+	lua_task				*Command = lua_task::luaGetTask( L );
 
 	try
 	{
-		lua_task			*Command = lua_task::luaGetTask( L );
 		luaConnection		*LC = arg( L );
 		Connection			*C = LC->mConnection;
 		const char			*s = luaL_checkstring( L, 2 );
@@ -280,18 +269,16 @@ int lua_connection::luaSet(lua_State *L)
 
 		throw( mooException( E_PROPNF, QString( "property '%1' is not defined" ).arg( QString( s ) ) ) );
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
 	}
-	catch( ... )
+	catch( const std::exception &e )
 	{
-
+		Command->setException( mooException( E_EXCEPTION, e.what() ) );
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
+	return( Command->lua_pushexception( lua_gettop( L ) ) );
 }
 
 //-----------------------------------------------------------------------------

@@ -151,13 +151,12 @@ int lua_verb::luaGC( lua_State *L )
 
 int lua_verb::luaCall( lua_State *L )
 {
-	bool		LuaErr = false;
+	lua_task				*Command = lua_task::luaGetTask( L );
 
 	try
 	{
 		luaVerb				*LV = arg( L );
 		Verb				*V = LV->mVerb;
-		lua_task			*Command = lua_task::luaGetTask( L );
 		Task				 T = Command->task();
 
 		if( !V )
@@ -178,25 +177,23 @@ int lua_verb::luaCall( lua_State *L )
 	}
 	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
 	}
 	catch( ... )
 	{
-
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
+	return( Command->lua_pushexception() );
 }
 
 int lua_verb::luaGet( lua_State *L )
 {
-	bool		LuaErr = false;
+	lua_task				*Command = lua_task::luaGetTask( L );
+
 
 	try
 	{
-		const Task			&T = lua_task::luaGetTask( L )->task();
+		const Task			&T = Command->task();
 		luaVerb				*LV = arg( L );
 		Verb				*V = LV->mVerb;
 		const char			*s = luaL_checkstring( L, 2 );
@@ -334,29 +331,23 @@ int lua_verb::luaGet( lua_State *L )
 
 		throw( mooException( E_PROPNF, QString( "property '%1' is not defined" ).arg( QString( s ) ) ) );
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
 	}
 	catch( ... )
 	{
-
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
+	return( Command->lua_pushexception() );
 }
 
 int lua_verb::luaSet( lua_State *L )
 {
-	bool		LuaErr = false;
+	lua_task				*Command = lua_task::luaGetTask( L );
 
 	try
 	{
-		lua_task			*Command = lua_task::luaGetTask( L );
-		const Task			&T = Command->task();
-
 		if( !Command->isPermValid() )
 		{
 			throw mooException( E_PERM, "programmer is invalid" );
@@ -569,31 +560,25 @@ int lua_verb::luaSet( lua_State *L )
 
 		throw( mooException( E_PROPNF, QString( "property '%1' is not defined" ).arg( N ) ) );
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
 	}
 	catch( ... )
 	{
-
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
+	return( Command->lua_pushexception() );
 }
 
 int lua_verb::luaAliasAdd( lua_State *L )
 {
-	bool		LuaErr = false;
+	lua_task				*Command = lua_task::luaGetTask( L );
 
 	luaL_checkstring( L, 2 );
 
 	try
 	{
-		lua_task			*Command = lua_task::luaGetTask( L );
-		const Task			&T = Command->task();
-
 		if( !Command->isPermValid() )
 		{
 			throw mooException( E_PERM, "programmer is invalid" );
@@ -616,31 +601,25 @@ int lua_verb::luaAliasAdd( lua_State *L )
 
 		Command->changeAdd( new change::VerbAliasAdd( V, N ) );
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
 	}
 	catch( ... )
 	{
-
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
+	return( Command->lua_pushexception() );
 }
 
 int lua_verb::luaAliasRem(lua_State *L)
 {
-	bool		LuaErr = false;
+	lua_task				*Command = lua_task::luaGetTask( L );
 
 	luaL_checkstring( L, 2 );
 
 	try
 	{
-		lua_task			*Command = lua_task::luaGetTask( L );
-		const Task			&T = Command->task();
-
 		if( !Command->isPermValid() )
 		{
 			throw mooException( E_PERM, "programmer is invalid" );
@@ -663,27 +642,23 @@ int lua_verb::luaAliasRem(lua_State *L)
 
 		Command->changeAdd( new change::VerbAliasDelete( V, N ) );
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
 	}
 	catch( ... )
 	{
-
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
+	return( Command->lua_pushexception() );
 }
 
 int lua_verb::luaDump( lua_State *L )
 {
-	bool		LuaErr = false;
+	lua_task				*Command = lua_task::luaGetTask( L );
 
 	try
 	{
-		lua_task			*Command = lua_task::luaGetTask( L );
 		const Task			&T = Command->task();
 		luaVerb				*LV = arg( L );
 		Verb				*V = LV->mVerb;
@@ -691,7 +666,7 @@ int lua_verb::luaDump( lua_State *L )
 		Object				*Player = ObjectManager::instance()->object( T.player() );
 		const bool			 isOwner  = ( Player != 0 && O != 0 ? Player->id() == O->owner() : false );
 		const bool			 isWizard = ( Player != 0 ? Player->wizard() : false );
-		Connection			*C = ConnectionManager::instance()->connection( lua_task::luaGetTask( L )->connectionId() );
+		Connection			*C = ConnectionManager::instance()->connection( Command->connectionId() );
 
 		if( V == 0 )
 		{
@@ -712,34 +687,32 @@ int lua_verb::luaDump( lua_State *L )
 
 		Command->changeAdd( new change::ConnectionNotify( C, "." ) );
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
 	}
 	catch( ... )
 	{
-
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
+	return( Command->lua_pushexception() );
 }
 
 int lua_verb::luaProgram( lua_State *L )
 {
-	bool		LuaErr = false;
+	lua_task				*Command = lua_task::luaGetTask( L );
+
 
 	try
 	{
-		const Task			&T = lua_task::luaGetTask( L )->task();
+		const Task			&T = Command->task();
 		luaVerb				*LV = arg( L );
 		Verb				*V = LV->mVerb;
 		Object				*O = ObjectManager::o( V->object() );
 		Object				*Player = ObjectManager::instance()->object( T.player() );
 		const bool			 isOwner  = ( Player != 0 && O != 0 ? Player->id() == O->owner() : false );
 		const bool			 isWizard = ( Player != 0 ? Player->wizard() : false );
-		Connection			*C = ConnectionManager::instance()->connection( lua_task::luaGetTask( L )->connectionId() );
+		Connection			*C = ConnectionManager::instance()->connection( Command->connectionId() );
 
 		if( V == 0 )
 		{
@@ -760,34 +733,32 @@ int lua_verb::luaProgram( lua_State *L )
 
 		C->pushInputSink( IS );
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
 	}
 	catch( ... )
 	{
-
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
+	return( Command->lua_pushexception() );
 }
 
 int lua_verb::luaEdit( lua_State *L )
 {
-	bool		LuaErr = false;
+	lua_task				*Command = lua_task::luaGetTask( L );
+
 
 	try
 	{
-		const Task			&T = lua_task::luaGetTask( L )->task();
+		const Task			&T = Command->task();
 		luaVerb				*LV = arg( L );
 		Verb				*V = LV->mVerb;
 		Object				*O = ObjectManager::o( V->object() );
 		Object				*Player = ObjectManager::instance()->object( T.player() );
 		const bool			 isOwner  = ( Player != 0 && O != 0 ? Player->id() == O->owner() : false );
 		const bool			 isWizard = ( Player != 0 ? Player->wizard() : false );
-		Connection			*C = ConnectionManager::instance()->connection( lua_task::luaGetTask( L )->connectionId() );
+		Connection			*C = ConnectionManager::instance()->connection( Command->connectionId() );
 
 		if( !V )
 		{
@@ -815,16 +786,13 @@ int lua_verb::luaEdit( lua_State *L )
 
 		C->pushInputSink( IS );
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
 	}
 	catch( ... )
 	{
-
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
+	return( Command->lua_pushexception() );
 }

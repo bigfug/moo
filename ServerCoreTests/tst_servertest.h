@@ -6,22 +6,17 @@
 
 #include "mooglobal.h"
 
+#include "luatestdata.h"
+
 class Object;
 class Connection;
 class ObjectManager;
 
-class ServerTest : public QObject
+class ServerTest : public LuaTestObject
 {
 	Q_OBJECT
 
-public:
-	ServerTest();
-
-	static ConnectionId initLua( qint64 pTimeStamp );
-
-private Q_SLOTS:
-	void initTestCase( void );
-
+private slots:
 	void taskDefaults( void );
 	void taskGetSet( void );
 	void taskSchedule( void );
@@ -33,14 +28,6 @@ private Q_SLOTS:
 	void verbMatch( void );
 	void verbGetSet( void );
 	void verbArgs( void );
-
-	void objectDefaults( void );
-	void objectGetSet( void );
-	void objectTree( void );
-	void objectLocation( void );
-	void objectVerbs( void );
-	void objectProps( void );
-	void objectPropsInherit( void );
 
 	void luaRegistration( void );
 
@@ -148,8 +135,6 @@ private Q_SLOTS:
 
 	void taskRollbackObjectAliasAdd();
 	void taskRollbackObjectAliasDelete();
-
-	void cleanupTestCase( void );
 };
 
 #endif // TST_SERVERTEST_H

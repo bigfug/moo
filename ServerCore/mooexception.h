@@ -5,12 +5,18 @@
 #include "lualib.h"
 #include "lauxlib.h"
 
+#include <QString>
+
 #include "mooglobal.h"
-#include <QDebug>
 
 class mooException
 {
 public:
+	mooException( void )
+		: mError( E_NONE )
+	{
+	}
+
 	mooException( mooError pError, const QString &pMessage ) : mError( pError ), mMessage( pMessage )
 	{
 	}
@@ -21,9 +27,19 @@ public:
 
 	void lua_pushexception( lua_State *L ) const;
 
+	mooError error( void ) const
+	{
+		return( mError );
+	}
+
+	QString message( void ) const
+	{
+		return( mMessage );
+	}
+
 public:
-	const mooError	mError;
-	const QString	mMessage;
+	mooError	mError;
+	QString		mMessage;
 };
 
 #endif // MOOEXCEPTION_H

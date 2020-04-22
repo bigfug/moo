@@ -22,38 +22,54 @@ void lua_osc::luaRegisterState( lua_State *L )
 
 int lua_osc::luaSend( lua_State *L )
 {
-	luaL_checkstring( L, 1 );
+	lua_task				*Command = lua_task::luaGetTask( L );
 
-	const int			 argc = lua_gettop( L );
-
-	//const Task			&T = lua_task::luaGetTask( L )->task();
-
-	QString		Path = QString( lua_tostring( L, 1 ) );
-
-	QVariant	Args;
-
-	if( argc >= 2 )
+	try
 	{
-		if( lua_isnumber( L, 2 ) )
+		if( !Command->isWizard() )
 		{
-			Args = lua_tonumber( L, 2 );
+			throw( mooException( E_NACC, "programmer is not wizard" ) );
 		}
-		else if( lua_isstring( L, 2 ) )
+
+		luaL_checkstring( L, 1 );
+
+		const int			 argc = lua_gettop( L );
+
+		QString		Path = QString( lua_tostring( L, 1 ) );
+
+		QVariant	Args;
+
+		if( argc >= 2 )
 		{
-			Args = QString( lua_tostring( L, 2 ) );
+			if( lua_isnumber( L, 2 ) )
+			{
+				Args = lua_tonumber( L, 2 );
+			}
+			else if( lua_isstring( L, 2 ) )
+			{
+				Args = QString( lua_tostring( L, 2 ) );
+			}
+			else if( lua_isboolean( L, 2 ) )
+			{
+				Args = lua_toboolean( L, 2 );
+			}
 		}
-		else if( lua_isboolean( L, 2 ) )
+
+		OSC	*DEV = OSC::devices().isEmpty() ? nullptr : OSC::devices().first();
+
+		if( DEV )
 		{
-			Args = lua_toboolean( L, 2 );
+			DEV->sendData( Path, Args );
 		}
 	}
-
-	OSC	*DEV = OSC::devices().isEmpty() ? nullptr : OSC::devices().first();
-
-	if( DEV )
+	catch( const mooException &e )
 	{
-		DEV->sendData( Path, Args );
+		Command->setException( e );
+	}
+	catch( const std::exception &e )
+	{
+		Command->setException( mooException( E_EXCEPTION, e.what() ) );
 	}
 
-	return( 0 );
+	return( Command->lua_pushexception() );
 }

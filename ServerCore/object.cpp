@@ -71,6 +71,18 @@ Property * Object::propParent( const QString &pName ) const
 	return( ParentObject->propParent( pName ) );
 }
 
+QVariant Object::propValue( const QString &pName ) const
+{
+	const Property		*P = prop( pName );
+
+	if( P )
+	{
+		return( P->value() );
+	}
+
+	return( QVariant() );
+}
+
 Verb * Object::verbParent( const QString &pName, ObjectId pDirectObjectId, const QString &pPreposition, ObjectId pIndirectObjectId ) const
 {
 	if( mData.mParent == -1 )
@@ -417,13 +429,14 @@ void Object::propNames( QStringList &pList ) const
 	pList = mData.mProperties.keys();
 }
 
-void Object::propAdd( QString pName, QVariant pVariant )
+void Object::propAdd( QString pName, QVariant pVariant, ObjectId pOwnerId )
 {
 	Property		P;
 
 	P.initialise();
 
 	P.setValue( pVariant );
+	P.setOwner( pOwnerId );
 
 	propAdd( pName, P );
 }

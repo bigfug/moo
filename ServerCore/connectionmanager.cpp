@@ -5,6 +5,8 @@
 #include "lua_task.h"
 #include "listenersocket.h"
 
+#include <QDebug>
+
 ConnectionManager	*ConnectionManager::mInstance = 0;
 
 ConnectionManager::ConnectionManager( QObject *pParent ) :
@@ -177,7 +179,7 @@ void ConnectionManager::processClosedSockets( void )
 			{
 				lua_task::process( QString( "moo.system:user_client_disconnected( o( %1 ) )" ).arg( CON->player() ), LS->connectionId(), CON->player() );
 			}
-			catch( mooException &e )
+			catch( const mooException &e )
 			{
 				qWarning() << e.mMessage;
 			}

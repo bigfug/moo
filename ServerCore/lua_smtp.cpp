@@ -84,7 +84,7 @@ int lua_smtp::luaNew( lua_State *L )
 
 int lua_smtp::luaSetSender(lua_State *L)
 {
-	bool		LuaErr = false;
+	lua_task				*Command = lua_task::luaGetTask( L );
 
 	try
 	{
@@ -103,23 +103,20 @@ int lua_smtp::luaSetSender(lua_State *L)
 
 		UD->mMimeMessage->setSender( Addr );
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
 	}
 	catch( ... )
 	{
-
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
+	return( Command->lua_pushexception() );
 }
 
 int lua_smtp::luaAddTo( lua_State *L )
 {
-	bool		LuaErr = false;
+	lua_task				*Command = lua_task::luaGetTask( L );
 
 	try
 	{
@@ -138,23 +135,20 @@ int lua_smtp::luaAddTo( lua_State *L )
 
 		UD->mMimeMessage->addTo( Addr );
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
 	}
 	catch( ... )
 	{
-
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
+	return( Command->lua_pushexception() );
 }
 
 int lua_smtp::luaSetSubject( lua_State *L )
 {
-	bool		LuaErr = false;
+	lua_task				*Command = lua_task::luaGetTask( L );
 
 	try
 	{
@@ -164,23 +158,20 @@ int lua_smtp::luaSetSubject( lua_State *L )
 
 		UD->mMimeMessage->setSubject( QString::fromLatin1( Text, TLen ) );
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
 	}
 	catch( ... )
 	{
-
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
+	return( Command->lua_pushexception() );
 }
 
 int lua_smtp::luaAddText( lua_State *L )
 {
-	bool		LuaErr = false;
+	lua_task				*Command = lua_task::luaGetTask( L );
 
 	try
 	{
@@ -194,28 +185,23 @@ int lua_smtp::luaAddText( lua_State *L )
 
 		Mime->setParent( UD->mMimeMessage.data() );
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
 	}
 	catch( ... )
 	{
-
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
+	return( Command->lua_pushexception() );
 }
 
 int lua_smtp::luaSend( lua_State *L )
 {
-	bool		LuaErr = false;
+	lua_task				*Command = lua_task::luaGetTask( L );
 
 	try
 	{
-		lua_task			*Command = lua_task::luaGetTask( L );
-
 		if( !Command->isWizard() )
 		{
 			throw mooException( E_PERM, "only wizards can send email" );
@@ -229,18 +215,15 @@ int lua_smtp::luaSend( lua_State *L )
 
 		Worker->start();
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
 	}
 	catch( ... )
 	{
-
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
+	return( Command->lua_pushexception() );
 }
 
 lua_smtp::luaMimeMessage *lua_smtp::message( lua_State *L, int pIndex )

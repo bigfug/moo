@@ -126,11 +126,13 @@ public:
 	void propSet( const QString &pName, const QVariant &pValue );
 	bool propFind( const QString &pName, Property **pProp, Object **pObject );
 	void propNames( QStringList &pList ) const;
-	void propAdd( QString pName, QVariant pVariant );
+	void propAdd( QString pName, QVariant pVariant, ObjectId pOwnerId = OBJECT_NONE );
 
 	const Property *prop( const QString &pName ) const;
 	Property *prop( const QString &pName );
 	Property *propParent( const QString &pName ) const;
+
+	QVariant propValue( const QString &pName ) const;
 
 	inline const QMap<QString,Property> &properties( void ) const
 	{

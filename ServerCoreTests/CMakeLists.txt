@@ -9,7 +9,6 @@ set( SOURCE_FILES
 	tst_task.cpp
 	tst_properties.cpp
 	tst_verbs.cpp
-	tst_object.cpp
 	tst_lua_create.cpp
 	tst_lua_recycle.cpp
 	tst_lua_move.cpp
@@ -18,23 +17,17 @@ set( SOURCE_FILES
 	tst_lua_verb.cpp
 	tst_lua_task.cpp
 	tst_lua_call_values.cpp
-	luatestdata.cpp
 	tst_lua_prop_security.cpp
 	permissionstest.cpp
     tst_lua_prop_inheritance.cpp
     tst_lua_verb_call.cpp
     tst_lua_pass.cpp
 	tst_servertest.h
-	luatestdata.h
 	permissionstest.h
 	tst_task_rollback_object.cpp
 	)
 
-add_executable( ${PROJECT_NAME} ${SOURCE_FILES} )
-
 find_package( Qt5 REQUIRED COMPONENTS Core Test )
-
-add_test( ServerCore ${PROJECT_NAME} )
 
 include_directories(
 	../ServerCore
@@ -43,7 +36,7 @@ include_directories(
 	${CMAKE_BINARY_DIR}/libs
 )
 
-target_link_libraries( ${PROJECT_NAME}
+link_libraries(
 	ServerCore
 	SMTPEmail
 	telnet
@@ -51,3 +44,16 @@ target_link_libraries( ${PROJECT_NAME}
 	lua
 	Qt5::Core Qt5::Test
 )
+
+set( TEST_DATA_SOURCES luatestdata.h luatestdata.cpp )
+
+add_executable( ${PROJECT_NAME} ${SOURCE_FILES} ${TEST_DATA_SOURCES} )
+
+add_executable( test_object tst_object.cpp tst_object.h ${TEST_DATA_SOURCES} )
+
+add_executable( eval_moo eval_moo.cpp eval_moo.h ${TEST_DATA_SOURCES} )
+
+add_test( ServerCore ${PROJECT_NAME} )
+add_test( test_object test_object )
+add_test( eval_moo eval_moo )
+

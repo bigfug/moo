@@ -508,7 +508,7 @@ int lua_moo::luaGlobalIndex( lua_State *L )
 
 int lua_moo::luaGet( lua_State *L )
 {
-	bool		LuaErr = false;
+	lua_task				*Command = lua_task::luaGetTask( L );
 
 	try
 	{
@@ -530,23 +530,21 @@ int lua_moo::luaGet( lua_State *L )
 			return( F( L ) );
 		}
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
 	}
 	catch( ... )
 	{
 
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
+	return( Command->lua_pushexception() );
 }
 
 int lua_moo::luaSet( lua_State *L )
 {
-	bool		LuaErr = false;
+	lua_task				*Command = lua_task::luaGetTask( L );
 
 	try
 	{
@@ -561,20 +559,16 @@ int lua_moo::luaSet( lua_State *L )
 			return( F( L ) );
 		}
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
 	}
 	catch( ... )
 	{
-
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
+	return( Command->lua_pushexception() );
 }
-
 
 QString lua_moo::parseNotify( lua_State *L )
 {
@@ -654,12 +648,11 @@ QString lua_moo::parseNotify( lua_State *L )
 
 int lua_moo::luaBroadcast( lua_State *L )
 {
-	bool				 LuaErr = false;
+	lua_task			*Command = lua_task::luaGetTask( L );
 
 	try
 	{
 		QString				 Msg = parseNotify( L );
-		lua_task			*Command = lua_task::luaGetTask( L );
 		ConnectionManager	*CM = ConnectionManager::instance();
 
 		if( !Command->isWizard() )
@@ -679,28 +672,25 @@ int lua_moo::luaBroadcast( lua_State *L )
 
 		return( 0 );
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
 	}
 	catch( ... )
 	{
 
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
+	return( Command->lua_pushexception() );
 }
 
 int lua_moo::luaNotify( lua_State *L )
 {
-	bool				 LuaErr = false;
+	lua_task			*Command = lua_task::luaGetTask( L );
 
 	try
 	{
 		QString				 Msg = parseNotify( L );
-		lua_task			*Command = lua_task::luaGetTask( L );
 		Connection			*C = ConnectionManager::instance()->connection( Command->connectionId() );
 
 		if( C )
@@ -712,23 +702,21 @@ int lua_moo::luaNotify( lua_State *L )
 
 		return( 0 );
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
 	}
 	catch( ... )
 	{
 
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
+	return( Command->lua_pushexception() );
 }
 
 int lua_moo::luaRoot( lua_State *L )
 {
-	bool				 LuaErr = false;
+	lua_task			*Command = lua_task::luaGetTask( L );
 
 	try
 	{
@@ -743,23 +731,21 @@ int lua_moo::luaRoot( lua_State *L )
 
 		return( 1 );
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
 	}
 	catch( ... )
 	{
 
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
+	return( Command->lua_pushexception() );
 }
 
 int lua_moo::luaSystem( lua_State *L )
 {
-	bool				 LuaErr = false;
+	lua_task			*Command = lua_task::luaGetTask( L );
 
 	try
 	{
@@ -772,18 +758,16 @@ int lua_moo::luaSystem( lua_State *L )
 
 		return( lua_object::lua_pushobject( L, O ) );
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
 	}
 	catch( ... )
 	{
 
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
+	return( Command->lua_pushexception() );
 }
 
 // pass calls the verb with the same name as the current verb but as defined on
@@ -791,11 +775,10 @@ int lua_moo::luaSystem( lua_State *L )
 
 int lua_moo::luaPass( lua_State *L )
 {
-	bool				 LuaErr = false;
+	lua_task			*Command = lua_task::luaGetTask( L );
 
 	try
 	{
-		lua_task			*Command = lua_task::luaGetTask( L );
 		const Task			&T = Command->task();
 		ObjectManager		&OM = *ObjectManager::instance();
 		ObjectId			 id = T.object();
@@ -851,27 +834,24 @@ int lua_moo::luaPass( lua_State *L )
 			id = P->id();
 		}
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
 	}
 	catch( ... )
 	{
 
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
+	return( Command->lua_pushexception() );
 }
 
 int lua_moo::luaEval( lua_State *L )
 {
-	bool				 LuaErr = false;
+	lua_task			*Command = lua_task::luaGetTask( L );
 
 	try
 	{
-		lua_task			*Command = lua_task::luaGetTask( L );
 		const Task			&T = Command->task();
 		const char			*C = luaL_checkstring( L, -1 );
 		Task				 E( C );
@@ -898,33 +878,30 @@ int lua_moo::luaEval( lua_State *L )
 
 		return( Results );
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
 	}
 	catch( ... )
 	{
 
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
+	return( Command->lua_pushexception() );
 }
 
 int lua_moo::luaElevate( lua_State *L )
 {
-	bool                 LuaErr = false;
+	lua_task			*Command = lua_task::luaGetTask( L );
 
-	const char            *ArgStr = luaL_checkstring( L, 1 );
+	const char			*ArgStr = luaL_checkstring( L, 1 );
 
 	try
 	{
-		lua_task            *LT = lua_task::luaGetTask( L );
-		const Task          &T  = LT->task();
-		Object				*O  = ObjectManager::o( LT->permissions() );
+		const Task          &T  = Command->task();
+		Object				*O  = ObjectManager::o( Command->permissions() );
 
-		if( LT->permissions() != OBJECT_NONE && ( !O || !O->wizard() ) )
+		if( Command->permissions() != OBJECT_NONE && ( !O || !O->wizard() ) )
 		{
 			throw mooException( E_PERM, "programmer is not a wizard!" );
 		}
@@ -954,19 +931,19 @@ int lua_moo::luaElevate( lua_State *L )
 			E.setCaller( T.object() );
 			E.setObject( OBJECT_NONE );
 
-			bool	CurE = LT->elevated();
+			bool	CurE = Command->elevated();
 
-			LT->setElevated( true );
+			Command->setElevated( true );
 
-			LT->taskDump( "luaElevate()", E );
+			Command->taskDump( "luaElevate()", E );
 
-			LT->taskPush( E );
+			Command->taskPush( E );
 
-			int Results = LT->eval();
+			int Results = Command->eval();
 
-			LT->taskPop();
+			Command->taskPop();
 
-			LT->setElevated( CurE );
+			Command->setElevated( CurE );
 
 //            if( C )
 //            {
@@ -978,16 +955,14 @@ int lua_moo::luaElevate( lua_State *L )
 	}
 	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
 	}
 	catch( ... )
 	{
 
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
+	return( Command->lua_pushexception() );
 }
 
 int lua_moo::luaHash( lua_State *L )
@@ -1053,15 +1028,16 @@ int lua_moo::luaFindByProp( lua_State *L )
 
 int lua_moo::luaFind( lua_State *L )
 {
+	lua_task				*Command = lua_task::luaGetTask( L );
+
 	size_t					 StrLen;
 	const char				*StrDat = luaL_checklstring( L, -1, &StrLen );
 	ObjectId				 PID = OBJECT_NONE;
 
 	if( StrDat && StrLen > 0 )
 	{
-		const QString			 S = QString::fromLatin1( StrDat, StrLen );
+		const QString			 S = QString::fromLatin1( StrDat, int( StrLen ) );
 
-		lua_task				*Command = lua_task::luaGetTask( L );
 		const Task				&T = Command->task();
 		QList<ObjectId>			 ObjLst;
 
@@ -1102,39 +1078,35 @@ int lua_moo::luaTimestamp(lua_State *L)
 
 int lua_moo::luaCheckPoint( lua_State *L )
 {
-	bool				 LuaErr = false;
+	lua_task			*Command = lua_task::luaGetTask( L );
 
 	try
 	{
-		if( !lua_task::luaGetTask( L )->isWizard() )
+		if( !Command->isWizard() )
 		{
 			throw mooException( E_PERM, "wizard is not a wizard!" );
 		}
 
 		ObjectManager::instance()->checkpoint();
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
 	}
 	catch( ... )
 	{
 
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
-
+	return( Command->lua_pushexception() );
 }
 
 int lua_moo::luaLastObject(lua_State *L)
 {
-	bool				 LuaErr = false;
+	lua_task			*Command = lua_task::luaGetTask( L );
 
 	try
 	{
-		lua_task			*Command = lua_task::luaGetTask( L );
 		Connection			*C = ConnectionManager::instance()->connection( Command->connectionId() );
 		Object				*O = ObjectManager::instance()->object( C->lastCreatedObjectId() );
 
@@ -1147,27 +1119,24 @@ int lua_moo::luaLastObject(lua_State *L)
 
 		return( 1 );
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
 	}
 	catch( ... )
 	{
 
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
+	return( Command->lua_pushexception() );
 }
 
 int lua_moo::luaNetworkGet( lua_State *L )
 {
-	bool				 LuaErr = false;
+	lua_task			*Command = lua_task::luaGetTask( L );
 
 	try
 	{
-		lua_task			*Command = lua_task::luaGetTask( L );
 		const char			*R = luaL_checkstring( L, 1 );
 		Object				*O = lua_object::argObj( L, 2 );
 		const char			*V = luaL_checkstring( L, 3 );
@@ -1208,21 +1177,17 @@ int lua_moo::luaNetworkGet( lua_State *L )
 
 		QObject::connect( NetRep, SIGNAL(readyRead()), ObjectManager::instance(), SLOT(networkRequestReadyRead()) );
 		QObject::connect( NetRep, SIGNAL(finished()), ObjectManager::instance(), SLOT(networkRequestFinished()) );
-
-		return( 0 );
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
 	}
 	catch( ... )
 	{
 
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
+	return( Command->lua_pushexception() );
 }
 
 int lua_moo::luaPanic( lua_State *L )
@@ -1337,16 +1302,15 @@ int lua_moo::luaGMCP( lua_State *L )
 
 int lua_moo::luaImport( lua_State *L )
 {
-	size_t		 FNSize;
-	const char	*FNChars = luaL_checklstring( L, 1, &FNSize );
-	bool		 LuaErr = false;
+	lua_task			*Command = lua_task::luaGetTask( L );
+	size_t				 FNSize;
+	const char			*FNChars = luaL_checklstring( L, 1, &FNSize );
 
 	try
 	{
-		lua_task	*T = lua_task::luaGetTask( L );
-		Connection	*C = T->connection();
+		Connection	*C = Command->connection();
 
-		if( !T->isWizard() )
+		if( !Command->isWizard() )
 		{
 			throw mooException( E_PERM, "you have to be a wizard to do that!" );
 		}
@@ -1365,7 +1329,7 @@ int lua_moo::luaImport( lua_State *L )
 			throw mooException( E_NACC, "import script doesn't begin with correct header" );
 		}
 
-		lua_task		ImportTask( T->connectionId(), TaskEntry( "", T->connectionId(), T->permissions() ) );
+		lua_task		ImportTask( Command->connectionId(), TaskEntry( "", Command->connectionId(), Command->permissions() ) );
 
 		while( !FH.atEnd() )
 		{
@@ -1378,9 +1342,9 @@ int lua_moo::luaImport( lua_State *L )
 
 			C->notify( FL.toHtmlEscaped() );
 
-			ImportTask.taskPush( TaskEntry( FL, T->connectionId(), T->permissions() ) );
+			ImportTask.taskPush( TaskEntry( FL, Command->connectionId(), Command->permissions() ) );
 
-			ImportTask.execute( T->timestamp() );
+			ImportTask.execute( Command->timestamp() );
 
 			ImportTask.taskPop();
 		}
@@ -1391,12 +1355,14 @@ int lua_moo::luaImport( lua_State *L )
 	}
 	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
+		Command->setException( e );
+	}
+	catch( ... )
+	{
 
-		LuaErr = true;
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
+	return( Command->lua_pushexception() );
 }
 
 QVariantMap lua_moo::parseReadArgs( lua_State *L, int pIndex )
@@ -1456,15 +1422,14 @@ QVariantMap lua_moo::parseReadArgs( lua_State *L, int pIndex )
 
 int lua_moo::luaRead( lua_State *L )
 {
-	bool				 LuaErr = false;
+	lua_task			*Command = lua_task::luaGetTask( L );
 
 	QVariantMap			 ReadOpts;
 	QVariantList		 VerbArgs;
 
 	try
 	{
-		lua_task			*Command = lua_task::luaGetTask( L );
-		const Task			&T = lua_task::luaGetTask( L )->task();
+		const Task			&T = Command->task();
 		Connection			*C = ConnectionManager::instance()->connection( Command->connectionId() );
 
 		if( !lua_gettop( L ) )
@@ -1582,18 +1547,16 @@ int lua_moo::luaRead( lua_State *L )
 			}
 		}
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
 	}
 	catch( ... )
 	{
 
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
+	return( Command->lua_pushexception() );
 }
 
 int lua_moo::luaSetCookie( lua_State *L )
@@ -1631,13 +1594,12 @@ int lua_moo::luaSetCookie( lua_State *L )
 
 int lua_moo::luaCookie( lua_State *L )
 {
-	bool				 LuaErr = false;
+	lua_task				*Command = lua_task::luaGetTask( L );
 
 	const char				*S = luaL_checkstring( L, 1 );
 
 	try
 	{
-		lua_task			*Command = lua_task::luaGetTask( L );
 		Connection			*C = ConnectionManager::instance()->connection( Command->connectionId() );
 
 		QString				 N = QString::fromLatin1( S );
@@ -1650,29 +1612,26 @@ int lua_moo::luaCookie( lua_State *L )
 			return( 1 );
 		}
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
 	}
 	catch( ... )
 	{
 
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
+	return( Command->lua_pushexception() );
 }
 
 int lua_moo::luaClearCookie( lua_State *L )
 {
-	bool					 LuaErr = false;
+	lua_task				*Command = lua_task::luaGetTask( L );
 
 	const char				*S = luaL_checkstring( L, 1 );
 
 	try
 	{
-		lua_task			*Command = lua_task::luaGetTask( L );
 		Connection			*C = ConnectionManager::instance()->connection( Command->connectionId() );
 
 		if( C->hasCookie( QString::fromLatin1( S ) ) )
@@ -1680,16 +1639,14 @@ int lua_moo::luaClearCookie( lua_State *L )
 			Command->changeAdd( new change::ConnectionClearCookie( C, QString::fromLatin1( S ) ) );
 		}
 	}
-	catch( mooException &e )
+	catch( const mooException &e )
 	{
-		e.lua_pushexception( L );
-
-		LuaErr = true;
+		Command->setException( e );
 	}
 	catch( ... )
 	{
 
 	}
 
-	return( LuaErr ? lua_error( L ) : 0 );
+	return( Command->lua_pushexception() );
 }
