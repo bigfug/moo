@@ -36,13 +36,13 @@ public:
 		{
 			Property		*Quota = objOwner->prop( "ownership_quota" );
 
-			if( Quota && Quota->type() == QVariant::Int )
+			if( Quota && Quota->type() == QVariant::Double )
 			{
 				int		QuotaValue = Quota->value().toInt();
 
 				if( QuotaValue > 0 )
 				{
-					Quota->setValue( QuotaValue - 1 );
+					objOwner->propSet( Quota->name(), double( QuotaValue - 1 ) );
 				}
 			}
 		}

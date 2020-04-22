@@ -236,7 +236,7 @@ void Object::propSet( const QString &pName, const QVariant &pValue )
 	{
 		if( P->value().type() != QVariant::Invalid && P->value().type() != pValue.type() )
 		{
-			return;
+			throw mooException( E_TYPE, QString( "property %1 is type %2 - trying to set type %3" ).arg( P->name() ).arg( P->value().typeName() ).arg( pValue.typeName() ) );
 		}
 
 		P->setValue( pValue );
@@ -245,7 +245,7 @@ void Object::propSet( const QString &pName, const QVariant &pValue )
 	{
 		if( P->value().type() != QVariant::Invalid && P->value().type() != pValue.type() )
 		{
-			return;
+			throw mooException( E_TYPE, QString( "property %1 is type %2 - trying to set type %3" ).arg( P->name() ).arg( P->value().typeName() ).arg( pValue.typeName() ) );
 		}
 
 		Property		C = *P;

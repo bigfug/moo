@@ -84,7 +84,7 @@ ObjectId ObjectLogic::create( lua_task &pTask, ObjectId pUserId, ObjectId pParen
 	{
 		Quota = objOwner->prop( "ownership_quota" );
 
-		if( Quota && Quota->type() != QVariant::Int )
+		if( Quota && Quota->type() != QVariant::Double )
 		{
 			Quota = nullptr;
 		}
@@ -97,7 +97,7 @@ ObjectId ObjectLogic::create( lua_task &pTask, ObjectId pUserId, ObjectId pParen
 
 	if( QuotaValue <= 0 )
 	{
-		throw( mooException( E_QUOTA, "" ) );
+		throw( mooException( E_QUOTA, "No object quota left" ) );
 	}
 
 	Object		*objNew = OM.newObject();
@@ -109,7 +109,7 @@ ObjectId ObjectLogic::create( lua_task &pTask, ObjectId pUserId, ObjectId pParen
 
 	if( Quota )
 	{
-		Quota->setValue( int( QuotaValue - 1 ) );
+		objOwner->propSet( Quota->name(), double( QuotaValue - 1 ) );
 	}
 
 	if( objParent )
@@ -465,11 +465,11 @@ void ObjectLogic::recycle( lua_task &pTask, ObjectId pUserId, ObjectId pObjectId
 	{
 		Property		*Quota = objOwner->prop( "ownership_quota" );
 
-		if( Quota && Quota->type() == QVariant::Int )
+		if( Quota && Quota->type() == QVariant::Double )
 		{
 			int		QuotaValue = Quota->value().toInt();
 
-			Quota->setValue( QuotaValue + 1 );
+			objOwner->propSet( Quota->name(), double( QuotaValue + 1 ) );
 		}
 	}
 

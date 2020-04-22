@@ -424,11 +424,11 @@ void ServerTest::luaCreate( void )
 
 	P.initialise();
 	P.setOwner( Programmer->id() );
-	P.setValue( (qint32)1 );
+	P.setValue( double( 1 ) );
 
 	Programmer->propAdd( "ownership_quota", P );
 
-	QVERIFY( Programmer->prop( "ownership_quota" ) != 0 );
+	QVERIFY( Programmer->prop( "ownership_quota" ) );
 
 	if( true )
 	{
@@ -447,7 +447,7 @@ void ServerTest::luaCreate( void )
 
 		QVERIFY( O != 0 );
 
-		QCOMPARE( Programmer->prop( "ownership_quota" )->value().toInt(), 0 );
+		QCOMPARE( Programmer->prop( "ownership_quota" )->value().toDouble(), 0.0 );
 
 		if( true )
 		{
@@ -466,7 +466,7 @@ void ServerTest::luaCreate( void )
 
 			QVERIFY( O == 0 );
 
-			QCOMPARE( Programmer->prop( "ownership_quota" )->value().toInt(), 0 );
+			QCOMPARE( Programmer->prop( "ownership_quota" )->value().toDouble(), 0 );
 		}
 
 		O->setParent( OBJECT_NONE );
