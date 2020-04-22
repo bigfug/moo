@@ -71,6 +71,8 @@ public:
 
 	virtual ObjectId importModule( ObjectId pParentId, ObjectId pOwnerId, const QString &pFileName, TransferInformation &pTrnInf ) Q_DECL_OVERRIDE;
 
+	virtual ObjectIdVector connectedObjects( void ) const Q_DECL_OVERRIDE;
+
 private:
 	//void updateObject( const Object &O );
 

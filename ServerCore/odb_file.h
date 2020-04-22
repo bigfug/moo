@@ -165,6 +165,11 @@ public:
 		return( OBJECT_NONE );
 	}
 
+	virtual ObjectIdVector connectedObjects( void ) const
+	{
+		return( ObjectIdVector() );
+	}
+
 private:
 	void loadObject( QDataStream &DS, Object &O );
 	void updateObject( QDataStream &DS, const Object &O );

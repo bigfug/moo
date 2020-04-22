@@ -128,6 +128,11 @@ QList<Object *> ObjectManager::connectedPlayers() const
 	return( ObjLst );
 }
 
+ObjectIdVector ObjectManager::connectedObjects() const
+{
+	return( mODB ? mODB->connectedObjects() : ObjectIdVector() );
+}
+
 qint64 ObjectManager::timeToNextTask() const
 {
 	qint64			NextTaskTime = ( mODB ? mODB->nextTaskTime() : -1 );

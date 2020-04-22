@@ -1687,3 +1687,27 @@ ObjectId ODBSQL::importModule( ObjectId pParentId, ObjectId pOwnerId, const QStr
 	return( NewModuleId );
 }
 
+ObjectIdVector ODBSQL::connectedObjects() const
+{
+	ObjectIdVector		ObjectVector;
+
+	if( !QSqlDatabase::database().isOpen() )
+	{
+		return( ObjectVector );
+	}
+
+	QSqlQuery	Q( "SELECT id FROM object WHERE connection != -1 AND recycled = false" );
+
+	if( !Q.exec() )
+	{
+		return( ObjectVector );
+	}
+
+	while( Q.next() )
+	{
+		ObjectVector << ObjectId( Q.value( 0 ).toInt() );
+	}
+
+	return( ObjectVector );
+}
+

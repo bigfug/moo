@@ -125,6 +125,8 @@ public:
 
 	QList<Object *> connectedPlayers( void ) const;
 
+	ObjectIdVector connectedObjects( void ) const;
+
 	inline ODB *odb( void )
 	{
 		return( mODB );

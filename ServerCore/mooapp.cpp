@@ -66,18 +66,23 @@ mooApp::mooApp( const QString &pDataFileName, QObject *pParent )
 
 	if( System )
 	{
-		QList<Object *>		ObjLst = ObjectManager::instance()->connectedPlayers();
+		ObjectIdVector		ObjLst = ObjectManager::instance()->connectedObjects();
 
 		bool		HasVerb = System->verb( "user_disconnected" );
 
-		for( Object *O : ObjLst )
+		for( ObjectId OID : ObjLst )
 		{
-			if( HasVerb )
-			{
-				lua_task::process( QString( "moo.system:user_disconnected( o( %1 ) )" ).arg( O->id() ) );
-			}
+			Object		*O = ObjectManager::o( OID );
 
-			O->setConnection( -1 );
+			if( O )
+			{
+				if( HasVerb )
+				{
+					lua_task::process( QString( "moo.system:user_disconnected( o( %1 ) )" ).arg( O->id() ) );
+				}
+
+				O->setConnection( -1 );
+			}
 		}
 
 		if( System->verb( "server_started" ) )

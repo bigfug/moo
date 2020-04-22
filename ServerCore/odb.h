@@ -64,6 +64,8 @@ public:
 
 	virtual ObjectId importModule( ObjectId pParentId, ObjectId pOwnerId, const QString &pFileName, TransferInformation &pTrnInf ) = 0;
 
+	virtual ObjectIdVector connectedObjects( void ) const = 0;
+
 protected:
 	Object *newObject( void ) const;
 
