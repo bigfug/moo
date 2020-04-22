@@ -139,6 +139,39 @@ void ODBSQL::initialiseDatabase( QSqlDatabase &pDB )
 
 		updateTaskAddSchedule( pDB );
 	}
+
+	if( true )
+	{
+		QSqlQuery	Q( "SELECT id FROM object WHERE recycled = true" );
+
+		QSqlQuery	DeletePropertiesQuery;
+		QSqlQuery	DeleteVerbsQuery;
+		QSqlQuery	DeleteTasksQuery;
+
+		DeletePropertiesQuery.prepare( "DELETE FROM property WHERE object = :id OR owner = :id" );
+
+		DeleteVerbsQuery.prepare( "DELETE FROM verb WHERE object = :id OR owner = :id" );
+
+		DeleteTasksQuery.prepare( "DELETE FROM task WHERE player = :id" );
+
+		if( Q.exec() )
+		{
+			while( Q.next() )
+			{
+				int		id = Q.value( 0 ).toInt();
+
+				DeletePropertiesQuery.bindValue( ":id", id );
+				DeleteVerbsQuery.bindValue( ":id", id );
+				DeleteTasksQuery.bindValue( ":id", id );
+
+				DeletePropertiesQuery.exec();
+				DeleteVerbsQuery.exec();
+				DeleteTasksQuery.exec();
+			}
+		}
+
+		pDB.exec( "DELETE FROM object WHERE recycled = true" );
+	}
 }
 
 ODBSQL::ODBSQL()
