@@ -448,9 +448,14 @@ int lua_object::luaGet( lua_State *L )
 
 					for( int i = 0 ; i < O->contents().size() ; i++ )
 					{
-						lua_pushinteger( L, i + 1 );
-						lua_pushobjectid( L, O->contents().at( i ) );
-						lua_settable( L, -3 );
+						ObjectId	OID = O->contents().at( i );
+
+						if( OID != OBJECT_NONE )
+						{
+							lua_pushinteger( L, i + 1 );
+							lua_pushobjectid( L, O->contents().at( i ) );
+							lua_settable( L, -3 );
+						}
 					}
 
 					return( 1 );
