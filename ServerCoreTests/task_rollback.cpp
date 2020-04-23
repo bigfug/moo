@@ -1,4 +1,4 @@
-#include "tst_servertest.h"
+#include "task_rollback.h"
 
 #include "object.h"
 #include "objectmanager.h"
@@ -8,7 +8,7 @@
 
 #include "luatestdata.h"
 
-void ServerTest::taskRollbackObjectCreate( void )
+void TaskRollback::taskRollbackObjectCreate( void )
 {
 	LuaTestData			TD;
 
@@ -27,7 +27,7 @@ void ServerTest::taskRollbackObjectCreate( void )
 	QCOMPARE( TD.OM.o( O->id() ), nullptr );
 }
 
-void ServerTest::taskRollbackObjectRecycle()
+void TaskRollback::taskRollbackObjectRecycle()
 {
 	LuaTestData			TD;
 
@@ -47,7 +47,7 @@ void ServerTest::taskRollbackObjectRecycle()
 	QCOMPARE( TD.OM.o( O->id() ), O );
 }
 
-void ServerTest::taskRollbackObjectRead()
+void TaskRollback::taskRollbackObjectRead()
 {
 	LuaTestData			TD;
 
@@ -66,7 +66,7 @@ void ServerTest::taskRollbackObjectRead()
 	QCOMPARE( O->read(), V );
 }
 
-void ServerTest::taskRollbackObjectWrite( void )
+void TaskRollback::taskRollbackObjectWrite( void )
 {
 	LuaTestData			TD;
 
@@ -85,7 +85,7 @@ void ServerTest::taskRollbackObjectWrite( void )
 	QCOMPARE( O->write(), V );
 }
 
-void ServerTest::taskRollbackObjectFertile( void )
+void TaskRollback::taskRollbackObjectFertile( void )
 {
 	LuaTestData			TD;
 
@@ -104,7 +104,7 @@ void ServerTest::taskRollbackObjectFertile( void )
 	QCOMPARE( O->fertile(), V );
 }
 
-void ServerTest::taskRollbackObjectName( void )
+void TaskRollback::taskRollbackObjectName( void )
 {
 	LuaTestData			TD;
 
@@ -126,7 +126,7 @@ void ServerTest::taskRollbackObjectName( void )
 	QCOMPARE( O->name(), v1 );
 }
 
-void ServerTest::taskRollbackObjectOwner()
+void TaskRollback::taskRollbackObjectOwner()
 {
 	LuaTestData			TD;
 
@@ -148,7 +148,7 @@ void ServerTest::taskRollbackObjectOwner()
 	QCOMPARE( O->owner(), v1 );
 }
 
-void ServerTest::taskRollbackObjectParent()
+void TaskRollback::taskRollbackObjectParent()
 {
 	LuaTestData			TD;
 
@@ -170,7 +170,7 @@ void ServerTest::taskRollbackObjectParent()
 	QCOMPARE( O->parent(), v1 );
 }
 
-void ServerTest::taskRollbackObjectLocation()
+void TaskRollback::taskRollbackObjectLocation()
 {
 	LuaTestData			TD;
 
@@ -193,7 +193,7 @@ void ServerTest::taskRollbackObjectLocation()
 	QCOMPARE( O->location(), L1->id() );
 }
 
-void ServerTest::taskRollbackObjectPlayer()
+void TaskRollback::taskRollbackObjectPlayer()
 {
 	LuaTestData			TD;
 
@@ -212,7 +212,7 @@ void ServerTest::taskRollbackObjectPlayer()
 	QCOMPARE( O->player(), V );
 }
 
-void ServerTest::taskRollbackObjectProgrammer()
+void TaskRollback::taskRollbackObjectProgrammer()
 {
 	LuaTestData			TD;
 
@@ -231,7 +231,7 @@ void ServerTest::taskRollbackObjectProgrammer()
 	QCOMPARE( O->programmer(), V );
 }
 
-void ServerTest::taskRollbackObjectWizard()
+void TaskRollback::taskRollbackObjectWizard()
 {
 	LuaTestData			TD;
 
@@ -250,7 +250,7 @@ void ServerTest::taskRollbackObjectWizard()
 	QCOMPARE( O->wizard(), V );
 }
 
-void ServerTest::taskRollbackObjectPropAdd( void )
+void TaskRollback::taskRollbackObjectPropAdd( void )
 {
 	LuaTestData			TD;
 
@@ -272,7 +272,7 @@ void ServerTest::taskRollbackObjectPropAdd( void )
 	QVERIFY( !O->prop( v1 ) );
 }
 
-void ServerTest::taskRollbackObjectPropDelete()
+void TaskRollback::taskRollbackObjectPropDelete()
 {
 	LuaTestData			TD;
 
@@ -300,7 +300,7 @@ void ServerTest::taskRollbackObjectPropDelete()
 	QCOMPARE( O->prop( v1 )->value().toString(), v2 );
 }
 
-void ServerTest::taskRollbackObjectPropClear()
+void TaskRollback::taskRollbackObjectPropClear()
 {
 	LuaTestData			TD;
 
@@ -341,7 +341,7 @@ void ServerTest::taskRollbackObjectPropClear()
 	QCOMPARE( O2->prop( v1 )->value().toString(), v3 );
 }
 
-void ServerTest::taskRollbackObjectPropValue()
+void TaskRollback::taskRollbackObjectPropValue()
 {
 	LuaTestData			TD;
 
@@ -374,7 +374,7 @@ void ServerTest::taskRollbackObjectPropValue()
 	QCOMPARE( O->prop( v1 )->value().toString(), v2 );
 }
 
-void ServerTest::taskRollbackObjectAliasAdd( void )
+void TaskRollback::taskRollbackObjectAliasAdd( void )
 {
 	LuaTestData			TD;
 
@@ -393,7 +393,7 @@ void ServerTest::taskRollbackObjectAliasAdd( void )
 	QVERIFY( !O->aliases().contains( v1 ) );
 }
 
-void ServerTest::taskRollbackObjectAliasDelete()
+void TaskRollback::taskRollbackObjectAliasDelete()
 {
 	LuaTestData			TD;
 
@@ -416,7 +416,7 @@ void ServerTest::taskRollbackObjectAliasDelete()
 	QVERIFY( O->aliases().contains( v1 ) );
 }
 
-void ServerTest::taskRollbackObjectPropInherit( void )
+void TaskRollback::taskRollbackObjectPropInherit( void )
 {
 	LuaTestData			TD;
 
@@ -446,3 +446,7 @@ void ServerTest::taskRollbackObjectPropInherit( void )
 	QCOMPARE( O2->prop( "test" )->value().toString(), QStringLiteral( "value2" ) );
 	QCOMPARE( O2->propParent( "test" )->value().toString(), QStringLiteral( "value1" ) );
 }
+
+QTEST_GUILESS_MAIN( TaskRollback )
+
+#include "task_rollback.moc"

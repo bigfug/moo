@@ -1,21 +1,24 @@
 #include "eval_moo.h"
 
-void eval_moo::broadcast()
+void eval_moo::broadcast_data()
 {
-	LuaTestData		TD;
+	QTest::addColumn<bool>( "elevated" );
+	QTest::addColumn<bool>( "error" );
 
-	lua_task		T = TD.execute( ";moo.broadcast()", false );
-
-	QCOMPARE( T.error(), true );
+	QTest::newRow( "elevated" ) << true << false;
+	QTest::newRow( "not elevated" ) << false << true;
 }
 
-void eval_moo::broadcastElevated()
+void eval_moo::broadcast()
 {
+	QFETCH( bool, elevated );
+	QFETCH( bool, error );
+
 	LuaTestData		TD;
 
-	lua_task		T = TD.execute( ";moo.broadcast()", true );
+	lua_task		T = TD.execute( ";moo.broadcast()", elevated );
 
-	QCOMPARE( T.error(), false );
+	QCOMPARE( T.error(), error );
 }
 
 void eval_moo::notify()
@@ -59,53 +62,51 @@ void eval_moo::system()
 	QCOMPARE( TD.Programmer->propValue( "result" ).toInt(), 0 );
 }
 
-void eval_moo::evalNotProgrammer()
+void eval_moo::eval_data()
 {
-	LuaTestData		TD;
+	QTest::addColumn<bool>( "programmer" );
+	QTest::addColumn<bool>( "wizard" );
+	QTest::addColumn<bool>( "elevated" );
+	QTest::addColumn<ObjectId>( "owner" );
+	QTest::addColumn<bool>( "error" );
+	QTest::addColumn<int>( "result" );
 
-	TD.Programmer->setProgrammer( false );
-	TD.Programmer->setWizard( false );
+	//                                     prg      wiz      elv      own  err     res
 
-	TD.Programmer->propAdd( "result", -1.0, TD.programmerId() );
+	QTest::newRow( "not programmer" )	<< false << false << false << 3 << true  << -1;
+	QTest::newRow( "programmer" )		<< true	 << false << false << 3 << false << 23;
+	QTest::newRow( "wizard" )			<< true  << true  << false << 3 << false << 23;
+	QTest::newRow( "elevated" )			<< true  << true  << true  << 3 << false << 23;
 
-	lua_task		T = TD.execute( ";moo.player.result = 23", false );
-
-	QCOMPARE( T.error(), true );
-
-	QCOMPARE( TD.Programmer->propValue( "result" ).toInt(), -1 );
+	QTest::newRow( "not programmer" )	<< false << false << false << 2 << true  << -1;
+	QTest::newRow( "programmer" )		<< true	 << false << false << 2 << true  << -1;
+	QTest::newRow( "wizard" )			<< true  << true  << false << 2 << true  << -1;
+	QTest::newRow( "elevated" )			<< true  << true  << true  << 2 << false << 23;
 }
 
-void eval_moo::evalProgrammer()
+void eval_moo::eval()
 {
+	QFETCH( bool, programmer );
+	QFETCH( bool, wizard );
+	QFETCH( bool, elevated );
+	QFETCH( ObjectId, owner );
+	QFETCH( bool, error );
+	QFETCH( int,  result );
+
 	LuaTestData		TD;
 
-	TD.Programmer->setProgrammer( true );
-	TD.Programmer->setWizard( false );
+	TD.Programmer->setProgrammer( programmer );
+	TD.Programmer->setWizard( wizard );
 
-	TD.Programmer->propAdd( "result", -1.0, TD.programmerId() );
+	TD.Programmer->propAdd( "result", -1.0, owner );
 
-	lua_task		T = TD.execute( ";moo.player.result = 23", false );
+	lua_task		T = TD.execute( ";moo.player.result = 23", elevated );
 
-	QCOMPARE( T.error(), false );
+	QCOMPARE( T.error(), error );
 
-	QCOMPARE( TD.Programmer->propValue( "result" ).toInt(), 23 );
+	QCOMPARE( TD.Programmer->propValue( "result" ).toInt(), result );
 }
 
-void eval_moo::evalElevated()
-{
-	LuaTestData		TD;
-
-	TD.Programmer->setProgrammer( true );
-	TD.Programmer->setWizard( true );
-
-	TD.Programmer->propAdd( "result", -1.0, TD.programmerId() );
-
-	lua_task		T = TD.execute( ";moo.player.result = 23", true );
-
-	QCOMPARE( T.error(), false );
-
-	QCOMPARE( TD.Programmer->propValue( "result" ).toInt(), 23 );
-}
 
 QTEST_GUILESS_MAIN( eval_moo )
 

@@ -6,6 +6,8 @@ include_directories( .. )
 
 set( SOURCE_FILES
 	tst_servertest.cpp
+	tst_servertest.h
+
 	tst_task.cpp
 	tst_properties.cpp
 	tst_verbs.cpp
@@ -16,15 +18,10 @@ set( SOURCE_FILES
 	tst_lua_prop.cpp
 	tst_lua_verb.cpp
 	tst_lua_task.cpp
-	tst_lua_call_values.cpp
 	tst_lua_prop_security.cpp
-	permissionstest.cpp
     tst_lua_prop_inheritance.cpp
     tst_lua_verb_call.cpp
     tst_lua_pass.cpp
-	tst_servertest.h
-	permissionstest.h
-	tst_task_rollback_object.cpp
 	)
 
 find_package( Qt5 REQUIRED COMPONENTS Core Test )
@@ -48,12 +45,17 @@ link_libraries(
 set( TEST_DATA_SOURCES luatestdata.h luatestdata.cpp )
 
 add_executable( ${PROJECT_NAME} ${SOURCE_FILES} ${TEST_DATA_SOURCES} )
-
 add_executable( test_object tst_object.cpp tst_object.h ${TEST_DATA_SOURCES} )
-
 add_executable( eval_moo eval_moo.cpp eval_moo.h ${TEST_DATA_SOURCES} )
+add_executable( permissionstest permissionstest.cpp permissionstest.h ${TEST_DATA_SOURCES} )
+add_executable( task_rollback task_rollback.cpp task_rollback.h ${TEST_DATA_SOURCES} )
+add_executable( tst_lua_call_values tst_lua_call_values.cpp tst_lua_call_values.h ${TEST_DATA_SOURCES} )
 
 add_test( ServerCore ${PROJECT_NAME} )
 add_test( test_object test_object )
 add_test( eval_moo eval_moo )
+add_test( permissionstest permissionstest )
+add_test( task_rollback task_rollback )
+add_test( tst_lua_call_values tst_lua_call_values )
+
 

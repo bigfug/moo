@@ -12,16 +12,15 @@ class eval_moo : public LuaTestObject
 	Q_OBJECT
 
 private slots:
+	void broadcast_data( void );
 	void broadcast( void );
-	void broadcastElevated( void );
 
 	void notify( void );
 	void root( void );
 	void system( void );
 
-	void evalNotProgrammer( void );
-	void evalProgrammer( void );
-	void evalElevated( void );
+	void eval_data( void );
+	void eval( void );
 };
 
 #endif // EVAL_MOO_H

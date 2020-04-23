@@ -36,7 +36,7 @@ void PermissionsTest::propAdd_data()
 	QList<bool>			BoolList;
 	int					TestNumber = 0;
 
-	ProgrammerIds << OBJECT_NONE << 3 << 4 << 5 << 6;
+	ProgrammerIds << OBJECT_NONE << 3 << 4;
 
 	BoolList << true << false;
 
@@ -91,5 +91,9 @@ void PermissionsTest::propAdd()
 
 	Property	*R = O->prop( "test" );
 
-	qDebug() << "PID=" << ProgrammerId << "PID=" << ObjectParentId << "OID=" << ObjectOwnerId << "OR=" << ObjectRead << "OW=" << ObjectWrite << "R=" << ( R == 0 ? "FAIL" : "OK" );
+	qDebug() << "PRID =" << ProgrammerId << "PAID =" << ObjectParentId << "OWID =" << ObjectOwnerId << "OR =" << ObjectRead << "OW =" << ObjectWrite << "R =" << ( R == 0 ? "FAIL" : "OK" );
 }
+
+QTEST_GUILESS_MAIN( PermissionsTest )
+
+#include "permissionstest.moc"

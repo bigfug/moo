@@ -946,8 +946,6 @@ int lua_task::execute( void )
 
 		T.setPermissions( FndVrb->owner() );
 
-		T.setObject( FndVrb->object() );
-
 		setPermissions( T.permissions() );
 
 		taskDump( "execute-verbCall", T );
@@ -972,7 +970,7 @@ int lua_task::verbCall( ObjectId pObjectId, Verb *V, int pArgCnt )
 	lua_task::taskDump( QString( "verbCall( %1, %2, %3 )" ).arg( pObjectId ).arg( V->name() ).arg( pArgCnt ), T );
 
 	T.setCaller( T.object() );
-	T.setObject( V->object() );
+	T.setObject( pObjectId );
 
 	if( T.verb().isEmpty() )
 	{

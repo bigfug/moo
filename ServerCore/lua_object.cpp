@@ -534,7 +534,8 @@ int lua_object::luaGet( lua_State *L )
 
 			lua_pushstring( L, s );
 			lua_verb::lua_pushverb( L, FndVrb );
-			lua_pushcclosure( L, lua_object::luaVerbCall, 2 );
+			lua_object::lua_pushobject( L, O );
+			lua_pushcclosure( L, lua_object::luaVerbCall, 3 );
 
 			return( 1 );
 		}
@@ -774,14 +775,27 @@ int lua_object::luaSet( lua_State *L )
 			throw( mooException( E_PROPNF, QString( "property '%1' is not defined" ).arg( N ) ) );
 		}
 
-		if( !O->write() && !Command->isOwner( FndPrp ) && !Command->isWizard() )
+		if( !Command->isWizard() )
 		{
-			throw( mooException( E_PERM, QString( "programmer (#%1) is not owner (#%2) or wizard of property (#%3)" ).arg( Command->permissions() ).arg( O->owner() ).arg( FndPrp->owner() ) ) );
-		}
+			if( FndObj->id() != O->id() )
+			{
+				// found prop on parent object
 
-		if( !FndPrp->write() && !Command->isOwner( FndPrp ) && !Command->isWizard() )
-		{
-			throw mooException( E_PERM, "no access to property" );
+				if( !FndPrp->change() )
+				{
+					if( !FndPrp->write() && !Command->isOwner( FndPrp ) )
+					{
+						throw mooException( E_PERM, "no access to property" );
+					}
+				}
+			}
+			else
+			{
+				if( !FndPrp->write() && !Command->isOwner( FndPrp ) )
+				{
+					throw mooException( E_PERM, "no access to property" );
+				}
+			}
 		}
 
 		QVariant					 V;
@@ -1043,14 +1057,15 @@ int lua_object::luaVerbCall( lua_State *L )
 
 	try
 	{
-		const Task			&PrvT = Command->task();
-		Task				 CurT = PrvT;
-		Object              *O = argObj( L );
-		const char			*s = lua_tostring( L, lua_upvalueindex( 1 ) );
-		QString				 n( s );
-		lua_verb::luaVerb	*v = (lua_verb::luaVerb *)lua_touserdata( L, lua_upvalueindex( 2 ) );
-		int					 Error = 0;
-		int					 ArgCnt = lua_gettop( L ) - 1;
+		const Task				&PrvT = Command->task();
+		Task					 CurT = PrvT;
+		Object					      *O = argObj( L );
+		const char					*s = lua_tostring( L, lua_upvalueindex( 1 ) );
+		QString						 n( s );
+		lua_verb::luaVerb			*v = (lua_verb::luaVerb *)lua_touserdata( L, lua_upvalueindex( 2 ) );
+		lua_object::luaHandle		*o = (lua_object::luaHandle *)lua_touserdata( L, lua_upvalueindex( 3 ) );
+		int							 Error = 0;
+		int							 ArgCnt = lua_gettop( L ) - 1;
 
 		const int			 c1 = lua_gettop( L ) - ArgCnt;
 

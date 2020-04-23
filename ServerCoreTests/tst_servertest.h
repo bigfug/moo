@@ -64,36 +64,6 @@ private slots:
 	void luaVerbAdd( void );
 	void luaVerbDel( void );
 
-	void luaCallValueObjectFirst( void );
-	void luaCallValuePlayerFirst( void );
-	void luaCallValueCallerFirst( void );
-	void luaCallValueProgrammerFirst( void );
-
-	void luaCallValueObjectSecond( void );
-	void luaCallValuePlayerSecond( void );
-	void luaCallValueCallerSecond( void );
-	void luaCallValueProgrammerSecond( void );
-
-	void luaCallValueObjectThird( void );
-	void luaCallValuePlayerThird( void );
-	void luaCallValueCallerThird( void );
-	void luaCallValueProgrammerThird( void );
-
-	void luaCallValueObjectFirstWizard( void );
-	void luaCallValuePlayerFirstWizard( void );
-	void luaCallValueCallerFirstWizard( void );
-	void luaCallValueProgrammerFirstWizard( void );
-
-	void luaCallValueObjectSecondWizard( void );
-	void luaCallValuePlayerSecondWizard( void );
-	void luaCallValueCallerSecondWizard( void );
-	void luaCallValueProgrammerSecondWizard( void );
-
-	void luaCallValueObjectThirdWizard( void );
-	void luaCallValuePlayerThirdWizard( void );
-	void luaCallValueCallerThirdWizard( void );
-	void luaCallValueProgrammerThirdWizard( void );
-
 	void luaPass1( void );
 	void luaPass2( void );
 	void luaPass3( void );
@@ -112,29 +82,6 @@ private slots:
 
 	void luaVerbVerbCall( void );
 	void luaVerbParentVerbCall( void );
-
-	void taskRollbackObjectCreate( void );
-	void taskRollbackObjectRecycle( void );
-
-	void taskRollbackObjectRead( void );
-	void taskRollbackObjectWrite( void );
-	void taskRollbackObjectFertile( void );
-	void taskRollbackObjectName( void );
-	void taskRollbackObjectOwner( void );
-	void taskRollbackObjectParent( void );
-	void taskRollbackObjectLocation( void );
-	void taskRollbackObjectPlayer( void );
-	void taskRollbackObjectProgrammer( void );
-	void taskRollbackObjectWizard( void );
-
-	void taskRollbackObjectPropAdd( void );
-	void taskRollbackObjectPropDelete( void );
-	void taskRollbackObjectPropClear( void );
-	void taskRollbackObjectPropValue( void );
-	void taskRollbackObjectPropInherit( void );
-
-	void taskRollbackObjectAliasAdd();
-	void taskRollbackObjectAliasDelete();
 };
 
 #endif // TST_SERVERTEST_H

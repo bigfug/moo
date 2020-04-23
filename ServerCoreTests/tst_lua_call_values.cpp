@@ -1,5 +1,5 @@
 
-#include "tst_servertest.h"
+#include "tst_lua_call_values.h"
 
 #include "object.h"
 #include "objectmanager.h"
@@ -102,14 +102,34 @@ Function: list eval (str string)
 
 */
 
-void ServerTest::luaCallValueObjectFirst( void )
+void TestLuaCallValues::luaCallValueFirst_data()
 {
+	QTest::addColumn<QString>( "pType" );
+	QTest::addColumn<bool>( "pWizard" );
+	QTest::addColumn<ObjectId>( "pResult" );
+
+	QTest::newRow( "object" )      << "object"      << false << OBJECT_NONE;
+	QTest::newRow( "caller" )      << "caller"      << false << 3;
+	QTest::newRow( "player" )      << "player"      << false << 3;
+	QTest::newRow( "permissions" ) << "permissions" << false << 3;
+
+	QTest::newRow( "object (wizard)" )      << "object"      << true  << OBJECT_NONE;
+	QTest::newRow( "caller (wizard)" )      << "caller"      << true  << 3;
+	QTest::newRow( "player (wizard)" )      << "player"      << true  << 3;
+	QTest::newRow( "permissions (wizard)" ) << "permissions" << true  << 3;
+}
+
+void TestLuaCallValues::luaCallValueFirst( void )
+{
+	QFETCH( QString,  pType );
+	QFETCH( bool, pWizard );
+	QFETCH( ObjectId, pResult );
+
 	LuaTestData			 TD;
 
-	TD.Programmer->setWizard( false );
+	TD.Programmer->setWizard( pWizard );
 
 	Object				*O  = TD.OM.newObject();
-	QString				 CD = QString( ";o( %1 ).result = moo.object.id" ).arg( O->id() );
 
 	O->setParent( 2 );
 	O->setOwner( TD.programmerId() );
@@ -127,7 +147,7 @@ void ServerTest::luaCallValueObjectFirst( void )
 
 	// Call test
 
-	TD.execute( CD );
+	TD.execute( QString( ";o( %1 ).result = moo.%2.id" ).arg( O->id() ).arg( pType ) );
 
 	// Check result
 
@@ -135,120 +155,35 @@ void ServerTest::luaCallValueObjectFirst( void )
 
 	QVERIFY( R );
 	QVERIFY( R->type() == QVariant::String );
-	QCOMPARE( R->value().toString(), QString( "%1" ).arg( OBJECT_NONE ) );	// moo.eval sets object to -1
+	QCOMPARE( R->value().toString(), QString( "%1" ).arg( pResult ) );	// moo.eval sets object to -1
 }
 
-void ServerTest::luaCallValueCallerFirst( void )
+void TestLuaCallValues::luaCallValueSecond_data()
 {
-	LuaTestData			 TD;
+	QTest::addColumn<QString>( "pType" );
+	QTest::addColumn<bool>( "pWizard" );
+	QTest::addColumn<ObjectId>( "pResult" );
 
-	TD.Programmer->setWizard( false );
+	QTest::newRow( "object" )      << "object"      << false << 4;
+	QTest::newRow( "caller" )      << "caller"      << false << -1;
+	QTest::newRow( "player" )      << "player"      << false << 3;
+	QTest::newRow( "permissions" ) << "permissions" << false << 4;
 
-	Object				*O  = TD.OM.newObject();
-
-	O->setParent( 2 );
-	O->setOwner( TD.programmerId() );
-
-	// Add property to hold result
-
-	Property		P;
-
-	P.initialise();
-
-	P.setValue( "string" );
-	P.setOwner( TD.programmerId() );
-
-	O->propAdd( "result", P );
-
-	// Call test
-
-	TD.execute( QString( ";o( %1 ).result = moo.caller.id" ).arg( O->id() ) );
-
-	// Check result
-
-	Property	*R = O->prop( "result" );
-
-	QVERIFY( R != 0 );
-	QVERIFY( R->type() == QVariant::String );
-	QCOMPARE( R->value().toString(), QString( "%1" ).arg( 1 ) );	 // #1.eval is the defined verb
+	QTest::newRow( "object (wizard)" )      << "object"      << true  << 4;
+	QTest::newRow( "caller (wizard)" )      << "caller"      << true  << OBJECT_NONE;
+	QTest::newRow( "player (wizard)" )      << "player"      << true  << 3;
+	QTest::newRow( "permissions (wizard)" ) << "permissions" << true  << 3;
 }
 
-void ServerTest::luaCallValuePlayerFirst( void )
+void TestLuaCallValues::luaCallValueSecond()
 {
+	QFETCH( QString,  pType );
+	QFETCH( bool, pWizard );
+	QFETCH( ObjectId, pResult );
+
 	LuaTestData			 TD;
 
-	TD.Programmer->setWizard( false );
-
-	Object				*O     = TD.OM.newObject();
-
-	O->setParent( 2 );
-	O->setOwner( TD.programmerId() );
-
-	// Add property to hold result
-
-	Property		P;
-
-	P.initialise();
-
-	P.setValue( "string" );
-	P.setOwner( TD.programmerId() );
-
-	O->propAdd( "result", P );
-
-	// Call test
-
-	TD.execute( QString( ";o( %1 ).result = moo.player.id" ).arg( O->id() ) );
-
-	// Check result
-
-	Property	*R = O->prop( "result" );
-
-	QVERIFY( R != 0 );
-	QVERIFY( R->type() == QVariant::String );
-	QCOMPARE( R->value().toString(), QString( "%1" ).arg( TD.Con->player() ) );
-}
-
-void ServerTest::luaCallValueProgrammerFirst( void )
-{
-	LuaTestData			 TD;
-
-	TD.Programmer->setWizard( false );
-
-	Object				*O     = TD.OM.newObject();
-
-	O->setParent( 2 );
-
-	// Add property to hold result
-
-	Property		P;
-
-	P.initialise();
-
-	P.setValue( "string" );
-	P.setOwner( TD.programmerId() );
-
-	O->propAdd( "result", P );
-
-	// Call test
-
-	TD.execute( QString( ";o( %1 ).result = moo.permissions.id" ).arg( O->id() ) );
-
-	// Check result
-
-	Property	*R = O->prop( "result" );
-
-	QVERIFY( R != 0 );
-	QVERIFY( R->type() == QVariant::String );
-	QCOMPARE( R->value().toString(), QString( "%1" ).arg( TD.programmerId() ) );
-}
-
-//------
-
-void ServerTest::luaCallValueObjectSecond( void )
-{
-	LuaTestData			 TD;
-
-	TD.Programmer->setWizard( false );
+	TD.Programmer->setWizard( pWizard );
 
 	Object				*O  = TD.OM.newObject();
 
@@ -272,7 +207,7 @@ void ServerTest::luaCallValueObjectSecond( void )
 	V.initialise();
 
 	V.setOwner( O->id() );
-	V.setScript( "moo.object.result = tostring( moo.object.id )" );
+	V.setScript( QString( "moo.object.result = tostring( moo.%1.id )" ).arg( pType ) );
 
 	O->verbAdd( "test", V );
 
@@ -284,157 +219,37 @@ void ServerTest::luaCallValueObjectSecond( void )
 
 	Property	*R = O->prop( "result" );
 
-	QVERIFY( R != 0 );
+	QVERIFY( R );
 	QVERIFY( R->type() == QVariant::String );
-	QCOMPARE( R->value().toString(), QString( "%1" ).arg( O->id() ) );
+	QCOMPARE( R->value().toString(), QString( "%1" ).arg( pResult ) );
 }
 
-void ServerTest::luaCallValueCallerSecond( void )
+void TestLuaCallValues::luaCallValueThird_data()
 {
-	LuaTestData			 TD;
+	QTest::addColumn<QString>( "pType" );
+	QTest::addColumn<bool>( "pWizard" );
+	QTest::addColumn<ObjectId>( "pResult" );
 
-	TD.Programmer->setWizard( false );
+	QTest::newRow( "object" )      << "object"      << false << 5;
+	QTest::newRow( "caller" )      << "caller"      << false << 4;
+	QTest::newRow( "player" )      << "player"      << false << 3;
+	QTest::newRow( "permissions" ) << "permissions" << false << 5;
 
-	Object				*O     = TD.OM.newObject();
-
-	O->setParent( 2 );
-
-	// Add property to hold result
-
-	Property		P;
-
-	P.initialise();
-
-	P.setValue( "string" );
-	P.setOwner( 2 );
-
-	O->propAdd( "result", P );
-
-	// Add verb
-
-	Verb			 V;
-
-	V.initialise();
-
-	V.setOwner( 2 );
-	V.setScript( "moo.object.result = tostring( moo.caller.id )" );
-
-	O->verbAdd( "test", V );
-
-	// Call test
-
-	TD.execute( QString( ";o( %1 ):test()" ).arg( O->id() ) );
-
-	// Check result
-
-	Property	*R = O->prop( "result" );
-
-	QVERIFY( R != 0 );
-	QVERIFY( R->type() == QVariant::String );
-	QCOMPARE( R->value().toString(), QString( "%1" ).arg( OBJECT_NONE ) );
+	QTest::newRow( "object (wizard)" )      << "object"      << true  << 5;
+	QTest::newRow( "caller (wizard)" )      << "caller"      << true  << 4;
+	QTest::newRow( "player (wizard)" )      << "player"      << true  << 3;
+	QTest::newRow( "permissions (wizard)" ) << "permissions" << true  << 3;
 }
 
-void ServerTest::luaCallValuePlayerSecond( void )
+void TestLuaCallValues::luaCallValueThird()
 {
+	QFETCH( QString,  pType );
+	QFETCH( bool, pWizard );
+	QFETCH( ObjectId, pResult );
+
 	LuaTestData			 TD;
 
-	TD.Programmer->setWizard( false );
-
-	Object				*O     = TD.OM.newObject();
-
-	O->setParent( 2 );
-
-	// Add property to hold result
-
-	Property		P;
-
-	P.initialise();
-
-	P.setValue( "string" );
-	P.setOwner( 2 );
-
-	O->propAdd( "result", P );
-
-	// Add verb
-
-	Verb			 V;
-
-	V.initialise();
-
-	V.setOwner( 2 );
-	V.setScript( "moo.object.result = tostring( moo.player.id )" );
-
-	O->verbAdd( "test", V );
-
-	// Call test
-
-	TD.execute( QString( ";o( %1 ):test()" ).arg( O->id() ) );
-
-	// Check result
-
-	Property	*R = O->prop( "result" );
-
-	QVERIFY( R != 0 );
-	QVERIFY( R->type() == QVariant::String );
-	QCOMPARE( R->value().toString(), QString( "%1" ).arg( TD.Con->player() ) );
-}
-
-void ServerTest::luaCallValueProgrammerSecond( void )
-{
-	LuaTestData			 TD;
-
-	TD.Programmer->setWizard( false );
-
-	Object				*O     = TD.OM.newObject();
-
-	O->setParent( 2 );
-
-	// Add property to hold result
-
-	Property		P;
-
-	P.initialise();
-
-	P.setValue( "string" );
-	P.setOwner( 2 );
-
-	O->propAdd( "result", P );
-
-	// Add verb
-
-	Verb			 V;
-
-	V.initialise();
-
-	V.setOwner( 2 );
-	V.setScript( "moo.object.result = tostring( moo.permissions.id )" );
-
-	O->verbAdd( "test", V );
-
-	// Call test
-
-	TD.execute( QString( ";o( %1 ):test()" ).arg( O->id() ) );
-
-	// Check result
-
-	// the same value as it had initially in the calling verb or,
-	// if the calling verb is running with wizard permissions,
-	// the same as the current value in the calling verb.
-
-	Property	*R = O->prop( "result" );
-
-	QVERIFY( R != 0 );
-	QVERIFY( R->type() == QVariant::String );
-	QCOMPARE( R->value().toString(), QString( "%1" ).arg( V.owner() ) );
-}
-
-//------
-
-void ServerTest::luaCallValueObjectThird( void )
-{
-	LuaTestData			 TD;
-
-	TD.Programmer->setWizard( false );
+	TD.Programmer->setWizard( pWizard );
 
 	Object				*O1 = TD.OM.newObject();
 	Object				*O2 = TD.OM.newObject();
@@ -471,7 +286,7 @@ void ServerTest::luaCallValueObjectThird( void )
 	V2.initialise();
 
 	V2.setOwner( O2->id() );
-	V2.setScript( QString( "o( %1 ).result = tostring( moo.object.id )" ).arg( O2->id() ) );
+	V2.setScript( QString( "o( %1 ).result = tostring( moo.%2.id )" ).arg( O2->id() ).arg( pType ) );
 
 	O2->verbAdd( "test", V2 );
 
@@ -485,695 +300,9 @@ void ServerTest::luaCallValueObjectThird( void )
 
 	QVERIFY( R != 0 );
 	QVERIFY( R->type() == QVariant::String );
-	QCOMPARE( R->value().toString(), QString( "%1" ).arg( O2->id() ) );
+	QCOMPARE( R->value().toString(), QString( "%1" ).arg( pResult ) );
 }
 
-void ServerTest::luaCallValuePlayerThird()
-{
-	LuaTestData			 TD;
+QTEST_GUILESS_MAIN( TestLuaCallValues )
 
-	TD.Programmer->setWizard( false );
-
-	Object				*O1 = TD.OM.newObject();
-	Object				*O2 = TD.OM.newObject();
-
-	O1->setParent( 2 );
-	O2->setParent( 1 );
-
-	// Add property to hold result
-
-	Property		P2;
-
-	P2.initialise();
-
-	P2.setValue( "result" );
-	P2.setOwner( O2->id() );
-
-	O2->propAdd( "result", P2 );
-
-	// Add verb
-
-	Verb			 V1;
-
-	V1.initialise();
-
-	V1.setOwner( O1->id() );
-	V1.setScript( QString( "o( %1 ):test()" ).arg( O2->id() ) );
-
-	O1->verbAdd( "test", V1);
-
-	// Add verb
-
-	Verb			 V2;
-
-	V2.initialise();
-
-	V2.setOwner( O2->id() );
-	V2.setScript( QString( "o( %1 ).result = tostring( moo.player.id )" ).arg( O2->id() ) );
-
-	O2->verbAdd( "test", V2 );
-
-	// Call test
-
-	TD.execute( QString( ";o( %1 ):test()" ).arg( O1->id() ) );
-
-	// Check result
-
-	Property	*R = O2->prop( "result" );
-
-	QVERIFY( R != 0 );
-	QVERIFY( R->type() == QVariant::String );
-	QCOMPARE( R->value().toString(), QString( "%1" ).arg( TD.Con->player() ) );
-}
-
-void ServerTest::luaCallValueCallerThird()
-{
-	LuaTestData			 TD;
-
-	TD.Programmer->setWizard( false );
-
-	Object				*O1 = TD.OM.newObject();
-	Object				*O2 = TD.OM.newObject();
-
-	O1->setParent( 2 );
-	O2->setParent( 1 );
-
-	// Add property to hold result
-
-	Property		P2;
-
-	P2.initialise();
-
-	P2.setValue( "result" );
-	P2.setOwner( O2->id() );
-
-	O2->propAdd( "result", P2 );
-
-	// Add verb
-
-	Verb			 V1;
-
-	V1.initialise();
-
-	V1.setOwner( O1->id() );
-	V1.setScript( QString( "o( %1 ):test()" ).arg( O2->id() ) );
-
-	O1->verbAdd( "test", V1);
-
-	// Add verb
-
-	Verb			 V2;
-
-	V2.initialise();
-
-	V2.setOwner( O2->id() );
-	V2.setScript( QString( "o( %1 ).result = tostring( moo.caller.id )" ).arg( O2->id() ) );
-
-	O2->verbAdd( "test", V2 );
-
-	// Call test
-
-	TD.execute( QString( ";o( %1 ):test()" ).arg( O1->id() ) );
-
-	// Check result
-
-	Property	*R = O2->prop( "result" );
-
-	QVERIFY( R != 0 );
-	QVERIFY( R->type() == QVariant::String );
-	QCOMPARE( R->value().toString(), QString( "%1" ).arg( O1->id() ) );
-}
-
-void ServerTest::luaCallValueProgrammerThird()
-{
-	LuaTestData			 TD;
-
-	TD.Programmer->setWizard( false );
-
-	Object				*O1 = TD.OM.newObject();
-	Object				*O2 = TD.OM.newObject();
-
-	O1->setParent( 2 );
-	O2->setParent( 1 );
-
-	// Add property to hold result
-
-	Property		P2;
-
-	P2.initialise();
-
-	P2.setValue( "result" );
-	P2.setOwner( O2->id() );
-
-	O2->propAdd( "result", P2 );
-
-	// Add verb
-
-	Verb			 V1;
-
-	V1.initialise();
-
-	V1.setOwner( O1->id() );
-	V1.setScript( QString( "o( %1 ):test()" ).arg( O2->id() ) );
-
-	O1->verbAdd( "test", V1);
-
-	// Add verb
-
-	Verb			 V2;
-
-	V2.initialise();
-
-	V2.setOwner( O2->id() );
-	V2.setScript( QString( "o( %1 ).result = tostring( moo.permissions.id )" ).arg( O2->id() ) );
-
-	O2->verbAdd( "test", V2 );
-
-	// Call test
-
-	TD.execute( QString( ";o( %1 ):test()" ).arg( O1->id() ) );
-
-	// Check result
-
-	Property	*R = O2->prop( "result" );
-
-	QVERIFY( R != 0 );
-	QVERIFY( R->type() == QVariant::String );
-	QCOMPARE( R->value().toString(), QString( "%1" ).arg( O2->id() ) );
-}
-
-//--------
-//--------
-
-void ServerTest::luaCallValueObjectFirstWizard( void )
-{
-	LuaTestData			 TD;
-	Object				*O = TD.OM.newObject();
-
-	O->setParent( 2 );
-
-	// Add property to hold result
-
-	Property		P;
-
-	P.initialise();
-
-	P.setValue( "string" );
-	P.setOwner( TD.programmerId() );
-
-	O->propAdd( "result", P );
-
-	// Call test
-
-	TD.execute( QString( ";o( %1 ).result = moo.object.id" ).arg( O->id() ) );
-
-	// Check result
-
-	Property	*R = O->prop( "result" );
-
-	QVERIFY( R != 0 );
-	QVERIFY( R->type() == QVariant::String );
-	QCOMPARE( R->value().toString(), QString( "%1" ).arg( OBJECT_NONE ) );
-}
-
-void ServerTest::luaCallValueCallerFirstWizard( void )
-{
-	LuaTestData			 TD;
-	Object				*O     = TD.OM.newObject();
-
-	O->setParent( 2 );
-
-	// Add property to hold result
-
-	Property		P;
-
-	P.initialise();
-
-	P.setValue( "string" );
-	P.setOwner( TD.programmerId() );
-
-	O->propAdd( "result", P );
-
-	// Call test
-
-	TD.execute( QString( ";o( %1 ).result = moo.caller.id" ).arg( O->id() ) );
-
-	// Check result
-
-	Property	*R = O->prop( "result" );
-
-	QVERIFY( R != 0 );
-	QVERIFY( R->type() == QVariant::String );
-	QCOMPARE( R->value().toString(), QString( "%1" ).arg( 1 ) );
-}
-
-void ServerTest::luaCallValuePlayerFirstWizard( void )
-{
-	LuaTestData			 TD;
-	Object				*O     = TD.OM.newObject();
-
-	O->setParent( 2 );
-
-	// Add property to hold result
-
-	Property		P;
-
-	P.initialise();
-
-	P.setValue( "string" );
-	P.setOwner( TD.programmerId() );
-
-	O->propAdd( "result", P );
-
-	// Call test
-
-	TD.execute( QString( ";o( %1 ).result = moo.player.id" ).arg( O->id() ) );
-
-	// Check result
-
-	Property	*R = O->prop( "result" );
-
-	QVERIFY( R != 0 );
-	QVERIFY( R->type() == QVariant::String );
-	QCOMPARE( R->value().toString(), QString( "%1" ).arg( TD.Con->player() ) );
-}
-
-void ServerTest::luaCallValueProgrammerFirstWizard( void )
-{
-	LuaTestData			 TD;
-	Object				*O     = TD.OM.newObject();
-
-	O->setParent( 2 );
-
-	// Add property to hold result
-
-	Property		P;
-
-	P.initialise();
-
-	P.setValue( "string" );
-
-	O->propAdd( "result", P );
-
-	// Call test
-
-	TD.execute( QString( ";o( %1 ).result = moo.permissions.id" ).arg( O->id() ) );
-
-	// Check result
-
-	Property	*R = O->prop( "result" );
-
-	QVERIFY( R != 0 );
-	QVERIFY( R->type() == QVariant::String );
-	QCOMPARE( R->value().toString(), QString( "%1" ).arg( TD.programmerId() ) );
-}
-
-//------
-
-void ServerTest::luaCallValueObjectSecondWizard( void )
-{
-	LuaTestData			 TD;
-	Object				*O     = TD.OM.newObject();
-
-	O->setParent( 2 );
-
-	// Add property to hold result
-
-	Property		P;
-
-	P.initialise();
-
-	P.setValue( "string" );
-
-	O->propAdd( "result", P );
-
-	// Add verb
-
-	Verb			 V;
-
-	V.initialise();
-
-	V.setOwner( 2 );
-	V.setScript( "moo.object.result = tostring( moo.object.id )" );
-
-	O->verbAdd( "test", V );
-
-	// Call test
-
-	TD.execute( QString( ";o( %1 ):test()" ).arg( O->id() ) );
-
-	// Check result
-
-	Property	*R = O->prop( "result" );
-
-	QVERIFY( R != 0 );
-	QVERIFY( R->type() == QVariant::String );
-	QCOMPARE( R->value().toString(), QString( "%1" ).arg( O->id() ) );
-}
-
-void ServerTest::luaCallValueCallerSecondWizard( void )
-{
-	LuaTestData			 TD;
-	Object				*O     = TD.OM.newObject();
-
-	O->setParent( 2 );
-
-	// Add property to hold result
-
-	Property		P;
-
-	P.initialise();
-
-	P.setValue( "string" );
-
-	O->propAdd( "result", P );
-
-	// Add verb
-
-	Verb			 V;
-
-	V.initialise();
-
-	V.setOwner( 2 );
-	V.setScript( "moo.object.result = tostring( moo.caller.id )" );
-
-	O->verbAdd( "test", V );
-
-	// Call test
-
-	TD.execute( QString( ";o( %1 ):test()" ).arg( O->id() ) );
-
-	// Check result
-
-	Property	*R = O->prop( "result" );
-
-	QVERIFY( R != 0 );
-	QVERIFY( R->type() == QVariant::String );
-	QCOMPARE( R->value().toString(), QString( "%1" ).arg( OBJECT_NONE ) );
-}
-
-void ServerTest::luaCallValuePlayerSecondWizard( void )
-{
-	LuaTestData			 TD;
-	Object				*O     = TD.OM.newObject();
-	QString				 CD = QString( ";o( %1 ):test()" ).arg( O->id() );
-
-	O->setParent( 2 );
-
-	// Add property to hold result
-
-	Property		P;
-
-	P.initialise();
-
-	P.setValue( "string" );
-
-	O->propAdd( "result", P );
-
-	// Add verb
-
-	Verb			 V;
-
-	V.initialise();
-
-	V.setOwner( 2 );
-	V.setScript( "moo.object.result = tostring( moo.player.id )" );
-
-	O->verbAdd( "test", V );
-
-	// Call test
-
-	TD.execute( CD );
-
-	// Check result
-
-	Property	*R = O->prop( "result" );
-
-	QVERIFY( R != 0 );
-	QVERIFY( R->type() == QVariant::String );
-	QCOMPARE( R->value().toString(), QString( "%1" ).arg( TD.Con->player() ) );
-}
-
-void ServerTest::luaCallValueProgrammerSecondWizard( void )
-{
-	LuaTestData			 TD;
-	Object				*O     = TD.OM.newObject();
-	QString				 CD = QString( ";o( %1 ):test()" ).arg( O->id() );
-
-	O->setParent( 2 );
-
-	// Add property to hold result
-
-	Property		P;
-
-	P.initialise();
-
-	P.setValue( "string" );
-
-	O->propAdd( "result", P );
-
-	// Add verb
-
-	Verb			 V;
-
-	V.initialise();
-
-	V.setOwner( 2 );
-	V.setScript( "moo.object.result = tostring( moo.permissions.id )" );
-
-	O->verbAdd( "test", V );
-
-	// Call test
-
-	TD.execute( CD );
-
-	// Check result
-
-	Property	*R = O->prop( "result" );
-
-	QVERIFY( R != 0 );
-	QVERIFY( R->type() == QVariant::String );
-	QCOMPARE( R->value().toString(), QString( "%1" ).arg( TD.programmerId() ) );
-}
-
-//------
-
-void ServerTest::luaCallValueObjectThirdWizard( void )
-{
-	LuaTestData			 TD;
-	Object				*O1 = TD.OM.newObject();
-	Object				*O2 = TD.OM.newObject();
-	QString				 CD = QString( ";o( %1 ):test()" ).arg( O1->id() );
-
-	O1->setParent( 2 );
-	O2->setParent( 1 );
-
-	// Add property to hold result
-
-	Property		P2;
-
-	P2.initialise();
-
-	P2.setValue( "result" );
-
-	O2->propAdd( "result", P2 );
-
-	// Add verb
-
-	Verb			 V1;
-
-	V1.initialise();
-
-	V1.setOwner( O1->id() );
-	V1.setScript( QString( "o( %1 ):test()" ).arg( O2->id() ) );
-
-	O1->verbAdd( "test", V1);
-
-	// Add verb
-
-	Verb			 V2;
-
-	V2.initialise();
-
-	V2.setOwner( O2->id() );
-	V2.setScript( QString( "o( %1 ).result = tostring( moo.object.id )" ).arg( O2->id() ) );
-
-	O2->verbAdd( "test", V2 );
-
-	// Call test
-
-	TD.execute( CD );
-
-	// Check result
-
-	Property	*R = O2->prop( "result" );
-
-	QVERIFY( R != 0 );
-	QVERIFY( R->type() == QVariant::String );
-	QCOMPARE( R->value().toString(), QString( "%1" ).arg( O2->id() ) );
-}
-
-void ServerTest::luaCallValuePlayerThirdWizard()
-{
-	LuaTestData			 TD;
-	Object				*O1 = TD.OM.newObject();
-	Object				*O2 = TD.OM.newObject();
-	QString				 CD = QString( ";o( %1 ):test()" ).arg( O1->id() );
-
-	O1->setParent( 2 );
-	O2->setParent( 1 );
-
-	// Add property to hold result
-
-	Property		P2;
-
-	P2.initialise();
-
-	P2.setValue( "result" );
-
-	O2->propAdd( "result", P2 );
-
-	// Add verb
-
-	Verb			 V1;
-
-	V1.initialise();
-
-	V1.setOwner( O1->id() );
-	V1.setScript( QString( "o( %1 ):test()" ).arg( O2->id() ) );
-
-	O1->verbAdd( "test", V1);
-
-	// Add verb
-
-	Verb			 V2;
-
-	V2.initialise();
-
-	V2.setOwner( O2->id() );
-	V2.setScript( QString( "o( %1 ).result = tostring( moo.player.id )" ).arg( O2->id() ) );
-
-	O2->verbAdd( "test", V2 );
-
-	// Call test
-
-	TD.execute( CD );
-
-	// Check result
-
-	Property	*R = O2->prop( "result" );
-
-	QVERIFY( R != 0 );
-	QVERIFY( R->type() == QVariant::String );
-	QCOMPARE( R->value().toString(), QString( "%1" ).arg( TD.programmerId() ) );
-}
-
-void ServerTest::luaCallValueCallerThirdWizard()
-{
-	LuaTestData			 TD;
-	Object				*O1 = TD.OM.newObject();
-	Object				*O2 = TD.OM.newObject();
-	QString				 CD = QString( ";o( %1 ):test()" ).arg( O1->id() );
-
-	O1->setParent( 2 );
-	O2->setParent( 1 );
-
-	// Add property to hold result
-
-	Property		P2;
-
-	P2.initialise();
-
-	P2.setValue( "result" );
-
-	O2->propAdd( "result", P2 );
-
-	// Add verb
-
-	Verb			 V1;
-
-	V1.initialise();
-
-	V1.setOwner( O1->id() );
-	V1.setScript( QString( "o( %1 ):test()" ).arg( O2->id() ) );
-
-	O1->verbAdd( "test", V1);
-
-	// Add verb
-
-	Verb			 V2;
-
-	V2.initialise();
-
-	V2.setOwner( O2->id() );
-	V2.setScript( QString( "o( %1 ).result = tostring( moo.caller.id )" ).arg( O2->id() ) );
-
-	O2->verbAdd( "test", V2 );
-
-	// Call test
-
-	TD.execute( CD );
-
-	// Check result
-
-	Property	*R = O2->prop( "result" );
-
-	QVERIFY( R != 0 );
-	QVERIFY( R->type() == QVariant::String );
-	QCOMPARE( R->value().toString(), QString( "%1" ).arg( O1->id() ) );
-}
-
-void ServerTest::luaCallValueProgrammerThirdWizard()
-{
-	LuaTestData			 TD;
-	Object				*O1 = TD.OM.newObject();
-	Object				*O2 = TD.OM.newObject();
-	QString				 CD = QString( ";o( %1 ):test()" ).arg( O1->id() );
-
-	O1->setParent( 2 );
-	O2->setParent( 1 );
-
-	// Add property to hold result
-
-	Property		P2;
-
-	P2.initialise();
-
-	P2.setValue( "result" );
-
-	O2->propAdd( "result", P2 );
-
-	// Add verb
-
-	Verb			 V1;
-
-	V1.initialise();
-
-	V1.setOwner( O1->id() );
-	V1.setScript( QString( "o( %1 ):test()" ).arg( O2->id() ) );
-
-	O1->verbAdd( "test", V1 );
-
-	// Add verb
-
-	Verb			 V2;
-
-	V2.initialise();
-
-	V2.setOwner( O2->id() );
-	V2.setScript( QString( "o( %1 ).result = tostring( moo.permissions.id )" ).arg( O2->id() ) );
-
-	O2->verbAdd( "test", V2 );
-
-	// Call test
-
-	TD.execute( CD );
-
-	// Check result
-
-	Property	*R = O2->prop( "result" );
-
-	QVERIFY( R != 0 );
-	QVERIFY( R->type() == QVariant::String );
-	QCOMPARE( R->value().toString(), QString( "%1" ).arg( TD.programmerId() ) );
-}
+#include "tst_lua_call_values.moc"

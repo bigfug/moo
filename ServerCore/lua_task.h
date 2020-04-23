@@ -202,6 +202,7 @@ private:
 
 	friend class lua_moo;
 	friend class ServerTest;
+	friend class TaskRollback;
 
 	Q_DISABLE_COPY( lua_task )
 };
