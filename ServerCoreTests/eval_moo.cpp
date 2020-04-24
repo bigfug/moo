@@ -107,6 +107,38 @@ void eval_moo::eval()
 	QCOMPARE( TD.Programmer->propValue( "result" ).toInt(), result );
 }
 
+void eval_moo::evalArgs_data()
+{
+	QTest::addColumn<QString>( "pType" );
+	QTest::addColumn<QString>( "pResult" );
+
+	QTest::newRow( "player" ) << "player" << "#3";
+	QTest::newRow( "caller" ) << "caller" << "#3";		// TODO: check this
+	QTest::newRow( "object" ) << "object" << "#-1";
+	QTest::newRow( "argstr" ) << "argstr" << "";
+	QTest::newRow( "verb" ) << "verb" << "";
+	QTest::newRow( "dobjstr" ) << "dobjstr" << "";
+	QTest::newRow( "dobj" ) << "dobj" << "#-1";
+	QTest::newRow( "prepstr" ) << "prepstr" << "";
+	QTest::newRow( "iobjstr" ) << "iobjstr" << "";
+	QTest::newRow( "iobj" ) << "iobj" << "#-1";
+}
+
+void eval_moo::evalArgs()
+{
+	QFETCH( QString, pType );
+	QFETCH( QString, pResult );
+
+	LuaTestData		TD;
+
+	TD.Programmer->propAdd( "result", "no result", TD.programmerId() );
+
+	lua_task		T = TD.execute( QString( ";moo.player.result = tostring( moo.%1 )" ).arg( pType ) );
+
+	QCOMPARE( T.error(), false );
+
+	QCOMPARE( TD.Programmer->propValue( "result" ).toString(), pResult );
+}
 
 QTEST_GUILESS_MAIN( eval_moo )
 

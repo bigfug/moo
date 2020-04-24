@@ -21,6 +21,9 @@ private slots:
 
 	void eval_data( void );
 	void eval( void );
+
+	void evalArgs_data( void );
+	void evalArgs( void );
 };
 
 #endif // EVAL_MOO_H
