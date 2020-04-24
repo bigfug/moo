@@ -78,6 +78,7 @@ private slots:
 
 	void luaPropDelSecurityPass( void );
 
+	void luaPropInheritance_data( void );
 	void luaPropInheritance( void );
 
 	void luaVerbVerbCall( void );
