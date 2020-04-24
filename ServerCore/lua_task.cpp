@@ -373,6 +373,17 @@ lua_task::lua_task(ConnectionId pConnectionId, const Task &pTask, bool pElevated
 	: mL( Q_NULLPTR ), mConnectionId( pConnectionId ), mTimeStamp( 0 ), mMemUse( 0 ),
 	  mPermissions( OBJECT_NONE ), mElevated( pElevated )
 {
+#if defined( QT_DEBUG ) && defined( MOO_DEBUG_TASKS )
+	if( true )
+#else
+	if( false )
+#endif
+	{
+		qDebug() << "id:" << pTask.id()
+				 << "plr:" << pTask.player()
+				 << "cmd:" << pTask.command();
+	}
+
 	taskPush( pTask );
 }
 
@@ -1063,12 +1074,10 @@ void lua_task::taskDump( const QString &S, const Task &T )
 #endif
 	{
 		qDebug() << S << "id:" << T.id()
-				 << "plr:" << T.player()
 				 << "obj:" << T.object()
 				 << "clr:" << T.caller()
 				 << "prm:" << T.permissions()
 				 << "argstr:" << T.argstr()
-				 << "cmd:" << T.command()
 				 << "elv:" << elevated()
 				 << "verb:" << T.verb();
 	}
