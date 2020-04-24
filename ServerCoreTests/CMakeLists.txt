@@ -50,6 +50,7 @@ add_executable( eval_moo eval_moo.cpp eval_moo.h ${TEST_DATA_SOURCES} )
 add_executable( permissionstest permissionstest.cpp permissionstest.h ${TEST_DATA_SOURCES} )
 add_executable( task_rollback task_rollback.cpp task_rollback.h ${TEST_DATA_SOURCES} )
 add_executable( tst_lua_call_values tst_lua_call_values.cpp tst_lua_call_values.h ${TEST_DATA_SOURCES} )
+add_executable( cmd_permissions cmd_permissions.cpp cmd_permissions.h ${TEST_DATA_SOURCES} )
 
 add_test( ServerCore ${PROJECT_NAME} )
 add_test( test_object test_object )
@@ -57,5 +58,5 @@ add_test( eval_moo eval_moo )
 add_test( permissionstest permissionstest )
 add_test( task_rollback task_rollback )
 add_test( tst_lua_call_values tst_lua_call_values )
-
+add_test( cmd_permissions cmd_permissions )
 

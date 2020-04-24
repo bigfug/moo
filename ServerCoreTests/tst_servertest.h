@@ -71,12 +71,11 @@ private slots:
 	void luaPass5( void );
 	void luaPass6( void );
 
-	void luaPropAddSecurityPass( void );
-	void luaPropAddSecurityFail( void );
-	void luaPropAddSecurityWizardOwner( void );
-	void luaPropAddSecurityWizard( void );
+	void luaPropAddSecurity_data( void );
+	void luaPropAddSecurity( void );
 
-	void luaPropDelSecurityPass( void );
+	void luaPropDelSecurity_data( void );
+	void luaPropDelSecurity( void );
 
 	void luaPropInheritance_data( void );
 	void luaPropInheritance( void );

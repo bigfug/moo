@@ -454,7 +454,7 @@ void ObjectLogic::recycle( lua_task &pTask, ObjectId pUserId, ObjectId pObjectId
 
 	if( ( V = objObject->verbMatch( "recycle" ) ) != 0 )
 	{
-		pTask.verbCall( objObject->id(), V );
+		pTask.verbCall( V );
 	}
 
 	move( pTask, pUserId, pObjectId, OBJECT_NONE );
@@ -542,7 +542,7 @@ void ObjectLogic::move( lua_task &pTask, ObjectId pUserId, ObjectId pObjectId, O
 
 		lua_object::lua_pushobject( L, objObject );
 
-		int		Results  = pTask.verbCall( objWhere->id(), FndVrb, 1 );
+		int		Results  = pTask.verbCall( FndVrb, 1 );
 		bool	Accepted = ( Results == 1 && lua_isboolean( L, -1 ) && lua_toboolean( L, -1 ) );
 
 		lua_pop( L, Results );
@@ -586,7 +586,7 @@ void ObjectLogic::move( lua_task &pTask, ObjectId pUserId, ObjectId pObjectId, O
 		lua_object::lua_pushobject( L, objObject );
 		lua_object::lua_pushobjectid( L, objWhere ? objWhere->id() : OBJECT_NONE );
 
-		int		Results  = pTask.verbCall( objFrom->id(), FndVrb, 2 );
+		int		Results  = pTask.verbCall( FndVrb, 2 );
 
 		lua_pop( L, Results );
 	}
@@ -604,7 +604,7 @@ void ObjectLogic::move( lua_task &pTask, ObjectId pUserId, ObjectId pObjectId, O
 		lua_object::lua_pushobject( L, objObject );
 		lua_object::lua_pushobjectid( L, objFrom ? objFrom->id() : OBJECT_NONE );
 
-		int		Results  = pTask.verbCall( objWhere->id(), FndVrb, 2 );
+		int		Results  = pTask.verbCall( FndVrb, 2 );
 
 		lua_pop( L, Results );
 	}

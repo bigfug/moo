@@ -263,8 +263,6 @@ int lua_object::luaCreate( lua_State *L )
 			{
 				Task		T = Command->task();
 
-				T.setObject( objObject->id() );
-
 				Command->verbCall( T, FndVrb, 0 );
 			}
 
@@ -568,7 +566,7 @@ int lua_object::luaSet( lua_State *L )
 
 	try
 	{
-		Command->taskDump( "luaSet()", Command->task() );
+		Command->taskDump( "lua_object::luaSet", Command->task() );
 
 		if( !Command->isPermValid() )
 		{
@@ -1066,6 +1064,8 @@ int lua_object::luaVerbCall( lua_State *L )
 		lua_object::luaHandle		*o = (lua_object::luaHandle *)lua_touserdata( L, lua_upvalueindex( 3 ) );
 		int							 Error = 0;
 		int							 ArgCnt = lua_gettop( L ) - 1;
+
+		qDebug() << "O->id" << ( O ? O->id() : OBJECT_NONE ) << " o->id" << o->O;
 
 		const int			 c1 = lua_gettop( L ) - ArgCnt;
 

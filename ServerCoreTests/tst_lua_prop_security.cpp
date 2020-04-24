@@ -8,126 +8,116 @@
 
 #include "luatestdata.h"
 
-void ServerTest::luaPropAddSecurityPass( void )
+void ServerTest::luaPropAddSecurity_data( void )
 {
-	LuaTestData			 TD;
+	QTest::addColumn<ObjectId>( "pOwner" );
+	QTest::addColumn<bool>( "pWizard" );
+	QTest::addColumn<bool>( "pObjectWrite" );
+	QTest::addColumn<ObjectId>( "pResult" );
+	QTest::addColumn<bool>( "pValid" );
 
-	TD.Programmer->setWizard( false );
+	QTest::newRow( "owner" )			<< 3 << false << false << 3 << true;
+	QTest::newRow( "not owner" )		<< 2 << false << false << 3 << false;
+	QTest::newRow( "wizard owner" )		<< 3 << true  << false << 3 << true;
+	QTest::newRow( "wizard not owner" )	<< 2 << true  << false << 3 << true;
 
-	Object				*O  = TD.OM.newObject();
-	QString				 CD = QString( ";o( %1 ):propadd( 'test', 'testval' )" ).arg( O->id() );
-
-	O->setParent( TD.Programmer->id() );
-	O->setOwner( TD.Programmer->id() );
-
-	// Call test
-
-	TD.execute( CD );
-
-	// Check result
-
-	Property	*R = O->prop( "test" );
-
-	QVERIFY( R != 0 );
-	QVERIFY( R->owner() == TD.Programmer->id() );
+	QTest::newRow( "owner (o:w)" )				<< 3 << false << true << 3 << true;
+	QTest::newRow( "not owner (o:w)" )			<< 2 << false << true << 3 << true;
+	QTest::newRow( "wizard owner (o:w)" )		<< 3 << true  << true << 3 << true;
+	QTest::newRow( "wizard not owner (o:w)" )	<< 2 << true  << true << 3 << true;
 }
 
-void ServerTest::luaPropAddSecurityFail( void )
+void ServerTest::luaPropAddSecurity( void )
 {
+	QFETCH( ObjectId, pOwner );
+	QFETCH( bool, pWizard );
+	QFETCH( bool, pObjectWrite );
+	QFETCH( ObjectId, pResult );
+	QFETCH( bool, pValid );
+
 	LuaTestData			 TD;
 
-	TD.Programmer->setWizard( false );
+	TD.Programmer->setWizard( pWizard );
 
 	Object				*O  = TD.OM.newObject();
-	QString				 CD = QString( ";o( %1 ):propadd( 'test', 'testval' )" ).arg( O->id() );
 
-	O->setParent( 2 );
-	O->setOwner( 2 );
+	O->setOwner( pOwner );
+	O->setWrite( pObjectWrite );
 
 	// Call test
 
-	TD.execute( CD );
+	TD.execute( QString( ";o( %1 ):propadd( 'test', 'testval' )" ).arg( O->id() ) );
 
 	// Check result
 
 	Property	*R = O->prop( "test" );
 
-	QVERIFY( R == 0 );
-}
-
-void ServerTest::luaPropAddSecurityWizardOwner( void )
-{
-	LuaTestData			 TD;
-	Object				*O  = TD.OM.newObject();
-	QString				 CD = QString( ";o( %1 ):propadd( 'test', 'testval' )" ).arg( O->id() );
-
-	O->setParent( TD.Programmer->id() );
-	O->setOwner( TD.Programmer->id() );
-
-	// Call test
-
-	TD.execute( CD );
-
-	// Check result
-
-	Property	*R = O->prop( "test" );
-
-	QVERIFY( R != 0 );
-	QVERIFY( R->owner() == TD.Programmer->id() );
-}
-
-void ServerTest::luaPropAddSecurityWizard( void )
-{
-	LuaTestData			 TD;
-	Object				*O  = TD.OM.newObject();
-	QString				 CD = QString( ";o( %1 ):propadd( 'test', 'testval' )" ).arg( O->id() );
-
-	O->setParent( 2 );
-	O->setOwner( 2 );
-
-	// Call test
-
-	TD.execute( CD );
-
-	// Check result
-
-	Property	*R = O->prop( "test" );
-
-	QVERIFY( R != 0 );
-	QVERIFY( R->owner() == TD.Programmer->id() );
+	if( pValid )
+	{
+		QVERIFY( R );
+		QCOMPARE( R->owner(), pResult );
+	}
+	else
+	{
+		QVERIFY( !R );
+	}
 }
 
 //-----------------------------
 
-void ServerTest::luaPropDelSecurityPass( void )
+void ServerTest::luaPropDelSecurity_data( void )
 {
+	QTest::addColumn<ObjectId>( "pObjectOwner" );
+	QTest::addColumn<bool>( "pWizard" );
+	QTest::addColumn<ObjectId>( "pPropertyOwner" );
+	QTest::addColumn<bool>( "pValid" );
+
+	QTest::newRow( "owner" )			<< 3 << false << 3 << false;
+	QTest::newRow( "not owner" )		<< 2 << false << 3 << true;
+	QTest::newRow( "wizard owner" )		<< 3 << true  << 3 << false;
+	QTest::newRow( "wizard not owner" )	<< 2 << true  << 3 << false;
+}
+
+void ServerTest::luaPropDelSecurity( void )
+{
+	QFETCH( ObjectId, pObjectOwner );
+	QFETCH( bool, pWizard );
+	QFETCH( ObjectId, pPropertyOwner );
+	QFETCH( bool, pValid );
+
 	LuaTestData			 TD;
 
-	TD.Programmer->setWizard( false );
+	TD.Programmer->setWizard( pWizard );
 
 	Object				*O  = TD.OM.newObject();
-	QString				 CD = QString( ";o( %1 ):propdel( 'test' )" ).arg( O->id() );
 
-	O->setParent( TD.Programmer->id() );
-	O->setOwner( TD.Programmer->id() );
+	O->setParent( pObjectOwner );
+	O->setOwner( pObjectOwner );
 
 	Property			 P;
 
 	P.initialise();
 
-	P.setOwner( TD.Programmer->id() );
+	P.setOwner( pPropertyOwner );
 
 	O->propAdd( "test", P );
 
-	QVERIFY( O->prop( "test" ) != 0 );
+	QVERIFY( O->prop( "test" ) );
 
 	// Call test
 
-	TD.execute( CD );
+	TD.execute( QString( ";o( %1 ):propdel( 'test' )" ).arg( O->id() ) );
 
 	// Check result
 
 	Property	*R = O->prop( "test" );
 
-	QVERIFY( R == 0 );
+	if( pValid )
+	{
+		QVERIFY( R );
+	}
+	else
+	{
+		QVERIFY( !R );
+	}
 }

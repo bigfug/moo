@@ -232,7 +232,7 @@ bool InputSinkRead::input( const QString &pData )
 				}
 			}
 
-			L.verbCall( mObjectId, V, ArgCnt );
+			L.verbCall( V, ArgCnt );
 		}
 
 		return( false );

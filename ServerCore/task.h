@@ -33,10 +33,6 @@ private:
 	QString				 mPreposition;			// the prepositional phrase found during parsing
 	ObjectId			 mPermissions;			// the current object that defines the permissions
 
-	ObjectId			 mPassObject;
-	ObjectId			 mPassVerbObject;
-	QString				 mPassVerb;
-
 	const static QList<QString>	 mPrepositionList;
 
 	friend class lua_task;
@@ -197,36 +193,6 @@ public:
 	void setPermissions( ObjectId pObjectId )
 	{
 		mPermissions = pObjectId;
-	}
-
-	ObjectId passObject( void ) const
-	{
-		return( mPassObject );
-	}
-
-	void setPassObject( ObjectId pObjectId )
-	{
-		mPassObject = pObjectId;
-	}
-
-	ObjectId passVerbObject( void ) const
-	{
-		return( mPassVerbObject );
-	}
-
-	void setPassVerbObject( ObjectId pObjectId )
-	{
-		mPassVerbObject = pObjectId;
-	}
-
-	QString passVerb( void ) const
-	{
-		return( mPassVerb );
-	}
-
-	void setPassVerb( const QString &pVerb )
-	{
-		mPassVerb = pVerb;
 	}
 
 	void findObject( const QString &pName, QList<ObjectId> &pId ) const;

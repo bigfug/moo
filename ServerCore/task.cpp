@@ -59,9 +59,6 @@ Task::Task( const QString &pCommand ) : mCommand( pCommand )
 
 	mDirectObjectId   = OBJECT_NONE;
 	mIndirectObjectId = OBJECT_NONE;
-
-	mPassObject     = OBJECT_NONE;
-	mPassVerbObject = OBJECT_NONE;
 }
 
 Task::Task( const TaskEntry &pEntry )
@@ -78,9 +75,6 @@ Task::Task( const TaskEntry &pEntry )
 
 	mDirectObjectId   = OBJECT_NONE;
 	mIndirectObjectId = OBJECT_NONE;
-
-	mPassObject     = OBJECT_NONE;
-	mPassVerbObject = OBJECT_NONE;
 }
 
 void Task::findObject( const QString &pName, QList<ObjectId> &pId ) const

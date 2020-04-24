@@ -616,7 +616,7 @@ void ObjectManager::onFrame( qint64 pTimeStamp )
 
 		L.setPermissions( V->owner() );
 
-		L.verbCall( NRE.mObjectId, V, 1 );
+		L.verbCall( V, 1 );
 
 		mStats.mTasks++;
 	}

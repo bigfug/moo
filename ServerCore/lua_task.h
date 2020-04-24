@@ -58,7 +58,7 @@ public:
 	void taskPush( const Task &T );
 	void taskPop( void );
 
-	int verbCall( ObjectId pObjectId, Verb *V, int pArgCnt = 0 );
+	int verbCall( Verb *V, int pArgCnt = 0 );
 	int verbCall( Task &pTask, Verb *V, int pArgCnt );
 
 	int throwError( mooError pError, const QString pMessage = "" );

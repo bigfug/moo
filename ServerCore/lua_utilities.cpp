@@ -161,7 +161,7 @@ bool XmlOutputParser::startElement( const QString &namespaceURI, const QString &
 
 				if( V )
 				{
-					int r = T->verbCall( O->id(), V );
+					int r = T->verbCall( V );
 
 					if( r > 0 )
 					{

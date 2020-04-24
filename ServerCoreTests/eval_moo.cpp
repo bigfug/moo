@@ -113,7 +113,7 @@ void eval_moo::evalArgs_data()
 	QTest::addColumn<QString>( "pResult" );
 
 	QTest::newRow( "player" ) << "player" << "#3";
-	QTest::newRow( "caller" ) << "caller" << "#3";		// TODO: check this
+	QTest::newRow( "caller" ) << "caller" << "#1";		// TODO: check this
 	QTest::newRow( "object" ) << "object" << "#-1";
 	QTest::newRow( "argstr" ) << "argstr" << "";
 	QTest::newRow( "verb" ) << "verb" << "";

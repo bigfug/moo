@@ -535,7 +535,7 @@ int lua_task::execute( qint64 pTimeStamp )
 	T.setArgStr( ArgStr );
 	T.setArgs( Words );
 
-	taskDump( "execute()", T );
+	taskDump( "lua_task::execute()", T );
 
 	// check for the built-in commands
 
@@ -669,7 +669,7 @@ int lua_task::login( Object *pPlayer )
 					{
 						lua_object::lua_pushobject( mL, pPlayer );
 
-						verbCall( System->id(), V, 1 );
+						verbCall( V, 1 );
 					}
 				}
 				else
@@ -693,7 +693,7 @@ int lua_task::login( Object *pPlayer )
 			{
 				lua_object::lua_pushobject( mL, pPlayer );
 
-				verbCall( System->id(), V, 1 );
+				verbCall( V, 1 );
 			}
 		}
 		else if( UR )
@@ -702,7 +702,7 @@ int lua_task::login( Object *pPlayer )
 			{
 				lua_object::lua_pushobject( mL, pPlayer );
 
-				verbCall( System->id(), V, 1 );
+				verbCall( V, 1 );
 			}
 		}
 		else
@@ -711,7 +711,7 @@ int lua_task::login( Object *pPlayer )
 			{
 				lua_object::lua_pushobject( mL, pPlayer );
 
-				verbCall( System->id(), V, 1 );
+				verbCall( V, 1 );
 			}
 		}
 	}
@@ -754,7 +754,7 @@ int lua_task::executeLogin( void )
 
 		T.setVerb( LoginCommand->name() );
 
-		if( verbCall( System->id(), LoginCommand ) != 1 )
+		if( verbCall( LoginCommand ) != 1 )
 		{
 			lua_pop( mL, std::max<int>( 0, lua_gettop( mL ) ) );
 
@@ -812,7 +812,7 @@ int lua_task::execute( void )
 		Object		*Root = OM.systemObject();
 		Verb		*DoCommand = ( Root ? Root->verbMatch( "do_command" ) : 0 );
 
-		if( DoCommand && verbCall( *Root, DoCommand ) == 1 && lua_toboolean( mL, -1 ) )
+		if( DoCommand && verbCall( DoCommand ) == 1 && lua_toboolean( mL, -1 ) )
 		{
 			return( lua_gettop( mL ) );
 		}
@@ -909,23 +909,23 @@ int lua_task::execute( void )
 
 		if( Player && Player->verbFind( T.verb(), &FndVrb, &FndObj, DirectObjectId, T.preposition(), IndirectObjectId ) )
 		{
-			T.setObject( Player->id() );
+//			T.setObject( Player->id() );
 		}
 		else if( Location && Location->verbFind( T.verb(), &FndVrb, &FndObj, DirectObjectId, T.preposition(), IndirectObjectId ) )
 		{
-			T.setObject( Location->id() );
+//			T.setObject( Location->id() );
 		}
 		else if( DirectObject && DirectObject->verbFind( T.verb(), &FndVrb, &FndObj, DirectObjectId, T.preposition(), IndirectObjectId ) )
 		{
-			T.setObject( DirectObject->id() );
+//			T.setObject( DirectObject->id() );
 		}
 		else if( IndirectObject && IndirectObject->verbFind( T.verb(), &FndVrb, &FndObj, DirectObjectId, T.preposition(), IndirectObjectId ) )
 		{
-			T.setObject( IndirectObject->id() );
+//			T.setObject( IndirectObject->id() );
 		}
 		else if( Location && Location->verbFind( "huh", &FndVrb, &FndObj ) )
 		{
-			T.setObject( Location->id() );
+//			T.setObject( Location->id() );
 		}
 		else
 		{
@@ -936,6 +936,8 @@ int lua_task::execute( void )
 
 			return( 0 );
 		}
+
+		T.setObject( FndVrb->object() );
 
 		/*
 		player    an object, the player who typed the command
@@ -959,7 +961,7 @@ int lua_task::execute( void )
 
 		setPermissions( T.permissions() );
 
-		taskDump( "execute-verbCall", T );
+		taskDump( "lua_task::execute->verbCallCode()", T );
 
 		return( verbCallCode( FndVrb ) );
 	}
@@ -974,14 +976,13 @@ int lua_task::execute( void )
 	return( lua_pushexception( lua_gettop( mL ) ) );
 }
 
-int lua_task::verbCall( ObjectId pObjectId, Verb *V, int pArgCnt )
+int lua_task::verbCall( Verb *V, int pArgCnt )
 {
 	Task		T = task();
 
-	lua_task::taskDump( QString( "verbCall( %1, %2, %3 )" ).arg( pObjectId ).arg( V->name() ).arg( pArgCnt ), T );
+	lua_task::taskDump( QString( "verbCall( %1, %2 )" ).arg( V->name() ).arg( pArgCnt ), T );
 
 	T.setCaller( T.object() );
-	T.setObject( pObjectId );
 
 	if( T.verb().isEmpty() )
 	{
@@ -994,6 +995,8 @@ int lua_task::verbCall( ObjectId pObjectId, Verb *V, int pArgCnt )
 int lua_task::verbCall( Task &pTask, Verb *V, int pArgCnt  )
 {
 	int			Result;
+
+	pTask.setObject( V->object() );
 
 	lua_task::taskDump( "verbCall()", pTask );
 

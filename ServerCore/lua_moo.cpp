@@ -785,53 +785,27 @@ int lua_moo::luaPass( lua_State *L )
 		bool				 VrbFnd = false;
 		Verb				*V;
 
-		if( T.passObject() == id && T.passVerb() == T.verb() )
+		Command->taskDump( "luaPass()", T );
+
+		Object				*O = OM.object( T.object() );
+		Object				*P = OM.object( O->parent() );
+
+		while( P )
 		{
-			id = T.passVerbObject();
-		}
-
-		while( id != OBJECT_NONE )
-		{
-			Object			*O = OM.object( id );
-
-			if( !O )
-			{
-				return( 0 );
-			}
-
-			if( !VrbFnd && O->verb( T.verb() ) )
-			{
-				VrbFnd = true;
-			}
-
-			Object			*P = OM.object( O->parent() );
-
-			if( !P )
-			{
-				return( 0 );
-			}
-
-			V = P->verb( T.verb() );
+			Verb		*V = P->verb( T.verb() );
 
 			if( V )
 			{
-				if( !VrbFnd )
-				{
-					VrbFnd = true;
-				}
-				else
-				{
-					Task		T2 = Command->task();
+				Task		PT = T;
 
-					T2.setPassObject( T.object() );
-					T2.setPassVerbObject( P->id() );
-					T2.setPassVerb( T.verb() );
+				PT.setPermissions( V->owner() );
 
-					return( Command->verbCall( T2, V, lua_gettop( L ) ) );
-				}
+				qDebug() << "luaPass - obj:" << T.object() << "- vob:" << P->id() << "- vrb:" << T.verb();
+
+				return( Command->verbCall( PT, V, lua_gettop( L ) ) );
 			}
 
-			id = P->id();
+			P = OM.object( P->parent() );
 		}
 	}
 	catch( const mooException &e )

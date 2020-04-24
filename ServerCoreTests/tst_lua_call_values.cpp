@@ -109,12 +109,12 @@ void TestLuaCallValues::luaCallValueFirst_data()
 	QTest::addColumn<ObjectId>( "pResult" );
 
 	QTest::newRow( "object" )      << "object"      << false << OBJECT_NONE;
-	QTest::newRow( "caller" )      << "caller"      << false << 3;
+	QTest::newRow( "caller" )      << "caller"      << false << 1;
 	QTest::newRow( "player" )      << "player"      << false << 3;
 	QTest::newRow( "permissions" ) << "permissions" << false << 3;
 
 	QTest::newRow( "object (wizard)" )      << "object"      << true  << OBJECT_NONE;
-	QTest::newRow( "caller (wizard)" )      << "caller"      << true  << 3;
+	QTest::newRow( "caller (wizard)" )      << "caller"      << true  << 1;
 	QTest::newRow( "player (wizard)" )      << "player"      << true  << 3;
 	QTest::newRow( "permissions (wizard)" ) << "permissions" << true  << 3;
 }

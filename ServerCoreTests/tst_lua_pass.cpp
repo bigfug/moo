@@ -20,8 +20,8 @@ void ServerTest::luaPass1( void )
 	O1->setParent( 2 );
 	O2->setParent( O1->id() );
 
-	O1->setOwner( TD.Programmer->id() );
-	O2->setOwner( TD.Programmer->id() );
+	O1->setOwner( O1->id() );
+	O2->setOwner( O2->id() );
 
 	// Add verb
 
@@ -52,7 +52,7 @@ void ServerTest::luaPass1( void )
 	P.initialise();
 
 	P.setValue( "result" );
-	P.setOwner( TD.Programmer->id() );
+	P.setOwner( O1->id() );
 
 	O1->propAdd( "result", P );
 
@@ -66,7 +66,7 @@ void ServerTest::luaPass1( void )
 
 	QVERIFY( R != 0 );
 	QVERIFY( R->type() == QVariant::String );
-	QCOMPARE( R->value().toString(), QString( "%1" ).arg( O2->id() ) ); // The initial value of this in the called verb is the same as in the calling verb.
+	QCOMPARE( R->value().toString(), QString( "%1" ).arg( O1->id() ) ); // The initial value of this in the called verb is the same as in the calling verb.
 }
 
 // moo.pass() on two parents
@@ -83,9 +83,9 @@ void ServerTest::luaPass2( void )
 	O2->setParent( O1->id() );
 	O3->setParent( O2->id() );
 
-	O1->setOwner( TD.Programmer->id() );
-	O2->setOwner( TD.Programmer->id() );
-	O3->setOwner( TD.Programmer->id() );
+	O1->setOwner( O1->id() );
+	O2->setOwner( O2->id() );
+	O3->setOwner( O3->id() );
 
 	// Add verb
 
@@ -127,7 +127,7 @@ void ServerTest::luaPass2( void )
 	P.initialise();
 
 	P.setValue( "result" );
-	P.setOwner( TD.Programmer->id() );
+	P.setOwner( O1->id() );
 
 	O1->propAdd( "result", P );
 
@@ -141,7 +141,7 @@ void ServerTest::luaPass2( void )
 
 	QVERIFY( R != 0 );
 	QVERIFY( R->type() == QVariant::String );
-	QCOMPARE( R->value().toString(), QString( "%1" ).arg( O3->id() ) ); // The initial value of this in the called verb is the same as in the calling verb.
+	QCOMPARE( R->value().toString(), QString( "%1" ).arg( O1->id() ) ); // The initial value of this in the called verb is the same as in the calling verb.
 }
 
 // moo.pass() on three parents (where the verb is not defined on the 4th child)
@@ -160,10 +160,10 @@ void ServerTest::luaPass3( void )
 	O3->setParent( O2->id() );
 	O4->setParent( O3->id() );
 
-	O1->setOwner( TD.Programmer->id() );
-	O2->setOwner( TD.Programmer->id() );
-	O3->setOwner( TD.Programmer->id() );
-	O4->setOwner( TD.Programmer->id() );
+	O1->setOwner( O1->id() );
+	O2->setOwner( O2->id() );
+	O3->setOwner( O3->id() );
+	O4->setOwner( O4->id() );
 
 	// Add verb
 
@@ -205,7 +205,7 @@ void ServerTest::luaPass3( void )
 	P.initialise();
 
 	P.setValue( "result" );
-	P.setOwner( TD.Programmer->id() );
+	P.setOwner( O1->id() );
 
 	O1->propAdd( "result", P );
 
@@ -219,7 +219,7 @@ void ServerTest::luaPass3( void )
 
 	QVERIFY( R != 0 );
 	QVERIFY( R->type() == QVariant::String );
-	QCOMPARE( R->value().toString(), QString( "%1" ).arg( O4->id() ) ); // The initial value of this in the called verb is the same as in the calling verb.
+	QCOMPARE( R->value().toString(), QString( "%1" ).arg( O1->id() ) ); // The initial value of this in the called verb is the same as in the calling verb.
 }
 
 // moo.pass() on two parents (where the verb is not defined on the 2nd child)
@@ -236,9 +236,9 @@ void ServerTest::luaPass4( void )
 	O2->setParent( O1->id() );
 	O3->setParent( O2->id() );
 
-	O1->setOwner( TD.Programmer->id() );
-	O2->setOwner( TD.Programmer->id() );
-	O3->setOwner( TD.Programmer->id() );
+	O1->setOwner( O1->id() );
+	O2->setOwner( O2->id() );
+	O3->setOwner( O3->id() );
 
 	// Add verb
 
@@ -280,7 +280,7 @@ void ServerTest::luaPass4( void )
 	P.initialise();
 
 	P.setValue( "result" );
-	P.setOwner( TD.Programmer->id() );
+	P.setOwner( O1->id() );
 
 	O1->propAdd( "result", P );
 
@@ -294,7 +294,7 @@ void ServerTest::luaPass4( void )
 
 	QVERIFY( R != 0 );
 	QVERIFY( R->type() == QVariant::String );
-	QCOMPARE( R->value().toString(), QString( "%1" ).arg( O3->id() ) ); // The initial value of this in the called verb is the same as in the calling verb.
+	QCOMPARE( R->value().toString(), QString( "%1" ).arg( O1->id() ) ); // The initial value of this in the called verb is the same as in the calling verb.
 }
 
 // moo.pass() on three parents (where the verb is not defined on the 3rd child)
@@ -313,10 +313,10 @@ void ServerTest::luaPass5( void )
 	O3->setParent( O2->id() );
 	O4->setParent( O3->id() );
 
-	O1->setOwner( TD.Programmer->id() );
-	O2->setOwner( TD.Programmer->id() );
-	O3->setOwner( TD.Programmer->id() );
-	O4->setOwner( TD.Programmer->id() );
+	O1->setOwner( O1->id() );
+	O2->setOwner( O2->id() );
+	O3->setOwner( O3->id() );
+	O4->setOwner( O4->id() );
 
 	// Add verb
 
@@ -358,7 +358,7 @@ void ServerTest::luaPass5( void )
 	P.initialise();
 
 	P.setValue( "result" );
-	P.setOwner( TD.Programmer->id() );
+	P.setOwner( O1->id() );
 
 	O1->propAdd( "result", P );
 
@@ -372,7 +372,7 @@ void ServerTest::luaPass5( void )
 
 	QVERIFY( R != 0 );
 	QVERIFY( R->type() == QVariant::String );
-	QCOMPARE( R->value().toString(), QString( "%1" ).arg( O4->id() ) ); // The initial value of this in the called verb is the same as in the calling verb.
+	QCOMPARE( R->value().toString(), QString( "%1" ).arg( O1->id() ) ); // The initial value of this in the called verb is the same as in the calling verb.
 }
 
 // moo.pass() on one parent, calling second verb that also does a one parent moo.pass()
@@ -391,10 +391,10 @@ void ServerTest::luaPass6( void )
 	O3->setParent( 2 );
 	O4->setParent( O3->id() );
 
-	O1->setOwner( TD.Programmer->id() );
-	O2->setOwner( TD.Programmer->id() );
-	O3->setOwner( TD.Programmer->id() );
-	O4->setOwner( TD.Programmer->id() );
+	O1->setOwner( O1->id() );
+	O2->setOwner( O2->id() );
+	O3->setOwner( O3->id() );
+	O4->setOwner( O4->id() );
 
 	// Add verb
 
@@ -447,7 +447,7 @@ void ServerTest::luaPass6( void )
 	P.initialise();
 
 	P.setValue( "result" );
-	P.setOwner( TD.Programmer->id() );
+	P.setOwner( O1->id() );
 
 	O1->propAdd( "result", P );
 
@@ -461,5 +461,5 @@ void ServerTest::luaPass6( void )
 
 	QVERIFY( R != 0 );
 	QVERIFY( R->type() == QVariant::String );
-	QCOMPARE( R->value().toString(), QString( "%1" ).arg( O2->id() ) ); // The initial value of this in the called verb is the same as in the calling verb.
+	QCOMPARE( R->value().toString(), QString( "%1" ).arg( O1->id() ) ); // The initial value of this in the called verb is the same as in the calling verb.
 }
