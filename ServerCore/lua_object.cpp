@@ -611,7 +611,10 @@ int lua_object::luaSet( lua_State *L )
 
 					const char			*V = luaL_checkstring( L, 3 );
 
-					Command->changeAdd( new change::ObjectSetName( O, V ) );
+					if( O->name().compare( V ) )
+					{
+						Command->changeAdd( new change::ObjectSetName( O, V ) );
+					}
 
 					return( 0 );
 				}
@@ -624,7 +627,12 @@ int lua_object::luaSet( lua_State *L )
 						throw( mooException( E_PERM, "programmer is not owner or wizard" ) );
 					}
 
-					Command->changeAdd( new change::ObjectSetOwner( O, argId( L, 3 ) ) );
+					ObjectId		OID = argId( L, 3 );
+
+					if( O->owner() != OID )
+					{
+						Command->changeAdd( new change::ObjectSetOwner( O, argId( L, 3 ) ) );
+					}
 
 					return( 0 );
 				}
@@ -632,7 +640,12 @@ int lua_object::luaSet( lua_State *L )
 
 			case PARENT:
 				{
-					ObjectLogic::chparent( *Command, O->id(), argId( L, 3 ) );
+					ObjectId		OID = argId( L, 3 );
+
+					if( O->parent() != OID )
+					{
+						ObjectLogic::chparent( *Command, O->id(), OID );
+					}
 
 					return( 0 );
 				}
@@ -640,7 +653,12 @@ int lua_object::luaSet( lua_State *L )
 
 			case LOCATION:
 				{
-					ObjectLogic::move( *Command, Command->permissions(), O->id(), argId( L, 3 ) );
+					ObjectId		OID = argId( L, 3 );
+
+					if( O->location() != OID )
+					{
+						ObjectLogic::move( *Command, Command->permissions(), O->id(), OID );
+					}
 
 					return( 0 );
 				}
@@ -659,7 +677,12 @@ int lua_object::luaSet( lua_State *L )
 						throw( mooException( E_PERM, "programmer is not owner or wizard" ) );
 					}
 
-					Command->changeAdd( new change::ObjectSetModule( O, argId( L, 3 ) ) );
+					ObjectId		OID = argId( L, 3 );
+
+					if( O->module() != OID )
+					{
+						Command->changeAdd( new change::ObjectSetModule( O, OID ) );
+					}
 
 					return( 0 );
 				}
@@ -680,7 +703,10 @@ int lua_object::luaSet( lua_State *L )
 
 					bool		V = lua_toboolean( L, 3 );
 
-					Command->changeAdd( new change::ObjectSetPlayer( O, V ) );
+					if( O->player() != V )
+					{
+						Command->changeAdd( new change::ObjectSetPlayer( O, V ) );
+					}
 
 					return( 0 );
 				}
@@ -695,7 +721,10 @@ int lua_object::luaSet( lua_State *L )
 
 					bool		V = lua_toboolean( L, 3 );
 
-					Command->changeAdd( new change::ObjectSetProgrammer( O, V ) );
+					if( O->programmer() != V )
+					{
+						Command->changeAdd( new change::ObjectSetProgrammer( O, V ) );
+					}
 
 					return( 0 );
 				}
@@ -710,7 +739,10 @@ int lua_object::luaSet( lua_State *L )
 
 					bool		V = lua_toboolean( L, 3 );
 
-					Command->changeAdd( new change::ObjectSetWizard( O, V ) );
+					if( O->wizard() != V )
+					{
+						Command->changeAdd( new change::ObjectSetWizard( O, V ) );
+					}
 
 					return( 0 );
 				}
@@ -725,7 +757,10 @@ int lua_object::luaSet( lua_State *L )
 
 					bool		V = lua_toboolean( L, 3 );
 
-					Command->changeAdd( new change::ObjectSetRead( O, V ) );
+					if( O->read() != V )
+					{
+						Command->changeAdd( new change::ObjectSetRead( O, V ) );
+					}
 
 					return( 0 );
 				}
@@ -740,7 +775,10 @@ int lua_object::luaSet( lua_State *L )
 
 					bool		V = lua_toboolean( L, 3 );
 
-					Command->changeAdd( new change::ObjectSetWrite( O, V ) );
+					if( O->write() != V )
+					{
+						Command->changeAdd( new change::ObjectSetWrite( O, V ) );
+					}
 
 					return( 0 );
 				}
@@ -755,7 +793,10 @@ int lua_object::luaSet( lua_State *L )
 
 					bool		V = lua_toboolean( L, 3 );
 
-					Command->changeAdd( new change::ObjectSetFertile( O, V ) );
+					if( O->fertile() != V )
+					{
+						Command->changeAdd( new change::ObjectSetFertile( O, V ) );
+					}
 
 					return( 0 );
 				}
