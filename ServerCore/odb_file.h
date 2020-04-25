@@ -165,7 +165,7 @@ public:
 		return( OBJECT_NONE );
 	}
 
-	virtual ObjectIdVector connectedObjects( void ) const
+	virtual ObjectIdVector connectedObjects( void ) const Q_DECL_OVERRIDE
 	{
 		return( ObjectIdVector() );
 	}
