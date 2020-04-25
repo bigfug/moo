@@ -111,7 +111,10 @@ lua_prop::luaProp *lua_prop::arg( lua_State *L, int pIndex )
 {
 	luaProp		*P = static_cast<luaProp *>( luaL_checkudata( L, pIndex, mLuaName ) );
 
-	luaL_argcheck( L, P != NULL, 1, "`property' expected" );
+	if( !P )
+	{
+		throw( mooException( E_ARGS, "property expected" ) );
+	}
 
 	return( P );
 }
