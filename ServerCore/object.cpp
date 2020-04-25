@@ -80,6 +80,13 @@ QVariant Object::propValue( const QString &pName ) const
 		return( P->value() );
 	}
 
+	P = propParent( pName );
+
+	if( P )
+	{
+		return( P->value() );
+	}
+
 	return( QVariant() );
 }
 

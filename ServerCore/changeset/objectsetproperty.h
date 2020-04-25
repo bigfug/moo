@@ -17,12 +17,9 @@ public:
 	ObjectSetProperty( Object *pObject, QString pPrpNam, QVariant pValue )
 		: mObject( pObject ), mPrpNam( pPrpNam )
 	{
-		mProperty = mObject->prop( mPrpNam );
+		mHasProp = ( mObject->prop( mPrpNam ) ? true : false );
 
-		if( mProperty )
-		{
-			mOldValue = mProperty->value();
-		}
+		mOldValue = mObject->propValue( mPrpNam );
 
 		mObject->propSet( mPrpNam, pValue );
 	}
@@ -36,7 +33,7 @@ public:
 
 	virtual void rollback() Q_DECL_OVERRIDE
 	{
-		if( mProperty )
+		if( mHasProp )
 		{
 			mObject->propSet( mPrpNam, mOldValue );
 		}
@@ -48,9 +45,9 @@ public:
 
 private:
 	Object		*mObject;
-	Property	*mProperty;
 	QString		 mPrpNam;
 	QVariant	 mOldValue;
+	bool		 mHasProp;
 };
 
 }

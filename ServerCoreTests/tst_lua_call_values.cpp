@@ -172,7 +172,7 @@ void TestLuaCallValues::luaCallValueSecond_data()
 	QTest::newRow( "object (wizard)" )      << "object"      << true  << 4;
 	QTest::newRow( "caller (wizard)" )      << "caller"      << true  << OBJECT_NONE;
 	QTest::newRow( "player (wizard)" )      << "player"      << true  << 3;
-	QTest::newRow( "permissions (wizard)" ) << "permissions" << true  << 3;
+	QTest::newRow( "permissions (wizard)" ) << "permissions" << true  << 4;
 }
 
 void TestLuaCallValues::luaCallValueSecond()
@@ -238,7 +238,7 @@ void TestLuaCallValues::luaCallValueThird_data()
 	QTest::newRow( "object (wizard)" )      << "object"      << true  << 5;
 	QTest::newRow( "caller (wizard)" )      << "caller"      << true  << 4;
 	QTest::newRow( "player (wizard)" )      << "player"      << true  << 3;
-	QTest::newRow( "permissions (wizard)" ) << "permissions" << true  << 3;
+	QTest::newRow( "permissions (wizard)" ) << "permissions" << true  << 5;
 }
 
 void TestLuaCallValues::luaCallValueThird()
@@ -296,11 +296,47 @@ void TestLuaCallValues::luaCallValueThird()
 
 	// Check result
 
-	Property	*R = O2->prop( "result" );
+	QVariant R = O2->propValue( "result" );
 
-	QVERIFY( R != 0 );
-	QVERIFY( R->type() == QVariant::String );
-	QCOMPARE( R->value().toString(), QString( "%1" ).arg( pResult ) );
+	QCOMPARE( R.toString(), QString( "%1" ).arg( pResult ) );
+}
+
+void TestLuaCallValues::luaCallValueInherit()
+{
+	LuaTestData			 TD;
+
+	TD.Programmer->setWizard( false );
+
+	Object			*Root = TD.OM.rootObject();
+
+	Root->propAdd( "result", "no result", Root->id() );
+
+	Root->prop( "result" )->setChange( false );
+
+	Object			*O1 = TD.OM.object( 2 );
+
+	if( true )
+	{
+		Verb			V;
+
+		V.initialise();
+
+		V.setDirectObjectArgument( NONE );
+		V.setIndirectObjectArgument( NONE );
+		V.setPrepositionArgument( NONE );
+
+		V.setScript( QString( "moo.object.result = tostring( %1 )" ).arg( 23 ) );
+
+		V.setOwner( Root->id() );
+
+		Root->verbAdd( "test", V );
+	}
+
+	lua_task T  = TD.execute( QString( ";o( %1 ):test()" ).arg( O1->id() ) );
+
+	QCOMPARE( T.error(), false );
+
+	QCOMPARE( O1->propValue( "result" ).toString(), "23" );
 }
 
 QTEST_GUILESS_MAIN( TestLuaCallValues )

@@ -20,6 +20,8 @@ private slots:
 
 	void luaCallValueThird_data( void );
 	void luaCallValueThird( void );
+
+	void luaCallValueInherit( void );
 };
 
 #endif // TST_LUA_CALL_VALUES_H

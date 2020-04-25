@@ -533,8 +533,7 @@ int lua_object::luaGet( lua_State *L )
 
 			lua_pushstring( L, s );
 			lua_verb::lua_pushverb( L, FndVrb );
-			lua_object::lua_pushobject( L, O );
-			lua_pushcclosure( L, lua_object::luaVerbCall, 3 );
+			lua_pushcclosure( L, lua_object::luaVerbCall, 2 );
 
 			return( 1 );
 		}
@@ -1058,19 +1057,14 @@ int lua_object::luaVerbCall( lua_State *L )
 	{
 		const Task				&PrvT = Command->task();
 		Task					 CurT = PrvT;
-		Object					      *O = argObj( L );
-		const char					*s = lua_tostring( L, lua_upvalueindex( 1 ) );
-		QString						 n( s );
-		lua_verb::luaVerb			*v = (lua_verb::luaVerb *)lua_touserdata( L, lua_upvalueindex( 2 ) );
-		lua_object::luaHandle		*o = (lua_object::luaHandle *)lua_touserdata( L, lua_upvalueindex( 3 ) );
-		int							 Error = 0;
-		int							 ArgCnt = lua_gettop( L ) - 1;
-
-		qDebug() << "O->id" << ( O ? O->id() : OBJECT_NONE ) << " o->id" << o->O;
+		Object					*O = argObj( L );
+		const char				*s = lua_tostring( L, lua_upvalueindex( 1 ) );
+		QString					 n( s );
+		lua_verb::luaVerb		*v = (lua_verb::luaVerb *)lua_touserdata( L, lua_upvalueindex( 2 ) );
+		int						 Error = 0;
+		int						 ArgCnt = lua_gettop( L ) - 1;
 
 		const int			 c1 = lua_gettop( L ) - ArgCnt;
-
-		//qDebug() << "lua_object::luaVerbCall" << n << ArgCnt << "args:";
 
 		if( ( Error = v->mVerb->lua_pushverb( L ) ) != 0 )
 		{
@@ -1081,8 +1075,6 @@ int lua_object::luaVerbCall( lua_State *L )
 		{
 			lua_insert( L, -1 - ArgCnt );
 		}
-
-		//lua_moo::stackReverseDump( L );
 
 		/*
 			this
@@ -1105,11 +1097,7 @@ int lua_object::luaVerbCall( lua_State *L )
 		CurT.setObject( O->id() );
 		CurT.setVerb( n );
 		CurT.setCaller( PrvT.object() );
-
-		if( !Command->isWizard() )
-		{
-			CurT.setPermissions( v->mVerb->owner() );
-		}
+		CurT.setPermissions( v->mVerb->owner() );
 
 		Command->taskDump( "luaVerbCall()", CurT );
 
@@ -1132,10 +1120,6 @@ int lua_object::luaVerbCall( lua_State *L )
 		int				c2 = lua_gettop( L );
 
 		int				ResCnt = c2 - c1;
-
-		//qDebug() << "lua_object::luaVerbCall" << n << ResCnt << "results:";
-
-		//lua_moo::stackReverseDump( L );
 
 		Command->taskPop();
 
