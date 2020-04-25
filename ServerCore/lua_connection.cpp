@@ -84,24 +84,16 @@ int lua_connection::luaNotify( lua_State *L )
 
 	try
 	{
-		if( lua_gettop( L ) != 2 )
+		if( lua_gettop( L ) < 2 )
 		{
 			throw( mooException( E_ARGS, "wrong number of arguments" ) );
 		}
 
 		luaConnection	*Con = arg( L );
-		const char		*Msg = lua_tolstring( L, 2, 0 );
-
-		if( Msg )
-		{
-			throw( mooException( E_INVARG, "expected string" ) );
-		}
 
 		if( Con && Con->mConnection )
 		{
-			QString				 Message = lua_text::processOutputTags( L, QString::fromLatin1( Msg ) );
-
-			Command->changeAdd( new change::ConnectionNotify( Con->mConnection, Message ) );
+			Command->changeAdd( new change::ConnectionNotify( Con->mConnection, lua_text::processString( L, ObjectManager::o( Con->mConnection->player() ), 2 ) ) );
 		}
 	}
 	catch( const mooException &e )

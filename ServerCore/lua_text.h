@@ -11,10 +11,18 @@
 #include <QXmlAttributes>
 #include <QVector>
 
+class Object;
+
 class lua_text
 {
 public:
 	static QString processOutputTags( lua_State *L, QString pText );
+
+	static QString localeString( lua_State *L, int pKeyIdx, Object *O, QString pDefault = QString() );
+
+	static QString processTextArgs( lua_State *L, int pKeyIdx, QString pString );
+
+	static QString processString( lua_State *L, Object *O, int pKeyIdx );
 
 private:
 	class XmlOutputParser : private QXmlDefaultHandler
@@ -80,7 +88,6 @@ private:
 	static int luaBold( lua_State *L );
 
 	static int luaEscape( lua_State *L );
-
 
 	static const luaL_Reg		 mLuaStatic[];
 

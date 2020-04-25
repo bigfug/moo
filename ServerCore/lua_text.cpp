@@ -571,3 +571,97 @@ bool lua_text::XmlOutputParser::endDocument()
 	return( true );
 }
 
+QString lua_text::localeString( lua_State *L, int pKeyIdx, Object *pObject, QString pDefault )
+{
+	QString				 Msg;
+
+	if( lua_isstring( L, pKeyIdx ) )
+	{
+		Msg = QString( lua_tostring( L, pKeyIdx ) );
+	}
+	else if( lua_istable( L, pKeyIdx ) )
+	{
+		QString		LocaleKey;
+		int			r1 = 0;
+		int			t = lua_gettop( L );
+
+		if( !r1 && pObject )
+		{
+			LocaleKey = pObject->propValue( "locale" ).toString();
+
+			if( !LocaleKey.isEmpty() )
+			{
+				lua_getfield( L, pKeyIdx, LocaleKey.toLatin1().constData() );
+
+				r1 = lua_gettop( L ) - t;
+			}
+		}
+
+		if( !r1 && LocaleKey != "en" )
+		{
+			LocaleKey = QLocale::system().bcp47Name().toLatin1().constData();
+
+			lua_getfield( L, pKeyIdx, LocaleKey.toLatin1().constData() );
+
+			r1 = lua_gettop( L ) - t;
+		}
+
+		if( !r1 && LocaleKey != "en" )
+		{
+			LocaleKey = "en";
+
+			lua_getfield( L, pKeyIdx, LocaleKey.toLatin1().constData() );
+
+			r1 = lua_gettop( L ) - t;
+		}
+
+		if( r1 )
+		{
+			Msg = QString( lua_tostring( L, -1 ) );
+
+			lua_pop( L, 1 );
+		}
+		else
+		{
+			Msg = pDefault;
+		}
+	}
+
+	return( Msg );
+}
+
+QString lua_text::processTextArgs( lua_State *L, int pKeyIdx, QString pString )
+{
+	for( int i = pKeyIdx ; i <= lua_gettop( L ) ; i++ )
+	{
+		switch( lua_type( L, i ) )
+		{
+			case LUA_TNUMBER:
+				pString = pString.arg( double( lua_tonumber( L, i ) ) );
+				break;
+
+			case LUA_TSTRING:
+				pString = pString.arg( QString( lua_tostring( L, i ) ) );
+				break;
+
+			case LUA_TBOOLEAN:
+				pString = pString.arg( bool( lua_toboolean( L, i ) ) );
+				break;
+		}
+	}
+
+	return( pString );
+}
+
+QString lua_text::processString( lua_State *L, Object *O, int pKeyIdx )
+{
+	QString				 Msg;
+
+	Msg = localeString( L, pKeyIdx, O );
+
+	Msg = processTextArgs( L, pKeyIdx + 1, Msg );
+
+	Msg = processOutputTags( L, Msg );
+
+	return( Msg );
+}

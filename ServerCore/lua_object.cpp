@@ -1371,7 +1371,7 @@ int lua_object::luaNotify( lua_State *L )
 {
 	lua_task			*Command = lua_task::luaGetTask( L );
 
-	luaL_checkstring( L, 2 );
+	luaL_checkany( L, 2 );
 
 	try
 	{
@@ -1379,16 +1379,11 @@ int lua_object::luaNotify( lua_State *L )
 		ConnectionManager	&CM  = *ConnectionManager::instance();
 		ConnectionId		 CID = CM.fromPlayer( O->id() );
 		Connection			*CON = ConnectionManager::instance()->connection( CID );
-		QString				 Msg = QString( lua_tostring( L, 2 ) );
 
 		if( CON )
 		{
-			Msg = lua_text::processOutputTags( L, Msg );
-
-			Command->changeAdd( new change::ConnectionNotify( CON, Msg ) );
+			Command->changeAdd( new change::ConnectionNotify( CON, lua_text::processString( L, O, 2 ) ) );
 		}
-
-		return( 0 );
 	}
 	catch( const mooException &e )
 	{

@@ -570,89 +570,12 @@ int lua_moo::luaSet( lua_State *L )
 	return( Command->lua_pushexception() );
 }
 
-QString lua_moo::parseNotify( lua_State *L )
-{
-	QString				 Msg;
-	int					 ArgCnt = lua_gettop( L );
-
-	if( ArgCnt <= 0 )
-	{
-		return( Msg );
-	}
-
-	for( int i = 0 ; i < ArgCnt ; i++ )
-	{
-		int		ArgIdx = 1 + i;
-
-		switch( lua_type( L, ArgIdx ) )
-		{
-			case LUA_TSTRING:
-				{
-					size_t		 StrLen;
-					const char	*StrDat = lua_tolstring( L, ArgIdx, &StrLen );
-					QString		 StrSrc = QString::fromLatin1( StrDat, StrLen );
-					QStringList	 StrLst = StrSrc.split( "\n" );
-
-					for( QString &S : StrLst )
-					{
-						S.remove( '\r' );
-					}
-
-					Msg.append( StrLst.join( "\r\n" ) );
-				}
-				break;
-
-			case LUA_TNIL:
-				Msg.append( QStringLiteral( "<nil>" ).toHtmlEscaped() );
-				break;
-
-			case LUA_TBOOLEAN:
-				if( lua_toboolean( L, ArgIdx ) )
-				{
-					Msg.append( "true" );
-				}
-				else
-				{
-					Msg.append( "false" );
-				}
-				break;
-
-			case LUA_TNUMBER:
-				Msg.append( QString( "%1" ).arg( lua_tonumber( L, ArgIdx ) ) );
-				break;
-
-			case LUA_TUSERDATA:
-				Msg.append( QStringLiteral( "<userdata>" ).toHtmlEscaped() );
-				break;
-
-			case LUA_TFUNCTION:
-				Msg.append( QStringLiteral( "<function>" ).toHtmlEscaped() );
-				break;
-
-			case LUA_TLIGHTUSERDATA:
-				Msg.append( QStringLiteral( "<lightuserdata>" ).toHtmlEscaped() );
-				break;
-
-			case LUA_TTABLE:
-				Msg.append( QStringLiteral( "<table>" ).toHtmlEscaped() );
-				break;
-
-			default:
-				Msg.append( QStringLiteral( "<unknown>" ).toHtmlEscaped() );
-				break;
-		}
-	}
-
-	return( Msg );
-}
-
 int lua_moo::luaBroadcast( lua_State *L )
 {
 	lua_task			*Command = lua_task::luaGetTask( L );
 
 	try
 	{
-		QString				 Msg = parseNotify( L );
 		ConnectionManager	*CM = ConnectionManager::instance();
 
 		if( !Command->isWizard() )
@@ -660,12 +583,16 @@ int lua_moo::luaBroadcast( lua_State *L )
 			throw mooException( E_PERM, "only wizards can broadcast" );
 		}
 
-		Msg = lua_text::processOutputTags( L, Msg );
+		QString				 Msg;
 
 		for( Connection *C : CM->connectionList().values() )
 		{
 			if( C )
 			{
+				Object				*O  = ObjectManager::o( C->player() );
+
+				Msg = lua_text::processString( L, O, 1 );
+
 				Command->changeAdd( new change::ConnectionNotify( C, Msg ) );
 			}
 		}
@@ -690,12 +617,14 @@ int lua_moo::luaNotify( lua_State *L )
 
 	try
 	{
-		QString				 Msg = parseNotify( L );
 		Connection			*C = ConnectionManager::instance()->connection( Command->connectionId() );
 
 		if( C )
 		{
-			Msg = lua_text::processOutputTags( L, Msg );
+			Object				*O  = ObjectManager::o( Command->task().player() );
+			QString				 Msg;
+
+			Msg = lua_text::processString( L, O, 1 );
 
 			Command->changeAdd( new change::ConnectionNotify( C, Msg ) );
 		}
