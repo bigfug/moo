@@ -13,6 +13,7 @@ const luaL_Reg lua_text::mLuaStatic[] =
 {
 	{ "s", lua_text::luaPronounSubstitution },
 	{ "bold", lua_text::luaBold },
+	{ "escape", lua_text::luaEscape },
 	{ 0, 0 }
 };
 
@@ -211,5 +212,362 @@ int lua_text::luaBold( lua_State *L )
 	lua_pushstring( L, QString( "<b>%1</b>" ).arg( S ).toLatin1().constData() );
 
 	return( 1 );
+}
+
+int lua_text::luaEscape( lua_State *L )
+{
+	const char			*S = luaL_checkstring( L, 1 );
+
+	lua_pushstring( L, QString::fromLatin1( S ).toHtmlEscaped().toLatin1().constData() );
+
+	return( 1 );
+}
+
+QString lua_text::XmlOutputParser::preprocessString( const QString &S )
+{
+	QString		O;
+	QString		E;
+	bool		Escaped = false;
+
+	for( QChar C : S )
+	{
+		if( Escaped )
+		{
+			if( E.isEmpty() )
+			{
+				if( C == 'a' )
+				{
+					O.append( '\a' ); Escaped = false; continue;
+				}
+
+				if( C == 'b' )
+				{
+					O.append( '\b' ); Escaped = false; continue;
+				}
+
+				if( C == 'e' )
+				{
+					O.append( 0x1b ); Escaped = false; continue;
+				}
+
+				if( C == 'f' )
+				{
+					O.append( '\f' ); Escaped = false; continue;
+				}
+
+				if( C == 'n' )
+				{
+					O.append( '\n' ); Escaped = false; continue;
+				}
+
+				if( C == 'r' )
+				{
+					O.append( '\r' ); Escaped = false; continue;
+				}
+
+				if( C == 't' )
+				{
+					O.append( '\t' ); Escaped = false; continue;
+				}
+
+				if( C == '\'' )
+				{
+					O.append( '\'' ); Escaped = false; continue;
+				}
+
+				if( C == '\\' )
+				{
+					O.append( '\\' ); Escaped = false; continue;
+				}
+
+				if( C == '"' )
+				{
+					O.append( '"' ); Escaped = false; continue;
+				}
+
+				if( C == 'x' )
+				{
+					E = C; continue;
+				}
+
+				if( C.isDigit() )
+				{
+					E = C; continue;
+				}
+
+				O.append( '\\' );
+				O.append( C );
+
+				Escaped = false;
+
+				continue;
+			}
+
+			if( E[ 0 ] == 'x' )
+			{
+				QChar	c = C.toLower();
+
+				if( c >= 'a' && c <= 'f' )
+				{
+					E.append( c ); continue;
+				}
+				else
+				{
+					QChar	V;
+					bool	ok;
+
+					E.remove( 0, 1 );
+
+					V = E.toUInt( &ok, 16 );
+
+					if( ok )
+					{
+						O.append( V );
+					}
+				}
+			}
+			else if( E[ 0 ].isDigit() )
+			{
+				if( C.isDigit() )
+				{
+					E.append( C ); continue;
+				}
+				else
+				{
+					QChar	V;
+					bool	ok;
+
+					V = E.toUInt( &ok, 8 );
+
+					if( ok )
+					{
+						O.append( V );
+					}
+				}
+			}
+		}
+
+		if( C == '\\' )
+		{
+			Escaped = true;
+
+			E.clear();
+		}
+		else
+		{
+			O.append( C );
+		}
+	}
+
+	return( O );
+}
+
+QString lua_text::processOutputTags( lua_State *L, QString pText )
+{
+	return( XmlOutputParser( L, pText ).result() );
+}
+
+bool lua_text::XmlOutputParser::startElement( const QString &namespaceURI, const QString &localName, const QString &qName, const QXmlAttributes &atts )
+{
+	Q_UNUSED( namespaceURI )
+	Q_UNUSED( qName )
+	Q_UNUSED( atts )
+
+	Element		E;
+
+	E.mNamespaceUri = namespaceURI;
+	E.mLocalName    = localName;
+	E.mName         = qName;
+	E.mAttrs        = atts;
+
+	QStringList		NameList = qName.split( ':', QString::SkipEmptyParts );
+
+	if( NameList.size() == 2 )
+	{
+		const QString		&ObjectName = NameList.at( 0 );
+
+		lua_task		*T = lua_task::luaGetTask( mL );
+
+		Object			*O = Q_NULLPTR;
+
+		if( !ObjectName.compare( "player" ) )
+		{
+			O = ObjectManager::o( T->task().player() );
+		}
+		else if( !ObjectName.compare( "object" ) )
+		{
+			O = ObjectManager::o( T->task().object() );
+		}
+		else if( !ObjectName.compare( "direct" ) )
+		{
+			O = ObjectManager::o( T->task().directObjectId() );
+		}
+		else if( !ObjectName.compare( "indirect" ) )
+		{
+			O = ObjectManager::o( T->task().indirectObjectId() );
+		}
+		else if( !ObjectName.compare( "location" ) )
+		{
+			O = ObjectManager::o( T->task().player() );
+
+			if( O )
+			{
+				O = ObjectManager::o( O->location() );
+			}
+		}
+
+		if( O )
+		{
+			if( !localName.compare( "name" ) )
+			{
+				E.mContent = O->name();
+			}
+			else
+			{
+				Verb			*V = O->verb( localName );
+
+				if( V )
+				{
+					int r = T->verbCall( V );
+
+					if( r > 0 )
+					{
+						if( lua_isstring( T->L(), -1 ) )
+						{
+							const char *r = lua_tostring( T->L(), -1 );
+
+							E.mContent = QString::fromLatin1( r );
+						}
+
+						lua_pop( T->L(), r );
+					}
+				}
+				else
+				{
+					Property	*P = O->prop( localName );
+
+					if( P )
+					{
+						if( P->type() == QVariant::String )
+						{
+							E.mContent = P->value().toString();
+						}
+						else if( P->type() == QVariant::Double )
+						{
+							E.mContent = QString::number( P->value().toDouble() );
+						}
+						else if( P->type() == QVariant::Bool )
+						{
+							E.mContent = ( P->value().toBool() ? "true" : "false" );
+						}
+						else
+						{
+							E.mContent = P->value().toString();
+						}
+					}
+				}
+			}
+		}
+	}
+	else
+	{
+		QString			Style = QSettings( MOO_SETTINGS ).value( QString( "style/%1.start" ).arg( qName ) ).toString();
+
+		E.mContent = preprocessString( Style );
+	}
+
+	mElementStack.push_back( E );
+
+	return( true );
+}
+
+bool lua_text::XmlOutputParser::endElement( const QString &namespaceURI, const QString &localName, const QString &qName )
+{
+	Q_UNUSED( namespaceURI )
+	Q_UNUSED( localName )
+	Q_UNUSED( qName )
+
+	Element		E = mElementStack.takeLast();
+
+	QString		C = E.mContent;
+
+	QSettings		Settings( MOO_SETTINGS );
+
+	QString			StyleName = QString( "style/%1.end" ).arg( qName );
+
+	if( Settings.contains( StyleName ) )
+	{
+		QString			Style = Settings.value( StyleName ).toString();
+
+		Style = preprocessString( Style );
+
+		C.append( Style );
+	}
+
+	if( mElementStack.isEmpty() )
+	{
+		mXML.append( C );
+	}
+	else
+	{
+		Element		&E2 = mElementStack.last();
+
+		E2.mContent.append( C );
+	}
+
+	return( true );
+}
+
+QString lua_text::XmlOutputParser::errorString() const
+{
+	return( QString() );
+}
+
+bool lua_text::XmlOutputParser::characters(const QString &ch)
+{
+	Element		&E = mElementStack.last();
+
+	E.mContent.append( ch.toHtmlEscaped() );
+
+	return( true );
+}
+
+bool lua_text::XmlOutputParser::skippedEntity(const QString &name)
+{
+	mXML.append( name );
+
+	return( true );
+}
+
+bool lua_text::XmlOutputParser::warning(const QXmlParseException &exception)
+{
+	mXML.append( QString( "\x1b[0m\nWARNING (%1):" ).arg( exception.columnNumber() ) );
+	mXML.append( exception.message() );
+
+	return( false );
+}
+
+bool lua_text::XmlOutputParser::error(const QXmlParseException &exception)
+{
+	mXML.append( QString( "\x1b[0m\nERROR (%1):" ).arg( exception.columnNumber() ) );
+	mXML.append( exception.message() );
+
+	return( false );
+}
+
+bool lua_text::XmlOutputParser::fatalError(const QXmlParseException &exception)
+{
+	mXML.clear();
+	mXML.append( QString( "\r\x1b[0m%1\n" ).arg( mSRC.data() ) );
+	mXML.append( QString( ' ' ).repeated( exception.columnNumber() ).append( "^\n" ) );
+	mXML.append( QString( "FATAL (%1):" ).arg( exception.columnNumber() ) );
+	mXML.append( exception.message().trimmed() );
+
+	return( false );
+}
+
+bool lua_text::XmlOutputParser::endDocument()
+{
+	return( true );
 }
 

@@ -13,48 +13,7 @@
 #include "taskentry.h"
 #include "inputsink.h"
 
-class XmlParser : private QXmlDefaultHandler
-{
-public:
-	XmlParser( const QString &pText )
-	{
-		mSRC.setData( "<moo>" + pText + "</moo>" );
-
-		QXmlSimpleReader	Reader;
-
-		Reader.setContentHandler( this );
-		Reader.setEntityResolver( this );
-		Reader.setErrorHandler( this );
-
-		Reader.parse( mSRC );
-	}
-
-	QString result( void ) const
-	{
-		return( mXML );
-	}
-
-	// QXmlContentHandler interface
-public:
-	virtual bool startElement(const QString &namespaceURI, const QString &localName, const QString &qName, const QXmlAttributes &atts) Q_DECL_OVERRIDE;
-	virtual bool endElement(const QString &namespaceURI, const QString &localName, const QString &qName) Q_DECL_OVERRIDE;
-	virtual bool characters(const QString &ch) Q_DECL_OVERRIDE;
-	virtual bool skippedEntity(const QString &name) Q_DECL_OVERRIDE;
-
-private:
-	QXmlInputSource		mSRC;
-	QString				mXML;
-	QStringList			mStyles;
-
-	// QXmlErrorHandler interface
-public:
-	virtual bool warning(const QXmlParseException &exception) Q_DECL_OVERRIDE;
-	virtual bool error(const QXmlParseException &exception) Q_DECL_OVERRIDE;
-	virtual bool fatalError(const QXmlParseException &exception) Q_DECL_OVERRIDE;
-	virtual QString errorString() const Q_DECL_OVERRIDE;
-};
-
-class Connection : public QObject, private QXmlDefaultHandler
+class Connection : public QObject
 {
 	Q_OBJECT
 	Q_DISABLE_COPY( Connection )

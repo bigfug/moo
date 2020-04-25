@@ -15,6 +15,7 @@
 #include <iostream>
 #include <QDebug>
 #include "lua_utilities.h"
+#include "lua_text.h"
 #include "mooexception.h"
 
 #include "changeset/objectaliasadd.h"
@@ -1398,7 +1399,7 @@ int lua_object::luaNotify( lua_State *L )
 
 		if( CON )
 		{
-			Msg = lua_util::processOutputTags( L, Msg );
+			Msg = lua_text::processOutputTags( L, Msg );
 
 			Command->changeAdd( new change::ConnectionNotify( CON, Msg ) );
 		}

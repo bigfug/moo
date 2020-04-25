@@ -6,6 +6,7 @@
 #include "lua_utilities.h"
 #include "mooexception.h"
 #include "lua_task.h"
+#include "lua_text.h"
 #include "connectionmanager.h"
 #include "changeset/connectionnotify.h"
 #include "changeset/connectionclose.h"
@@ -98,7 +99,7 @@ int lua_connection::luaNotify( lua_State *L )
 
 		if( Con && Con->mConnection )
 		{
-			QString				 Message = lua_util::processOutputTags( L, QString::fromLatin1( Msg ) );
+			QString				 Message = lua_text::processOutputTags( L, QString::fromLatin1( Msg ) );
 
 			Command->changeAdd( new change::ConnectionNotify( Con->mConnection, Message ) );
 		}
