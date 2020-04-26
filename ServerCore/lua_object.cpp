@@ -262,9 +262,7 @@ int lua_object::luaCreate( lua_State *L )
 
 			if( objObject->verbFind( "initialise", &FndVrb, &FndObj ) )
 			{
-				Task		T = Command->task();
-
-				Command->verbCall( T, FndVrb, 0 );
+				Command->verbCall( FndVrb, 0, objObject->id() );
 			}
 
 			Connection	*CON = ConnectionManager::instance()->connection( Command->connectionId() );

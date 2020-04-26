@@ -716,17 +716,33 @@ int lua_moo::luaPass( lua_State *L )
 		Object				*O = OM.object( T.object() );
 		Object				*P = OM.object( O->parent() );
 
+		// we need to skip the first verb as this will be the one that called moo.pass()
+
+		Verb				*FirstVerb;
+		Object				*FirstObject;
+
+		O->verbFind( T.verb(), &FirstVerb, &FirstObject );
+
+		ObjectId			 CallerId = T.object();
+
 		while( P )
 		{
 			Verb		*V = P->verb( T.verb() );
 
 			if( V )
 			{
+				if( V->object() == FirstObject->id() )
+				{
+					CallerId = FirstObject->id();
+				}
+				else
+				{
 #if defined( MOO_DEBUG_TASKS )
-				qDebug() << "luaPass - obj:" << T.object() << "- vob:" << P->id() << "- vrb:" << T.verb();
+					qDebug() << "luaPass - obj:" << T.object() << "- clr:" << CallerId << "- vob:" << P->id() << "- vrb:" << T.verb();
 #endif
 
-				return( Command->verbCall( V, lua_gettop( L ), P->id() ) );
+					return( Command->verbCall( V, lua_gettop( L ), P->id(), CallerId ) );
+				}
 			}
 
 			P = OM.object( P->parent() );

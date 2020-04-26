@@ -149,13 +149,12 @@ void ServerTest::luaPass2( void )
 void ServerTest::luaPass3( void )
 {
 	LuaTestData			 TD;
-	Object				*O1 = TD.OM.newObject();
-	Object				*O2 = TD.OM.newObject();
-	Object				*O3 = TD.OM.newObject();
-	Object				*O4 = TD.OM.newObject();
-	QString				 CD = QString( ";o( %1 ):test()" ).arg( O4->id() );
+	Object				*O1 = TD.OM.newObject();	// #4
+	Object				*O2 = TD.OM.newObject();	// #5
+	Object				*O3 = TD.OM.newObject();	// #6
+	Object				*O4 = TD.OM.newObject();	// #7
 
-	O1->setParent( 2 );
+	O1->setParent( OBJECT_ROOT );
 	O2->setParent( O1->id() );
 	O3->setParent( O2->id() );
 	O4->setParent( O3->id() );
@@ -165,6 +164,33 @@ void ServerTest::luaPass3( void )
 	O3->setOwner( O3->id() );
 	O4->setOwner( O4->id() );
 
+	// Add property to hold result
+
+	if( true )
+	{
+		Property		P;
+
+		P.initialise();
+
+		P.setValue( "result" );
+		P.setOwner( O1->id() );
+
+		O1->propAdd( "result", P );
+	}
+
+	if( true )
+	{
+		Property		P;
+
+		P.initialise();
+
+		P.setValue( 0.0 );
+		P.setOwner( O1->id() );
+		P.setWrite( true );
+
+		O1->propAdd( "count", P );
+	}
+
 	// Add verb
 
 	Verb			 V1;
@@ -172,7 +198,7 @@ void ServerTest::luaPass3( void )
 	V1.initialise();
 
 	V1.setOwner( O1->id() );
-	V1.setScript( QString( "o( %1 ).result = tostring( moo.object.id )" ).arg( O1->id() ) );
+	V1.setScript( QString( "o( %1 ).count = o( %1 ).count + 1\n\no( %1 ).result = tostring( moo.object.id )" ).arg( O1->id() ) );
 
 	O1->verbAdd( "test", V1 );
 
@@ -183,7 +209,7 @@ void ServerTest::luaPass3( void )
 	V2.initialise();
 
 	V2.setOwner( O2->id() );
-	V2.setScript( QString( "moo.pass()" ) );
+	V2.setScript( QString( "o( %1 ).count = o( %1 ).count + 1\n\nmoo.pass()" ).arg( O1->id() ) );
 
 	O2->verbAdd( "test", V2 );
 
@@ -194,32 +220,27 @@ void ServerTest::luaPass3( void )
 	V3.initialise();
 
 	V3.setOwner( O3->id() );
-	V3.setScript( QString( "moo.pass()" ) );
+	V3.setScript( QString( "o( %1 ).count = o( %1 ).count + 1\n\nmoo.pass()" ).arg( O1->id() ) );
 
 	O3->verbAdd( "test", V3 );
 
-	// Add property to hold result
-
-	Property		P;
-
-	P.initialise();
-
-	P.setValue( "result" );
-	P.setOwner( O1->id() );
-
-	O1->propAdd( "result", P );
-
 	// Call test
 
-	TD.execute( CD );
+	TD.execute( QString( ";o( %1 ):test()" ).arg( O4->id() ) );
 
 	// Check result
 
-	Property	*R = O1->prop( "result" );
+	Property	*R1 = O1->prop( "result" );
 
-	QVERIFY( R != 0 );
-	QVERIFY( R->type() == QVariant::String );
-	QCOMPARE( R->value().toString(), QString( "%1" ).arg( O1->id() ) ); // The initial value of this in the called verb is the same as in the calling verb.
+	QVERIFY( R1 );
+	QVERIFY( R1->type() == QVariant::String );
+	QCOMPARE( R1->value().toString(), QString( "%1" ).arg( O1->id() ) ); // The initial value of this in the called verb is the same as in the calling verb.
+
+	Property	*R2 = O1->prop( "count" );
+
+	QVERIFY( R2 );
+	QVERIFY( R2->type() == QVariant::Double );
+	QCOMPARE( R2->value().toDouble(), 3 ); // The initial value of this in the called verb is the same as in the calling verb.
 }
 
 // moo.pass() on two parents (where the verb is not defined on the 2nd child)
@@ -230,15 +251,41 @@ void ServerTest::luaPass4( void )
 	Object				*O1 = TD.OM.newObject();
 	Object				*O2 = TD.OM.newObject();
 	Object				*O3 = TD.OM.newObject();
-	QString				 CD = QString( ";o( %1 ):test()" ).arg( O3->id() );
 
-	O1->setParent( 2 );
+	O1->setParent( OBJECT_ROOT );
 	O2->setParent( O1->id() );
 	O3->setParent( O2->id() );
 
 	O1->setOwner( O1->id() );
 	O2->setOwner( O2->id() );
 	O3->setOwner( O3->id() );
+
+	// Add property to hold result
+
+	if( true )
+	{
+		Property		P;
+
+		P.initialise();
+
+		P.setValue( "result" );
+		P.setOwner( O1->id() );
+
+		O1->propAdd( "result", P );
+	}
+
+	if( true )
+	{
+		Property		P;
+
+		P.initialise();
+
+		P.setValue( 0.0 );
+		P.setOwner( O1->id() );
+		P.setWrite( true );
+
+		O1->propAdd( "count", P );
+	}
 
 	// Add verb
 
@@ -247,7 +294,7 @@ void ServerTest::luaPass4( void )
 	V1.initialise();
 
 	V1.setOwner( O1->id() );
-	V1.setScript( QString( "o( %1 ).result = tostring( moo.object.id )" ).arg( O1->id() ) );
+	V1.setScript( QString( "o( %1 ).count = o( %1 ).count + 1\n\no( %1 ).result = tostring( moo.object.id )" ).arg( O1->id() ) );
 
 	O1->verbAdd( "test", V1 );
 
@@ -269,32 +316,27 @@ void ServerTest::luaPass4( void )
 	V3.initialise();
 
 	V3.setOwner( O3->id() );
-	V3.setScript( QString( "moo.pass()" ) );
+	V3.setScript( QString( "o( %1 ).count = o( %1 ).count + 1\n\nmoo.pass()" ).arg( O1->id() ) );
 
 	O3->verbAdd( "test", V3 );
 
-	// Add property to hold result
-
-	Property		P;
-
-	P.initialise();
-
-	P.setValue( "result" );
-	P.setOwner( O1->id() );
-
-	O1->propAdd( "result", P );
-
 	// Call test
 
-	TD.execute( CD );
+	TD.execute( QString( ";o( %1 ):test()" ).arg( O3->id() ) );
 
 	// Check result
 
-	Property	*R = O1->prop( "result" );
+	Property	*R1 = O1->prop( "result" );
 
-	QVERIFY( R != 0 );
-	QVERIFY( R->type() == QVariant::String );
-	QCOMPARE( R->value().toString(), QString( "%1" ).arg( O1->id() ) ); // The initial value of this in the called verb is the same as in the calling verb.
+	QVERIFY( R1 );
+	QVERIFY( R1->type() == QVariant::String );
+	QCOMPARE( R1->value().toString(), QString( "%1" ).arg( O1->id() ) ); // The initial value of this in the called verb is the same as in the calling verb.
+
+	Property	*R2 = O1->prop( "count" );
+
+	QVERIFY( R2 );
+	QVERIFY( R2->type() == QVariant::Double );
+	QCOMPARE( R2->value().toDouble(), 2 ); // The initial value of this in the called verb is the same as in the calling verb.
 }
 
 // moo.pass() on three parents (where the verb is not defined on the 3rd child)

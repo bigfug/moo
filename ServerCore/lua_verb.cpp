@@ -157,23 +157,13 @@ int lua_verb::luaCall( lua_State *L )
 	{
 		luaVerb				*LV = arg( L );
 		Verb				*V = LV->mVerb;
-		Task				 T = Command->task();
 
 		if( !V )
 		{
 			throw( mooException( E_VERBNF, "invalid verb" ) );
 		}
 
-		T.setCaller( V->object() );
-		T.setObject( V->object() );
-		T.setVerb( V->name() );
-
-		if( !Command->isWizard() )
-		{
-			T.setPermissions( V->owner() );
-		}
-
-		return( Command->verbCall( T, V, lua_gettop( L ) - 1 ) );
+		return( Command->verbCall( V, lua_gettop( L ) - 1, V->object(), V->object() ) );
 	}
 	catch( const mooException &e )
 	{

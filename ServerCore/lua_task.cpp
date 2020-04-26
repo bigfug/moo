@@ -980,35 +980,45 @@ int lua_task::execute( void )
 
 int lua_task::verbCall( Verb *V, int pArgCnt )
 {
+	return( verbCall( V, pArgCnt, V->object(), task().object() ) );
+}
+
+int lua_task::verbCall( Verb *V, int pArgCnt, ObjectId pObjectId )
+{
+	return( verbCall( V, pArgCnt, pObjectId, task().object() ) );
+}
+
+int lua_task::verbCall( Verb *V, int pArgCnt, ObjectId pObjectId, ObjectId pCallerId )
+{
+	ObjectId	CurPrm = permissions();
 	Task		T = task();
 
-	lua_task::taskDump( QString( "verbCall( %1, %2 )" ).arg( V->name() ).arg( pArgCnt ), T );
+	lua_task::taskDump( QString( "verbCall( %1, %2, %3, %4 )" ).arg( V->name() ).arg( pArgCnt ).arg( pObjectId ).arg( pCallerId ), T );
 
-	T.setCaller( T.object() );
+	if( CurPrm != OBJECT_SYSTEM )
+	{
+		T.setPermissions( V->owner() );
+	}
 
 	if( T.verb().isEmpty() )
 	{
 		T.setVerb( V->name() );
 	}
 
-	return( verbCall( T, V, pArgCnt ) );
-}
+	T.setCaller( pCallerId );
+	T.setObject( pObjectId );
 
-int lua_task::verbCall( Task &pTask, Verb *V, int pArgCnt )
-{
-	int			Result;
+	setPermissions( T.permissions() );
 
-	pTask.setObject( V->object() );
+	taskPush( T );
 
-	lua_task::taskDump( "verbCall()", pTask );
-
-	taskPush( pTask );
-
-	Result = verbCallCode( V, pArgCnt );
+	int			VrbRet = verbCallCode( V, pArgCnt );
 
 	taskPop();
 
-	return( Result );
+	setPermissions( CurPrm );
+
+	return( VrbRet );
 }
 
 int lua_task::verbCallCode( Verb *V, int pArgCnt )
@@ -1119,32 +1129,6 @@ void lua_task::taskPop()
 	{
 		setPermissions( mTasks.front().mPermissions );
 	}
-}
-
-int lua_task::verbCall( Verb *V, int pArgCnt, ObjectId pObjectId )
-{
-	ObjectId	CurPrm = permissions();
-	Task		T = task();
-
-	if( CurPrm != OBJECT_SYSTEM )
-	{
-		T.setPermissions( V->owner() );
-	}
-
-	T.setCaller( T.object() );
-	T.setObject( pObjectId );
-
-	setPermissions( T.permissions() );
-
-	taskPush( T );
-
-	int			VrbRet = verbCallCode( V, pArgCnt );
-
-	taskPop();
-
-	setPermissions( CurPrm );
-
-	return( VrbRet );
 }
 
 void lua_task::luaHook( lua_State *L, lua_Debug *ar )
