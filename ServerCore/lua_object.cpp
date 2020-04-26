@@ -244,18 +244,18 @@ int lua_object::luaCreate( lua_State *L )
 			// the new object itself (if owner was given as #-1)
 			// or owner (otherwise).
 
-//			if( argc < 2 )
-//			{
-//				objObject->setOwner( T.player() );
-//			}
-//			else if( OwnerId == -1 )
-//			{
-//				objObject->setOwner( objObject->id() );
-//			}
-//			else
-//			{
-//				objObject->setOwner( OwnerId );
-//			}
+			if( argc < 2 )
+			{
+				objObject->setOwner( Command->task().permissions() );
+			}
+			else if( OwnerId == OBJECT_NONE )
+			{
+				objObject->setOwner( objObject->id() );
+			}
+			else
+			{
+				objObject->setOwner( OwnerId );
+			}
 
 			Verb		*FndVrb;
 			Object		*FndObj;
@@ -1152,7 +1152,7 @@ int lua_object::luaVerbCall( lua_State *L )
 
 			if( CON )
 			{
-				CON->notify( ErrMsg.toHtmlEscaped() );
+				CON->notify( ErrMsg );
 			}
 
 			lua_pop( L, 1 );

@@ -35,7 +35,7 @@ void TaskRollback::taskRollbackObjectRecycle()
 
 	QVERIFY( O );
 
-	lua_task		 Com = TD.eval( QString( "o( %1 ):recycle()" ).arg( O->id() ) );
+	lua_task		 Com = TD.eval( QString( "o( %1 ):recycle()" ).arg( O->id() ), OBJECT_SYSTEM );
 
 	QVERIFY( O->recycle() );
 
@@ -57,7 +57,7 @@ void TaskRollback::taskRollbackObjectRead()
 
 	bool		 V = O->read();
 
-	lua_task	 C = TD.eval( QString( "o( %1 ).r = %2" ).arg( O->id() ).arg( !V ) );
+	lua_task	 C = TD.eval( QString( "o( %1 ).r = %2" ).arg( O->id() ).arg( !V ), OBJECT_SYSTEM );
 
 	QCOMPARE( O->read(), !V );
 
@@ -76,7 +76,7 @@ void TaskRollback::taskRollbackObjectWrite( void )
 
 	bool		 V = O->write();
 
-	lua_task	 C = TD.eval( QString( "o( %1 ).w = %2" ).arg( O->id() ).arg( !V ) );
+	lua_task	 C = TD.eval( QString( "o( %1 ).w = %2" ).arg( O->id() ).arg( !V ), OBJECT_SYSTEM );
 
 	QCOMPARE( O->write(), !V );
 
@@ -95,7 +95,7 @@ void TaskRollback::taskRollbackObjectFertile( void )
 
 	bool		 V = O->fertile();
 
-	lua_task	 C = TD.eval( QString( "o( %1 ).f = %2" ).arg( O->id() ).arg( !V ) );
+	lua_task	 C = TD.eval( QString( "o( %1 ).f = %2" ).arg( O->id() ).arg( !V ), OBJECT_SYSTEM );
 
 	QCOMPARE( O->fertile(), !V );
 
@@ -117,7 +117,7 @@ void TaskRollback::taskRollbackObjectName( void )
 
 	O->setName( v1 );
 
-	lua_task	 C = TD.eval( QString( "o( %1 ).name = '%2'" ).arg( O->id() ).arg( v2 ) );
+	lua_task	 C = TD.eval( QString( "o( %1 ).name = '%2'" ).arg( O->id() ).arg( v2 ), OBJECT_SYSTEM );
 
 	QCOMPARE( O->name(), v2 );
 
@@ -139,7 +139,7 @@ void TaskRollback::taskRollbackObjectOwner()
 
 	O->setOwner( v1 );
 
-	lua_task	 C = TD.eval( QString( "o( %1 ).owner = o( %2 )" ).arg( O->id() ).arg( v2 ) );
+	lua_task	 C = TD.eval( QString( "o( %1 ).owner = o( %2 )" ).arg( O->id() ).arg( v2 ), OBJECT_SYSTEM );
 
 	QCOMPARE( O->owner(), v2 );
 
@@ -161,7 +161,7 @@ void TaskRollback::taskRollbackObjectParent()
 
 	O->setParent( v1 );
 
-	lua_task	 C = TD.eval( QString( "o( %1 ).parent = o( %2 )" ).arg( O->id() ).arg( v2 ) );
+	lua_task	 C = TD.eval( QString( "o( %1 ).parent = o( %2 )" ).arg( O->id() ).arg( v2 ), OBJECT_SYSTEM );
 
 	QCOMPARE( O->parent(), v2 );
 
@@ -184,7 +184,7 @@ void TaskRollback::taskRollbackObjectLocation()
 
 	QCOMPARE( O->location(), L1->id() );
 
-	lua_task	 C = TD.eval( QString( "o( %1 ).location = o( %2 )" ).arg( O->id() ).arg( L2->id() ) );
+	lua_task	 C = TD.eval( QString( "o( %1 ).location = o( %2 )" ).arg( O->id() ).arg( L2->id() ), OBJECT_SYSTEM );
 
 	QCOMPARE( O->location(), L2->id() );
 
@@ -203,7 +203,7 @@ void TaskRollback::taskRollbackObjectPlayer()
 
 	bool		 V = O->player();
 
-	lua_task	 C = TD.eval( QString( "o( %1 ).player = %2" ).arg( O->id() ).arg( !V ) );
+	lua_task	 C = TD.eval( QString( "o( %1 ).player = %2" ).arg( O->id() ).arg( !V ), OBJECT_SYSTEM );
 
 	QCOMPARE( O->player(), !V );
 
@@ -222,7 +222,7 @@ void TaskRollback::taskRollbackObjectProgrammer()
 
 	bool		 V = O->programmer();
 
-	lua_task	 C = TD.eval( QString( "o( %1 ).programmer = %2" ).arg( O->id() ).arg( !V ) );
+	lua_task	 C = TD.eval( QString( "o( %1 ).programmer = %2" ).arg( O->id() ).arg( !V ), OBJECT_SYSTEM );
 
 	QCOMPARE( O->programmer(), !V );
 
@@ -241,7 +241,7 @@ void TaskRollback::taskRollbackObjectWizard()
 
 	bool		 V = O->wizard();
 
-	lua_task	 C = TD.eval( QString( "o( %1 ).wizard = %2" ).arg( O->id() ).arg( !V ) );
+	lua_task	 C = TD.eval( QString( "o( %1 ).wizard = %2" ).arg( O->id() ).arg( !V ), OBJECT_SYSTEM );
 
 	QCOMPARE( O->wizard(), !V );
 
@@ -261,7 +261,7 @@ void TaskRollback::taskRollbackObjectPropAdd( void )
 	QString		v1( "test1" );
 	QString		v2( "test2" );
 
-	lua_task	 C = TD.eval( QString( "o( %1 ):propadd( '%2', '%3' );" ).arg( O->id() ).arg( v1 ).arg( v2 ) );
+	lua_task	 C = TD.eval( QString( "o( %1 ):propadd( '%2', '%3' );" ).arg( O->id() ).arg( v1 ).arg( v2 ), OBJECT_SYSTEM );
 
 	QVERIFY( O->prop( v1 ) );
 
@@ -283,13 +283,13 @@ void TaskRollback::taskRollbackObjectPropDelete()
 	QString		v1( "test1" );
 	QString		v2( "test2" );
 
-	TD.process( QString( "o( %1 ):propadd( '%2', '%3' );" ).arg( O->id() ).arg( v1 ).arg( v2 ) );
+	TD.process( QString( "o( %1 ):propadd( '%2', '%3' );" ).arg( O->id() ).arg( v1 ).arg( v2 ), OBJECT_SYSTEM );
 
 	QVERIFY( O->prop( v1 ) );
 
 	QCOMPARE( O->prop( v1 )->value().toString(), v2 );
 
-	lua_task	 C = TD.eval( QString( "o( %1 ):propdel( '%2' );" ).arg( O->id() ).arg( v1 ) );
+	lua_task	 C = TD.eval( QString( "o( %1 ):propdel( '%2' );" ).arg( O->id() ).arg( v1 ), OBJECT_SYSTEM );
 
 	QVERIFY( !O->prop( v1 ) );
 
@@ -318,19 +318,19 @@ void TaskRollback::taskRollbackObjectPropClear()
 
 	QVERIFY( v2 != v3 );
 
-	TD.process( QString( "o( %1 ):propadd( '%2', '%3' );" ).arg( O1->id() ).arg( v1 ).arg( v2 ) );
+	TD.process( QString( "o( %1 ):propadd( '%2', '%3' );" ).arg( O1->id() ).arg( v1 ).arg( v2 ), OBJECT_SYSTEM );
 
 	QVERIFY( O1->prop( v1 ) );
 	QVERIFY( !O2->prop( v1 ) );
 	QVERIFY( O2->propParent( v1 ) );
 	QCOMPARE( O2->propParent( v1 )->value().toString(), v2 );
 
-	TD.process( QString( "o( %1 ).%2 = '%3'" ).arg( O2->id() ).arg( v1 ).arg( v3 ) );
+	TD.process( QString( "o( %1 ).%2 = '%3'" ).arg( O2->id() ).arg( v1 ).arg( v3 ), OBJECT_SYSTEM );
 
 	QVERIFY( O2->prop( v1 ) );
 	QCOMPARE( O2->prop( v1 )->value().toString(), v3 );
 
-	lua_task	 C = TD.eval( QString( "o( %1 ):propclr( '%2' );" ).arg( O2->id() ).arg( v1 ) );
+	lua_task	 C = TD.eval( QString( "o( %1 ):propclr( '%2' );" ).arg( O2->id() ).arg( v1 ), OBJECT_SYSTEM );
 
 	QVERIFY( !O2->prop( v1 ) );
 	QVERIFY( O2->propParent( v1 ) );
@@ -355,13 +355,13 @@ void TaskRollback::taskRollbackObjectPropValue()
 
 	QVERIFY( v2 != v3 );
 
-	TD.process( QString( "o( %1 ):propadd( '%2', '%3' );" ).arg( O->id() ).arg( v1 ).arg( v2 ) );
+	TD.process( QString( "o( %1 ):propadd( '%2', '%3' );" ).arg( O->id() ).arg( v1 ).arg( v2 ), OBJECT_SYSTEM );
 
 	QVERIFY( O->prop( v1 ) );
 
 	QCOMPARE( O->prop( v1 )->value().toString(), v2 );
 
-	lua_task	 C = TD.eval( QString( "o( %1 ).%2 = '%3';" ).arg( O->id() ).arg( v1 ).arg( v3 ) );
+	lua_task	 C = TD.eval( QString( "o( %1 ).%2 = '%3';" ).arg( O->id() ).arg( v1 ).arg( v3 ), OBJECT_SYSTEM );
 
 	QVERIFY( O->prop( v1 ) );
 
@@ -384,7 +384,7 @@ void TaskRollback::taskRollbackObjectAliasAdd( void )
 
 	QString		v1( "test1" );
 
-	lua_task	 C = TD.eval( QString( "o( %1 ):aliasadd( '%2' )" ).arg( O->id() ).arg( v1 ) );
+	lua_task	 C = TD.eval( QString( "o( %1 ):aliasadd( '%2' )" ).arg( O->id() ).arg( v1 ), OBJECT_SYSTEM );
 
 	QVERIFY( O->aliases().contains( v1 ) );
 
@@ -403,11 +403,11 @@ void TaskRollback::taskRollbackObjectAliasDelete()
 
 	QString		v1( "test1" );
 
-	TD.process( QString( "o( %1 ):aliasadd( '%2' )" ).arg( O->id() ).arg( v1 ) );
+	TD.process( QString( "o( %1 ):aliasadd( '%2' )" ).arg( O->id() ).arg( v1 ), OBJECT_SYSTEM );
 
 	QVERIFY( O->aliases().contains( v1 ) );
 
-	lua_task	 C = TD.eval( QString( "o( %1 ):aliasdel( '%2' )" ).arg( O->id() ).arg( v1 ) );
+	lua_task	 C = TD.eval( QString( "o( %1 ):aliasdel( '%2' )" ).arg( O->id() ).arg( v1 ), OBJECT_SYSTEM );
 
 	QVERIFY( !O->aliases().contains( v1 ) );
 
@@ -423,17 +423,17 @@ void TaskRollback::taskRollbackObjectPropInherit( void )
 	Object		*O1 = TD.OM.newObject();
 	Object		*O2 = TD.OM.newObject();
 
-	TD.process( QString( "o( %1 ).parent = o( %2 )" ).arg( O2->id() ).arg( O1->id() ) );
+	TD.process( QString( "o( %1 ).parent = o( %2 )" ).arg( O2->id() ).arg( O1->id() ), OBJECT_SYSTEM );
 
 	QCOMPARE( O2->parent(), O1->id() );
 
-	TD.process( QString( "o( %1 ):propadd( 'test', 'value1' )" ).arg( O1->id() ) );
-	TD.process( QString( "o( %1 ).test = 'value2'" ).arg( O2->id() ) );
+	TD.process( QString( "o( %1 ):propadd( 'test', 'value1' )" ).arg( O1->id() ), OBJECT_SYSTEM );
+	TD.process( QString( "o( %1 ).test = 'value2'" ).arg( O2->id() ), OBJECT_SYSTEM );
 
 	QCOMPARE( O2->prop( "test" )->value().toString(), QStringLiteral( "value2" ) );
 	QCOMPARE( O2->propParent( "test" )->value().toString(), QStringLiteral( "value1" ) );
 
-	lua_task	 C = TD.eval( QString( "o( %1 ).parent = O_NONE" ).arg( O2->id() ) );
+	lua_task	 C = TD.eval( QString( "o( %1 ).parent = O_NONE" ).arg( O2->id() ), OBJECT_SYSTEM );
 
 	QCOMPARE( O2->parent(), OBJECT_NONE );
 	QCOMPARE( O2->prop( "test" ), nullptr );

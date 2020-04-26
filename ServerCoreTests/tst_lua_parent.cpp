@@ -74,7 +74,7 @@ void ServerTest::luaParentBasic( void )
 
 	if( true )
 	{
-		lua_task::process( QString( "o( %1 ).parent = o( %2 )" ).arg( objObject->id() ).arg( Parent->id() ), CID, Programmer->id(), true );
+		lua_task::process( QString( "o( %1 ).parent = o( %2 )" ).arg( objObject->id() ).arg( Parent->id() ), CID, Programmer->id() );
 
 		//lua_moo::stackDump( Com.L() );
 
@@ -571,12 +571,12 @@ void ServerTest::luaParentChangePropTest1( void )
 
 	P1->propAdd( "test", QVariant::fromValue<double>( 0 ) );
 
-	TD.process( QString( "o( %1 ).parent = o( %2 )" ).arg( TO->id() ).arg( P1->id() ) );
+	TD.process( QString( "o( %1 ).parent = o( %2 )" ).arg( TO->id() ).arg( P1->id() ), OBJECT_SYSTEM );
 
 	QVERIFY( !TO->prop( "test" ) );
 	QVERIFY( TO->propParent( "test" ) );
 
-	TD.process( QString( "o( %1 ).parent = o( %2 )" ).arg( TO->id() ).arg( P2->id() ) );
+	TD.process( QString( "o( %1 ).parent = o( %2 )" ).arg( TO->id() ).arg( P2->id() ), OBJECT_SYSTEM );
 
 	QVERIFY( !TO->propParent( "test" ) );
 }
@@ -609,11 +609,11 @@ void ServerTest::luaParentChangePropTest3( void )
 	P1->propAdd( "test", QVariant::fromValue<double>( 0 ) );
 	C1->propAdd( "test", QVariant::fromValue<double>( 5 ) );
 
-	TD.process( QString( "o( %1 ).parent = o( %2 )" ).arg( C1->id() ).arg( TO->id() ) );
+	TD.process( QString( "o( %1 ).parent = o( %2 )" ).arg( C1->id() ).arg( TO->id() ), OBJECT_SYSTEM );
 
 	QCOMPARE( C1->parent(), TO->id() );
 
-	TD.process( QString( "o( %1 ).parent = o( %2 )" ).arg( TO->id() ).arg( P1->id() ) );
+	TD.process( QString( "o( %1 ).parent = o( %2 )" ).arg( TO->id() ).arg( P1->id() ), OBJECT_SYSTEM );
 
 	QCOMPARE( TO->parent(), OBJECT_NONE );
 }
@@ -627,11 +627,11 @@ void ServerTest::luaParentChangePropTest4( void )
 
 	P1->propAdd( "test", QVariant::fromValue<double>( 0 ) );
 
-	TD.process( QString( "o( %1 ).parent = o( %2 )" ).arg( TO->id() ).arg( P1->id() ) );
-
-	TO->propSet( "test", QVariant::fromValue<double>( 5 ) );
+	TD.process( QString( "o( %1 ).parent = o( %2 )" ).arg( TO->id() ).arg( P1->id() ), OBJECT_SYSTEM );
 
 	QCOMPARE( TO->parent(), P1->id() );
+
+	TO->propSet( "test", QVariant::fromValue<double>( 5 ) );
 
 	QVERIFY( TO->prop( "test" ) );
 

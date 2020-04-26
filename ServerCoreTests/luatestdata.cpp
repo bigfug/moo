@@ -28,49 +28,54 @@ LuaTestData::~LuaTestData()
 	ObjectManager::reset();
 }
 
-lua_task LuaTestData::execute( const QString &pCmd, bool pElevated )
+lua_task LuaTestData::execute( const QString &pCmd )
 {
-	lua_task	t( CID, TaskEntry( pCmd, CID, programmerId() ), pElevated );
+	return( execute( pCmd, programmerId() ) );
+}
+
+lua_task LuaTestData::execute( const QString &pCmd, ObjectId pProgrammerId )
+{
+	lua_task	t( CID, TaskEntry( pCmd, CID, pProgrammerId ) );
+
+	t.setPermissions( pProgrammerId );
 
 	t.execute( TimeStamp );
 
 	return( t );
 }
 
-lua_task LuaTestData::task( const QString &pCmd, bool pElevated )
+lua_task LuaTestData::task( const QString &pCmd )
 {
-	return( task( pCmd, programmerId(), pElevated ) );
+	return( task( pCmd, programmerId() ) );
 }
 
-lua_task LuaTestData::task( const QString &pCmd, ObjectId pProgrammerId, bool pElevated )
+lua_task LuaTestData::task( const QString &pCmd, ObjectId pProgrammerId )
 {
-	return( lua_task( CID, TaskEntry( pCmd, pProgrammerId ), pElevated ) );
+	return( lua_task( CID, TaskEntry( pCmd, pProgrammerId ) ) );
 }
 
-lua_task LuaTestData::eval( const QString &pCmd, bool pElevated )
+lua_task LuaTestData::eval( const QString &pCmd )
 {
-	return( eval( pCmd, programmerId(), pElevated ) );
+	return( eval( pCmd, programmerId() ) );
 }
 
-lua_task LuaTestData::eval( const QString &pCmd, ObjectId pProgrammerId, bool pElevated )
+lua_task LuaTestData::eval( const QString &pCmd, ObjectId pProgrammerId )
 {
 	lua_task	t( CID, TaskEntry( pCmd, CID, pProgrammerId ) );
-
-	t.setElevated( pElevated );
 
 	t.eval();
 
 	return( t );
 }
 
-void LuaTestData::process( const QString &pCmd, bool pElevated )
+void LuaTestData::process( const QString &pCmd )
 {
-	process( pCmd, programmerId(), pElevated );
+	process( pCmd, programmerId() );
 }
 
-void LuaTestData::process( const QString &pCmd, ObjectId pProgrammerId, bool pElevated )
+void LuaTestData::process( const QString &pCmd, ObjectId pProgrammerId )
 {
-	lua_task::process( pCmd, CID, pProgrammerId, pElevated );
+	lua_task::process( pCmd, CID, pProgrammerId );
 }
 
 ConnectionId LuaTestObject::initLua( qint64 pTimeStamp )

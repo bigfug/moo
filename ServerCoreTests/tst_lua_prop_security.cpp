@@ -18,13 +18,13 @@ void ServerTest::luaPropAddSecurity_data( void )
 
 	QTest::newRow( "owner" )			<< 3 << false << false << 3 << true;
 	QTest::newRow( "not owner" )		<< 2 << false << false << 3 << false;
-	QTest::newRow( "wizard owner" )		<< 3 << true  << false << 3 << true;
-	QTest::newRow( "wizard not owner" )	<< 2 << true  << false << 3 << true;
+	QTest::newRow( "wizard owner" )		<< 3 << true  << false << 0 << true;
+	QTest::newRow( "wizard not owner" )	<< 2 << true  << false << 0 << true;
 
 	QTest::newRow( "owner (o:w)" )				<< 3 << false << true << 3 << true;
 	QTest::newRow( "not owner (o:w)" )			<< 2 << false << true << 3 << true;
-	QTest::newRow( "wizard owner (o:w)" )		<< 3 << true  << true << 3 << true;
-	QTest::newRow( "wizard not owner (o:w)" )	<< 2 << true  << true << 3 << true;
+	QTest::newRow( "wizard owner (o:w)" )		<< 3 << true  << true << 0 << true;
+	QTest::newRow( "wizard not owner (o:w)" )	<< 2 << true  << true << 0 << true;
 }
 
 void ServerTest::luaPropAddSecurity( void )
@@ -37,8 +37,6 @@ void ServerTest::luaPropAddSecurity( void )
 
 	LuaTestData			 TD;
 
-	TD.Programmer->setWizard( pWizard );
-
 	Object				*O  = TD.OM.newObject();
 
 	O->setOwner( pOwner );
@@ -46,7 +44,7 @@ void ServerTest::luaPropAddSecurity( void )
 
 	// Call test
 
-	TD.execute( QString( ";o( %1 ):propadd( 'test', 'testval' )" ).arg( O->id() ) );
+	TD.execute( QString( ";o( %1 ):propadd( 'test', 'testval' )" ).arg( O->id() ), pWizard ? OBJECT_SYSTEM : TD.programmerId() );
 
 	// Check result
 
@@ -106,7 +104,7 @@ void ServerTest::luaPropDelSecurity( void )
 
 	// Call test
 
-	TD.execute( QString( ";o( %1 ):propdel( 'test' )" ).arg( O->id() ) );
+	TD.execute( QString( ";o( %1 ):propdel( 'test' )" ).arg( O->id() ), pWizard ? OBJECT_SYSTEM : TD.programmerId() );
 
 	// Check result
 

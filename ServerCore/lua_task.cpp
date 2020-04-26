@@ -369,9 +369,9 @@ int lua_task::luaSetPermissions( lua_State *L )
 	return( Command->lua_pushexception() );
 }
 
-lua_task::lua_task(ConnectionId pConnectionId, const Task &pTask, bool pElevated )
+lua_task::lua_task( ConnectionId pConnectionId, const Task &pTask )
 	: mL( Q_NULLPTR ), mConnectionId( pConnectionId ), mTimeStamp( 0 ), mMemUse( 0 ),
-	  mPermissions( OBJECT_NONE ), mElevated( pElevated )
+	  mPermissions( OBJECT_NONE )
 {
 #if defined( QT_DEBUG ) && defined( MOO_DEBUG_TASKS )
 	if( true )
@@ -395,7 +395,6 @@ lua_task::lua_task( lua_task &&t )
 	  mMemUse( std::move( t.mMemUse ) ),
 	  mChanges( std::move( t.mChanges ) ),
 	  mPermissions( std::move( t.mPermissions ) ),
-	  mElevated( std::move( t.mElevated ) ),
 	  mException( std::move( t.mException ) )
 {
 	lua_setallocf( mL, lua_task::luaAlloc, this );
@@ -604,6 +603,8 @@ int lua_task::eval( void )
 	const int		 OldTop		= lua_gettop( LS );
 	int				 Error;
 
+	taskDump( "lua_task::eval( void )", T );
+
 	if( ( Error = luaL_loadstring( LS, T.command().toLatin1() ) ) == LUA_OK )
 	{
 		lua_getglobal( LS, "moo_sandbox" );
@@ -624,7 +625,7 @@ int lua_task::eval( void )
 
 		if( CON )
 		{
-			CON->notify( Err.toHtmlEscaped() );
+			CON->notify( Err );
 		}
 
 		std::cerr << "eval: " << Err.toStdString() << std::endl;
@@ -909,23 +910,23 @@ int lua_task::execute( void )
 
 		if( Player && Player->verbFind( T.verb(), &FndVrb, &FndObj, DirectObjectId, T.preposition(), IndirectObjectId ) )
 		{
-//			T.setObject( Player->id() );
+			T.setObject( Player->id() );
 		}
 		else if( Location && Location->verbFind( T.verb(), &FndVrb, &FndObj, DirectObjectId, T.preposition(), IndirectObjectId ) )
 		{
-//			T.setObject( Location->id() );
+			T.setObject( Location->id() );
 		}
 		else if( DirectObject && DirectObject->verbFind( T.verb(), &FndVrb, &FndObj, DirectObjectId, T.preposition(), IndirectObjectId ) )
 		{
-//			T.setObject( DirectObject->id() );
+			T.setObject( DirectObject->id() );
 		}
 		else if( IndirectObject && IndirectObject->verbFind( T.verb(), &FndVrb, &FndObj, DirectObjectId, T.preposition(), IndirectObjectId ) )
 		{
-//			T.setObject( IndirectObject->id() );
+			T.setObject( IndirectObject->id() );
 		}
 		else if( Location && Location->verbFind( "huh", &FndVrb, &FndObj ) )
 		{
-//			T.setObject( Location->id() );
+			T.setObject( Location->id() );
 		}
 		else
 		{
@@ -936,8 +937,6 @@ int lua_task::execute( void )
 
 			return( 0 );
 		}
-
-		T.setObject( FndVrb->object() );
 
 		/*
 		player    an object, the player who typed the command
@@ -957,9 +956,12 @@ int lua_task::execute( void )
 		// verb runs; that is, the program in a verb can do whatever operations
 		// the owner of that verb is allowed to do and no others.
 
-		T.setPermissions( FndVrb->owner() );
+		if( T.permissions() != OBJECT_SYSTEM )
+		{
+			T.setPermissions( FndVrb->owner() );
 
-		setPermissions( T.permissions() );
+			setPermissions( T.permissions() );
+		}
 
 		taskDump( "lua_task::execute->verbCallCode()", T );
 
@@ -992,7 +994,7 @@ int lua_task::verbCall( Verb *V, int pArgCnt )
 	return( verbCall( T, V, pArgCnt ) );
 }
 
-int lua_task::verbCall( Task &pTask, Verb *V, int pArgCnt  )
+int lua_task::verbCall( Task &pTask, Verb *V, int pArgCnt )
 {
 	int			Result;
 
@@ -1047,7 +1049,7 @@ int lua_task::verbCallCode( Verb *V, int pArgCnt )
 
 		if( C )
 		{
-			C->notify( S.toHtmlEscaped() );
+			C->notify( S );
 		}
 
 		std::cerr << "verbCallCode" << S.toStdString() << std::endl;
@@ -1081,7 +1083,6 @@ void lua_task::taskDump( const QString &S, const Task &T )
 				 << "clr:" << T.caller()
 				 << "prm:" << T.permissions()
 				 << "argstr:" << T.argstr()
-				 << "elv:" << elevated()
 				 << "verb:" << T.verb();
 	}
 }
@@ -1112,21 +1113,36 @@ void lua_task::taskPush( const Task &T )
 
 void lua_task::taskPop()
 {
-#if defined( QT_DEBUG )
-	if( false )
-	{
-		const Task &T = mTasks.front();
-
-		qDebug() << "taskPop(" << T.id() << ")";
-	}
-#endif
-
 	mTasks.pop_front();
 
 	if( !mTasks.isEmpty() )
 	{
 		setPermissions( mTasks.front().mPermissions );
 	}
+}
+
+int lua_task::verbCall( Verb *V, int pArgCnt, ObjectId pObjectId )
+{
+	ObjectId	CurPrm = permissions();
+	Task		T = task();
+
+	if( CurPrm != OBJECT_SYSTEM )
+	{
+		setPermissions( V->owner() );
+	}
+
+	T.setCaller( T.object() );
+	T.setObject( pObjectId );
+
+	taskPush( T );
+
+	int			VrbRet = verbCallCode( V, pArgCnt );
+
+	taskPop();
+
+	setPermissions( CurPrm );
+
+	return( VrbRet );
 }
 
 void lua_task::luaHook( lua_State *L, lua_Debug *ar )
@@ -1176,12 +1192,10 @@ QStringList lua_task::taskVerbStack() const
 	return( VrbLst );
 }
 
-int lua_task::process( QString pCommand, ConnectionId pConnectionId, ObjectId pPlayerId, bool pElevated )
+int lua_task::process( QString pCommand, ConnectionId pConnectionId, ObjectId pPlayerId )
 {
 	lua_task		 Com( pConnectionId, TaskEntry( pCommand, pConnectionId, pPlayerId ) );
 	int				 Ret = 0;
-
-	Com.setElevated( pElevated );
 
 	try
 	{
@@ -1196,28 +1210,12 @@ int lua_task::process( QString pCommand, ConnectionId pConnectionId, ObjectId pP
 
 bool lua_task::isWizard() const
 {
-	ObjectId	 I = permissions();
-
-	if( I == OBJECT_NONE )
-	{
-		return( true );
-	}
-
-	if( !mElevated )
-	{
-		return( false );
-	}
-
-	Object		*O = ObjectManager::o( I );
-
-	return( O && O->wizard() );
+	return( permissions() == OBJECT_SYSTEM );
 }
 
 bool lua_task::isProgrammer() const
 {
-	ObjectId	 I = permissions();
-
-	if( I == OBJECT_NONE )
+	if( permissions() == OBJECT_SYSTEM )
 	{
 		return( true );
 	}
@@ -1234,7 +1232,7 @@ bool lua_task::isOwner( ObjectId pObjectId ) const
 
 bool lua_task::isPermValid() const
 {
-	return( permissions() == OBJECT_NONE || ObjectManager::o( permissions() ) );
+	return( ObjectManager::o( permissions() ) );
 }
 
 bool lua_task::isOwner( Object *O ) const
@@ -1242,7 +1240,7 @@ bool lua_task::isOwner( Object *O ) const
 	return( O ? isOwner( O->owner() ) : false );
 }
 
-bool lua_task::isOwner(Verb *V) const
+bool lua_task::isOwner( Verb *V ) const
 {
 	return( isOwner( V->owner() ) );
 }

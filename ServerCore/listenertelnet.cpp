@@ -37,7 +37,7 @@ void ListenerTelnet::newConnection( void )
 
 		if( SS )
 		{
-			qDebug() << "Socket Encrypted:" << SS->isEncrypted();
+			qInfo() << "Socket Encrypted:" << SS->isEncrypted();
 		}
 
 		ListenerTelnetSocket		*LS = new ListenerTelnetSocket( this, S );

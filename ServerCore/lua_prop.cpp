@@ -8,7 +8,6 @@
 #include "mooexception.h"
 #include "objectmanager.h"
 #include "object.h"
-#include <QDebug>
 #include "connectionmanager.h"
 #include "connection.h"
 #include "inputsinkset.h"

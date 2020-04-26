@@ -95,7 +95,7 @@ mooApp::mooApp( const QString &pDataFileName, QObject *pParent )
 
 	if( TimeToNextTask >= 0 )
 	{
-		qDebug() << "Time to next task:" << TimeToNextTask;
+		qInfo() << "Time to next task:" << TimeToNextTask;
 	}
 
 	connect( &mTimer, SIGNAL(timeout()), this, SLOT(taskReady()) );

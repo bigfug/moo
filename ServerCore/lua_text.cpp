@@ -527,7 +527,7 @@ bool lua_text::XmlOutputParser::characters(const QString &ch)
 {
 	Element		&E = mElementStack.last();
 
-	E.mContent.append( ch.toHtmlEscaped() );
+	E.mContent.append( ch );
 
 	return( true );
 }

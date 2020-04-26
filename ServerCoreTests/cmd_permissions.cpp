@@ -7,7 +7,7 @@ void cmd_permissions::testArgs_data()
 
 	QTest::newRow( "player" ) << "player" << "#3";
 	QTest::newRow( "caller" ) << "caller" << "#3";
-	QTest::newRow( "object" ) << "object" << "#1";
+	QTest::newRow( "object" ) << "object" << "#3";
 	QTest::newRow( "permissions" ) << "permissions" << "#1";
 	QTest::newRow( "verb" ) << "verb" << "test";
 	QTest::newRow( "argstr" ) << "argstr" << "";
@@ -24,8 +24,6 @@ void cmd_permissions::testArgs()
 	QFETCH( QString, pResult );
 
 	LuaTestData		TD;
-
-	TD.Programmer->setWizard( false );
 
 	Object			*Root = TD.OM.rootObject();
 
@@ -45,7 +43,7 @@ void cmd_permissions::testArgs()
 
 	Root->verbAdd( "test", V );
 
-	lua_task		T = TD.execute( QString( "test" ), false );
+	lua_task		T = TD.execute( QString( "test" ) );
 
 	QCOMPARE( T.error(), false );
 
@@ -76,8 +74,6 @@ void cmd_permissions::testArgs2()
 	QFETCH( QString, pResult );
 
 	LuaTestData		TD;
-
-	TD.Programmer->setWizard( false );
 
 	Object			*Root = TD.OM.rootObject();
 
@@ -117,7 +113,7 @@ void cmd_permissions::testArgs2()
 		TD.Programmer->verbAdd( "test", V );
 	}
 
-	lua_task		T = TD.execute( QString( "test" ), false );
+	lua_task		T = TD.execute( QString( "test" ) );
 
 	QCOMPARE( T.error(), false );
 
@@ -191,7 +187,7 @@ void cmd_permissions::testArgs3()
 		O1->verbAdd( "test", V );
 	}
 
-	lua_task		T = TD.execute( QString( "test" ), false );
+	lua_task		T = TD.execute( QString( "test" ) );
 
 	QCOMPARE( T.error(), false );
 

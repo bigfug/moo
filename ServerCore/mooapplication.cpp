@@ -4,7 +4,6 @@
 #include <QDateTime>
 #include <QStandardPaths>
 #include <QTextStream>
-#include <QDebug>
 #include <QFileInfo>
 #include <QDir>
 #include <QSysInfo>

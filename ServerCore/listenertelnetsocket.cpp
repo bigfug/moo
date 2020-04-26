@@ -22,7 +22,7 @@ ListenerTelnetSocket::ListenerTelnetSocket( QObject *pParent, QTcpSocket *pSocke
 	mLastChar  = 0;
 	mLocalEcho = false;
 
-	qDebug() << "Connection established from" << mSocket->peerAddress();
+	qInfo() << "Connection established from" << mSocket->peerAddress();
 
 	mConnectionId = ConnectionManager::instance()->doConnect( reinterpret_cast<ListenerServer *>( parent() )->objectid() );
 

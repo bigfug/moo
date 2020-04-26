@@ -710,14 +710,16 @@ int lua_moo::luaPass( lua_State *L )
 	{
 		const Task			&T = Command->task();
 		ObjectManager		&OM = *ObjectManager::instance();
-		ObjectId			 id = T.object();
-		bool				 VrbFnd = false;
-		Verb				*V;
 
 		Command->taskDump( "luaPass()", T );
 
 		Object				*O = OM.object( T.object() );
 		Object				*P = OM.object( O->parent() );
+
+		if( T.caller() == O->id() )
+		{
+			P = P ? OM.object( P->parent() ) : Q_NULLPTR;
+		}
 
 		while( P )
 		{
@@ -725,13 +727,12 @@ int lua_moo::luaPass( lua_State *L )
 
 			if( V )
 			{
-				Task		PT = T;
-
-				PT.setPermissions( V->owner() );
-
+#if defined( MOO_DEBUG_TASKS )
 				qDebug() << "luaPass - obj:" << T.object() << "- vob:" << P->id() << "- vrb:" << T.verb();
+#endif
 
-				return( Command->verbCall( PT, V, lua_gettop( L ) ) );
+				//return( Command->verbCall( PT, V, lua_gettop( L ) ) );
+				return( Command->verbCall( V, lua_gettop( L ), O->id() ) );
 			}
 
 			P = OM.object( P->parent() );
@@ -767,7 +768,7 @@ int lua_moo::luaEval( lua_State *L )
 
 		Command->taskDump( "luaEval( T )", T );
 
-		E.setPermissions( T.permissions() );
+		E.setPermissions( Command->permissions() );
 		E.setPlayer( T.player() );
 		E.setCaller( T.object() );
 
@@ -829,14 +830,10 @@ int lua_moo::luaElevate( lua_State *L )
 		{
 			Task                 E( ArgStr );
 
-			E.setPermissions( T.player() );
+			E.setPermissions( OBJECT_SYSTEM );
 			E.setPlayer( T.player() );
 			E.setCaller( T.object() );
 			E.setObject( OBJECT_NONE );
-
-			bool	CurE = Command->elevated();
-
-			Command->setElevated( true );
 
 			Command->taskDump( "luaElevate()", E );
 
@@ -845,8 +842,6 @@ int lua_moo::luaElevate( lua_State *L )
 			int Results = Command->eval();
 
 			Command->taskPop();
-
-			Command->setElevated( CurE );
 
 //            if( C )
 //            {
@@ -1097,7 +1092,7 @@ int lua_moo::luaPanic( lua_State *L )
 {
 	Q_UNUSED( L )
 
-	qDebug() << "**** LUA PANIC ****";
+	qWarning() << "**** LUA PANIC ****";
 
 	throw std::runtime_error( "**** LUA PANIC ****" );
 
@@ -1243,7 +1238,7 @@ int lua_moo::luaImport( lua_State *L )
 				continue;
 			}
 
-			C->notify( FL.toHtmlEscaped() );
+			C->notify( FL );
 
 			ImportTask.taskPush( TaskEntry( FL, Command->connectionId(), Command->permissions() ) );
 

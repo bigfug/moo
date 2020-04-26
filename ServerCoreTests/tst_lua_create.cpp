@@ -51,7 +51,7 @@ void ServerTest::luaCreate( void )
 
 		try
 		{
-			lua_task::process( QString( "moo.create( o( %1 ) )" ).arg( Parent->id() ), CID );
+			lua_task::process( QString( "moo.create( o( %1 ) )" ).arg( Parent->id() ), CID, OBJECT_SYSTEM );
 		}
 		catch( ... )
 		{
@@ -63,7 +63,7 @@ void ServerTest::luaCreate( void )
 		QVERIFY( O != 0 );
 
 		QCOMPARE( O->parent(), Parent->id() );
-		QCOMPARE( O->owner(), OBJECT_NONE );
+		QCOMPARE( O->owner(), OBJECT_SYSTEM );
 
 		O->setParent( OBJECT_NONE );
 
@@ -77,7 +77,7 @@ void ServerTest::luaCreate( void )
 		ObjectId		 oid = OM.maxId();
 		Object			*O   = 0;
 
-		lua_task::process( QString( "moo.create( o( %1 ), O_NONE )" ).arg( Parent->id() ), CID );
+		lua_task::process( QString( "moo.create( o( %1 ), O_NONE )" ).arg( Parent->id() ), CID, OBJECT_SYSTEM );
 
 		O = OM.object( oid );
 
@@ -98,7 +98,7 @@ void ServerTest::luaCreate( void )
 		ObjectId		 oid = OM.maxId();
 		Object			*O   = 0;
 
-		lua_task::process( QString( "moo.create( o( %1 ), o( %2 ) )" ).arg( Parent->id() ).arg( Owner->id() ), CID );
+		lua_task::process( QString( "moo.create( o( %1 ), o( %2 ) )" ).arg( Parent->id() ).arg( Owner->id() ), CID, OBJECT_SYSTEM );
 
 		O = OM.object( oid );
 
@@ -146,10 +146,8 @@ void ServerTest::luaCreate( void )
 	if( true )
 	{
 		QString			 CMD = QString( "moo.create( o( %1 ) )" ).arg( Parent->id() );
-		TaskEntry		 TE( CMD, CID, Programmer->id() );
+		TaskEntry		 TE( CMD, CID, OBJECT_SYSTEM );
 		lua_task		 Com( CID, TE );
-
-		Com.setElevated( true );
 
 		ObjectId		 oid = OM.maxId();
 		Object			*O   = 0;
@@ -167,10 +165,10 @@ void ServerTest::luaCreate( void )
 
 		O = OM.object( oid );
 
-		QVERIFY( O != 0 );
+		QVERIFY( O );
 
 		QCOMPARE( O->parent(), Parent->id() );
-		QCOMPARE( O->owner(), Programmer->id() );
+		QCOMPARE( O->owner(), OBJECT_SYSTEM );
 
 		O->setParent( OBJECT_NONE );
 
@@ -182,10 +180,8 @@ void ServerTest::luaCreate( void )
 	if( true )
 	{
 		QString			 CMD = QString( "moo.create( o( %1 ), -1 )" ).arg( Parent->id() );
-		TaskEntry		 TE( CMD, CID, Programmer->id() );
+		TaskEntry		 TE( CMD, CID, OBJECT_SYSTEM );
 		lua_task		 Com( CID, TE );
-
-		Com.setElevated( true );
 
 		ObjectId		 oid = OM.maxId();
 		Object			*O   = 0;
@@ -211,10 +207,8 @@ void ServerTest::luaCreate( void )
 	if( true )
 	{
 		QString			 CMD = QString( "moo.create( o( %1 ), o( %2 ) )" ).arg( Parent->id() ).arg( Owner->id() );
-		TaskEntry		 TE( CMD, CID, Programmer->id() );
+		TaskEntry		 TE( CMD, CID, OBJECT_SYSTEM );
 		lua_task		 Com( CID, TE );
-
-		Com.setElevated( true );
 
 		ObjectId		 oid = OM.maxId();
 		Object			*O   = 0;

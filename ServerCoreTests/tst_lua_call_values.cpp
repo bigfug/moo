@@ -109,14 +109,14 @@ void TestLuaCallValues::luaCallValueFirst_data()
 	QTest::addColumn<ObjectId>( "pResult" );
 
 	QTest::newRow( "object" )      << "object"      << false << OBJECT_NONE;
-	QTest::newRow( "caller" )      << "caller"      << false << 1;
+	QTest::newRow( "caller" )      << "caller"      << false << 3;
 	QTest::newRow( "player" )      << "player"      << false << 3;
 	QTest::newRow( "permissions" ) << "permissions" << false << 3;
 
 	QTest::newRow( "object (wizard)" )      << "object"      << true  << OBJECT_NONE;
-	QTest::newRow( "caller (wizard)" )      << "caller"      << true  << 1;
-	QTest::newRow( "player (wizard)" )      << "player"      << true  << 3;
-	QTest::newRow( "permissions (wizard)" ) << "permissions" << true  << 3;
+	QTest::newRow( "caller (wizard)" )      << "caller"      << true  << 0;
+	QTest::newRow( "player (wizard)" )      << "player"      << true  << 0;
+	QTest::newRow( "permissions (wizard)" ) << "permissions" << true  << 0;
 }
 
 void TestLuaCallValues::luaCallValueFirst( void )
@@ -126,8 +126,6 @@ void TestLuaCallValues::luaCallValueFirst( void )
 	QFETCH( ObjectId, pResult );
 
 	LuaTestData			 TD;
-
-	TD.Programmer->setWizard( pWizard );
 
 	Object				*O  = TD.OM.newObject();
 
@@ -147,7 +145,7 @@ void TestLuaCallValues::luaCallValueFirst( void )
 
 	// Call test
 
-	TD.execute( QString( ";o( %1 ).result = moo.%2.id" ).arg( O->id() ).arg( pType ) );
+	TD.execute( QString( ";o( %1 ).result = moo.%2.id" ).arg( O->id() ).arg( pType ), pWizard ? OBJECT_SYSTEM : TD.programmerId() );
 
 	// Check result
 

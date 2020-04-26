@@ -70,6 +70,7 @@ void ObjectManager::luaMinimal( void )
 	Wizard->setProgrammer( true );
 	Wizard->setWizard( true );
 	Wizard->setPlayer( true );
+	Wizard->setOwner( Wizard->id() );
 	Wizard->move( FirstRoom );
 
 	// Initialise the login verb to allow the player to login to the system
@@ -78,7 +79,7 @@ void ObjectManager::luaMinimal( void )
 
 	Login.initialise();
 
-	Login.setOwner( OBJECT_NONE );
+	Login.setOwner( OBJECT_SYSTEM );
 	Login.setScript( QString( "return( o( %1 ) )" ).arg( Wizard->id() ) );
 	Login.setDirectObjectArgument( THIS );
 	Login.setPrepositionArgument( NONE );
@@ -92,7 +93,8 @@ void ObjectManager::luaMinimal( void )
 
 	Eval.initialise();
 
-	Eval.setOwner( Wizard->id() );
+	Eval.setOwner( OBJECT_SYSTEM );
+
 	Eval.setScript( "moo.permissions = moo.player\n\nmoo.notify( moo.eval( moo.argstr ) )" );
 
 	Root->verbAdd( "eval", Eval );
@@ -103,7 +105,8 @@ void ObjectManager::luaMinimal( void )
 
 	Elevate.initialise();
 
-	Elevate.setOwner( Wizard->id() );
+	Elevate.setOwner( OBJECT_SYSTEM );
+
 	Elevate.setScript( "moo.permissions = moo.player\n\nmoo.notify( moo.elevate( moo.argstr ) )" );
 
 	Root->verbAdd( "elevate", Elevate );

@@ -31,7 +31,7 @@ public:
 	static void luaSetTask( lua_State *L, lua_task *T );
 
 public:
-	lua_task( ConnectionId pConnectionId, const Task &pTask, bool pElevated = false );
+	lua_task( ConnectionId pConnectionId, const Task &pTask );
 
 	lua_task( lua_task &&t );
 
@@ -57,6 +57,8 @@ public:
 
 	void taskPush( const Task &T );
 	void taskPop( void );
+
+	int verbCall( Verb *V, int pArgCnt, ObjectId pPermId );
 
 	int verbCall( Verb *V, int pArgCnt = 0 );
 	int verbCall( Task &pTask, Verb *V, int pArgCnt );
@@ -90,17 +92,7 @@ public:
 		mChanges.add( pChange );
 	}
 
-	void setElevated( bool pElevated )
-	{
-		mElevated = pElevated;
-	}
-
-	bool elevated( void ) const
-	{
-		return( mElevated );
-	}
-
-	static int process( QString pCommand, ConnectionId pConnectionId = CONNECTION_NONE, ObjectId pPlayerId = OBJECT_NONE, bool pElevated = false );
+	static int process( QString pCommand, ConnectionId pConnectionId = CONNECTION_NONE, ObjectId pPlayerId = OBJECT_NONE );
 
 	bool isWizard( void ) const;
 
@@ -189,11 +181,10 @@ private:
 	lua_State					*mL;
 	ConnectionId				 mConnectionId;
 	QList<Task>					 mTasks;
-	qint64						 mTimeStamp; // when the current task was started
+	qint64						 mTimeStamp;			// when the current task was started
 	size_t						 mMemUse;
 	change::ChangeSet			 mChanges;
 	ObjectId					 mPermissions;			// the current object that defines the permissions
-	bool						 mElevated;
 	mooException				 mException;
 
 	static const luaL_Reg		 mLuaStatic[];
