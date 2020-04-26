@@ -966,7 +966,7 @@ void ObjectManager::timeoutObjects()
 			continue;
 		}
 
-		if( mTimeStamp - O->data().mLastRead < 15 * 1000 )
+		if( mTimeStamp - O->data().mLastRead < 5 * 60 * 1000 )		// 5 minutes
 		{
 			continue;
 		}
