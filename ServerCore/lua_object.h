@@ -88,6 +88,8 @@ private:
 	static int luaHasVerb( lua_State *L );
 	static int luaHasProp( lua_State *L );
 
+	static int luaEmit( lua_State *L );
+
 	typedef enum Fields
 	{
 		UNKNOWN,

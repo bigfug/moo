@@ -153,6 +153,12 @@ public:
 
 	ObjectId importModule( ObjectId pParentId, ObjectId pOwnerId, const QString &pFileName, TransferInformation &pTrnInf );
 
+	void objectConnect( ObjectId pSrcObj, QString pSrcVrb, ObjectId pDstObj, QString pDstVrb );
+
+	void objectDisconnect( ObjectId pSrcObj, QString pSrcVrb = QString(), ObjectId pDstObj = OBJECT_NONE, QString pDstVrb = QString() );
+
+	QVector<QPair<ObjectId,QString>> objectSignals( ObjectId pSrcObj, QString pSrcVrb );
+
 signals:
 	void stats( const ObjectManagerStats &pStats );
 	void taskReady( void );
@@ -186,6 +192,8 @@ public slots:
 	void addProperty( Object *pObject, QString pName );
 	void deleteProperty( Object *pObject, QString pName );
 	void updateProperty( Object *pObject, QString pName );
+	void addSignalConnection( const SignalConnection &pSigCon );
+	void deleteSignalConnection( const SignalConnection &pSigCon );
 
 	void recordRead( void )
 	{
@@ -254,6 +262,9 @@ private:
 	QMap<ObjectId,QStringList>	 mAddedProperties;
 	QMap<ObjectId,QStringList>	 mDeletedProperties;
 	QMap<ObjectId,QStringList>	 mUpdatedProperties;
+
+	QVector<SignalConnection>	 mAddedConnections;
+	QVector<SignalConnection>	 mDeletedConnections;
 
 	Q_DISABLE_COPY( ObjectManager )
 };

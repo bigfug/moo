@@ -10,11 +10,23 @@
 #include <QMultiMap>
 #include <QDataStream>
 #include <QVariant>
+#include <QVector>
 #include "verb.h"
 #include "property.h"
 #include "task.h"
 
 class ObjectManager;
+
+typedef struct SignalConnection
+{
+	ObjectId			mSrcObj;
+	QString				mSrcVrb;
+	ObjectId			mDstObj;
+	QString				mDstVrb;
+
+}  SignalConnection;
+
+bool operator == ( const SignalConnection &lhs, const SignalConnection &rhs );
 
 typedef struct ObjectData
 {
@@ -52,6 +64,8 @@ typedef struct ObjectData
 	QMap<QString,Verb>			mVerbs;
 	QMap<QString,Property>		mProperties;	// Properties defined on this object
 	QList<Task>					mTasks;
+	QVector<SignalConnection>	mSignalConnections;
+
 
 	ObjectData( void )
 		: mId( OBJECT_NONE ), mPlayer( false ), mParent( OBJECT_NONE ), mOwner( OBJECT_NONE ), mLocation( OBJECT_NONE ),
@@ -283,6 +297,12 @@ public:
 	void setConnection( ConnectionId pConnectionId );
 
 	void setModule( ObjectId pObjectId );
+
+	void objectConnect( QString pSrcVrb, ObjectId pDstObj, QString pDstVrb );
+
+	void objectDisconnect( QString pSrcVrb = QString(), ObjectId pDstObj = OBJECT_NONE, QString pDstVrb = QString() );
+
+	QVector<QPair<ObjectId,QString>> objectSignals( QString pSrcVrb );
 
 protected:
 	ObjectData &data( void )

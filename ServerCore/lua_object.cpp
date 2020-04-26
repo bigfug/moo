@@ -70,6 +70,7 @@ const luaL_Reg lua_object::mLuaInstanceFunctions[] =
 	{ "children", lua_object::luaChildren },
 	{ "verb", lua_object::luaVerb },
 	{ "prop", lua_object::luaProperty },
+	{ "emit", lua_object::luaEmit },
 	{ "recycle", lua_object::luaRecycle },
 	{ "propadd", lua_object::luaPropAdd },
 	{ "propdel", lua_object::luaPropDel },
@@ -1983,6 +1984,46 @@ int lua_object::luaAliasDel(lua_State *L)
 		}
 
 		Command->changeAdd( new change::ObjectAliasDelete( O, N ) );
+	}
+	catch( const mooException &e )
+	{
+		Command->setException( e );
+	}
+	catch( ... )
+	{
+	}
+
+	return( Command->lua_pushexception() );
+}
+
+//----------------------------------------------------------------------------
+// Signal/Slot support
+
+int lua_object::luaEmit( lua_State *L )
+{
+	lua_task				*Command = lua_task::luaGetTask( L );
+
+	try
+	{
+		Object				*O = argObj( L );
+		const char			*N = luaL_checkstring( L, 2 );
+
+		QVector<QPair<ObjectId,QString>>		SignalMap = ObjectManager::instance()->objectSignals( O->id(), QString::fromLatin1( N ) );
+
+		for( const QPair<ObjectId,QString> &c : SignalMap )
+		{
+			Object			*FndObj = Q_NULLPTR;
+			Verb			*FndVrb = Q_NULLPTR;
+
+			Object			*DstObj = ObjectManager::o( c.first );
+
+			if( DstObj->verbFind( c.second, &FndVrb, &FndObj ) )
+			{
+				int r = Command->verbCall( FndVrb, lua_gettop( L ) - 2, DstObj->id(), Command->task().object() );
+
+				lua_pop( L, r );
+			}
+		}
 	}
 	catch( const mooException &e )
 	{

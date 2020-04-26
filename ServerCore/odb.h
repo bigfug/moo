@@ -40,6 +40,11 @@ public:
 	virtual void deleteProperty( Object &pObject, QString pName ) = 0;
 	virtual void updateProperty( Object &pObject, QString pName ) = 0;
 
+	virtual void addSignalConnection( const SignalConnection &SC ) = 0;
+	virtual void deleteSignalConnection( const SignalConnection &SC ) = 0;
+
+	virtual QVector<SignalConnection> signalConnections( ObjectId pSrcObj ) const = 0;
+
 	virtual void addTask( TaskEntry &TE ) = 0;
 
 	virtual QList<TaskEntry> tasks( qint64 pTimeStamp ) = 0;

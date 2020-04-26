@@ -93,6 +93,21 @@ public:
 	virtual ObjectId findPlayer( QString pName ) const Q_DECL_OVERRIDE;
 	virtual ObjectId findByProp( QString pName, const QVariant &pValue ) const Q_DECL_OVERRIDE;
 
+	virtual void addSignalConnection( const SignalConnection &SC ) Q_DECL_OVERRIDE
+	{
+
+	}
+
+	virtual void deleteSignalConnection( const SignalConnection &SC ) Q_DECL_OVERRIDE
+	{
+
+	}
+
+	virtual QVector<SignalConnection> signalConnections( ObjectId pSrcObj ) const Q_DECL_OVERRIDE
+	{
+		return( QVector<SignalConnection>() );
+	}
+
 	virtual void addTask(TaskEntry &TE) Q_DECL_OVERRIDE
 	{
 		mTaskQueue << TE;

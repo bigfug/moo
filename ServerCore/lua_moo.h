@@ -72,6 +72,9 @@ private:
 
 	static int luaImport( lua_State *L );
 
+	static int luaConnect( lua_State *L );
+	static int luaDisconnect( lua_State *L );
+
 	static void typeDump( lua_State *L, const int i )
 	{
 		int t = lua_type(L, i);

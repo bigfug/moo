@@ -140,6 +140,27 @@ void ODBSQL::initialiseDatabase( QSqlDatabase &pDB )
 		updateTaskAddSchedule( pDB );
 	}
 
+	if( !pDB.tables().contains( "signals" ) )
+	{
+		pDB.exec( "CREATE TABLE signals ( "
+				  "src_object INTEGER DEFAULT -1,"
+				  "src_verb TEXT,"
+				  "dst_object INTEGER DEFAULT -1,"
+				  "dst_verb TEXT,"
+				  "FOREIGN KEY(`src_object`) REFERENCES `object`(`id`),"
+				  "FOREIGN KEY(`dst_object`) REFERENCES `object`(`id`)"
+				  ")" );
+
+		QSqlError		DBE = pDB.lastError();
+
+		if( DBE.type() != QSqlError::NoError )
+		{
+			qCritical() << "CREATE TABLE signals:" << DBE.databaseText() << DBE.driverText();
+
+			return;
+		}
+	}
+
 	if( true )
 	{
 		QSqlQuery	Q( "SELECT id FROM object WHERE recycled = true" );
@@ -419,6 +440,8 @@ Object *ODBSQL::object( ObjectId pIndex ) const
 
 	ObjectManager::instance()->recordRead();
 
+	D.mSignalConnections = signalConnections( D.mId );
+
 	return( O );
 }
 
@@ -658,6 +681,22 @@ void ODBSQL::insertTaskData( QSqlQuery &Q, const TaskEntryData &D )
 	Q.bindValue( ":day_of_month", S.mDayOfMonth );
 	Q.bindValue( ":month", S.mMonth );
 	Q.bindValue( ":year", S.mYear );
+
+	Q.exec();
+}
+
+void ODBSQL::insertSignalData( QSqlQuery &Q, const SignalConnection &SC )
+{
+	Q.prepare( "INSERT INTO signals "
+			   "( src_object, src_verb, dst_object, dst_verb )"
+			   "VALUES "
+			   "( :src_object, :src_verb, :dst_object, :dst_verb )"
+			   );
+
+	Q.bindValue( ":src_object", SC.mSrcObj );
+	Q.bindValue( ":src_verb", SC.mSrcVrb );
+	Q.bindValue( ":dst_object", SC.mDstObj );
+	Q.bindValue( ":dst_verb", SC.mDstVrb );
 
 	Q.exec();
 }
@@ -970,6 +1009,82 @@ void ODBSQL::addTask( TaskEntry &TE )
 	QSqlQuery			 Q;
 
 	insertTaskData( Q, data( TE ) );
+}
+
+void ODBSQL::addSignalConnection( const SignalConnection &SC )
+{
+	QSqlQuery			 Q;
+
+//	Q.exec( "SELECT COUNT( * ) FROM signals WHERE src_object = :src_object AND src_verb = :src_verb AND dst_object = :dst_object AND dst_verb = :dst_verb" );
+
+//	Q.bindValue( ":src_object", SC.mSrcObj );
+//	Q.bindValue( ":src_verb", SC.mSrcVrb );
+//	Q.bindValue( ":dst_object", SC.mDstObj );
+//	Q.bindValue( ":dst_verb", SC.mDstVrb );
+
+//	if( Q.exec() && Q.next() && Q.value( 0 ).toInt() == 0 )
+	{
+		insertSignalData( Q, SC );
+	}
+}
+
+void ODBSQL::deleteSignalConnection( const SignalConnection &SC )
+{
+	QSqlQuery			 Q;
+
+	if( SC.mDstVrb.isEmpty() )
+	{
+		if( SC.mDstObj == OBJECT_NONE )
+		{
+			if( SC.mSrcVrb.isEmpty() )
+			{
+				Q.prepare( "DELETE FROM signals WHERE src_object = :src_object" );
+			}
+			else
+			{
+				Q.prepare( "DELETE FROM signals WHERE src_object = :src_object AND src_verb = :src_verb" );
+			}
+		}
+		else
+		{
+			Q.prepare( "DELETE FROM signals WHERE src_object = :src_object AND src_verb = :src_verb AND dst_object = :dst_object" );
+		}
+	}
+	else
+	{
+		Q.prepare( "DELETE FROM signals WHERE src_object = :src_object AND src_verb = :src_verb AND dst_object = :dst_object AND dst_verb = :dst_verb" );
+	}
+
+	Q.bindValue( ":src_object", SC.mSrcObj );
+	Q.bindValue( ":src_verb", SC.mSrcVrb );
+	Q.bindValue( ":dst_object", SC.mDstObj );
+	Q.bindValue( ":dst_verb", SC.mDstVrb );
+
+	Q.exec();
+}
+
+QVector<SignalConnection> ODBSQL::signalConnections( ObjectId pSrcObj ) const
+{
+	QSqlQuery			 Q;
+
+	Q.prepare( "SELECT * FROM signals WHERE src_object = :src_object" );
+
+	Q.bindValue( ":src_object", pSrcObj );
+
+	QVector<SignalConnection>	SigLst;
+
+	Q.exec();
+
+	while( Q.next() )
+	{
+		SignalConnection		SC;
+
+		queryToSignalData( Q, SC );
+
+		SigLst << SC;
+	}
+
+	return( SigLst );
 }
 
 QList<TaskEntry> ODBSQL::tasks( qint64 pTimeStamp )
@@ -1424,6 +1539,14 @@ void ODBSQL::queryToTaskData( const QSqlQuery &Q, TaskEntryData &D )
 	D.mSchedule.mYear = Q.value( "year" ).toString();
 
 	TaskEntry::setMaxTaskId( D.mId + 1 );
+}
+
+void ODBSQL::queryToSignalData( const QSqlQuery &Q, SignalConnection &SC )
+{
+	SC.mSrcObj = Q.value( "src_object" ).toInt();
+	SC.mSrcVrb = Q.value( "src_verb" ).toString();
+	SC.mDstObj = Q.value( "dst_object" ).toInt();
+	SC.mDstVrb = Q.value( "dst_verb" ).toString();
 }
 
 void ODBSQL::exportModule( ObjectId pModuleId, const QString &pFileName, TransferInformation &pTrnInf ) const

@@ -47,6 +47,11 @@ public:
 	virtual ObjectId findPlayer( QString pName ) const Q_DECL_OVERRIDE;
 	virtual ObjectId findByProp( QString pName, const QVariant &pValue ) const Q_DECL_OVERRIDE;
 
+	virtual void addSignalConnection( const SignalConnection &SC ) Q_DECL_OVERRIDE;
+	virtual void deleteSignalConnection( const SignalConnection &SC ) Q_DECL_OVERRIDE;
+
+	virtual QVector<SignalConnection> signalConnections( ObjectId pSrcObj ) const Q_DECL_OVERRIDE;
+
 	virtual void addTask( TaskEntry &TE ) Q_DECL_OVERRIDE;
 
 	virtual QList<TaskEntry> tasks( qint64 pTimeStamp ) Q_DECL_OVERRIDE;
@@ -80,11 +85,13 @@ private:
 	static void queryToVerbData( const QSqlQuery &Q, FuncData &FD, VerbData &VD );
 	static void queryToPropertyData( const QSqlQuery &Q, PropertyData &PD );
 	static void queryToTaskData( const QSqlQuery &Q, TaskEntryData &D );
+	static void queryToSignalData( const QSqlQuery &Q, SignalConnection &SC );
 
 	static void insertObjectData( QSqlQuery &Q, const ObjectData &OD );
 	static void insertVerbData( QSqlQuery &Q, const FuncData &FD, const VerbData &VD );
 	static void insertPropertyData( QSqlQuery &Q, const PropertyData &PD );
 	static void insertTaskData( QSqlQuery &Q, const TaskEntryData &PD );
+	static void insertSignalData( QSqlQuery &Q, const SignalConnection &SC );
 
 	static void initialiseDatabase( QSqlDatabase &pDB );
 

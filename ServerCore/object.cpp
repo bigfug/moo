@@ -783,3 +783,65 @@ bool Object::verbFindRecurse( const QString &pName, Verb **pVerb, Object **pObje
 
 	return( P->verbFindRecurse( pName, pVerb, pObject ) );
 }
+
+//----------------------------------------------------------------------------
+// Signal/Slot support
+
+void Object::objectConnect( QString pSrcVrb, ObjectId pDstObj, QString pDstVrb )
+{
+	for( const SignalConnection &c : mData.mSignalConnections )
+	{
+		if( c.mSrcVrb == pSrcVrb && c.mDstObj == pDstObj && c.mDstVrb == pDstVrb )
+		{
+			return;
+		}
+	}
+
+	SignalConnection		SC{ id(), pSrcVrb, pDstObj, pDstVrb };
+
+	mData.mSignalConnections << SC;
+
+	ObjectManager::instance()->addSignalConnection( SC );
+}
+
+void Object::objectDisconnect( QString pSrcVrb, ObjectId pDstObj, QString pDstVrb )
+{
+	for( QVector<SignalConnection>::iterator it = mData.mSignalConnections.begin() ; it != mData.mSignalConnections.end() ; )
+	{
+		if( pSrcVrb.isEmpty() || pSrcVrb == it->mSrcVrb )
+		{
+			if( pDstObj == OBJECT_NONE || pDstObj == it->mDstObj )
+			{
+				if( pDstVrb.isEmpty() || pDstVrb == it->mDstVrb )
+				{
+					ObjectManager::instance()->deleteSignalConnection( *it );
+
+					it = mData.mSignalConnections.erase( it );
+				}
+			}
+		}
+
+		it++;
+	}
+}
+
+QVector<QPair<ObjectId, QString> > Object::objectSignals( QString pSrcVrb )
+{
+	QVector<QPair<ObjectId,QString>>	SigMap;
+
+	for( const SignalConnection &c : mData.mSignalConnections )
+	{
+		if( pSrcVrb == c.mSrcVrb )
+		{
+			SigMap << QPair<ObjectId,QString>( c.mDstObj, c.mDstVrb );
+		}
+	}
+
+	return( SigMap );
+}
+
+bool operator ==(const SignalConnection &lhs, const SignalConnection &rhs)
+{
+	return( lhs.mSrcObj == rhs.mSrcObj && lhs.mSrcVrb == rhs.mSrcVrb &&
+			lhs.mDstObj == rhs.mDstObj && lhs.mDstVrb == rhs.mDstVrb );
+}

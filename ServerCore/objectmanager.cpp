@@ -574,6 +574,22 @@ void ObjectManager::updateProperty(Object *pObject, QString pName)
 	mUpdatedProperties.insert( pObject->id(), StrLst );
 }
 
+void ObjectManager::addSignalConnection( const SignalConnection &pSigCon )
+{
+	mAddedConnections.removeAll( pSigCon );
+	mDeletedConnections.removeAll( pSigCon );
+
+	mAddedConnections << pSigCon;
+}
+
+void ObjectManager::deleteSignalConnection( const SignalConnection &pSigCon )
+{
+	mAddedConnections.removeAll( pSigCon );
+	mDeletedConnections.removeAll( pSigCon );
+
+	mDeletedConnections << pSigCon;
+}
+
 void ObjectManager::networkRequestFinished()
 {
 	QNetworkReply		*NetRep = qobject_cast<QNetworkReply *>( sender() );
@@ -914,6 +930,24 @@ void ObjectManager::timeoutObjects()
 
 	//-------------------------------------------------------------------------
 
+	for( const SignalConnection &c : mAddedConnections )
+	{
+		mODB->addSignalConnection( c );
+	}
+
+	mAddedConnections.clear();
+
+	//-------------------------------------------------------------------------
+
+	for( const SignalConnection &c : mDeletedConnections )
+	{
+		mODB->deleteSignalConnection( c );
+	}
+
+	mDeletedConnections.clear();
+
+	//-------------------------------------------------------------------------
+
 	recycleObjects();
 
 	//-------------------------------------------------------------------------
@@ -941,4 +975,39 @@ void ObjectManager::timeoutObjects()
 
 		delete O;
 	}
+}
+
+//----------------------------------------------------------------------------
+// Signal/Slot support
+
+void ObjectManager::objectConnect( ObjectId pSrcObj, QString pSrcVrb, ObjectId pDstObj, QString pDstVrb )
+{
+	Object		*O = object( pSrcObj );
+
+	if( O )
+	{
+		O->objectConnect( pSrcVrb, pDstObj, pDstVrb );
+	}
+}
+
+void ObjectManager::objectDisconnect( ObjectId pSrcObj, QString pSrcVrb, ObjectId pDstObj, QString pDstVrb )
+{
+	Object		*O = object( pSrcObj );
+
+	if( O )
+	{
+		O->objectDisconnect( pSrcVrb, pDstObj, pDstVrb );
+	}
+}
+
+QVector<QPair<ObjectId,QString>> ObjectManager::objectSignals( ObjectId pSrcObj, QString pSrcVrb )
+{
+	Object		*O = object( pSrcObj );
+
+	if( O )
+	{
+		return( O->objectSignals( pSrcVrb ) );
+	}
+
+	return( QVector<QPair<ObjectId,QString>>() );
 }

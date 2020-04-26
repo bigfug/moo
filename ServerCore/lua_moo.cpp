@@ -52,6 +52,8 @@ const luaL_Reg lua_moo::mLuaStatic[] =
 {
 	{ "broadcast", lua_moo::luaBroadcast },
 	{ "checkpoint", lua_moo::luaCheckPoint },
+	{ "connect", lua_moo::luaConnect },
+	{ "disconnect", lua_moo::luaDisconnect },
 	{ "notify", lua_moo::luaNotify },
 	{ "pass", lua_moo::luaPass },
 	{ "eval", lua_moo::luaEval },
@@ -1540,6 +1542,101 @@ int lua_moo::luaClearCookie( lua_State *L )
 	catch( ... )
 	{
 
+	}
+
+	return( Command->lua_pushexception() );
+}
+
+//----------------------------------------------------------------------------
+// Signal/Slot support
+
+int lua_moo::luaConnect( lua_State *L )
+{
+	lua_task				*Command = lua_task::luaGetTask( L );
+
+	try
+	{
+		Object				*SrcObj = lua_object::argObj( L, 1 );
+		QString				 SrcVrb;
+		Object				*DstObj = Q_NULLPTR;
+		QString				 DstVrb;
+
+		if( lua_gettop( L ) > 1 )
+		{
+			const char	*S = luaL_checkstring( L, 2 );
+
+			SrcVrb = QString::fromLatin1( S );
+		}
+
+		if( lua_gettop( L ) > 2 )
+		{
+			DstObj = lua_object::argObj( L, 3 );
+		}
+
+		if( lua_gettop( L ) > 3 )
+		{
+			const char	*S = luaL_checkstring( L, 4 );
+
+			DstVrb = QString::fromLatin1( S );
+		}
+
+		if( SrcObj && DstObj && !SrcVrb.isEmpty() && !DstVrb.isEmpty() )
+		{
+			ObjectManager::instance()->objectConnect( SrcObj->id(), SrcVrb, DstObj->id(), DstVrb );
+		}
+	}
+	catch( const mooException &e )
+	{
+		Command->setException( e );
+	}
+	catch( ... )
+	{
+	}
+
+	return( Command->lua_pushexception() );
+}
+
+int lua_moo::luaDisconnect( lua_State *L )
+{
+	lua_task				*Command = lua_task::luaGetTask( L );
+
+	try
+	{
+		Object				*SrcObj = lua_object::argObj( L, 1 );
+		QString				 SrcVrb;
+		Object				*DstObj = Q_NULLPTR;
+		QString				 DstVrb;
+
+		if( lua_gettop( L ) > 1 )
+		{
+			const char	*S = luaL_checkstring( L, 2 );
+
+			SrcVrb = QString::fromLatin1( S );
+		}
+
+		if( lua_gettop( L ) > 2 )
+		{
+			DstObj = lua_object::argObj( L, 3 );
+		}
+
+		if( lua_gettop( L ) > 3 )
+		{
+			const char	*S = luaL_checkstring( L, 4 );
+
+			DstVrb = QString::fromLatin1( S );
+		}
+
+		if( SrcObj )
+		{
+			ObjectManager::instance()->objectDisconnect( SrcObj->id(), SrcVrb, DstObj ? DstObj->id() : OBJECT_NONE, DstVrb );
+		}
+	}
+	catch( const mooException &e )
+	{
+		Command->setException( e );
+	}
+	catch( ... )
+	{
 	}
 
 	return( Command->lua_pushexception() );
