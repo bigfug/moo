@@ -83,14 +83,14 @@ void MooApplication::process( void )
 
 	//-------------------------------------------------------------------------
 
-	lua_moo::setSettingsFilePath( optionConfigurationFile() );
+	QFileInfo	SettingsFileInfo( optionConfigurationFile() );
 
-	QFileInfo	SettingsFileInfo( lua_moo::settingsFilePath() );
+	SettingsFileInfo.makeAbsolute();
+
+	lua_moo::setSettingsFilePath( SettingsFileInfo.filePath() );
 
 	if( !SettingsFileInfo.isFile() || !SettingsFileInfo.isReadable() )
 	{
-		SettingsFileInfo.makeAbsolute();
-
 		qCritical() << "Can't open" << SettingsFileInfo.filePath();
 	}
 	else
