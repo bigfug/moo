@@ -57,7 +57,7 @@ void cmd_permissions::testArgs2_data()
 
 	QTest::newRow( "player" ) << "player" << "#3";
 	QTest::newRow( "caller" ) << "caller" << "#3";
-	QTest::newRow( "object" ) << "object" << "#1";
+	QTest::newRow( "object" ) << "object" << "#3";
 	QTest::newRow( "permissions" ) << "permissions" << "#1";
 	QTest::newRow( "verb" ) << "verb" << "test";
 	QTest::newRow( "argstr" ) << "argstr" << "";

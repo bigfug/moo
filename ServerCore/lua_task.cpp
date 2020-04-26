@@ -963,6 +963,8 @@ int lua_task::execute( void )
 			setPermissions( T.permissions() );
 		}
 
+		T.setVerbObject( FndVrb->object() );
+
 		taskDump( "lua_task::execute->verbCallCode()", T );
 
 		return( verbCallCode( FndVrb ) );
@@ -1007,6 +1009,7 @@ int lua_task::verbCall( Verb *V, int pArgCnt, ObjectId pObjectId, ObjectId pCall
 
 	T.setCaller( pCallerId );
 	T.setObject( pObjectId );
+	T.setVerbObject( V->object() );
 
 	setPermissions( T.permissions() );
 

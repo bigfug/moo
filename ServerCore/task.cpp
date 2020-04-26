@@ -48,6 +48,7 @@ const QList<QString>	 Task::mPrepositionList =
 Task::Task( const QString &pCommand ) : mCommand( pCommand )
 {
 	mPermissions = OBJECT_NONE;
+	mVerbObject  = OBJECT_NONE;
 
 	mId = TaskEntry::newTaskId();
 
@@ -64,6 +65,7 @@ Task::Task( const QString &pCommand ) : mCommand( pCommand )
 Task::Task( const TaskEntry &pEntry )
 {
 	mPermissions = pEntry.playerid();
+	mVerbObject  = OBJECT_NONE;
 
 	mId			= pEntry.id();
 	mTimeStamp	= pEntry.timestamp();

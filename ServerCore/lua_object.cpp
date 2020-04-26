@@ -1137,6 +1137,7 @@ int lua_object::luaVerbCall( lua_State *L )
 		CurT.setVerb( n );
 		CurT.setCaller( PrvT.object() );
 		CurT.setPermissions( v->mVerb->owner() );
+		CurT.setVerbObject( v->mVerb->object() );
 
 		Command->taskDump( "luaVerbCall()", CurT );
 

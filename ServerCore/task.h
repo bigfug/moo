@@ -32,6 +32,7 @@ private:
 	ObjectId			 mIndirectObjectId;		// the indirect object value
 	QString				 mPreposition;			// the prepositional phrase found during parsing
 	ObjectId			 mPermissions;			// the current object that defines the permissions
+	ObjectId			 mVerbObject;			// the object that the current verb belongs to
 
 	const static QList<QString>	 mPrepositionList;
 
@@ -128,6 +129,16 @@ public:
 	void setTimeStamp( qint64 pTime )
 	{
 		mTimeStamp = pTime;
+	}
+
+	void setVerbObject( ObjectId pId )
+	{
+		mVerbObject = pId;
+	}
+
+	ObjectId verbObject( void ) const
+	{
+		return( mVerbObject );
 	}
 
 	const QString &command( void ) const

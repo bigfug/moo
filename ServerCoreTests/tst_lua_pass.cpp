@@ -66,7 +66,7 @@ void ServerTest::luaPass1( void )
 
 	QVERIFY( R != 0 );
 	QVERIFY( R->type() == QVariant::String );
-	QCOMPARE( R->value().toString(), QString( "%1" ).arg( O1->id() ) ); // The initial value of this in the called verb is the same as in the calling verb.
+	QCOMPARE( R->value().toString(), QString( "%1" ).arg( O2->id() ) ); // The initial value of this in the called verb is the same as in the calling verb.
 }
 
 // moo.pass() on two parents
@@ -141,7 +141,7 @@ void ServerTest::luaPass2( void )
 
 	QVERIFY( R != 0 );
 	QVERIFY( R->type() == QVariant::String );
-	QCOMPARE( R->value().toString(), QString( "%1" ).arg( O1->id() ) ); // The initial value of this in the called verb is the same as in the calling verb.
+	QCOMPARE( R->value().toString(), QString( "%1" ).arg( O3->id() ) ); // The initial value of this in the called verb is the same as in the calling verb.
 }
 
 // moo.pass() on three parents (where the verb is not defined on the 4th child)
@@ -234,7 +234,7 @@ void ServerTest::luaPass3( void )
 
 	QVERIFY( R1 );
 	QVERIFY( R1->type() == QVariant::String );
-	QCOMPARE( R1->value().toString(), QString( "%1" ).arg( O1->id() ) ); // The initial value of this in the called verb is the same as in the calling verb.
+	QCOMPARE( R1->value().toString(), QString( "%1" ).arg( O4->id() ) ); // The initial value of this in the called verb is the same as in the calling verb.
 
 	Property	*R2 = O1->prop( "count" );
 
@@ -330,7 +330,7 @@ void ServerTest::luaPass4( void )
 
 	QVERIFY( R1 );
 	QVERIFY( R1->type() == QVariant::String );
-	QCOMPARE( R1->value().toString(), QString( "%1" ).arg( O1->id() ) ); // The initial value of this in the called verb is the same as in the calling verb.
+	QCOMPARE( R1->value().toString(), QString( "%1" ).arg( O3->id() ) ); // The initial value of this in the called verb is the same as in the calling verb.
 
 	Property	*R2 = O1->prop( "count" );
 
@@ -414,7 +414,7 @@ void ServerTest::luaPass5( void )
 
 	QVERIFY( R != 0 );
 	QVERIFY( R->type() == QVariant::String );
-	QCOMPARE( R->value().toString(), QString( "%1" ).arg( O1->id() ) ); // The initial value of this in the called verb is the same as in the calling verb.
+	QCOMPARE( R->value().toString(), QString( "%1" ).arg( O4->id() ) ); // The initial value of this in the called verb is the same as in the calling verb.
 }
 
 // moo.pass() on one parent, calling second verb that also does a one parent moo.pass()
@@ -503,5 +503,5 @@ void ServerTest::luaPass6( void )
 
 	QVERIFY( R != 0 );
 	QVERIFY( R->type() == QVariant::String );
-	QCOMPARE( R->value().toString(), QString( "%1" ).arg( O1->id() ) ); // The initial value of this in the called verb is the same as in the calling verb.
+	QCOMPARE( R->value().toString(), QString( "%1" ).arg( O2->id() ) ); // The initial value of this in the called verb is the same as in the calling verb.
 }
