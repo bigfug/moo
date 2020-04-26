@@ -1128,11 +1128,13 @@ int lua_task::verbCall( Verb *V, int pArgCnt, ObjectId pObjectId )
 
 	if( CurPrm != OBJECT_SYSTEM )
 	{
-		setPermissions( V->owner() );
+		T.setPermissions( V->owner() );
 	}
 
 	T.setCaller( T.object() );
 	T.setObject( pObjectId );
+
+	setPermissions( T.permissions() );
 
 	taskPush( T );
 

@@ -716,11 +716,6 @@ int lua_moo::luaPass( lua_State *L )
 		Object				*O = OM.object( T.object() );
 		Object				*P = OM.object( O->parent() );
 
-		if( T.caller() == O->id() )
-		{
-			P = P ? OM.object( P->parent() ) : Q_NULLPTR;
-		}
-
 		while( P )
 		{
 			Verb		*V = P->verb( T.verb() );
@@ -731,8 +726,7 @@ int lua_moo::luaPass( lua_State *L )
 				qDebug() << "luaPass - obj:" << T.object() << "- vob:" << P->id() << "- vrb:" << T.verb();
 #endif
 
-				//return( Command->verbCall( PT, V, lua_gettop( L ) ) );
-				return( Command->verbCall( V, lua_gettop( L ), O->id() ) );
+				return( Command->verbCall( V, lua_gettop( L ), P->id() ) );
 			}
 
 			P = OM.object( P->parent() );

@@ -13,11 +13,11 @@
 void ServerTest::luaPass1( void )
 {
 	LuaTestData			 TD;
-	Object				*O1 = TD.OM.newObject();
-	Object				*O2 = TD.OM.newObject();
-	QString				 CD = QString( ";o( %1 ):test()" ).arg( O2->id() );
 
-	O1->setParent( 2 );
+	Object				*O1 = TD.OM.newObject();	// #4
+	Object				*O2 = TD.OM.newObject();	// #5
+
+	O1->setParent( OBJECT_ROOT );
 	O2->setParent( O1->id() );
 
 	O1->setOwner( O1->id() );
@@ -58,7 +58,7 @@ void ServerTest::luaPass1( void )
 
 	// Call test
 
-	TD.execute( CD );
+	TD.execute( QString( ";o( %1 ):test()" ).arg( O2->id() ) );
 
 	// Check result
 
