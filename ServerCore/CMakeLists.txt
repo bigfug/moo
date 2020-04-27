@@ -36,15 +36,16 @@ set( SOURCE_FILES
 	odb_sql.cpp
 	lua_json.cpp
 	lua_serialport.cpp
-	listenertelnet.cpp
-	listenertelnetsocket.cpp
-	listenerwebsocket.cpp
-	listenerserver.cpp
-	listenersocket.cpp
-	listenerwebsocketsocket.cpp
 	lua_smtp.cpp
 	inputsinkread.cpp
-)
+
+	listeners/listenertelnet.cpp
+	listeners/listenertelnetsocket.cpp
+	listeners/listenerwebsocket.cpp
+	listeners/listenerserver.cpp
+	listeners/listenersocket.cpp
+	listeners/listenerwebsocketsocket.cpp
+	)
 
 set( HEADER_FILES
 	verb.h
@@ -82,14 +83,16 @@ set( HEADER_FILES
 	odb_sql.h
 	lua_json.h
 	lua_serialport.h
-	listenertelnet.h
-	listenertelnetsocket.h
-	listenerwebsocket.h
-	listenerserver.h
-	listenersocket.h
-	listenerwebsocketsocket.h
+	listeners/listenertelnet.h
 	lua_smtp.h
 	inputsinkread.h
+
+	listeners/listenertelnetsocket.h
+	listeners/listenerwebsocket.h
+	listeners/listenerserver.h
+	listeners/listenersocket.h
+	listeners/listenerwebsocketsocket.h
+
 	changeset/changeset.cpp
 	changeset/changeset.h
 	changeset/change.h

@@ -19,11 +19,12 @@
 
 #include "connectionmanager.h"
 #include "connection.h"
-#include "listenertelnet.h"
-#include "listenerwebsocket.h"
 #include "taskentry.h"
 #include "objectmanager.h"
 #include "osc.h"
+
+#include "listeners/listenertelnet.h"
+#include "listeners/listenerwebsocket.h"
 
 #define Q(x) #x
 #define QUOTE(x) Q(x)

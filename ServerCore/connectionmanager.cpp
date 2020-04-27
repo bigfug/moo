@@ -1,9 +1,9 @@
 #include "connectionmanager.h"
 #include "mooexception.h"
 #include "connection.h"
-#include "listenerserver.h"
 #include "lua_task.h"
-#include "listenersocket.h"
+#include "listeners/listenerserver.h"
+#include "listeners/listenersocket.h"
 
 #include <QDebug>
 
