@@ -2,30 +2,24 @@
 #define LISTENERTELNET_H
 
 #include <QObject>
-#include "mooglobal.h"
-//#include <QTcpServer>
-//#include <QTcpSocket>
-//#include <QSslSocket>
-//#include "connection.h"
-//#include <QTimer>
-//#include <QTimerEvent>
-//#include <QMutex>
+#include <QTcpServer>
+#include <QSslSocket>
 
+#include "mooglobal.h"
 #include "listenerserver.h"
 
-/*
-class ListenerServerTCP : public QTcpServer
+class SslServer : public QTcpServer
 {
 	Q_OBJECT
 
 public:
-	ListenerServerTelnet( QObject *parent = Q_NULLPTR )
+	SslServer( QObject *parent = Q_NULLPTR )
 		: QTcpServer( parent )
 	{
 
 	}
 
-	virtual ~ListenerServerTelnet( void ) {}
+	virtual ~SslServer( void ) {}
 
 	// QTcpServer interface
 protected:
@@ -70,7 +64,6 @@ private slots:
 		}
 	}
 };
-*/
 
 class ListenerServerTCP : public ListenerServer
 {
@@ -85,7 +78,7 @@ private slots:
 	void newConnection( void );
 
 private:
-//	ListenerServerTCP			 mServer;
+	SslServer					 mServer;
 	ObjectId					 mListeningObjectId;
 };
 
