@@ -874,12 +874,28 @@ int lua_moo::luaHash( lua_State *L )
 
 int lua_moo::luaDebug( lua_State *L )
 {
-	for( int i = 1 ; i <= lua_gettop( L ) ; i++ )
+	lua_task			*Command = lua_task::luaGetTask( L );
+
+	try
 	{
-		std::cout << lua_tostring( L, i ) << std::endl;
+		for( int i = 1 ; i <= lua_gettop( L ) ; i++ )
+		{
+			if( lua_isstring( L, i ) )
+			{
+				std::cout << lua_tostring( L, i ) << std::endl;
+			}
+		}
+	}
+	catch( const mooException &e )
+	{
+		Command->setException( e );
+	}
+	catch( ... )
+	{
+
 	}
 
-	return( 0 );
+	return( Command->lua_pushexception() );
 }
 
 int lua_moo::luaFindPlayer( lua_State *L )
@@ -1071,8 +1087,8 @@ int lua_moo::luaNetworkGet( lua_State *L )
 		NetRep->setProperty( "oid", O->id() );
 		NetRep->setProperty( "verb", QString::fromLatin1( V ) );
 
-		QObject::connect( NetRep, SIGNAL(readyRead()), ObjectManager::instance(), SLOT(networkRequestReadyRead()) );
-		QObject::connect( NetRep, SIGNAL(finished()), ObjectManager::instance(), SLOT(networkRequestFinished()) );
+		QObject::connect( NetRep, &QNetworkReply::readyRead, ObjectManager::instance(), &ObjectManager::networkRequestReadyRead );
+		QObject::connect( NetRep, &QNetworkReply::finished, ObjectManager::instance(), &ObjectManager::networkRequestFinished );
 	}
 	catch( const mooException &e )
 	{

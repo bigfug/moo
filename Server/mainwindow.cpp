@@ -151,7 +151,9 @@ void MainWindow::log( const QString &pMessage )
 
 Object *MainWindow::currentObject()
 {
-	return( ObjectManager::o( ui->mCurrentObject->objectId() )  );
+	Object		*O = ObjectManager::o( ui->mCurrentObject->objectId() );
+
+	return( O && O->valid() ? O : Q_NULLPTR );
 }
 
 Verb *MainWindow::currentVerb()
@@ -487,6 +489,8 @@ void MainWindow::on_mButtonVerbAdd_clicked()
 	}
 
 	Verb		 V;
+
+	V.initialise();
 
 	V.setOwner( ui->mCurrentOwner->objectId() );
 

@@ -1058,14 +1058,26 @@ int lua_task::verbCallCode( Verb *V, int pArgCnt )
 
 	if( Error )
 	{
-		QString		S = QString::fromLatin1( lua_tostring( mL, -1 ) );
+		QString		S;
 
-		if( C )
+		if( lua_isstring( mL, -1 ) )
 		{
-			C->notify( S );
+			S = QString::fromLatin1( lua_tostring( mL, -1 ) );
+		}
+		else
+		{
+			S = QString::fromLatin1( lua_typename( mL, lua_type( mL, -1 ) ) );
 		}
 
-		std::cerr << "verbCallCode" << S.toStdString() << std::endl;
+		if( !S.isEmpty() )
+		{
+			if( C )
+			{
+				C->notify( S );
+			}
+
+			std::cerr << "verbCallCode" << S.toStdString() << std::endl;
+		}
 
 		lua_pop( mL, 1 );
 
