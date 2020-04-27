@@ -32,9 +32,8 @@
 MooApplication	*MooApplication::mInstance = nullptr;
 
 MooApplication::MooApplication( QCoreApplication &a ) :
-	QObject( &a ), mApp( a ), mMooApp( nullptr ), mOSC( nullptr ), mListenerTelnet( nullptr ),
+	QObject( &a ), mApp( a ), mMooApp( nullptr ), mOSC( nullptr ),
 	mOptionDataDirectory( QStringList() << "d" << "dir", "data directory", "directory", QStandardPaths::writableLocation( QStandardPaths::AppDataLocation ) ),
-	mOptionServerPort( QStringList() << "p" << "port", "default server port", "port", "1123" ),
 	mOptionConfiguration( QStringList() << "c" << "cfg", "path to moo.ini", "filepath", "moo.ini" )
 {
 	mInstance = this;
@@ -65,7 +64,6 @@ MooApplication::MooApplication( QCoreApplication &a ) :
 	mParser.addVersionOption();
 
 	mParser.addOption( mOptionDataDirectory );
-	mParser.addOption( mOptionServerPort );
 	mParser.addOption( mOptionConfiguration );
 }
 
@@ -116,20 +114,6 @@ void MooApplication::process( void )
 	}
 
 	qInfo() << "Using data directory" << DataDirInfo.filePath();
-
-	//-------------------------------------------------------------------------
-
-	int			Port = optionServerPort();
-
-	if( Port < 0 || Port > 65535 )
-	{
-		qFatal( "Port must be in the range 0-65535" );
-	}
-
-	if( Port < 1024 )
-	{
-		qWarning() << "Port" << Port << "is in the 'well known' range of TCP/IP ports (0-1023)";
-	}
 }
 
 bool MooApplication::initialiseApp()
@@ -155,18 +139,67 @@ bool MooApplication::initialiseApp()
 		return( false );
 	}
 
-//	mListenerTelnet	= new ListenerServerTCP( 0, optionServerPort() );
+	//-----------------------------------------------------
+	// Initalise listeners
 
-	mListenerTelnet	= new ListenerServerWebSocket( 0, optionServerPort() );
+	QSettings		Settings( MOO_SETTINGS );
 
-	if( !mListenerTelnet )
+	Settings.beginGroup( "listeners" );
+
+	for( QString G : Settings.childGroups() )
 	{
-		return( false );
+		Settings.beginGroup( G );
+
+		int			Port     = Settings.value( "port" ).toInt();
+		int			ObjectId = Settings.value( "object", 0 ).toInt();
+		QString		Type     = Settings.value( "type" ).toString();
+
+		if( Port < 0 || Port > 65535 )
+		{
+			qFatal( "Port must be in the range 0-65535" );
+		}
+
+		if( Port < 1024 )
+		{
+			qWarning() << "Port" << Port << "is in the 'well known' range of TCP/IP ports (0-1023)";
+		}
+
+		ListenerServer		*Server = Q_NULLPTR;
+
+		if( Type == "tcp" )
+		{
+			Server = new ListenerServerTCP( ObjectId, Port );
+		}
+		else if( Type == "websocket" )
+		{
+			Server = new ListenerServerWebSocket( ObjectId, Port );
+		}
+
+		if( !Server )
+		{
+			return( false );
+		}
+
+		mListenerServers << Server;
+
+		if( !CM->connection( ObjectId ) )
+		{
+			CM->doConnect( ObjectId );
+		}
+
+		qInfo() << "ArtMOO listening for" << Type << "connections on port" << Port;
+
+		Settings.endGroup();
 	}
 
-	CM->doConnect( 0 );
+	Settings.endGroup();
 
-	qInfo() << "ArtMOO listening for connections on port" << optionServerPort();
+	if( mListenerServers.isEmpty() )
+	{
+		qCritical() << "No listeners defined in configuration file";
+
+		return( false );
+	}
 
 	return( true );
 }
@@ -183,12 +216,9 @@ void MooApplication::deinitialiseApp()
 
 	CM->processClosedSockets();
 
-	if( mListenerTelnet )
-	{
-		delete mListenerTelnet;
+	qDeleteAll( mListenerServers );
 
-		mListenerTelnet = nullptr;
-	}
+	mListenerServers.clear();
 
 	if( mOSC )
 	{

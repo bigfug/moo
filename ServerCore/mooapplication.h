@@ -27,11 +27,6 @@ public:
 		return( mParser.value( mOptionDataDirectory ) );
 	}
 
-	inline int optionServerPort( void ) const
-	{
-		return( mParser.value( mOptionServerPort ).toInt() );
-	}
-
 	inline QString optionConfigurationFile( void ) const
 	{
 		return( mParser.value( mOptionConfiguration ) );
@@ -59,15 +54,14 @@ private slots:
 private:
 	static MooApplication	*mInstance;
 
-	QCoreApplication		&mApp;
-	mooApp					*mMooApp;
-	OSC						*mOSC;
-	ListenerServer			*mListenerTelnet;
+	QCoreApplication			&mApp;
+	mooApp						*mMooApp;
+	OSC							*mOSC;
+	QVector<ListenerServer *>	 mListenerServers;
 
-	QCommandLineParser		 mParser;
-	QCommandLineOption		 mOptionDataDirectory;
-	QCommandLineOption		 mOptionServerPort;
-	QCommandLineOption		 mOptionConfiguration;
+	QCommandLineParser			 mParser;
+	QCommandLineOption			 mOptionDataDirectory;
+	QCommandLineOption			 mOptionConfiguration;
 };
 
 #endif // MOOAPPLICATION_H
