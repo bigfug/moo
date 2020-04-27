@@ -58,6 +58,7 @@ const luaL_Reg lua_json::mLuaDocumentInstance[] =
 	{ "isArray", lua_json::luaDocumentIsArray },
 	{ "object", lua_json::luaDocumentObject },
 	{ "array", lua_json::luaDocumentArray },
+	{ "map", lua_json::luaDocumentMap },
 	{ 0, 0 }
 };
 
@@ -360,6 +361,13 @@ int lua_json::luaDocumentArray(lua_State *L)
 	lua_pushjsonarray( L, UD->mJsonDocument.array() );
 
 	return( 1 );
+}
+
+int lua_json::luaDocumentMap(lua_State *L)
+{
+	luaJsonDocument		*UD = document( L );
+
+	return( luaL_pushvariant( L, UD->mJsonDocument.toVariant() ) );
 }
 
 int lua_json::luaArrayIPairs( lua_State *L )

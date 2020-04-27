@@ -87,6 +87,24 @@ int luaL_pushvariant( lua_State *L, const QVariant &pV )
 				return( 1 );
 			}
 
+		case QVariant::List:
+			{
+				const QVariantList		&VarLst = pV.toList();
+
+				lua_newtable( L );
+
+				for( int i = 0 ; i < VarLst.size() ; i++ )
+				{
+					lua_pushinteger( L, i + 1 );
+
+					luaL_pushvariant( L, VarLst.at( i ) );
+
+					lua_settable( L, -3 );
+				}
+
+				return( 1 );
+			}
+
 		default:
 			lua_pushnil( L );
 			break;

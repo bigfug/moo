@@ -66,6 +66,7 @@ private:
 
 	static int luaDocumentObject( lua_State *L );
 	static int luaDocumentArray( lua_State *L );
+	static int luaDocumentMap( lua_State *L );
 
 	static int luaArrayIPairs( lua_State *L );
 
