@@ -23,8 +23,8 @@
 #include "objectmanager.h"
 #include "osc.h"
 
-#include "listeners/listenertelnet.h"
-#include "listeners/listenerwebsocket.h"
+#include "listeners/listenerservertelnet.h"
+#include "listeners/listenerserverwebsocket.h"
 
 #define Q(x) #x
 #define QUOTE(x) Q(x)

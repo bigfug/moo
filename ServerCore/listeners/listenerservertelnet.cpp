@@ -1,11 +1,11 @@
-#include "listenertelnet.h"
+#include "listenerservertelnet.h"
 
-#include "listenertelnetsocket.h"
+#include "listenersockettelnet.h"
 
 ListenerTelnet::ListenerTelnet( ObjectId pObjectId, quint16 pPort, QObject *pParent ) :
 	ListenerServer( pObjectId, pParent ), mServer( this )
 {
-	connect( &mServer, &ListenerTelnetServer::newConnection, this, &ListenerTelnet::newConnection );
+	connect( &mServer, &ListenerServerTelnet::newConnection, this, &ListenerTelnet::newConnection );
 
 	mServer.listen( QHostAddress::Any, pPort );
 
@@ -40,7 +40,7 @@ void ListenerTelnet::newConnection( void )
 			qInfo() << "Socket Encrypted:" << SS->isEncrypted();
 		}
 
-		ListenerTelnetSocket		*LS = new ListenerTelnetSocket( this, S );
+		ListenerSocketTelnet		*LS = new ListenerSocketTelnet( this, S );
 
 		if( !LS )
 		{

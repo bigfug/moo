@@ -15,18 +15,18 @@
 
 #include "listenerserver.h"
 
-class ListenerTelnetServer : public QTcpServer
+class ListenerServerTelnet : public QTcpServer
 {
 	Q_OBJECT
 
 public:
-	ListenerTelnetServer( QObject *parent = Q_NULLPTR )
+	ListenerServerTelnet( QObject *parent = Q_NULLPTR )
 		: QTcpServer( parent )
 	{
 
 	}
 
-	virtual ~ListenerTelnetServer( void ) {}
+	virtual ~ListenerServerTelnet( void ) {}
 
 	// QTcpServer interface
 protected:
@@ -85,7 +85,7 @@ private slots:
 	void newConnection( void );
 
 private:
-	ListenerTelnetServer		 mServer;
+	ListenerServerTelnet		 mServer;
 	ObjectId					 mListeningObjectId;
 	QVector<telnet_telopt_t>	 mOptions;
 };

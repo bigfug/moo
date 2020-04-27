@@ -6,14 +6,14 @@
 
 #include "listenersocket.h"
 
-class ListenerWebSocketSocket : public ListenerSocket
+class ListenerSocketWebSocket : public ListenerSocket
 {
 	Q_OBJECT
 
 public:
-	ListenerWebSocketSocket( QObject *pParent, QWebSocket *pSocket );
+	ListenerSocketWebSocket( QObject *pParent, QWebSocket *pSocket );
 
-	virtual ~ListenerWebSocketSocket( void ) {}
+	virtual ~ListenerSocketWebSocket( void ) {}
 
 private slots:
 	void disconnected( void );

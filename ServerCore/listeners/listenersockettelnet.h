@@ -14,14 +14,14 @@
 
 #include "listenersocket.h"
 
-class ListenerTelnetSocket : public ListenerSocket
+class ListenerSocketTelnet : public ListenerSocket
 {
 	Q_OBJECT
 
 public:
-	explicit ListenerTelnetSocket( QObject *pParent, QTcpSocket *pSocket );
+	explicit ListenerSocketTelnet( QObject *pParent, QTcpSocket *pSocket );
 
-	virtual ~ListenerTelnetSocket( void ) {}
+	virtual ~ListenerSocketTelnet( void ) {}
 
 	void setOptions( const QVector<telnet_telopt_t> &pOptions )
 	{

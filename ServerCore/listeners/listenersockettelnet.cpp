@@ -1,4 +1,4 @@
-#include "listenertelnetsocket.h"
+#include "listenersockettelnet.h"
 
 #include <QCryptographicHash>
 #include <QtEndian>
@@ -12,7 +12,7 @@
 
 #define TELNET_TELOPT_GMCP (0xc9)
 
-ListenerTelnetSocket::ListenerTelnetSocket( QObject *pParent, QTcpSocket *pSocket ) :
+ListenerSocketTelnet::ListenerSocketTelnet( QObject *pParent, QTcpSocket *pSocket ) :
 	ListenerSocket( pParent ), mSocket( pSocket ), mCursorPosition( 0 ), mTelnet( nullptr ), mLineMode( Connection::EDIT )
 {
 	mDataReceived    = false;
@@ -28,35 +28,35 @@ ListenerTelnetSocket::ListenerTelnetSocket( QObject *pParent, QTcpSocket *pSocke
 
 	Connection		*CON = ConnectionManager::instance()->connection( mConnectionId );
 
-	connect( this, &ListenerTelnetSocket::textOutput, CON, &Connection::dataInput );
-	connect( CON, &Connection::textOutput, this, &ListenerTelnetSocket::textInput );
+	connect( this, &ListenerSocketTelnet::textOutput, CON, &Connection::dataInput );
+	connect( CON, &Connection::textOutput, this, &ListenerSocketTelnet::textInput );
 
 	connect( CON, &Connection::taskOutput, ObjectManager::instance(), &ObjectManager::doTask );
 
-	connect( CON, &Connection::lineModeChanged, this, &ListenerTelnetSocket::setLineMode );
-	connect( this, &ListenerTelnetSocket::lineModeSupported, CON, &Connection::setLineModeSupport );
+	connect( CON, &Connection::lineModeChanged, this, &ListenerSocketTelnet::setLineMode );
+	connect( this, &ListenerSocketTelnet::lineModeSupported, CON, &Connection::setLineModeSupport );
 
-	connect( mSocket, &QTcpSocket::disconnected, this, &ListenerTelnetSocket::disconnected );
-	connect( mSocket, &QTcpSocket::readyRead, this, &ListenerTelnetSocket::readyRead );
+	connect( mSocket, &QTcpSocket::disconnected, this, &ListenerSocketTelnet::disconnected );
+	connect( mSocket, &QTcpSocket::readyRead, this, &ListenerSocketTelnet::readyRead );
 
-	connect( CON, &Connection::gmcpOutput, this, &ListenerTelnetSocket::sendGMCP );
+	connect( CON, &Connection::gmcpOutput, this, &ListenerSocketTelnet::sendGMCP );
 
-	connect( CON, &Connection::connectionClosed, this, &ListenerTelnetSocket::close );
+	connect( CON, &Connection::connectionClosed, this, &ListenerSocketTelnet::close );
 	connect( CON, &Connection::connectionFlush, mSocket, &QTcpSocket::flush );
 
-	connect( &mTimer, &QTimer::timeout, this, &ListenerTelnetSocket::inputTimeout );
+	connect( &mTimer, &QTimer::timeout, this, &ListenerSocketTelnet::inputTimeout );
 
 	mTimer.singleShot( 500, this, SLOT(inputTimeout()) );
 
-	mTelnet = telnet_init( mOptions.constData(), &ListenerTelnetSocket::telnetEventHandlerStatic, 0, this );
+	mTelnet = telnet_init( mOptions.constData(), &ListenerSocketTelnet::telnetEventHandlerStatic, 0, this );
 }
 
-bool ListenerTelnetSocket::echo() const
+bool ListenerSocketTelnet::echo() const
 {
 	return( mLocalEcho );
 }
 
-void ListenerTelnetSocket::sendData( const QByteArray &pData )
+void ListenerSocketTelnet::sendData( const QByteArray &pData )
 {
 #if defined( DEBUG_LISTENER )
 	qDebug() << "ListenerTelnetSocket::sendData" << pData;
@@ -65,7 +65,7 @@ void ListenerTelnetSocket::sendData( const QByteArray &pData )
 	telnet_send( mTelnet, pData.constData(), pData.size() );
 }
 
-void ListenerTelnetSocket::processInput( const QByteArray &pData )
+void ListenerSocketTelnet::processInput( const QByteArray &pData )
 {
 #if defined( DEBUG_LISTENER )
 	qDebug() << "processInput" << pData;
@@ -273,7 +273,7 @@ void ListenerTelnetSocket::processInput( const QByteArray &pData )
 	}
 }
 
-void ListenerTelnetSocket::inputTimeout( void )
+void ListenerSocketTelnet::inputTimeout( void )
 {
 	if( !mWebSocketActive )
 	{
@@ -299,7 +299,7 @@ void ListenerTelnetSocket::inputTimeout( void )
 	ObjectManager::instance()->doTask( E );
 }
 
-void ListenerTelnetSocket::setLineMode( Connection::LineMode pLineMode )
+void ListenerSocketTelnet::setLineMode( Connection::LineMode pLineMode )
 {
 	if( pLineMode == Connection::EDIT )
 	{
@@ -315,24 +315,24 @@ void ListenerTelnetSocket::setLineMode( Connection::LineMode pLineMode )
 	mLineMode = pLineMode;
 }
 
-void ListenerTelnetSocket::sendGMCP( const QByteArray &pGMCP )
+void ListenerSocketTelnet::sendGMCP( const QByteArray &pGMCP )
 {
 	telnet_subnegotiation( mTelnet, TELNET_TELOPT_GMCP, pGMCP.constData(), pGMCP.size() );
 }
 
-void ListenerTelnetSocket::close()
+void ListenerSocketTelnet::close()
 {
 	mSocket->close();
 }
 
-void ListenerTelnetSocket::disconnected( void )
+void ListenerSocketTelnet::disconnected( void )
 {
 	qInfo() << "Connection disconnected from" << mSocket->peerAddress();
 
 	ConnectionManager::instance()->closeListener( this );
 }
 
-void ListenerTelnetSocket::readyRead( void )
+void ListenerSocketTelnet::readyRead( void )
 {
 	if( mTimer.isActive() )
 	{
@@ -491,7 +491,7 @@ void ListenerTelnetSocket::readyRead( void )
 	}
 }
 
-void ListenerTelnetSocket::textInput( const QString &pText )
+void ListenerSocketTelnet::textInput( const QString &pText )
 {
 	QByteArray		Buff = QByteArray( pText.toUtf8() );
 
@@ -503,14 +503,14 @@ void ListenerTelnetSocket::textInput( const QString &pText )
 	sendData( Buff );
 }
 
-void ListenerTelnetSocket::telnetEventHandlerStatic(telnet_t *telnet, telnet_event_t *event, void *user_data)
+void ListenerSocketTelnet::telnetEventHandlerStatic(telnet_t *telnet, telnet_event_t *event, void *user_data)
 {
 	Q_UNUSED( telnet )
 
-	((ListenerTelnetSocket *)user_data)->telnetEventHandler( event );
+	((ListenerSocketTelnet *)user_data)->telnetEventHandler( event );
 }
 
-void ListenerTelnetSocket::telnetEventHandler(telnet_event_t *event)
+void ListenerSocketTelnet::telnetEventHandler(telnet_event_t *event)
 {
 	switch( event->type )
 	{

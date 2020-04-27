@@ -15,14 +15,14 @@
 #include "listenerserver.h"
 #include "listenersocket.h"
 
-class ListenerWebSocket : public ListenerServer
+class ListenerServerWebSocket : public ListenerServer
 {
 	Q_OBJECT
 
 public:
-	explicit ListenerWebSocket( ObjectId pObjectId, quint16 pPort, QObject *pParent = 0 );
+	explicit ListenerServerWebSocket( ObjectId pObjectId, quint16 pPort, QObject *pParent = 0 );
 
-	virtual ~ListenerWebSocket( void ) {}
+	virtual ~ListenerServerWebSocket( void ) {}
 
 private slots:
 	void newConnection( void );

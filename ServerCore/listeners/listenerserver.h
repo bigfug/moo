@@ -10,7 +10,11 @@ class ListenerServer : public QObject
 	Q_OBJECT
 
 public:
-	explicit ListenerServer( ObjectId pObjectId, QObject *pParent = 0 );
+	explicit ListenerServer( ObjectId pObjectId, QObject *pParent = 0 )
+		:QObject( pParent ), mObjectId( pObjectId )
+	{
+
+	}
 
 	virtual ~ListenerServer( void ) {}
 

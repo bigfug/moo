@@ -8,7 +8,11 @@ class ListenerSocket : public QObject
 	Q_OBJECT
 
 public:
-	ListenerSocket( QObject *pParent = 0 );
+	ListenerSocket( QObject *pParent = 0 )
+		: QObject( pParent )
+	{
+
+	}
 
 	virtual ~ListenerSocket( void ) {}
 
