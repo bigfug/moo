@@ -5,28 +5,20 @@
 #include "listenerserverwebsocket.h"
 
 ListenerSocketWebSocket::ListenerSocketWebSocket( QObject *pParent, QWebSocket *pSocket )
-	: ListenerSocket( pParent ), mSocket( pSocket )
+	: ListenerSocketTelnet( pParent ), mSocket( pSocket )
 {
-	mConnectionId = ConnectionManager::instance()->doConnect( reinterpret_cast<ListenerServerWebSocket *>( parent() )->objectid() );
+	connect( mSocket, &QWebSocket::disconnected, this, &ListenerSocketWebSocket::disconnected );
 
-	Connection		*CON = ConnectionManager::instance()->connection( mConnectionId );
-
-	connect( this, SIGNAL(textOutput(QString)), CON, SLOT(dataInput(QString)) );
-	connect( CON, SIGNAL(textOutput(QString)), this, SLOT(textInput(QString)));
-
-	connect( CON, SIGNAL(taskOutput(TaskEntry&)), ObjectManager::instance(), SLOT(doTask(TaskEntry&)));
-
-	connect( mSocket, SIGNAL(disconnected()), this, SLOT(disconnected()) );
-
-	//connect( mSocket, &QWebSocket::binaryFrameReceived, this, &ListenerWebSocketSocket::binaryFrameReceived );
 	connect( mSocket, &QWebSocket::binaryMessageReceived, this, &ListenerSocketWebSocket::binaryMessageReceived );
 
-	//connect( mSocket, &QWebSocket::textFrameReceived, this, &ListenerWebSocketSocket::textFrameReceived );
-	connect( mSocket, &QWebSocket::textMessageReceived, this, &ListenerSocketWebSocket::textMessageReceived );
+	connect( mSocket, &QWebSocket::textFrameReceived, this, &ListenerSocketWebSocket::textFrameReceived );
 
-	connect( &mTimer, SIGNAL(timeout()), this, SLOT(inputTimeout()) );
+	start( this );
+}
 
-	mTimer.singleShot( 1000, this, SLOT(inputTimeout()) );
+bool ListenerSocketWebSocket::isOpen() const
+{
+	return( mSocket->isValid() );
 }
 
 void ListenerSocketWebSocket::disconnected()
@@ -36,41 +28,24 @@ void ListenerSocketWebSocket::disconnected()
 	ConnectionManager::instance()->closeListener( this );
 }
 
-void ListenerSocketWebSocket::textInput( const QString &pText )
+void ListenerSocketWebSocket::binaryMessageReceived( const QByteArray &message )
 {
-//	QByteArray		Buff = QByteArray( pText.toUtf8() );
-
-//	if( mLineMode == Connection::EDIT )
-//	{
-//		Buff.append( "\r\n" );
-//	}
-
-	mSocket->sendTextMessage( pText );
+	read( message );
 }
 
-void ListenerSocketWebSocket::inputTimeout()
+void ListenerSocketWebSocket::textFrameReceived( const QString &message, bool isLastFrame )
 {
-	TaskEntry		 E( "", mConnectionId );
+	Q_UNUSED( isLastFrame )
 
-	ObjectManager::instance()->doTask( E );
+	read( message.toLatin1() );
 }
 
-void ListenerSocketWebSocket::binaryMessageReceived(const QByteArray &message)
+qint64 ListenerSocketWebSocket::write( const QByteArray &A )
 {
-	if( mTimer.isActive() )
-	{
-		mTimer.stop();
-	}
-
-	emit textOutput( message );
+	return( mSocket->sendTextMessage( A ) );
 }
 
-void ListenerSocketWebSocket::textMessageReceived(const QString &message)
+qint64 ListenerSocketWebSocket::write( const char *p, qint64 l )
 {
-	if( mTimer.isActive() )
-	{
-		mTimer.stop();
-	}
-
-	emit textOutput( message );
+	return( mSocket->sendTextMessage( QString::fromLatin1( p, l ) ) );
 }

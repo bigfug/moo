@@ -39,10 +39,12 @@ set( SOURCE_FILES
 	lua_smtp.cpp
 	inputsinkread.cpp
 
-	listeners/listenerservertelnet.cpp
+	listeners/listenerservertcp.cpp
 	listeners/listenerserverwebsocket.cpp
 
 	listeners/listenersockettelnet.cpp
+
+	listeners/listenersockettcp.cpp
 	listeners/listenersocketwebsocket.cpp
 	)
 
@@ -88,8 +90,10 @@ set( HEADER_FILES
 	listeners/listenerserver.h
 	listeners/listenersocket.h
 
-	listeners/listenerservertelnet.h
 	listeners/listenersockettelnet.h
+
+	listeners/listenerservertcp.h
+	listeners/listenersockettcp.h
 
 	listeners/listenerserverwebsocket.h
 	listeners/listenersocketwebsocket.h

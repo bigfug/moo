@@ -1,21 +1,20 @@
 #ifndef LISTENERTELNET_H
 #define LISTENERTELNET_H
 
-#include "mooglobal.h"
 #include <QObject>
-#include <QTcpServer>
-#include <QTcpSocket>
-#include <QSslSocket>
-#include "connection.h"
-#include <QTimer>
-#include <QTimerEvent>
-#include <QMutex>
-
-#include "libtelnet.h"
+#include "mooglobal.h"
+//#include <QTcpServer>
+//#include <QTcpSocket>
+//#include <QSslSocket>
+//#include "connection.h"
+//#include <QTimer>
+//#include <QTimerEvent>
+//#include <QMutex>
 
 #include "listenerserver.h"
 
-class ListenerServerTelnet : public QTcpServer
+/*
+class ListenerServerTCP : public QTcpServer
 {
 	Q_OBJECT
 
@@ -71,23 +70,23 @@ private slots:
 		}
 	}
 };
+*/
 
-class ListenerTelnet : public ListenerServer
+class ListenerServerTCP : public ListenerServer
 {
 	Q_OBJECT
 
 public:
-	explicit ListenerTelnet( ObjectId pObjectId, quint16 pPort, QObject *pParent = 0 );
+	explicit ListenerServerTCP( ObjectId pObjectId, quint16 pPort, QObject *pParent = 0 );
 
-	virtual ~ListenerTelnet( void ) {}
+	virtual ~ListenerServerTCP( void ) {}
 
 private slots:
 	void newConnection( void );
 
 private:
-	ListenerServerTelnet		 mServer;
+//	ListenerServerTCP			 mServer;
 	ObjectId					 mListeningObjectId;
-	QVector<telnet_telopt_t>	 mOptions;
 };
 
 #endif // LISTENERTELNET_H

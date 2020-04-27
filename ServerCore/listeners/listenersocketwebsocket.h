@@ -4,9 +4,9 @@
 #include <QWebSocket>
 #include <QTimer>
 
-#include "listenersocket.h"
+#include "listenersockettelnet.h"
 
-class ListenerSocketWebSocket : public ListenerSocket
+class ListenerSocketWebSocket : public ListenerSocketTelnet
 {
 	Q_OBJECT
 
@@ -15,23 +15,26 @@ public:
 
 	virtual ~ListenerSocketWebSocket( void ) {}
 
+	virtual bool isOpen( void ) const Q_DECL_OVERRIDE;
+
 private slots:
 	void disconnected( void );
-	void textInput( const QString &pText );
-	void inputTimeout( void );
 
-//	void binaryFrameReceived(const QByteArray &frame, bool isLastFrame);
 	void binaryMessageReceived(const QByteArray &message);
 
-//	void textFrameReceived(const QString &frame, bool isLastFrame);
-	void textMessageReceived(const QString &message);
+	void textFrameReceived( const QString &message, bool isLastFrame );
 
-signals:
-	void textOutput( const QString &pText );
+protected slots:
+	virtual void close( void ) Q_DECL_OVERRIDE
+	{
+		mSocket->close();
+	}
+
+	virtual qint64 write( const QByteArray &A ) Q_DECL_OVERRIDE;
+	virtual qint64 write( const char *p, qint64 l ) Q_DECL_OVERRIDE;
 
 private:
 	QWebSocket					*mSocket;
-	QTimer						 mTimer;
 };
 
 #endif // LISTENERWEBSOCKETSOCKET_H

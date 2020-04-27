@@ -23,7 +23,7 @@
 #include "objectmanager.h"
 #include "osc.h"
 
-#include "listeners/listenerservertelnet.h"
+#include "listeners/listenerservertcp.h"
 #include "listeners/listenerserverwebsocket.h"
 
 #define Q(x) #x
@@ -155,7 +155,9 @@ bool MooApplication::initialiseApp()
 		return( false );
 	}
 
-	mListenerTelnet	= new ListenerTelnet( 0, optionServerPort() );
+//	mListenerTelnet	= new ListenerServerTCP( 0, optionServerPort() );
+
+	mListenerTelnet	= new ListenerServerWebSocket( 0, optionServerPort() );
 
 	if( !mListenerTelnet )
 	{

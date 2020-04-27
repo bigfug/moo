@@ -3,8 +3,6 @@
 
 #include "mooglobal.h"
 #include <QObject>
-#include <QTcpServer>
-#include <QTcpSocket>
 #include "connection.h"
 #include <QTimer>
 #include <QTimerEvent>
@@ -19,9 +17,9 @@ class ListenerSocketTelnet : public ListenerSocket
 	Q_OBJECT
 
 public:
-	explicit ListenerSocketTelnet( QObject *pParent, QTcpSocket *pSocket );
+	explicit ListenerSocketTelnet( QObject *pParent );
 
-	virtual ~ListenerSocketTelnet( void ) {}
+	virtual ~ListenerSocketTelnet( void );
 
 	void setOptions( const QVector<telnet_telopt_t> &pOptions )
 	{
@@ -30,8 +28,13 @@ public:
 
 	bool echo( void ) const;
 
+	virtual bool isOpen( void ) const = 0;
+
+	void start( ListenerSocketTelnet *pThis );
+
 private:
 	void sendData( const QByteArray &pData );
+
 	void processInput( const QByteArray &pData );
 
 	static void telnetEventHandlerStatic( telnet_t *telnet, telnet_event_t *event, void *user_data );
@@ -39,23 +42,29 @@ private:
 	void telnetEventHandler( telnet_event_t *event );
 
 private slots:
-	void disconnected( void );
-	void readyRead( void );
 	void textInput( const QString &pText );
+
 	void inputTimeout( void );
 
 	void setLineMode( Connection::LineMode pLineMode );
 
 	void sendGMCP( const QByteArray &pGMCP );
 
-	void close( void );
+protected slots:
+	virtual void close( void ) = 0;
+
+	virtual qint64 write( const QByteArray &A ) = 0;
+	virtual qint64 write( const char *p, qint64 l ) = 0;
+
+	void read( QByteArray A );
+
+	void stopTimer( void );
 
 signals:
 	void textOutput( const QString &pText );
 	void lineModeSupported( bool pLineModeSupport );
 
 private:
-	QTcpSocket					*mSocket;
 	QString						 mBuffer;
 	int							 mCursorPosition;
 	quint8						 mLastChar;
@@ -67,14 +76,6 @@ private:
 	bool						 mTelnetOptionsSent;
 	bool						 mTelnetOptionsReceived;
 	bool						 mLocalEcho;
-
-	bool						 mDataReceived;
-	bool						 mWebSocketActive;
-	bool						 mWebSocketHeader;
-	QString                      mWebSocketAccept;
-	QByteArray					 mWebSocketBuffer;
-	QString						 mWebSocketOrigin;
-	QString						 mWebSocketProtocol;
 };
 
 #endif // LISTENERTELNETSOCKET_H
