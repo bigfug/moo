@@ -184,6 +184,11 @@ void Connection::listenerInput( const QString &pText )
 				mInputSinkList.removeAll( IS );
 
 				delete( IS );
+
+				if( !mInputSinkList.isEmpty() )
+				{
+					mInputSinkList.first()->output( "" );
+				}
 			}
 		}
 	}
