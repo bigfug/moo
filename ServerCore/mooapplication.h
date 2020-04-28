@@ -3,6 +3,7 @@
 
 #include <QCoreApplication>
 #include <QCommandLineParser>
+#include <QVector>
 
 class mooApp;
 class OSC;
