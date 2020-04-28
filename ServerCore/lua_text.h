@@ -10,6 +10,9 @@
 #include <QXmlDefaultHandler>
 #include <QXmlAttributes>
 #include <QVector>
+#include <QSettings>
+
+#include "lua_moo.h"
 
 class Object;
 
@@ -29,7 +32,7 @@ private:
 	{
 	public:
 		XmlOutputParser( lua_State *L, QString pText )
-			: mL( L )
+			: mL( L ), mSettings( MOO_SETTINGS )
 		{
 			mSRC.setData( "<moo>" + pText + "</moo>" );
 
@@ -76,6 +79,7 @@ private:
 		QXmlInputSource		 mSRC;
 		QString				 mXML;
 		QVector<Element>	 mElementStack;
+		QSettings			 mSettings;
 	};
 
 private:

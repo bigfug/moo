@@ -471,7 +471,18 @@ bool lua_text::XmlOutputParser::startElement( const QString &namespaceURI, const
 	}
 	else
 	{
-		QString			Style = QSettings( MOO_SETTINGS ).value( QString( "style/%1.start" ).arg( qName ) ).toString();
+		QString			StyleName      = QString( "style/%1" ).arg( qName );
+		QString			StyleStartName = QString( "%1.start" ).arg( StyleName );
+		QString			Style;
+
+		if( mSettings.contains( StyleStartName ) )
+		{
+			Style = mSettings.value( StyleStartName ).toString();
+		}
+		else if( mSettings.contains( StyleName ) )
+		{
+			Style = mSettings.value( StyleName ).toString();
+		}
 
 		E.mContent = preprocessString( Style );
 	}
@@ -491,17 +502,13 @@ bool lua_text::XmlOutputParser::endElement( const QString &namespaceURI, const Q
 
 	QString		C = E.mContent;
 
-	QSettings		Settings( MOO_SETTINGS );
-
 	QString			StyleName = QString( "style/%1.end" ).arg( qName );
 
-	if( Settings.contains( StyleName ) )
+	if( mSettings.contains( StyleName ) )
 	{
-		QString			Style = Settings.value( StyleName ).toString();
+		QString			Style = mSettings.value( StyleName ).toString();
 
-		Style = preprocessString( Style );
-
-		C.append( Style );
+		C.append( preprocessString( Style ) );
 	}
 
 	if( mElementStack.isEmpty() )
