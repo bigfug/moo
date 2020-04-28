@@ -17,19 +17,25 @@ public:
 
 	virtual bool isOpen( void ) const Q_DECL_OVERRIDE;
 
+signals:
+	void disconnected( ListenerSocket *pSocket );
+
+public slots:
+	virtual void close( void ) Q_DECL_OVERRIDE
+	{
+		mSocket->close();
+	}
+
+	void flush( void );
+
 private slots:
-	void disconnected( void );
+	void socketDisconnected( void );
 
 	void binaryMessageReceived(const QByteArray &message);
 
 	void textFrameReceived( const QString &message, bool isLastFrame );
 
 protected slots:
-	virtual void close( void ) Q_DECL_OVERRIDE
-	{
-		mSocket->close();
-	}
-
 	virtual qint64 write( const QByteArray &A ) Q_DECL_OVERRIDE;
 	virtual qint64 write( const char *p, qint64 l ) Q_DECL_OVERRIDE;
 

@@ -13,11 +13,9 @@
 InputSinkEditText::InputSinkEditText(Connection *C, ObjectId pObjectId, QString pPropName, QStringList pText )
 	: mConnection( C ), mObjectId( pObjectId ), mPropName( pPropName )
 {
-	mConnection->setLineMode( Connection::REALTIME );
-
 	mEditor.setSize( mConnection->terminalSize() );
 
-	connect( &mEditor, SIGNAL(output(QString)), this, SLOT(output(QString)) );
+	connect( &mEditor, &Editor::output, this, &InputSinkEditText::editorOutput );
 
 	mEditor.setText( pText );
 
@@ -42,7 +40,7 @@ bool InputSinkEditText::input( const QString &pData )
 	return( !mEditor.hasQuit() );
 }
 
-void InputSinkEditText::output( const QString &pData )
+void InputSinkEditText::editorOutput( const QString &pData )
 {
 	mConnection->notify( pData );
 }

@@ -1,19 +1,16 @@
 #include "listenersocketwebsocket.h"
 
-#include "objectmanager.h"
-#include "connectionmanager.h"
-#include "listenerserverwebsocket.h"
+#include <QHostAddress>
+#include <QDebug>
 
 ListenerSocketWebSocket::ListenerSocketWebSocket( QObject *pParent, QWebSocket *pSocket )
 	: ListenerSocketTelnet( pParent ), mSocket( pSocket )
 {
-	connect( mSocket, &QWebSocket::disconnected, this, &ListenerSocketWebSocket::disconnected );
+	connect( mSocket, &QWebSocket::disconnected, this, &ListenerSocketWebSocket::socketDisconnected );
 
 	connect( mSocket, &QWebSocket::binaryMessageReceived, this, &ListenerSocketWebSocket::binaryMessageReceived );
 
 	connect( mSocket, &QWebSocket::textFrameReceived, this, &ListenerSocketWebSocket::textFrameReceived );
-
-	start( this );
 }
 
 bool ListenerSocketWebSocket::isOpen() const
@@ -21,11 +18,16 @@ bool ListenerSocketWebSocket::isOpen() const
 	return( mSocket->isValid() );
 }
 
-void ListenerSocketWebSocket::disconnected()
+void ListenerSocketWebSocket::flush()
+{
+	mSocket->flush();
+}
+
+void ListenerSocketWebSocket::socketDisconnected()
 {
 	qInfo() << "Connection disconnected from" << mSocket->peerAddress();
 
-	ConnectionManager::instance()->closeListener( this );
+	emit disconnected( this );
 }
 
 void ListenerSocketWebSocket::binaryMessageReceived( const QByteArray &message )

@@ -14,29 +14,10 @@
 #define TELNET_TELOPT_GMCP (0xc9)
 
 ListenerSocketTelnet::ListenerSocketTelnet( QObject *pParent ) :
-	ListenerSocket( pParent ), mCursorPosition( 0 ), mTelnet( nullptr ), mLineMode( Connection::EDIT )
+	ListenerSocket( pParent ), mCursorPosition( 0 ), mTelnet( nullptr ), mLineMode( Connection::NOT_SET )
 {
-	mConnectionId = ConnectionManager::instance()->doConnect( reinterpret_cast<ListenerServer *>( parent() )->objectid() );
-
 	mLastChar  = 0;
 	mLocalEcho = false;
-
-	Connection		*CON = ConnectionManager::instance()->connection( mConnectionId );
-
-	connect( CON, &Connection::textOutput, this, &ListenerSocketTelnet::textInput );
-
-	connect( CON, &Connection::taskOutput, ObjectManager::instance(), &ObjectManager::doTask );
-
-	connect( CON, &Connection::gmcpOutput, this, &ListenerSocketTelnet::sendGMCP );
-
-	connect( CON, &Connection::connectionClosed, this, &ListenerSocketTelnet::close );
-
-	connect( CON, &Connection::lineModeChanged, this, &ListenerSocketTelnet::setLineMode );
-
-
-	connect( this, &ListenerSocketTelnet::textOutput, CON, &Connection::dataInput );
-
-	connect( this, &ListenerSocketTelnet::lineModeSupported, CON, &Connection::setLineModeSupport );
 
 	//------------------------------------------------------------------------
 	// Telnet Options
@@ -65,15 +46,13 @@ ListenerSocketTelnet::~ListenerSocketTelnet()
 	}
 }
 
-void ListenerSocketTelnet::start( ListenerSocketTelnet *pThis )
+void ListenerSocketTelnet::start( void )// ListenerSocketTelnet *pThis )
 {
-	mTelnet = telnet_init( mOptions.constData(), &ListenerSocketTelnet::telnetEventHandlerStatic, 0, pThis );
+	mTelnet = telnet_init( mOptions.constData(), &ListenerSocketTelnet::telnetEventHandlerStatic, 0, this );
 
 	telnet_negotiate( mTelnet, TELNET_DO,   TELNET_TELOPT_NAWS );		// ask for client window size
-	telnet_negotiate( mTelnet, TELNET_DO,   TELNET_TELOPT_TTYPE );		// terminal type
+	telnet_negotiate( mTelnet, TELNET_DO,   TELNET_TELOPT_TTYPE );		// ask for terminal type
 	telnet_negotiate( mTelnet, TELNET_WILL, TELNET_TELOPT_GMCP );		// Generic Mud Communication Protocol
-
-	setLineMode( Connection::EDIT );
 
 	//------------------------------------------------------------------------
 	// Initial timer
@@ -105,14 +84,14 @@ void ListenerSocketTelnet::processInput( const QByteArray &pData )
 	qDebug() << "processInput" << pData;
 #endif
 
+	Connection		*CON = ConnectionManager::instance()->connection( mConnectionId );
+
 	for( int i = 0 ; i < pData.size() ; i++ )
 	{
 		quint8		ch = pData.at( i );
 
 		if( mLineMode == Connection::REALTIME )
 		{
-			Connection		*CON = ConnectionManager::instance()->connection( mConnectionId );
-
 			if( CON )
 			{
 				CON->processInput( QChar( ch ) );
@@ -175,6 +154,11 @@ void ListenerSocketTelnet::inputTimeout( void )
 
 void ListenerSocketTelnet::setLineMode( Connection::LineMode pLineMode )
 {
+	if( pLineMode == mLineMode )
+	{
+		return;
+	}
+
 	if( pLineMode == Connection::EDIT )
 	{
 		telnet_negotiate( mTelnet, TELNET_WONT, TELNET_TELOPT_ECHO );
@@ -333,12 +317,7 @@ void ListenerSocketTelnet::telnetEventHandler( telnet_event_t *event )
 							qDebug() << "TERMINAL_NAWS" << w << h;
 #endif
 
-							Connection		*CON = ConnectionManager::instance()->connection( mConnectionId );
-
-							if( CON )
-							{
-								CON->setTerminalSize( QSize( w, h ) );
-							}
+							emit terminalSizeChanged( QSize( w, h ) );
 						}
 						break;
 

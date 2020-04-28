@@ -17,16 +17,22 @@ public:
 
 	virtual bool isOpen( void ) const Q_DECL_OVERRIDE;
 
-protected slots:
+signals:
+	void disconnected( ListenerSocket *pSocket );
+
+public slots:
 	virtual void close( void ) Q_DECL_OVERRIDE
 	{
 		mSocket->close();
 	}
 
+	void flush( void );
+
+protected slots:
 	virtual qint64 write( const QByteArray &A ) Q_DECL_OVERRIDE;
 	virtual qint64 write( const char *p, qint64 l ) Q_DECL_OVERRIDE;
 
-	void disconnected( void );
+	void socketDisconnected( void );
 	void readyRead( void );
 
 private:

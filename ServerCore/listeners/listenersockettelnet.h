@@ -30,7 +30,7 @@ public:
 
 	virtual bool isOpen( void ) const = 0;
 
-	void start( ListenerSocketTelnet *pThis );
+	void start( void ); //ListenerSocketTelnet *pThis );
 
 private:
 	void sendData( const QByteArray &pData );
@@ -41,7 +41,7 @@ private:
 
 	void telnetEventHandler( telnet_event_t *event );
 
-private slots:
+public slots:
 	void textInput( const QString &pText );
 
 	void inputTimeout( void );
@@ -50,9 +50,9 @@ private slots:
 
 	void sendGMCP( const QByteArray &pGMCP );
 
-protected slots:
 	virtual void close( void ) = 0;
 
+protected slots:
 	virtual qint64 write( const QByteArray &A ) = 0;
 	virtual qint64 write( const char *p, qint64 l ) = 0;
 
@@ -63,6 +63,7 @@ protected slots:
 signals:
 	void textOutput( const QString &pText );
 	void lineModeSupported( bool pLineModeSupport );
+	void terminalSizeChanged( const QSize &pSize );
 
 private:
 	QString						 mBuffer;

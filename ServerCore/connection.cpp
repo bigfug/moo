@@ -1,7 +1,4 @@
 #include "connection.h"
-#include "task.h"
-#include "lua_moo.h"
-#include "lua_object.h"
 
 #include <QDebug>
 #include <QDateTime>
@@ -9,11 +6,31 @@
 #include <QXmlInputSource>
 #include <QSettings>
 
+#include "task.h"
+#include "lua_moo.h"
+#include "lua_object.h"
+#include "inputsink/inputsink.h"
+#include "inputsink/inputsinkcommand.h"
+
 Connection::Connection( ConnectionId pConnectionId, QObject *pParent ) :
 	QObject( pParent ), mConnectionId( pConnectionId ), mObjectId( 0 ), mPlayerId( OBJECT_NONE ), mConnectionTime( 0 ), mLastActiveTime( 0 ),
 	mLineModeSupport( true ), mLastCreatedObjectId( OBJECT_NONE ), mTerminalSize( 80, 24 ), mLineMode( EDIT )
 {
 	mConnectionTime = mLastActiveTime = QDateTime::currentMSecsSinceEpoch();
+
+	resetTerminalWindow();
+
+	if( false )
+	{
+		pushInputSink( new InputSinkCommand( this ) );
+	}
+}
+
+void Connection::pushInputSink( InputSink *pIS )
+{
+	mInputSinkList.push_front( pIS );
+
+	setLineMode( pIS->lineMode() );
 }
 
 bool Connection::processInput( const QString &pData )
@@ -42,9 +59,23 @@ bool Connection::processInput( const QString &pData )
 
 	if( !IS->input( pData ) )
 	{
+		if( IS->screenNeedsReset() )
+		{
+			redrawBuffer();
+		}
+
 		mInputSinkList.removeAll( IS );
 
 		delete( IS );
+	}
+
+	if( !mInputSinkList.isEmpty() )
+	{
+		setLineMode( mInputSinkList.first()->lineMode() );
+	}
+	else
+	{
+		setLineMode( Connection::EDIT );
 	}
 
 	return( true );
@@ -72,18 +103,22 @@ void Connection::write( const QString &pText )
 
 void Connection::notify( const QString &pText )
 {
+	bool		PrintText = true;
+
+	if( !mInputSinkList.isEmpty() )
+	{
+		if( mInputSinkList.first()->output( pText ) )
+		{
+			PrintText = false;
+		}
+	}
+
 	if( mLineMode == EDIT )
 	{
-		mLineBuffer << pText;
-
-		while( mLineBuffer.size() > mTerminalSize.height() )
-		{
-			mLineBuffer.removeFirst();
-		}
-
-		emit textOutput( pText );
+		addToLineBuffer( pText );
 	}
-	else
+
+	if( PrintText )
 	{
 		emit textOutput( pText );
 	}
@@ -112,11 +147,16 @@ void Connection::flush()
 
 void Connection::redrawBuffer()
 {
-	emit textOutput( "\x1b[2J\x1b[1;1H" );
+	emit textOutput( QString( "\e[2J\e[H" ) );
 
-	for( const QString &S : mLineBuffer )
+	for( int y = mTerminalWindow.top() ; y < mTerminalWindow.bottom() ; y++ )
 	{
-		emit textOutput( S );
+		if( mLineBuffer.size() <= y )
+		{
+			break;
+		}
+
+		emit textOutput( mLineBuffer.at( y ) );
 	}
 }
 
@@ -132,6 +172,16 @@ void Connection::setLineMode( Connection::LineMode pLineMode )
 	if( mLineModeSupport )
 	{
 		emit lineModeChanged( pLineMode );
+	}
+}
+
+void Connection::addToLineBuffer( const QString &pText )
+{
+	mLineBuffer << pText;
+
+	while( mLineBuffer.size() > mTerminalSize.height() )
+	{
+		mLineBuffer.removeFirst();
 	}
 }
 

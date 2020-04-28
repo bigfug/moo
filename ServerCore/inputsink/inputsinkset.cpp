@@ -17,7 +17,7 @@ InputSinkSet::InputSinkSet( Connection *C, ObjectId pObjectId, QString pPropName
 
 bool InputSinkSet::input( const QString &pData )
 {
-	if( pData.compare( "." ) == 0 )
+	if( !pData.compare( "." ) )
 	{
 		Object		*O = ObjectManager::o( mObjectId );
 		Property	*P = ( O ? O->prop( mPropName ) : nullptr );

@@ -16,7 +16,24 @@ class InputSinkProgram : public InputSink
 public:
 	InputSinkProgram( Connection *C, ObjectId pObjectId, QString pVerbName );
 
-	virtual bool input( const QString &pData );
+	virtual bool input( const QString &pData ) Q_DECL_OVERRIDE;
+
+	virtual bool output( const QString &pData ) Q_DECL_OVERRIDE
+	{
+		Q_UNUSED( pData )
+
+		return( false );
+	}
+
+	virtual bool screenNeedsReset( void ) const Q_DECL_OVERRIDE
+	{
+		return( false );
+	}
+
+	virtual Connection::LineMode lineMode( void ) const Q_DECL_OVERRIDE
+	{
+		return( Connection::EDIT );
+	}
 
 private:
 	Connection		*mConnection;

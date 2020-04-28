@@ -22,7 +22,24 @@ public:
 
 	InputSinkRead( Connection *C, const Task &pTask, QVariantMap pReadArgs = QVariantMap(), QVariantList pVerbArgs = QVariantList() );
 
-	virtual bool input( const QString &pData );
+	virtual bool input( const QString &pData ) Q_DECL_OVERRIDE;
+
+	virtual bool output( const QString &pData ) Q_DECL_OVERRIDE
+	{
+		Q_UNUSED( pData )
+
+		return( false );
+	}
+
+	virtual bool screenNeedsReset( void ) const Q_DECL_OVERRIDE
+	{
+		return( false );
+	}
+
+	virtual Connection::LineMode lineMode( void ) const Q_DECL_OVERRIDE
+	{
+		return( mLineMode );
+	}
 
 private:
 	void processAnsiSequence( const QByteArray &pData );
@@ -39,6 +56,8 @@ private:
 	int				 mAnsiEsc;
 	QByteArray		 mAnsiSeq;
 	int				 mAnsiPos;
+
+	Connection::LineMode	 mLineMode;
 };
 
 

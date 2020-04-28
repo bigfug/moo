@@ -5,13 +5,16 @@
 #include <QByteArray>
 #include <QSize>
 #include <QMap>
+#include <QVector>
 #include <QVariant>
 #include <QString>
 #include <QXmlDefaultHandler>
+#include <QRect>
 
 #include "mooglobal.h"
 #include "taskentry.h"
-#include "inputsink/inputsink.h"
+
+class InputSink;
 
 class Connection : public QObject
 {
@@ -20,7 +23,7 @@ class Connection : public QObject
 
 	explicit Connection( ConnectionId pConnectionId, QObject *pParent = Q_NULLPTR );
 
-	inline void setObjectId( const ObjectId pObjectId )
+	void setObjectId( const ObjectId pObjectId )
 	{
 		mObjectId = pObjectId;
 	}
@@ -30,36 +33,37 @@ class Connection : public QObject
 public:
 	typedef enum LineMode
 	{
+		NOT_SET = -1,
 		EDIT,
 		REALTIME
 	} LineMode;
 
-	inline ConnectionId id( void ) const
+	ConnectionId id( void ) const
 	{
 		return( mConnectionId );
 	}
 
-	inline QString name( void ) const
+	QString name( void ) const
 	{
 		return( mName );
 	}
 
-	inline ObjectId player( void ) const
+	ObjectId player( void ) const
 	{
 		return( mPlayerId );
 	}
 
-	inline ObjectId object( void ) const
+	ObjectId object( void ) const
 	{
 		return( mObjectId );
 	}
 
-	inline const QString &prefix( void ) const
+	const QString &prefix( void ) const
 	{
 		return( mPrefix );
 	}
 
-	inline const QString &suffix( void ) const
+	const QString &suffix( void ) const
 	{
 		return( mSuffix );
 	}
@@ -74,15 +78,12 @@ public:
 		mSuffix = pSuffix;
 	}
 
-	inline void setPlayerId( ObjectId pPlayerId )
+	void setPlayerId( ObjectId pPlayerId )
 	{
 		mPlayerId = pPlayerId;
 	}
 
-	inline void pushInputSink( InputSink *pIS )
-	{
-		mInputSinkList.push_front( pIS );
-	}
+	void pushInputSink( InputSink *pIS );
 
 	bool processInput( const QString &pData );
 
@@ -98,7 +99,7 @@ public:
 		return( mTerminalSize );
 	}
 
-	inline LineMode lineMode( void ) const
+	LineMode lineMode( void ) const
 	{
 		return( mLineMode );
 	}
@@ -106,6 +107,11 @@ public:
 	QVariant cookie( const QString &pName );
 
 	bool hasCookie( const QString &pName ) const;
+
+	QRect terminalWindow( void ) const
+	{
+		return( mTerminalWindow );
+	}
 
 signals:
 	void taskOutput( TaskEntry &pTask );
@@ -128,6 +134,8 @@ public slots:
 	void setLineModeSupport( bool pLineModeSupport );
 	void setLineMode( LineMode pLineMode );
 
+	void addToLineBuffer( const QString &pText );
+
 	void setLastCreatedObjectId( const ObjectId pObjectId )
 	{
 		mLastCreatedObjectId = pObjectId;
@@ -135,7 +143,29 @@ public slots:
 
 	void setTerminalSize( QSize pSize )
 	{
+		int		l = mTerminalWindow.left();
+		int		r = mTerminalSize.width() - mTerminalWindow.right();
+		int		t = mTerminalWindow.top();
+		int		b = mTerminalSize.height() - mTerminalWindow.bottom();
+
 		mTerminalSize = pSize;
+
+		mTerminalWindow = QRect( QPoint( l, t ), mTerminalSize - QSize( r, b ) );
+	}
+
+	void setTerminalWindowBottom( int v )
+	{
+		mTerminalWindow.setBottom( v );
+	}
+
+	void setTerminalWindow( QRect pWindow )
+	{
+		mTerminalWindow = pWindow;
+	}
+
+	void resetTerminalWindow( void )
+	{
+		mTerminalWindow = QRect( QPoint(), mTerminalSize );
 	}
 
 	void setCookie( const QString &pName, QVariant pValue );
@@ -145,21 +175,22 @@ public slots:
 	void sendGMCP( const QByteArray &pGMCP );
 
 private:
-	ConnectionId		mConnectionId;
-	ObjectId			mObjectId;
-	ObjectId			mPlayerId;
-	QString				mPrefix;
-	QString				mSuffix;
-	qint64				mConnectionTime;
-	qint64				mLastActiveTime;
-	QString				mName;
-	QList<InputSink *>	mInputSinkList;
-	bool				mLineModeSupport;
-	ObjectId			mLastCreatedObjectId;
-	QSize				mTerminalSize;
-	QStringList			mLineBuffer;
-	LineMode			mLineMode;
+	ConnectionId			 mConnectionId;
+	ObjectId				 mObjectId;
+	ObjectId				 mPlayerId;
+	QString					 mPrefix;
+	QString					 mSuffix;
+	qint64					 mConnectionTime;
+	qint64					 mLastActiveTime;
+	QString					 mName;
+	QVector<InputSink *>	 mInputSinkList;
+	bool					 mLineModeSupport;
+	ObjectId				 mLastCreatedObjectId;
+	QSize					 mTerminalSize;
+	QStringList				 mLineBuffer;
+	LineMode				 mLineMode;
 	QMap<QString,QVariant>	 mCookies;
+	QRect					 mTerminalWindow;
 };
 
 #endif // CONNECTION_H

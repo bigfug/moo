@@ -39,6 +39,7 @@ set( SOURCE_FILES
 	inputsink/inputsinkprogram.cpp
 	inputsink/inputsinkset.cpp
 	inputsink/inputsinkread.cpp
+	inputsink/inputsinkcommand.cpp
 
 	listeners/listenerservertcp.cpp
 	listeners/listenerserverwebsocket.cpp
@@ -88,6 +89,7 @@ set( HEADER_FILES
 	inputsink/inputsinkset.h
 	inputsink/inputsinkeditor.h
 	inputsink/inputsinkedittext.h
+	inputsink/inputsinkcommand.h
 
 	listeners/listenerserver.h
 	listeners/listenersocket.h

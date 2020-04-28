@@ -16,11 +16,11 @@
 
 InputSinkRead::InputSinkRead( Connection *C, const Task &pTask, ObjectId pObjectId, QString pVerbName, QVariantMap pReadArgs, QVariantList pVerbArgs )
 	: mConnection( C ), mTask( pTask ), mObjectId( pObjectId ), mVerbName( pVerbName ), mReadArgs( pReadArgs ), mVerbArgs( pVerbArgs ),
-	  mAnsiEsc( 0 ), mAnsiPos( 0 )
+	  mAnsiEsc( 0 ), mAnsiPos( 0 ), mLineMode( Connection::EDIT )
 {
 	if( mReadArgs.value( "password", false ).toBool() )
 	{
-		mConnection->setLineMode( Connection::REALTIME );
+		mLineMode = Connection::REALTIME;
 	}
 }
 

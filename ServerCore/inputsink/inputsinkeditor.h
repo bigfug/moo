@@ -18,10 +18,27 @@ class InputSinkEditor : public QObject, public InputSink
 public:
 	InputSinkEditor( Connection *C, ObjectId pObjectId, QString pVerbName, QStringList pText );
 
-	virtual bool input( const QString &pData );
+	virtual bool input( const QString &pData ) Q_DECL_OVERRIDE;
+
+	virtual bool output( const QString &pData ) Q_DECL_OVERRIDE
+	{
+		Q_UNUSED( pData )
+
+		return( false );
+	}
+
+	virtual bool screenNeedsReset( void ) const Q_DECL_OVERRIDE
+	{
+		return( true );
+	}
+
+	virtual Connection::LineMode lineMode( void ) const Q_DECL_OVERRIDE
+	{
+		return( Connection::REALTIME );
+	}
 
 private slots:
-	void output( const QString &pData );
+	void editorOutput( const QString &pData );
 
 	void test( void );
 

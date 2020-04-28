@@ -16,9 +16,15 @@ public:
 
 	virtual ~ListenerSocket( void ) {}
 
-	inline ConnectionId connectionId( void ) const
+	ConnectionId connectionId( void ) const
 	{
 		return( mConnectionId );
+	}
+
+public slots:
+	void setConnectionId( ConnectionId pConnectionId )
+	{
+		mConnectionId = pConnectionId;
 	}
 
 protected:

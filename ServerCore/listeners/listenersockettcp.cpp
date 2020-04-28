@@ -1,28 +1,26 @@
 #include "listenersockettcp.h"
 
 #include <QHostAddress>
-
-#include "../connectionmanager.h"
+#include <QDebug>
 
 ListenerSocketTCP::ListenerSocketTCP( QObject *pParent, QTcpSocket *pSocket )
 	: ListenerSocketTelnet( pParent ), mSocket( pSocket )
 {
 	qInfo() << "Connection established from" << mSocket->peerAddress();
 
-	Connection		*CON = ConnectionManager::instance()->connection( mConnectionId );
-
-	connect( mSocket, &QTcpSocket::disconnected, this, &ListenerSocketTCP::disconnected );
+	connect( mSocket, &QTcpSocket::disconnected, this, &ListenerSocketTCP::socketDisconnected );
 
 	connect( mSocket, &QTcpSocket::readyRead, this, &ListenerSocketTCP::readyRead );
-
-	connect( CON, &Connection::connectionFlush, mSocket, &QTcpSocket::flush );
-
-	start( this );
 }
 
 bool ListenerSocketTCP::isOpen() const
 {
 	return( mSocket->isOpen() );
+}
+
+void ListenerSocketTCP::flush()
+{
+	mSocket->flush();
 }
 
 qint64 ListenerSocketTCP::write(const QByteArray &A)
@@ -35,11 +33,11 @@ qint64 ListenerSocketTCP::write(const char *p, qint64 l)
 	return( mSocket->write( p, l ) );
 }
 
-void ListenerSocketTCP::disconnected( void )
+void ListenerSocketTCP::socketDisconnected( void )
 {
 	qInfo() << "Connection disconnected from" << mSocket->peerAddress();
 
-	ConnectionManager::instance()->closeListener( this );
+	emit disconnected( this );
 }
 
 void ListenerSocketTCP::readyRead( void )
