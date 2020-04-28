@@ -16,167 +16,29 @@
 
 InputSinkRead::InputSinkRead( Connection *C, const Task &pTask, ObjectId pObjectId, QString pVerbName, QVariantMap pReadArgs, QVariantList pVerbArgs )
 	: mConnection( C ), mTask( pTask ), mObjectId( pObjectId ), mVerbName( pVerbName ), mReadArgs( pReadArgs ), mVerbArgs( pVerbArgs ),
-	  mAnsiEsc( 0 ), mAnsiPos( 0 ), mLineMode( Connection::EDIT )
+	  mReadDone( false )
 {
-	if( mReadArgs.value( "password", false ).toBool() )
-	{
-		mLineMode = Connection::REALTIME;
-	}
+	initialise();
 }
 
 InputSinkRead::InputSinkRead( Connection *C, const Task &pTask, QVariantMap pReadArgs, QVariantList pVerbArgs )
 	: mConnection( C ), mTask( pTask ), mObjectId( pTask.object() ), mVerbName( pTask.verb() ), mReadArgs( pReadArgs ), mVerbArgs( pVerbArgs ),
-	  mAnsiEsc( 0 ), mAnsiPos( 0 )
+	  mReadDone( false )
 {
-
+	initialise();
 }
 
-bool InputSinkRead::input( const QString &pData )
+void InputSinkRead::initialise()
 {
-	if( mConnection->lineMode() == Connection::REALTIME )
+	if( mReadArgs.value( "password", false ).toBool() )
 	{
-		bool		EndRead = false;
+		mLineEdit.setSecretChar( '#' );
+	}
 
-		QChar		SecretChar = 0;
-
-		if( mReadArgs.value( "password", false ).toBool() )
-		{
-			SecretChar = '*';
-		}
-
-		for( QChar ch : pData )
-		{
-			if( ch == '\n' || ch == '\r' )
-			{
-				EndRead = true;
-			}
-			else if( mAnsiEsc == 1 )
-			{
-				if( ch == '[' )
-				{
-					mAnsiEsc++;
-
-					mAnsiSeq.append( ch );
-				}
-				else
-				{
-					mInput.append( 0x1B );
-					mInput.append( ch );
-
-					mAnsiEsc = 0;
-				}
-			}
-			else if( mAnsiEsc == 2 )
-			{
-				mAnsiSeq.append( ch );
-
-				if( ch >= 64 && ch <= 126 )
-				{
-					if( SecretChar.isNull() )
-					{
-						processAnsiSequence( mAnsiSeq );
-					}
-
-					mAnsiEsc = 0;
-				}
-			}
-			else
-			{
-				QByteArray	Tmp;
-
-				switch( ch.toLatin1() )
-				{
-					case 0x08:	// BACKSPACE
-						if( mAnsiPos > 0 )
-						{
-							mInput.remove( --mAnsiPos, 1 );
-
-							if( SecretChar.isNull() )  // echo() )
-							{
-								Tmp.append( "\x1b[D" );
-								Tmp.append( mInput.mid( mAnsiPos ) );
-								Tmp.append( QString( " \x1b[%1D" ).arg( mInput.size() + 1 - mAnsiPos ) );
-							}
-							else
-							{
-								Tmp.append( "\x1b[D \x1b[D" );
-							}
-						}
-						break;
-
-					case 0x09:
-						break;
-
-					case 0x0e:	// SHIFT OUT
-					case 0x0f:	// SHIFT IN
-						break;
-
-					case 0x1b:	// ESCAPE
-						mAnsiSeq.clear();
-						mAnsiSeq.append( ch );
-						mAnsiEsc++;
-						break;
-
-					case 0x7f:	// DELETE
-						if( mAnsiPos < mInput.size() )
-						{
-							mInput.remove( mAnsiPos, 1 );
-
-							if( SecretChar.isNull() ) //echo() )
-							{
-								Tmp.append( mInput.mid( mAnsiPos ) );
-								Tmp.append( QString( " \x1b[%1D" ).arg( mInput.size() + 1 - mAnsiPos ) );
-							}
-						}
-						break;
-
-					default:
-						if( ch >= 0x20 && ch < 0x7f )
-						{
-							mInput.insert( mAnsiPos++, ch );
-
-							if( true ) // echo() )
-							{
-								if( mAnsiPos < mInput.size() )
-								{
-									Tmp.append( mInput.mid( mAnsiPos - 1 ).append( QString( "\x1b[%1D" ).arg( mInput.size() - mAnsiPos ) ) );
-								}
-								else if( !SecretChar.isNull() )
-								{
-									Tmp.append( SecretChar );
-								}
-								else
-								{
-									Tmp.append( ch );
-								}
-							}
-						}
-						break;
-				}
-
-				if( !Tmp.isEmpty() )
-				{
-					mConnection->write( Tmp );
-				}
-			}
-		}
-
-		if( !EndRead )
-		{
-			return( true );
-		}
-
+	connect( &mLineEdit, &LineEdit::lineOutput, [=]( const QByteArray &pLine )
+	{
 		mConnection->write( "\r\n" );
 
-		mConnection->setLineMode( Connection::EDIT );
-	}
-	else
-	{
-		mInput = pData;
-	}
-
-	if( true )
-	{
 		Object		*O = ObjectManager::o( mObjectId );
 		Verb		*V = ( O ? O->verb( mVerbName ) : nullptr );
 
@@ -188,7 +50,7 @@ bool InputSinkRead::input( const QString &pData )
 
 			int			ArgCnt = 1;
 
-			lua_pushlstring( L.L(), mInput.toLatin1().constData(), mInput.size() );
+			lua_pushlstring( L.L(), pLine.constData(), pLine.size() );
 
 			for( const QVariant &V : mVerbArgs )
 			{
@@ -235,37 +97,19 @@ bool InputSinkRead::input( const QString &pData )
 			L.verbCall( V, ArgCnt );
 		}
 
-		return( false );
-	}
+		mReadDone = true;
+	} );
 
-	return( true );
+	connect( &mLineEdit, &LineEdit::dataOutput, [=]( const QByteArray &pData )
+	{
+		mConnection->write( pData );
+	} );
 }
 
-void InputSinkRead::processAnsiSequence( const QByteArray &pData )
+bool InputSinkRead::input( const QString &pData )
 {
-	if( pData.size() == 3 )
-	{
-		switch( static_cast<quint8>( pData.at( 2 ) ) )
-		{
-			case 'C':	// CURSOR FORWARD
-				if( mAnsiPos < mInput.size() )
-				{
-					mAnsiPos++;
+	mLineEdit.dataInput( pData.toLatin1() );
 
-					mConnection->write( "\x1b[C" );
-				}
-				break;
-
-			case 'D':	// CURSOR BACK
-				if( mAnsiPos > 0 )
-				{
-					mAnsiPos--;
-
-					mConnection->write( "\x1b[D" );
-				}
-				break;
-
-		}
-	}
+	return( !mReadDone );
 }
 

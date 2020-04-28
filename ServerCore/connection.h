@@ -113,18 +113,24 @@ public:
 		return( mTerminalWindow );
 	}
 
+	ConnectionId connectionId( void ) const
+	{
+		return( mConnectionId );
+	}
+
 signals:
 	void taskOutput( TaskEntry &pTask );
-	void textOutput( const QString &pText );
+	void listenerOutput( const QString &pText );	// data to be sent to the listener
 	void lineModeChanged( Connection::LineMode pLineMode );
 	void gmcpOutput( const QByteArray &pGMCP );
 	void connectionClosed( void );
 	void connectionFlush( void );
 
 public slots:
-	void write( const QString &pText );
-	void notify( const QString &pText );
-	void dataInput( const QString &pText );
+	void write( const QString &pText );				// writes directly to listener
+	void notify( const QString &pText );			// stores to line buffer and writes to listener if allowed
+
+	void listenerInput( const QString &pText );		// data coming in from listener
 
 	void close( void );
 	void flush( void );
@@ -140,6 +146,8 @@ public slots:
 	{
 		mLastCreatedObjectId = pObjectId;
 	}
+
+	void performTask( const QString &pTask );
 
 	void setTerminalSize( QSize pSize )
 	{

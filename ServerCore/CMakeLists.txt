@@ -33,6 +33,7 @@ set( SOURCE_FILES
 	lua_json.cpp
 	lua_serialport.cpp
 	lua_smtp.cpp
+	lineedit.cpp
 
 	inputsink/inputsinkeditor.cpp
 	inputsink/inputsinkedittext.cpp
@@ -82,6 +83,7 @@ set( HEADER_FILES
 	lua_json.h
 	lua_serialport.h
 	lua_smtp.h
+	lineedit.h
 
 	inputsink/inputsinkread.h
 	inputsink/inputsink.h

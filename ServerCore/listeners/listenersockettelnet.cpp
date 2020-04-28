@@ -7,18 +7,14 @@
 
 #include "connectionmanager.h"
 #include "listenerserver.h"
-#include "objectmanager.h"
 
 //#define DEBUG_LISTENER
 
 #define TELNET_TELOPT_GMCP (0xc9)
 
 ListenerSocketTelnet::ListenerSocketTelnet( QObject *pParent ) :
-	ListenerSocket( pParent ), mCursorPosition( 0 ), mTelnet( nullptr ), mLineMode( Connection::NOT_SET )
+	ListenerSocket( pParent ), mTelnet( nullptr ), mLineMode( Connection::NOT_SET ), mLocalEcho( false )
 {
-	mLastChar  = 0;
-	mLocalEcho = false;
-
 	//------------------------------------------------------------------------
 	// Telnet Options
 
@@ -57,7 +53,10 @@ void ListenerSocketTelnet::start( void )// ListenerSocketTelnet *pThis )
 	//------------------------------------------------------------------------
 	// Initial timer
 
-	connect( &mTimer, &QTimer::timeout, this, &ListenerSocketTelnet::inputTimeout );
+	connect( &mTimer, &QTimer::timeout, [=]( void )
+	{
+		emit ready();
+	} );
 
 	mTimer.setSingleShot( true );
 
@@ -67,89 +66,6 @@ void ListenerSocketTelnet::start( void )// ListenerSocketTelnet *pThis )
 bool ListenerSocketTelnet::echo() const
 {
 	return( mLocalEcho );
-}
-
-void ListenerSocketTelnet::sendData( const QByteArray &pData )
-{
-#if defined( DEBUG_LISTENER )
-	qDebug() << "ListenerTelnetSocket::sendData" << pData;
-#endif
-
-	telnet_send_text( mTelnet, pData.constData(), pData.size() );
-}
-
-void ListenerSocketTelnet::processInput( const QByteArray &pData )
-{
-#if defined( DEBUG_LISTENER )
-	qDebug() << "processInput" << pData;
-#endif
-
-	Connection		*CON = ConnectionManager::instance()->connection( mConnectionId );
-
-	for( int i = 0 ; i < pData.size() ; i++ )
-	{
-		quint8		ch = pData.at( i );
-
-		if( mLineMode == Connection::REALTIME )
-		{
-			if( CON )
-			{
-				CON->processInput( QChar( ch ) );
-			}
-		}
-		else if( ch == '\r' || ch == '\n' )
-		{
-			if( mBuffer.isEmpty() )
-			{
-				if( ch == '\n' && mLastChar == '\r' )
-				{
-
-				}
-				else
-				{
-					emit textOutput( mBuffer );
-				}
-			}
-			else
-			{
-				emit textOutput( mBuffer );
-
-				mBuffer.clear();
-
-				mCursorPosition = 0;
-			}
-		}
-		else
-		{
-			if( ch == '\b' )
-			{
-				if( mCursorPosition > 0 )
-				{
-					mBuffer.remove( mCursorPosition - 1, 1 );
-
-					mCursorPosition--;
-				}
-			}
-			else
-			{
-				if( ch >= 0x20 && ch < 0x7f )
-				{
-					mBuffer.insert( mCursorPosition, ch );
-
-					mCursorPosition++;
-				}
-			}
-		}
-
-		mLastChar = ch;
-	}
-}
-
-void ListenerSocketTelnet::inputTimeout( void )
-{
-	TaskEntry		 E( "", mConnectionId );
-
-	ObjectManager::instance()->doTask( E );
 }
 
 void ListenerSocketTelnet::setLineMode( Connection::LineMode pLineMode )
@@ -178,16 +94,9 @@ void ListenerSocketTelnet::sendGMCP( const QByteArray &pGMCP )
 	telnet_subnegotiation( mTelnet, TELNET_TELOPT_GMCP, pGMCP.constData(), pGMCP.size() );
 }
 
-void ListenerSocketTelnet::read( QByteArray A )
+void ListenerSocketTelnet::socketToTelnet( const QByteArray &pData )
 {
-	if( mTelnet )
-	{
-		telnet_recv( mTelnet, A.constData(), A.size() );
-	}
-	else
-	{
-		processInput( A );
-	}
+	telnet_recv( mTelnet, pData.constData(), pData.size() );
 }
 
 void ListenerSocketTelnet::stopTimer()
@@ -198,16 +107,15 @@ void ListenerSocketTelnet::stopTimer()
 	}
 }
 
-void ListenerSocketTelnet::textInput( const QString &pText )
+void ListenerSocketTelnet::connectionToTelnet( const QString &pText )
 {
-	QByteArray		Buff = QByteArray( pText.toUtf8() );
+#if defined( DEBUG_LISTENER )
+	qDebug() << "ListenerTelnetSocket::sendData" << pText;
+#endif
 
-	if( mLineMode == Connection::EDIT )
-	{
-		Buff.append( "\r\n" );
-	}
+	QByteArray		Buff = pText.toLatin1();
 
-	sendData( Buff );
+	telnet_send_text( mTelnet, Buff.constData(), Buff.size() );
 }
 
 void ListenerSocketTelnet::telnetEventHandlerStatic(telnet_t *telnet, telnet_event_t *event, void *user_data)
@@ -222,7 +130,9 @@ void ListenerSocketTelnet::telnetEventHandler( telnet_event_t *event )
 	switch( event->type )
 	{
 		case TELNET_EV_DATA:
-			processInput( QByteArray::fromRawData( event->data.buffer, event->data.size ) );
+			{
+				emit telnetToConnection( QByteArray::fromRawData( event->data.buffer, event->data.size ) );
+			}
 			break;
 
 		case TELNET_EV_SEND:
@@ -233,7 +143,7 @@ void ListenerSocketTelnet::telnetEventHandler( telnet_event_t *event )
 				}
 				else
 				{
-					write( event->data.buffer, event->data.size );
+					writeToSocket( event->data.buffer, event->data.size );
 				}
 			}
 			break;

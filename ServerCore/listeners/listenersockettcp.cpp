@@ -23,12 +23,12 @@ void ListenerSocketTCP::flush()
 	mSocket->flush();
 }
 
-qint64 ListenerSocketTCP::write(const QByteArray &A)
+qint64 ListenerSocketTCP::writeToSocket(const QByteArray &A)
 {
 	return( mSocket->write( A ) );
 }
 
-qint64 ListenerSocketTCP::write(const char *p, qint64 l)
+qint64 ListenerSocketTCP::writeToSocket(const char *p, qint64 l)
 {
 	return( mSocket->write( p, l ) );
 }
@@ -42,5 +42,5 @@ void ListenerSocketTCP::socketDisconnected( void )
 
 void ListenerSocketTCP::readyRead( void )
 {
-	read( mSocket->readAll() );
+	socketToTelnet( mSocket->readAll() );
 }

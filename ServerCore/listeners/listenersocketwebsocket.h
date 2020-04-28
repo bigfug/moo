@@ -31,13 +31,13 @@ public slots:
 private slots:
 	void socketDisconnected( void );
 
-	void binaryMessageReceived(const QByteArray &message);
+	void binaryFrameReceived( const QByteArray &message, bool isLastFrame );
 
 	void textFrameReceived( const QString &message, bool isLastFrame );
 
 protected slots:
-	virtual qint64 write( const QByteArray &A ) Q_DECL_OVERRIDE;
-	virtual qint64 write( const char *p, qint64 l ) Q_DECL_OVERRIDE;
+	virtual qint64 writeToSocket( const QByteArray &A ) Q_DECL_OVERRIDE;
+	virtual qint64 writeToSocket( const char *p, qint64 l ) Q_DECL_OVERRIDE;
 
 private:
 	QWebSocket					*mSocket;

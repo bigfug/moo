@@ -11,6 +11,8 @@
 #include "lua_object.h"
 #include "inputsink/inputsink.h"
 #include "inputsink/inputsinkcommand.h"
+#include "taskentry.h"
+#include "task.h"
 
 Connection::Connection( ConnectionId pConnectionId, QObject *pParent ) :
 	QObject( pParent ), mConnectionId( pConnectionId ), mObjectId( 0 ), mPlayerId( OBJECT_NONE ), mConnectionTime( 0 ), mLastActiveTime( 0 ),
@@ -20,10 +22,9 @@ Connection::Connection( ConnectionId pConnectionId, QObject *pParent ) :
 
 	resetTerminalWindow();
 
-	if( false )
-	{
-		pushInputSink( new InputSinkCommand( this ) );
-	}
+	InputSinkCommand	*IS = new InputSinkCommand( this );
+
+	pushInputSink( IS );
 }
 
 void Connection::pushInputSink( InputSink *pIS )
@@ -33,52 +34,71 @@ void Connection::pushInputSink( InputSink *pIS )
 	setLineMode( pIS->lineMode() );
 }
 
+/*
+ * called from lua_task::execute( qint64 pTimeStamp )
+ * returns true if we don't want to process any further
+ * this allows InputSink classes to filter input
+ *
+ * @param pData the command entered by the player
+*/
+
 bool Connection::processInput( const QString &pData )
 {
-	if( mLineMode == EDIT )
-	{
-		mLineBuffer << pData;
+	return( false );
 
-		while( mLineBuffer.size() > mTerminalSize.height() )
-		{
-			mLineBuffer.removeFirst();
-		}
-	}
+//	qDebug() << "Connection::processInput" << pData;
 
-	if( mInputSinkList.isEmpty() )
-	{
-		return( false );
-	}
+//	if( true )
+//	{
+//		return( false );
+//	}
 
-	InputSink		*IS = mInputSinkList.first();
+//	if( mLineMode == EDIT )
+//	{
+//		mLineBuffer << pData;
 
-	if( !IS )
-	{
-		return( false );
-	}
+//		while( mLineBuffer.size() > mTerminalSize.height() )
+//		{
+//			mLineBuffer.removeFirst();
+//		}
+//	}
 
-	if( !IS->input( pData ) )
-	{
-		if( IS->screenNeedsReset() )
-		{
-			redrawBuffer();
-		}
+//	if( mInputSinkList.isEmpty() )
+//	{
+//		return( false );
+//	}
 
-		mInputSinkList.removeAll( IS );
+//	InputSink		*IS = mInputSinkList.first();
 
-		delete( IS );
-	}
+//	if( !IS )
+//	{
+//		return( false );
+//	}
 
-	if( !mInputSinkList.isEmpty() )
-	{
-		setLineMode( mInputSinkList.first()->lineMode() );
-	}
-	else
-	{
-		setLineMode( Connection::EDIT );
-	}
+//	if( !IS->input( pData ) )
+//	{
+//		if( IS->screenNeedsReset() )
+//		{
+//			redrawBuffer();
+//		}
 
-	return( true );
+//		mInputSinkList.removeAll( IS );
+
+//		delete( IS );
+//	}
+
+//	if( !mInputSinkList.isEmpty() )
+//	{
+//		setLineMode( mInputSinkList.first()->lineMode() );
+
+//		mInputSinkList.first()->output( "" );
+//	}
+//	else
+//	{
+//		setLineMode( Connection::EDIT );
+//	}
+
+//	return( true );
 }
 
 bool Connection::supportsLineMode() const
@@ -98,7 +118,7 @@ bool Connection::hasCookie(const QString &pName) const
 
 void Connection::write( const QString &pText )
 {
-	emit textOutput( pText );
+	emit listenerOutput( pText );
 }
 
 void Connection::notify( const QString &pText )
@@ -120,19 +140,53 @@ void Connection::notify( const QString &pText )
 
 	if( PrintText )
 	{
-		emit textOutput( pText );
+		write( pText );
+		write( "\r\n" );
 	}
 }
 
-void Connection::dataInput( const QString &pText )
+void Connection::listenerInput( const QString &pText )
 {
-	// Create a task entry for this data
+//	while( lineMode() == REALTIME )
+//	{
 
-	TaskEntry		T( pText, mConnectionId, mPlayerId );
+//	}
 
-	mLastActiveTime = T.timestamp();
+//	for( int i = 0 ; i < pData.size() ; i++ )
+//	{
+//		quint8		ch = pData.at( i );
 
-	emit taskOutput( T );
+//		if( mLineMode == Connection::REALTIME )
+//		{
+//			emit charOutput( ch );
+//		}
+//		else
+//		{
+//			mLineEdit.dataInput( pData );
+//		}
+//	}
+
+//	qDebug() << "listenerInput" << pText;
+
+	if( !mInputSinkList.isEmpty() )
+	{
+		InputSink		*IS = mInputSinkList.first();
+
+		if( IS )
+		{
+			if( !IS->input( pText ) )
+			{
+				if( IS->screenNeedsReset() )
+				{
+					redrawBuffer();
+				}
+
+				mInputSinkList.removeAll( IS );
+
+				delete( IS );
+			}
+		}
+	}
 }
 
 void Connection::close()
@@ -147,16 +201,18 @@ void Connection::flush()
 
 void Connection::redrawBuffer()
 {
-	emit textOutput( QString( "\e[2J\e[H" ) );
+	write( QString( "\x1b[2J" ) );
 
 	for( int y = mTerminalWindow.top() ; y < mTerminalWindow.bottom() ; y++ )
 	{
+		write( QString( "\x1b[%1;%2H" ).arg( y + 1 ).arg( mTerminalWindow.left() + 1 ) );
+
 		if( mLineBuffer.size() <= y )
 		{
 			break;
 		}
 
-		emit textOutput( mLineBuffer.at( y ) );
+		write( mLineBuffer.at( y ) );
 	}
 }
 
@@ -177,12 +233,30 @@ void Connection::setLineMode( Connection::LineMode pLineMode )
 
 void Connection::addToLineBuffer( const QString &pText )
 {
-	mLineBuffer << pText;
+	int			i = 0;
+
+	while( i < pText.length() )
+	{
+		int		j = std::min( pText.length(), mTerminalWindow.width() );
+
+		mLineBuffer << pText.mid( i, j );
+
+		i += j;
+	}
 
 	while( mLineBuffer.size() > mTerminalSize.height() )
 	{
 		mLineBuffer.removeFirst();
 	}
+}
+
+void Connection::performTask( const QString &pTask )
+{
+	TaskEntry	E( pTask, connectionId(), player() );
+
+	emit taskOutput( E );
+
+	mLastActiveTime = E.timestamp();
 }
 
 void Connection::setCookie(const QString &pName, QVariant pValue)

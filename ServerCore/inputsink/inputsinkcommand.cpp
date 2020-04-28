@@ -1,19 +1,45 @@
 #include "inputsinkcommand.h"
 
+#include <QDebug>
+
 InputSinkCommand::InputSinkCommand( Connection *C )
 	: mConnection( C )
 {
+	connect( &mLineEdit, &LineEdit::lineOutput, [=]( const QByteArray &pLine )
+	{
+		mConnection->write( "\r\n" );
 
+		mConnection->performTask( pLine );
+	} );
+
+	connect( &mLineEdit, &LineEdit::dataOutput, [=]( const QByteArray &pData )
+	{
+		mConnection->write( pData );
+	} );
 }
 
 bool InputSinkCommand::input( const QString &pData )
 {
+//	qDebug() << "InputSinkCommand::input" << pData;
+
+	mLineEdit.dataInput( pData.toLatin1() );
+
 	return( true );
 }
 
+// output() receives data from Connection::notify()
+// has the option to block printing (returns true)
+// or allows it (returns false)
+
 bool InputSinkCommand::output( const QString &pData )
 {
-	Q_UNUSED( pData )
+	mConnection->write( "\x1b[1G\x1b[K" );	// cursor to column 0 and clear to end of line
 
-	return( false );
+	mConnection->write( pData );
+
+	mConnection->write( "\r\n" );
+
+	mLineEdit.redraw();
+
+	return( true );
 }

@@ -29,8 +29,8 @@ public slots:
 	void flush( void );
 
 protected slots:
-	virtual qint64 write( const QByteArray &A ) Q_DECL_OVERRIDE;
-	virtual qint64 write( const char *p, qint64 l ) Q_DECL_OVERRIDE;
+	virtual qint64 writeToSocket( const QByteArray &A ) Q_DECL_OVERRIDE;
+	virtual qint64 writeToSocket( const char *p, qint64 l ) Q_DECL_OVERRIDE;
 
 	void socketDisconnected( void );
 	void readyRead( void );

@@ -33,18 +33,12 @@ public:
 	void start( void ); //ListenerSocketTelnet *pThis );
 
 private:
-	void sendData( const QByteArray &pData );
-
-	void processInput( const QByteArray &pData );
-
 	static void telnetEventHandlerStatic( telnet_t *telnet, telnet_event_t *event, void *user_data );
 
 	void telnetEventHandler( telnet_event_t *event );
 
 public slots:
-	void textInput( const QString &pText );
-
-	void inputTimeout( void );
+	void connectionToTelnet( const QString &pText );
 
 	void setLineMode( Connection::LineMode pLineMode );
 
@@ -53,23 +47,21 @@ public slots:
 	virtual void close( void ) = 0;
 
 protected slots:
-	virtual qint64 write( const QByteArray &A ) = 0;
-	virtual qint64 write( const char *p, qint64 l ) = 0;
+	virtual qint64 writeToSocket( const QByteArray &A ) = 0;
+	virtual qint64 writeToSocket( const char *p, qint64 l ) = 0;
 
-	void read( QByteArray A );
+	void socketToTelnet( const QByteArray &pData );
 
 	void stopTimer( void );
 
 signals:
-	void textOutput( const QString &pText );
+	void telnetToConnection( const QString &pText );
+
 	void lineModeSupported( bool pLineModeSupport );
 	void terminalSizeChanged( const QSize &pSize );
+	void ready( void );
 
 private:
-	QString						 mBuffer;
-	int							 mCursorPosition;
-	quint8						 mLastChar;
-	QByteArray					 mTelnetSequence;
 	QTimer						 mTimer;
 	telnet_t					*mTelnet;
 	QVector<telnet_telopt_t>	 mOptions;

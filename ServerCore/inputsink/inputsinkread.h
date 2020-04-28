@@ -8,13 +8,16 @@
 #include "task.h"
 
 #include "inputsink.h"
+#include "lineedit.h"
 
 class Connection;
 class Object;
 class Verb;
 
-class InputSinkRead : public InputSink
+class InputSinkRead : public QObject, public InputSink
 {
+	Q_OBJECT
+
 public:
 //	InputSinkRead( Connection *C, ObjectId pObjectId, QString pVerbName, QVariantMap pReadArgs, QVariantList pVerbArgs );
 
@@ -38,26 +41,23 @@ public:
 
 	virtual Connection::LineMode lineMode( void ) const Q_DECL_OVERRIDE
 	{
-		return( mLineMode );
+		return( Connection::REALTIME );
 	}
 
 private:
-	void processAnsiSequence( const QByteArray &pData );
+	void initialise( void );
 
 private:
 	Connection		*mConnection;
 	Task			 mTask;
 	ObjectId		 mObjectId;
 	QString			 mVerbName;
-	QString			 mInput;
+//	QString			 mInput;
 	QVariantMap		 mReadArgs;
 	QVariantList	 mVerbArgs;
+	LineEdit		 mLineEdit;
 
-	int				 mAnsiEsc;
-	QByteArray		 mAnsiSeq;
-	int				 mAnsiPos;
-
-	Connection::LineMode	 mLineMode;
+	bool			 mReadDone;
 };
 
 

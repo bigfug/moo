@@ -3,11 +3,14 @@
 
 #include "mooglobal.h"
 #include "inputsink.h"
+#include "lineedit.h"
 
 class Connection;
 
-class InputSinkCommand : public InputSink
+class InputSinkCommand : public QObject, public InputSink
 {
+	Q_OBJECT
+
 public:
 	InputSinkCommand( Connection *C );
 
@@ -27,6 +30,7 @@ public:
 
 private:
 	Connection		*mConnection;
+	LineEdit		 mLineEdit;
 };
 
 #endif // INPUTSINKCOMMAND_H

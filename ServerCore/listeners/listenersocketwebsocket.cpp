@@ -8,7 +8,7 @@ ListenerSocketWebSocket::ListenerSocketWebSocket( QObject *pParent, QWebSocket *
 {
 	connect( mSocket, &QWebSocket::disconnected, this, &ListenerSocketWebSocket::socketDisconnected );
 
-	connect( mSocket, &QWebSocket::binaryMessageReceived, this, &ListenerSocketWebSocket::binaryMessageReceived );
+	connect( mSocket, &QWebSocket::binaryFrameReceived, this, &ListenerSocketWebSocket::binaryFrameReceived );
 
 	connect( mSocket, &QWebSocket::textFrameReceived, this, &ListenerSocketWebSocket::textFrameReceived );
 }
@@ -30,24 +30,26 @@ void ListenerSocketWebSocket::socketDisconnected()
 	emit disconnected( this );
 }
 
-void ListenerSocketWebSocket::binaryMessageReceived( const QByteArray &message )
+void ListenerSocketWebSocket::binaryFrameReceived( const QByteArray &message, bool isLastFrame )
 {
-	read( message );
+	Q_UNUSED( isLastFrame )
+
+	socketToTelnet( message );
 }
 
 void ListenerSocketWebSocket::textFrameReceived( const QString &message, bool isLastFrame )
 {
 	Q_UNUSED( isLastFrame )
 
-	read( message.toLatin1() );
+	socketToTelnet( message.toLatin1() );
 }
 
-qint64 ListenerSocketWebSocket::write( const QByteArray &A )
+qint64 ListenerSocketWebSocket::writeToSocket( const QByteArray &A )
 {
 	return( mSocket->sendTextMessage( A ) );
 }
 
-qint64 ListenerSocketWebSocket::write( const char *p, qint64 l )
+qint64 ListenerSocketWebSocket::writeToSocket( const char *p, qint64 l )
 {
 	return( mSocket->sendTextMessage( QString::fromLatin1( p, l ) ) );
 }

@@ -35,26 +35,23 @@ void ListenerServerWebSocket::newConnection( void )
 
 		LS->setConnectionId( CID );
 
-		connect( CON, &Connection::textOutput, LS, &ListenerSocketWebSocket::textInput );
+		connect( CON, &Connection::listenerOutput, LS, &ListenerSocketWebSocket::connectionToTelnet );
+		connect( CON, &Connection::gmcpOutput, LS, &ListenerSocketWebSocket::sendGMCP );
+		connect( CON, &Connection::connectionClosed, LS, &ListenerSocketWebSocket::close );
+		connect( CON, &Connection::lineModeChanged, LS, &ListenerSocketWebSocket::setLineMode );
+		connect( CON, &Connection::connectionFlush, LS, &ListenerSocketWebSocket::flush );
 
 		connect( CON, &Connection::taskOutput, ObjectManager::instance(), &ObjectManager::doTask );
 
-		connect( CON, &Connection::gmcpOutput, LS, &ListenerSocketWebSocket::sendGMCP );
-
-		connect( CON, &Connection::connectionClosed, LS, &ListenerSocketWebSocket::close );
-
-		connect( CON, &Connection::lineModeChanged, LS, &ListenerSocketWebSocket::setLineMode );
-
-		connect( CON, &Connection::connectionFlush, LS, &ListenerSocketWebSocket::flush );
-
-
-		connect( LS, &ListenerSocketWebSocket::textOutput, CON, &Connection::dataInput );
-
+		connect( LS, &ListenerSocketWebSocket::telnetToConnection, CON, &Connection::listenerInput );
 		connect( LS, &ListenerSocketWebSocket::lineModeSupported, CON, &Connection::setLineModeSupport );
-
 		connect( LS, &ListenerSocketWebSocket::terminalSizeChanged, CON, &Connection::setTerminalSize );
-
 		connect( LS, &ListenerSocketWebSocket::disconnected, CM, &ConnectionManager::closeListener );
+
+		connect( LS, &ListenerSocketWebSocket::ready, [=]( void )
+		{
+			CON->performTask( "" );
+		} );
 
 		LS->start();
 
