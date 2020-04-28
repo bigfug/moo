@@ -10,8 +10,8 @@
 #include "object.h"
 #include "connectionmanager.h"
 #include "connection.h"
-#include "inputsinkset.h"
-#include "inputsinkedittext.h"
+#include "inputsink/inputsinkset.h"
+#include "inputsink/inputsinkedittext.h"
 
 #include "changeset/propertysetowner.h"
 #include "changeset/propertysetread.h"

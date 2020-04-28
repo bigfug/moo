@@ -16,7 +16,7 @@
 #include "mooexception.h"
 #include "connectionmanager.h"
 #include "taskentry.h"
-#include "inputsinkprogram.h"
+#include "inputsink/inputsinkprogram.h"
 
 #include "changeset/connectionnotify.h"
 

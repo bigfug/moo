@@ -20,7 +20,7 @@
 #include "lua_smtp.h"
 #include "lua_text.h"
 
-#include "inputsinkread.h"
+#include "inputsink/inputsinkread.h"
 
 #include "connectionmanager.h"
 

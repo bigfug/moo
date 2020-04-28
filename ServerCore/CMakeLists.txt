@@ -25,19 +25,20 @@ set( SOURCE_FILES
 	func.cpp
 	connectionmanager.cpp
 	taskentry.cpp
-	inputsinkprogram.cpp
-	inputsinkset.cpp
 	lua_osc.cpp
 	osc.cpp
-	inputsinkeditor.cpp
-	inputsinkedittext.cpp
 	odb_file.cpp
 	odb.cpp
 	odb_sql.cpp
 	lua_json.cpp
 	lua_serialport.cpp
 	lua_smtp.cpp
-	inputsinkread.cpp
+
+	inputsink/inputsinkeditor.cpp
+	inputsink/inputsinkedittext.cpp
+	inputsink/inputsinkprogram.cpp
+	inputsink/inputsinkset.cpp
+	inputsink/inputsinkread.cpp
 
 	listeners/listenerservertcp.cpp
 	listeners/listenerserverwebsocket.cpp
@@ -72,29 +73,27 @@ set( HEADER_FILES
 	func.h
 	connectionmanager.h
 	taskentry.h
-	inputsink.h
-	inputsinkprogram.h
-	inputsinkset.h
 	lua_osc.h
 	osc.h
-	inputsinkeditor.h
-	inputsinkedittext.h
 	odb_file.h
 	odb.h
 	odb_sql.h
 	lua_json.h
 	lua_serialport.h
 	lua_smtp.h
-	inputsinkread.h
+
+	inputsink/inputsinkread.h
+	inputsink/inputsink.h
+	inputsink/inputsinkprogram.h
+	inputsink/inputsinkset.h
+	inputsink/inputsinkeditor.h
+	inputsink/inputsinkedittext.h
 
 	listeners/listenerserver.h
 	listeners/listenersocket.h
-
 	listeners/listenersockettelnet.h
-
 	listeners/listenerservertcp.h
 	listeners/listenersockettcp.h
-
 	listeners/listenerserverwebsocket.h
 	listeners/listenersocketwebsocket.h
 

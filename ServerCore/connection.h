@@ -11,7 +11,7 @@
 
 #include "mooglobal.h"
 #include "taskentry.h"
-#include "inputsink.h"
+#include "inputsink/inputsink.h"
 
 class Connection : public QObject
 {

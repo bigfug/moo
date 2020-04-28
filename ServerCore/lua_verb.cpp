@@ -9,8 +9,8 @@
 #include "objectmanager.h"
 #include "connectionmanager.h"
 #include "connection.h"
-#include "inputsinkprogram.h"
-#include "inputsinkeditor.h"
+#include "inputsink/inputsinkprogram.h"
+#include "inputsink/inputsinkeditor.h"
 
 #include "changeset/verbsetowner.h"
 #include "changeset/verbsetread.h"
