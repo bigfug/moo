@@ -189,10 +189,8 @@ int lua_verb::luaGet( lua_State *L )
 		const char			*s = luaL_checkstring( L, 2 );
 		Object				*O = ObjectManager::o( V->object() );
 		Object				*Player = ObjectManager::instance()->object( T.player() );
-		const bool			 isOwner  = ( Player != 0 && O != 0 ? Player->id() == O->owner() : false );
-		const bool			 isWizard = ( Player != 0 ? Player->wizard() : false );
 
-		if( V == 0 )
+		if( !V )
 		{
 			throw( mooException( E_TYPE, "invalid object" ) );
 		}
@@ -269,7 +267,7 @@ int lua_verb::luaGet( lua_State *L )
 
 			case SCRIPT:
 				{
-					if( !isWizard && !isOwner && !V->read() )
+					if( !V->read() && !Command->isWizard() && !Command->isOwner( V ) )
 					{
 						throw( mooException( E_TYPE, "not allowed to read script" ) );
 					}

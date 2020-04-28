@@ -26,6 +26,18 @@ public:
 	static void luaNewRecurse( lua_State *L, int pIdx, QVariant &pVariant  );
 
 private:
+	typedef enum Fields
+	{
+		UNKNOWN,
+		NAME,
+		OWNER,
+		READ,
+		WRITE,
+		CHANGE,
+	} Fields;
+
+	static const QMap<QString,Fields>		mFieldMap;
+
 	static void initialise( void );
 
 	static void luaRegisterState( lua_State *L );

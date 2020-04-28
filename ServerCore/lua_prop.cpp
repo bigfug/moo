@@ -45,6 +45,18 @@ const luaL_Reg lua_prop::mLuaInstanceFunctions[] =
 	{ 0, 0 }
 };
 
+const QMap<QString,lua_prop::Fields> lua_prop::mFieldMap =
+{
+	{ "name", NAME },
+	{ "owner", OWNER },
+	{ "r", READ },
+	{ "w", WRITE },
+	{ "c", CHANGE },
+	{ "read", READ },
+	{ "write", WRITE },
+	{ "change", CHANGE },
+};
+
 void lua_prop::initialise()
 {
 	for( const luaL_Reg *FP = mLuaInstanceFunctions ; FP->name != 0 ; FP++ )
@@ -156,7 +168,7 @@ int lua_prop::luaGet( lua_State *L )
 			throw( mooException( E_TYPE, "invalid property" ) );
 		}
 
-		if( !Command->isOwner( P ) && !Command->isWizard() )
+		if( !Command->isWizardOrOwner( P ) )
 		{
 			throw mooException( E_PERM, "no access" );
 		}
@@ -172,39 +184,45 @@ int lua_prop::luaGet( lua_State *L )
 			return( 1 );
 		}
 
-		if( strcmp( s, "name" ) == 0 )
+		switch( mFieldMap.value( QString( s ) ) )
 		{
-			lua_pushstring( L, LP->mName->toLatin1() );
+			case NAME:
+				{
+					lua_pushstring( L, LP->mName->toLatin1() );
 
-			return( 1 );
-		}
+					return( 1 );
+				}
 
-		if( strcmp( s, "owner" ) == 0 )
-		{
-			lua_object::lua_pushobjectid( L, P->owner() );
+			case OWNER:
+				{
+					lua_object::lua_pushobjectid( L, P->owner() );
 
-			return( 1 );
-		}
+					return( 1 );
+				}
 
-		if( strcmp( s, "r" ) == 0 )
-		{
-			lua_pushboolean( L, P->read() );
+			case READ:
+				{
+					lua_pushboolean( L, P->read() );
 
-			return( 1 );
-		}
+					return( 1 );
+				}
 
-		if( strcmp( s, "w" ) == 0 )
-		{
-			lua_pushboolean( L, P->write() );
+			case WRITE:
+				{
+					lua_pushboolean( L, P->write() );
 
-			return( 1 );
-		}
+					return( 1 );
+				}
 
-		if( strcmp( s, "c" ) == 0 )
-		{
-			lua_pushboolean( L, P->change() );
+			case CHANGE:
+				{
+					lua_pushboolean( L, P->change() );
 
-			return( 1 );
+					return( 1 );
+				}
+
+			case UNKNOWN:
+				break;
 		}
 
 		// Look for function in mLuaMap
@@ -244,7 +262,7 @@ int lua_prop::luaSet( lua_State *L )
 	{
 		luaProp				*LP = arg( L );
 
-		if( LP == 0 )
+		if( !LP )
 		{
 			throw( mooException( E_PERM, "property is invalid" ) );
 		}
@@ -254,74 +272,74 @@ int lua_prop::luaSet( lua_State *L )
 			throw( mooException( E_ARGS, "property name is not a string" ) );
 		}
 
-		const Task			&T = Command->task();
-		Object				*Player = ObjectManager::instance()->object( T.player() );
-
 		Property			*P = LP->mProperty;
-		Object				*O = ObjectManager::o( LP->mObjectId );
 		const char			*N = lua_tostring( L, 2 );
-		const bool			 isOwner  = ( Player != 0 && O != 0 ? Player->id() == O->owner() : false );
-		const bool			 isWizard = ( Player != 0 ? Player->wizard() : false );
 
-		if( strcmp( N, "name" ) == 0 )
+		switch( mFieldMap.value( QString( N ) ) )
 		{
-			throw( mooException( E_PERM, "can't set property name" ) );
-		}
+			case NAME:
+				{
+					throw( mooException( E_PERM, "can't set property name" ) );
+				}
 
-		if( strcmp( N, "owner" ) == 0 )
-		{
-			if( !isWizard && !isOwner )
-			{
-				throw( mooException( E_PERM, "player is not owner or wizard" ) );
-			}
+			case OWNER:
+				{
+					if( !Command->isWizardOrOwner( P ) )
+					{
+						throw( mooException( E_PERM, "player is not owner or wizard" ) );
+					}
 
-			Object				*D = lua_object::argObj( L, 3 );
+					Object				*D = lua_object::argObj( L, 3 );
 
-			Command->changeAdd( new change::PropertySetOwner( P, D->id() ) );
+					Command->changeAdd( new change::PropertySetOwner( P, D->id() ) );
 
-			return( 0 );
-		}
+					return( 0 );
+				}
 
-		if( strcmp( N, "r" ) == 0 )
-		{
-			if( !isWizard && !isOwner )
-			{
-				throw( mooException( E_PERM, "player is not owner or wizard" ) );
-			}
+			case READ:
+				{
+					if( !Command->isWizardOrOwner( P ) )
+					{
+						throw( mooException( E_PERM, "player is not owner or wizard" ) );
+					}
 
-			bool		v = lua_toboolean( L, 3 );
+					bool		v = lua_toboolean( L, 3 );
 
-			Command->changeAdd( new change::PropertySetRead( P, v ) );
+					Command->changeAdd( new change::PropertySetRead( P, v ) );
 
-			return( 0 );
-		}
+					return( 0 );
+				}
 
-		if( strcmp( N, "w" ) == 0 )
-		{
-			if( !isWizard && !isOwner )
-			{
-				throw( mooException( E_PERM, "player is not owner or wizard" ) );
-			}
+			case WRITE:
+				{
+					if( !Command->isWizardOrOwner( P ) )
+					{
+						throw( mooException( E_PERM, "player is not owner or wizard" ) );
+					}
 
-			bool		v = lua_toboolean( L, 3 );
+					bool		v = lua_toboolean( L, 3 );
 
-			Command->changeAdd( new change::PropertySetWrite( P, v ) );
+					Command->changeAdd( new change::PropertySetWrite( P, v ) );
 
-			return( 0 );
-		}
+					return( 0 );
+				}
 
-		if( strcmp( N, "c" ) == 0 )
-		{
-			if( !isWizard && !isOwner )
-			{
-				throw( mooException( E_PERM, "player is not owner or wizard" ) );
-			}
+			case CHANGE:
+				{
+					if( !Command->isWizardOrOwner( P ) )
+					{
+						throw( mooException( E_PERM, "player is not owner or wizard" ) );
+					}
 
-			bool		v = lua_toboolean( L, 3 );
+					bool		v = lua_toboolean( L, 3 );
 
-			Command->changeAdd( new change::PropertySetChange( P, v ) );
+					Command->changeAdd( new change::PropertySetChange( P, v ) );
 
-			return( 0 );
+					return( 0 );
+				}
+
+			case UNKNOWN:
+				break;
 		}
 
 		throw( mooException( E_PROPNF, QString( "property '%1' is not defined" ).arg( N ) ) );

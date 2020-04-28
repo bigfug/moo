@@ -1236,6 +1236,16 @@ bool lua_task::isPermValid() const
 	return( ObjectManager::o( permissions() ) );
 }
 
+bool lua_task::isWizardOrOwner(ObjectId pObjectId) const
+{
+	return( isWizard() || isOwner( pObjectId ) );
+}
+
+bool lua_task::isWizardOrOwner( Property *P ) const
+{
+	return( isWizard() || isOwner( P ) );
+}
+
 bool lua_task::isOwner( Object *O ) const
 {
 	return( O ? isOwner( O->owner() ) : false );

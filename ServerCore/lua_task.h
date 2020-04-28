@@ -97,9 +97,13 @@ public:
 
 	bool isProgrammer( void ) const;
 
-	bool isOwner( ObjectId pObjectId ) const;
-
 	bool isPermValid( void ) const;
+
+	bool isWizardOrOwner( ObjectId pObjectId ) const;
+
+	bool isWizardOrOwner( Property *P ) const;
+
+	bool isOwner( ObjectId pObjectId ) const;
 
 	bool isOwner( Object *O ) const;
 
