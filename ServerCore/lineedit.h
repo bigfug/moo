@@ -30,13 +30,19 @@ signals:
 
 	void lineOutput( const QByteArray &pData );		// when user presses return
 
-private:
-	void processAnsiSequence( const QByteArray &pData, QByteArray &pTemp );
-	void processFunctionKey( int pAnsiCode, QByteArray &pTemp );
+protected:
+	void processCursorToStartOfLine( QByteArray &pOutput );
+	void processCursorToEndOfLine( QByteArray &pOutput );
 
-	void processCursorLeft( QByteArray &pTemp );
-	void processCursorRight( QByteArray &pTemp );
-	void processDelete( QByteArray &pBuffer );
+	void processAnsiSequence( const QByteArray &pData, QByteArray &pOutput );
+	void processFunctionKey( int pAnsiCode, QByteArray &pOutput );
+
+	void processCharacter( QChar ch, QByteArray &pOutput );
+
+	void processCursorLeft( QByteArray &pOutput );
+	void processCursorRight( QByteArray &pOutput );
+	void processDelete( QByteArray &pOutput );
+	void processBackspace( QByteArray &pOutput );
 
 	void write( const char *pData );
 	void write( const QString &pData );

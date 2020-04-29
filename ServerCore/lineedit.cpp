@@ -11,7 +11,7 @@ void LineEdit::dataInput( const QByteArray &pData )
 {
 	for( QChar ch : pData )
 	{
-		QByteArray	Tmp;
+		QByteArray	Output;
 
 		if( ch == '\n' || ch == '\r' )
 		{
@@ -45,7 +45,7 @@ void LineEdit::dataInput( const QByteArray &pData )
 			{
 				if( mSecretChar.isNull() )
 				{
-					processAnsiSequence( mAnsiSeq, Tmp );
+					processAnsiSequence( mAnsiSeq, Output );
 				}
 
 				mAnsiEsc = 0;
@@ -55,22 +55,28 @@ void LineEdit::dataInput( const QByteArray &pData )
 		{
 			switch( ch.toLatin1() )
 			{
-				case 0x08:	// BACKSPACE
-					if( mAnsiPos > 0 )
-					{
-						mLineBuffer.remove( --mAnsiPos, 1 );
+				case 0x01:	// Ctrl + A - Cursor to start of line
+					processCursorToStartOfLine( Output );
+					break;
 
-						if( mSecretChar.isNull() )  // echo() )
-						{
-							Tmp.append( "\x1b[D" );
-							Tmp.append( mLineBuffer.mid( mAnsiPos ) );
-							Tmp.append( QString( " \x1b[%1D" ).arg( mLineBuffer.size() + 1 - mAnsiPos ) );
-						}
-						else
-						{
-							Tmp.append( "\x1b[D \x1b[D" );
-						}
-					}
+				case 0x02:	// Ctrl + B - Cursor to the left
+					processCursorLeft( Output );
+					break;
+
+				case 0x04:	// Ctrl + D - Delete the character under the cursor
+					processDelete( Output );
+					break;
+
+				case 0x05:	// Ctrl + E - Cursor to end of line
+					processCursorToEndOfLine( Output );
+					break;
+
+				case 0x06:	// Ctrl + F - Cursor to the right
+					processCursorRight( Output );
+					break;
+
+				case 0x08:	// BACKSPACE
+					processBackspace( Output );
 					break;
 
 				case 0x09:
@@ -87,37 +93,21 @@ void LineEdit::dataInput( const QByteArray &pData )
 					break;
 
 				case 0x7f:	// DELETE
-					processDelete( Tmp );
+					processBackspace( Output );
 					break;
 
 				default:
 					if( ch >= 0x20 && ch < 0x7f )
 					{
-						mLineBuffer.insert( mAnsiPos++, ch );
-
-						if( true ) // echo() )
-						{
-							if( mAnsiPos < mLineBuffer.size() )
-							{
-								Tmp.append( mLineBuffer.mid( mAnsiPos - 1 ).append( QString( "\x1b[%1D" ).arg( mLineBuffer.size() - mAnsiPos ) ) );
-							}
-							else if( !mSecretChar.isNull() )
-							{
-								Tmp.append( mSecretChar );
-							}
-							else
-							{
-								Tmp.append( ch );
-							}
-						}
+						processCharacter( ch, Output );
 					}
 					break;
 			}
 		}
 
-		if( !Tmp.isEmpty() )
+		if( !Output.isEmpty() )
 		{
-			write( Tmp );
+			write( Output );
 		}
 	}
 }
@@ -158,7 +148,7 @@ void LineEdit::redraw()
 	write( A );
 }
 
-void LineEdit::processAnsiSequence( const QByteArray &pData, QByteArray &pTemp )
+void LineEdit::processAnsiSequence( const QByteArray &pData, QByteArray &pOutput )
 {
 	QByteArray	CodeData = pData.mid( 2, pData.size() - 3 );
 	quint8		CodeChar = pData.right( 1 ).at( 0 );
@@ -166,21 +156,21 @@ void LineEdit::processAnsiSequence( const QByteArray &pData, QByteArray &pTemp )
 	switch( CodeChar )
 	{
 		case 'C':	// CURSOR FORWARD
-			processCursorRight( pTemp );
+			processCursorRight( pOutput );
 			break;
 
 		case 'D':	// CURSOR BACK
-			processCursorLeft( pTemp );
+			processCursorLeft( pOutput );
 			break;
 
 		case '~':
-			processFunctionKey( CodeData.toInt(), pTemp );
+			processFunctionKey( CodeData.toInt(), pOutput );
 			break;
 
 	}
 }
 
-void LineEdit::processFunctionKey( int pAnsiCode, QByteArray &pTemp )
+void LineEdit::processFunctionKey( int pAnsiCode, QByteArray &pOutput )
 {
 	Qt::Key		K = Qt::Key_unknown;
 
@@ -188,34 +178,75 @@ void LineEdit::processFunctionKey( int pAnsiCode, QByteArray &pTemp )
 	{
 		case 1: K = Qt::Key_Home; break;
 		case 2: K = Qt::Key_Insert; break;
-		case 3: K = Qt::Key_Delete; processDelete( pTemp ); break;
+		case 3: K = Qt::Key_Delete; processDelete( pOutput ); break;
 		case 4: K = Qt::Key_End; break;
 		case 5: K = Qt::Key_PageUp; break;
 		case 6: K = Qt::Key_PageDown; break;
 	}
 }
 
-void LineEdit::processCursorLeft( QByteArray &pTemp )
+void LineEdit::processCharacter( QChar ch, QByteArray &pOutput )
+{
+	mLineBuffer.insert( mAnsiPos++, ch );
+
+	if( true ) // echo() )
+	{
+		if( mAnsiPos < mLineBuffer.size() )
+		{
+			pOutput.append( mLineBuffer.mid( mAnsiPos - 1 ).append( QString( "\x1b[%1D" ).arg( mLineBuffer.size() - mAnsiPos ) ) );
+		}
+		else if( !mSecretChar.isNull() )
+		{
+			pOutput.append( mSecretChar );
+		}
+		else
+		{
+			pOutput.append( ch );
+		}
+	}
+}
+
+void LineEdit::processCursorLeft( QByteArray &pOutput )
 {
 	if( mAnsiPos > 0 )
 	{
 		mAnsiPos--;
 
-		pTemp.append( "\x1b[D" );
+		pOutput.append( "\x1b[D" );
 	}
 }
 
-void LineEdit::processCursorRight( QByteArray &pTemp )
+void LineEdit::processCursorRight( QByteArray &pOutput )
 {
 	if( mAnsiPos < mLineBuffer.size() )
 	{
 		mAnsiPos++;
 
-		pTemp.append( "\x1b[C" );
+		pOutput.append( "\x1b[C" );
 	}
 }
 
-void LineEdit::processDelete( QByteArray &pTemp )
+void LineEdit::processCursorToStartOfLine( QByteArray &pOutput )
+{
+	if( mAnsiPos > 0 )
+	{
+		mAnsiPos = 0;
+
+		pOutput.append( QString( "\x1b[%1G" ).arg( 1 + mAnsiPos + mPrompt.length() ).toLatin1() );
+	}
+}
+
+void LineEdit::processCursorToEndOfLine( QByteArray &pOutput )
+{
+	if( mAnsiPos < mLineBuffer.size() )
+	{
+		mAnsiPos = mLineBuffer.size();
+
+		pOutput.append( QString( "\x1b[%1G" ).arg( 1 + mAnsiPos + mPrompt.length() ).toLatin1() );
+	}
+}
+
+void LineEdit::processDelete( QByteArray &pOutput )
 {
 	if( mAnsiPos < mLineBuffer.size() )
 	{
@@ -223,8 +254,27 @@ void LineEdit::processDelete( QByteArray &pTemp )
 
 		if( mSecretChar.isNull() ) //echo() )
 		{
-			pTemp.append( mLineBuffer.mid( mAnsiPos ) );
-			pTemp.append( QString( " \x1b[%1D" ).arg( mLineBuffer.size() + 1 - mAnsiPos ) );
+			pOutput.append( mLineBuffer.mid( mAnsiPos ) );
+			pOutput.append( QString( " \x1b[%1D" ).arg( mLineBuffer.size() + 1 - mAnsiPos ) );
+		}
+	}
+}
+
+void LineEdit::processBackspace( QByteArray &pOutput )
+{
+	if( mAnsiPos > 0 )
+	{
+		mLineBuffer.remove( --mAnsiPos, 1 );
+
+		if( mSecretChar.isNull() )  // echo() )
+		{
+			pOutput.append( "\x1b[D" );
+			pOutput.append( mLineBuffer.mid( mAnsiPos ) );
+			pOutput.append( QString( " \x1b[%1D" ).arg( mLineBuffer.size() + 1 - mAnsiPos ) );
+		}
+		else
+		{
+			pOutput.append( "\x1b[D \x1b[D" );
 		}
 	}
 }
