@@ -334,7 +334,7 @@ void TestLuaCallValues::luaCallValueInherit()
 
 	QCOMPARE( T.error(), false );
 
-	QCOMPARE( O1->propValue( "result" ).toString(), "23" );
+	QCOMPARE( O1->propValue( "result" ).toString(), QString( "23" ) );
 }
 
 QTEST_GUILESS_MAIN( TestLuaCallValues )
