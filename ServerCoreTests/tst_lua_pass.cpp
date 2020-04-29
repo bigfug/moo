@@ -240,7 +240,7 @@ void ServerTest::luaPass3( void )
 
 	QVERIFY( R2 );
 	QVERIFY( R2->type() == QVariant::Double );
-	QCOMPARE( R2->value().toInt(), 3.0 ); // The initial value of this in the called verb is the same as in the calling verb.
+	QCOMPARE( R2->value().toInt(), 3 ); // The initial value of this in the called verb is the same as in the calling verb.
 }
 
 // moo.pass() on two parents (where the verb is not defined on the 2nd child)
