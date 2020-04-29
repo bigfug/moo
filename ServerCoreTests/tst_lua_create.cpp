@@ -460,7 +460,7 @@ void ServerTest::luaCreate( void )
 
 			QVERIFY( O == 0 );
 
-			QCOMPARE( Programmer->prop( "ownership_quota" )->value().toDouble(), 0 );
+			QCOMPARE( Programmer->prop( "ownership_quota" )->value().toDouble(), 0.0 );
 		}
 
 		O->setParent( OBJECT_NONE );
