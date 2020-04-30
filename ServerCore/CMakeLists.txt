@@ -49,6 +49,8 @@ set( SOURCE_FILES
 
 	listeners/listenersockettcp.cpp
 	listeners/listenersocketwebsocket.cpp
+	listeners/listenerserverserial.cpp
+	listeners/listenerserialmodem.cpp
 	)
 
 set( HEADER_FILES
@@ -100,6 +102,8 @@ set( HEADER_FILES
 	listeners/listenersockettcp.h
 	listeners/listenerserverwebsocket.h
 	listeners/listenersocketwebsocket.h
+	listeners/listenerserverserial.h
+	listeners/listenerserialmodem.h
 
 	changeset/changeset.cpp
 	changeset/changeset.h

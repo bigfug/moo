@@ -25,6 +25,7 @@
 
 #include "listeners/listenerservertcp.h"
 #include "listeners/listenerserverwebsocket.h"
+#include "listeners/listenerserverserial.h"
 
 #define Q(x) #x
 #define QUOTE(x) Q(x)
@@ -150,29 +151,41 @@ bool MooApplication::initialiseApp()
 	{
 		Settings.beginGroup( G );
 
-		int			Port     = Settings.value( "port" ).toInt();
 		int			ObjectId = Settings.value( "object", 0 ).toInt();
 		QString		Type     = Settings.value( "type" ).toString();
-
-		if( Port < 0 || Port > 65535 )
-		{
-			qFatal( "Port must be in the range 0-65535" );
-		}
-
-		if( Port < 1024 )
-		{
-			qWarning() << "Port" << Port << "is in the 'well known' range of TCP/IP ports (0-1023)";
-		}
+		QVariant	PortVariant = Settings.value( "port" );
 
 		ListenerServer		*Server = Q_NULLPTR;
 
-		if( Type == "tcp" )
+		if( Type == "serial" )
 		{
-			Server = new ListenerServerTCP( ObjectId, Port );
+			QString		Port = PortVariant.toString();
+			int			Baud = Settings.value( "baud", 38400 ).toInt();
+
+			Server = new ListenerServerSerial( ObjectId, Port, Baud );
 		}
-		else if( Type == "websocket" )
+		else
 		{
-			Server = new ListenerServerWebSocket( ObjectId, Port );
+			int			Port = PortVariant.toInt();
+
+			if( Port < 0 || Port > 65535 )
+			{
+				qFatal( "Port must be in the range 0-65535" );
+			}
+
+			if( Port < 1024 )
+			{
+				qWarning() << "Port" << Port << "is in the 'well known' range of TCP/IP ports (0-1023)";
+			}
+
+			if( Type == "tcp" )
+			{
+				Server = new ListenerServerTCP( ObjectId, Port );
+			}
+			else if( Type == "websocket" )
+			{
+				Server = new ListenerServerWebSocket( ObjectId, Port );
+			}
 		}
 
 		if( !Server )
@@ -187,7 +200,7 @@ bool MooApplication::initialiseApp()
 			CM->doConnect( ObjectId );
 		}
 
-		qInfo() << "ArtMOO listening for" << Type << "connections on port" << Port;
+		qInfo() << "ArtMOO listening for" << Type << "connections on port" << PortVariant.toString();
 
 		Settings.endGroup();
 	}
