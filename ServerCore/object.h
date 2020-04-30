@@ -191,10 +191,14 @@ public:
 		return( mData.mId );
 	}
 
+	/// returns the name of the object
+
 	inline const QString &name( void ) const
 	{
 		return( mData.mName );
 	}
+
+	/// returns true if this object represents a player (has the player bit set)
 
 	inline bool player( void ) const
 	{
