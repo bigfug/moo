@@ -472,38 +472,6 @@ void bindVerb( const VerbData &D, QSqlQuery &Q )
 	Q.bindValue( ":aliases", D.mAliases.join( ',' ) );
 }
 
-void objectsToStrings( QVariantMap &PrpDat )
-{
-	for( QVariantMap::iterator it = PrpDat.begin() ; it != PrpDat.end() ; it++ )
-	{
-		if( it.value().canConvert<lua_object::luaHandle>() )
-		{
-			lua_object::luaHandle	LH = it.value().value<lua_object::luaHandle>();
-
-			it.value() = QString( "#%1" ).arg( LH.O );
-		}
-		else if( QMetaType::Type( it.value().type() ) == QMetaType::QString )
-		{
-			QString					ST = it.value().toString();
-
-			if( ST.startsWith( '#' ) )
-			{
-				ST.prepend( '#' );
-
-				it.value() = ST;
-			}
-		}
-		else if( QMetaType::Type( it.value().type() ) == QMetaType::QVariantMap )
-		{
-			QVariantMap		VM = it.value().toMap();
-
-			objectsToStrings( VM );
-
-			it.value() = VM;
-		}
-	}
-}
-
 void bindProperty( const PropertyData &D, QSqlQuery &Q )
 {
 	Q.bindValue( ":name", D.mName );
@@ -570,7 +538,7 @@ void bindProperty( const PropertyData &D, QSqlQuery &Q )
 
 					QVariantMap		PrpDat = D.mValue.toMap();
 
-					objectsToStrings( PrpDat );
+					lua_util::objectsToStrings( PrpDat );
 
 					QJsonDocument	Json = QJsonDocument::fromVariant( PrpDat );
 
