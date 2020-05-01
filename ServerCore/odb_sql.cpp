@@ -516,23 +516,6 @@ void bindProperty( const PropertyData &D, QSqlQuery &Q )
 				break;
 
 			default:
-#if 0
-				{
-					QByteArray		Buffer;
-
-					{
-						QBuffer		WriteBuffer( &Buffer );
-
-						WriteBuffer.open( QIODevice::WriteOnly );
-
-						QDataStream	WriteStream( &WriteBuffer );
-
-						WriteStream << D.mValue;
-					}
-
-					Q.bindValue( ":value", Buffer.toBase64() );
-				}
-#else
 				{
 					Q.bindValue( ":type", "json" );
 
@@ -546,7 +529,6 @@ void bindProperty( const PropertyData &D, QSqlQuery &Q )
 
 					qDebug() << Json.toJson( QJsonDocument::Compact );
 				}
-#endif
 				break;
 		}
 	}
@@ -1394,7 +1376,7 @@ void ODBSQL::queryToPropertyData( const QSqlQuery &Q, PropertyData &PD )
 
 		PD.mValue = JSON.toVariant();
 
-		if( QMetaType::Type( PD.mValue.type() ) == QMetaType::QVariantMap )
+		if( PD.mValue.type() == QVariant::Map )
 		{
 			QVariantMap		VM = PD.mValue.toMap();
 
