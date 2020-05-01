@@ -297,42 +297,6 @@ void ODBSQL::save()
 //	}
 }
 
-void stringsToObjects( QVariantMap &PrpDat )
-{
-	for( QVariantMap::iterator it = PrpDat.begin() ; it != PrpDat.end() ; it++ )
-	{
-		if( QMetaType::Type( it.value().type() ) == QMetaType::QString )
-		{
-			QString					ST = it.value().toString();
-
-			if( ST.startsWith( "##" ) )
-			{
-				ST.remove( 0, 1 );
-
-				it.value() = ST;
-			}
-			else if( ST.startsWith( '#' ) )
-			{
-				ST.remove( 0, 1 );
-
-				lua_object::luaHandle	LH;
-
-				LH.O = ST.toInt();
-
-				it.value() = QVariant::fromValue( LH );
-			}
-		}
-		else if( QMetaType::Type( it.value().type() ) == QMetaType::QVariantMap )
-		{
-			QVariantMap		VM = it.value().toMap();
-
-			stringsToObjects( VM );
-
-			it.value() = VM;
-		}
-	}
-}
-
 Object *ODBSQL::object( ObjectId pIndex ) const
 {
 	QSqlQuery	Q;
@@ -1466,7 +1430,7 @@ void ODBSQL::queryToPropertyData( const QSqlQuery &Q, PropertyData &PD )
 		{
 			QVariantMap		VM = PD.mValue.toMap();
 
-			stringsToObjects( VM );
+			lua_util::stringsToObjects( VM );
 
 			PD.mValue = VM;
 		}

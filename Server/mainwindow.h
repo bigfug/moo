@@ -35,10 +35,6 @@ private:
 
 	Property *currentProperty( void );
 
-	static void objectsToStrings( QVariantMap &PrpDat );
-
-	static void stringsToObjects( QVariantMap &PrpDat );
-
 	bool isEditingObject( void ) const;
 	bool isEditingVerb( void ) const;
 	bool isEditingProperty( void ) const;

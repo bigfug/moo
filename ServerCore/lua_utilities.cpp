@@ -113,3 +113,84 @@ int luaL_pushvariant( lua_State *L, const QVariant &pV )
 	return( 1 );
 }
 
+
+QVariant lua_util::stringToObject( QVariant V )
+{
+	if( V.type() != QVariant::String )
+	{
+		return( V );
+	}
+
+	QString					ST = V.toString();
+
+	if( ST.startsWith( "##" ) )
+	{
+		ST.remove( 0, 1 );
+
+		return( ST );
+	}
+
+	if( ST.startsWith( '#' ) )
+	{
+		ST.remove( 0, 1 );
+
+		lua_object::luaHandle	LH;
+
+		LH.O = ST.toInt();
+
+		return( QVariant::fromValue( LH ) );
+	}
+
+	return( V );
+}
+
+void lua_util::stringsToObjects( QVariantMap &PrpDat )
+{
+	for( QVariantMap::iterator it = PrpDat.begin() ; it != PrpDat.end() ; it++ )
+	{
+		if( it.value().type() == QVariant::String )
+		{
+			it.value() = stringToObject( it.value() );
+		}
+		else if( it.value().type() == QVariant::Map )
+		{
+			QVariantMap		VM = it.value().toMap();
+
+			stringsToObjects( VM );
+
+			it.value() = VM;
+		}
+	}
+}
+
+void lua_util::objectsToStrings( QVariantMap &PrpDat )
+{
+	for( QVariantMap::iterator it = PrpDat.begin() ; it != PrpDat.end() ; it++ )
+	{
+		if( it.value().canConvert<lua_object::luaHandle>() )
+		{
+			lua_object::luaHandle	LH = it.value().value<lua_object::luaHandle>();
+
+			it.value() = QString( "#%1" ).arg( LH.O );
+		}
+		else if( it.value().type() == QVariant::String )
+		{
+			QString					ST = it.value().toString();
+
+			if( ST.startsWith( '#' ) )
+			{
+				ST.prepend( '#' );
+
+				it.value() = ST;
+			}
+		}
+		else if( it.value().type() == QVariant::Map )
+		{
+			QVariantMap		VM = it.value().toMap();
+
+			objectsToStrings( VM );
+
+			it.value() = VM;
+		}
+	}
+}
