@@ -198,74 +198,6 @@ Property *MainWindow::currentProperty()
 	return( FP );
 }
 
-void MainWindow::objectsToStrings( QVariantMap &PrpDat )
-{
-	for( QVariantMap::iterator it = PrpDat.begin() ; it != PrpDat.end() ; it++ )
-	{
-		if( it.value().canConvert<lua_object::luaHandle>() )
-		{
-			lua_object::luaHandle	LH = it.value().value<lua_object::luaHandle>();
-
-			it.value() = QString( "#%1" ).arg( LH.O );
-		}
-		else if( QMetaType::Type( it.value().type() ) == QMetaType::QString )
-		{
-			QString					ST = it.value().toString();
-
-			if( ST.startsWith( '#' ) )
-			{
-				ST.prepend( '#' );
-
-				it.value() = ST;
-			}
-		}
-		else if( QMetaType::Type( it.value().type() ) == QMetaType::QVariantMap )
-		{
-			QVariantMap		VM = it.value().toMap();
-
-			objectsToStrings( VM );
-
-			it.value() = VM;
-		}
-	}
-}
-
-void MainWindow::stringsToObjects( QVariantMap &PrpDat )
-{
-	for( QVariantMap::iterator it = PrpDat.begin() ; it != PrpDat.end() ; it++ )
-	{
-		if( QMetaType::Type( it.value().type() ) == QMetaType::QString )
-		{
-			QString					ST = it.value().toString();
-
-			if( ST.startsWith( "##" ) )
-			{
-				ST.remove( 0, 1 );
-
-				it.value() = ST;
-			}
-			else if( ST.startsWith( '#' ) )
-			{
-				ST.remove( 0, 1 );
-
-				lua_object::luaHandle	LH;
-
-				LH.O = ST.toInt();
-
-				it.value() = QVariant::fromValue( LH );
-			}
-		}
-		else if( QMetaType::Type( it.value().type() ) == QMetaType::QVariantMap )
-		{
-			QVariantMap		VM = it.value().toMap();
-
-			stringsToObjects( VM );
-
-			it.value() = VM;
-		}
-	}
-}
-
 bool MainWindow::isEditingObject() const
 {
 	return(	ui->mEditorStack->currentIndex() == 0 );
@@ -609,7 +541,7 @@ void MainWindow::on_mButtonEditorUpdate_clicked()
 							{
 								QVariantMap		VM = V.toMap();
 
-								stringsToObjects( VM );
+								lua_util::stringsToObjects( VM );
 
 								O->propSet( P->name(), VM );
 							}
@@ -799,7 +731,7 @@ void MainWindow::on_mTypeMap_clicked()
 			{
 				VM = V.toMap();
 
-				stringsToObjects( VM );
+				lua_util::stringsToObjects( VM );
 			}
 		}
 		else
@@ -993,7 +925,7 @@ void MainWindow::updateProperty( void )
 					{
 						QVariantMap		PrpDat = P->value().toMap();
 
-						objectsToStrings( PrpDat );
+						lua_util::objectsToStrings( PrpDat );
 
 						QJsonDocument	Json = QJsonDocument::fromVariant( PrpDat );
 

@@ -297,42 +297,6 @@ void ODBSQL::save()
 //	}
 }
 
-void stringsToObjects( QVariantMap &PrpDat )
-{
-	for( QVariantMap::iterator it = PrpDat.begin() ; it != PrpDat.end() ; it++ )
-	{
-		if( QMetaType::Type( it.value().type() ) == QMetaType::QString )
-		{
-			QString					ST = it.value().toString();
-
-			if( ST.startsWith( "##" ) )
-			{
-				ST.remove( 0, 1 );
-
-				it.value() = ST;
-			}
-			else if( ST.startsWith( '#' ) )
-			{
-				ST.remove( 0, 1 );
-
-				lua_object::luaHandle	LH;
-
-				LH.O = ST.toInt();
-
-				it.value() = QVariant::fromValue( LH );
-			}
-		}
-		else if( QMetaType::Type( it.value().type() ) == QMetaType::QVariantMap )
-		{
-			QVariantMap		VM = it.value().toMap();
-
-			stringsToObjects( VM );
-
-			it.value() = VM;
-		}
-	}
-}
-
 Object *ODBSQL::object( ObjectId pIndex ) const
 {
 	QSqlQuery	Q;
@@ -508,38 +472,6 @@ void bindVerb( const VerbData &D, QSqlQuery &Q )
 	Q.bindValue( ":aliases", D.mAliases.join( ',' ) );
 }
 
-void objectsToStrings( QVariantMap &PrpDat )
-{
-	for( QVariantMap::iterator it = PrpDat.begin() ; it != PrpDat.end() ; it++ )
-	{
-		if( it.value().canConvert<lua_object::luaHandle>() )
-		{
-			lua_object::luaHandle	LH = it.value().value<lua_object::luaHandle>();
-
-			it.value() = QString( "#%1" ).arg( LH.O );
-		}
-		else if( QMetaType::Type( it.value().type() ) == QMetaType::QString )
-		{
-			QString					ST = it.value().toString();
-
-			if( ST.startsWith( '#' ) )
-			{
-				ST.prepend( '#' );
-
-				it.value() = ST;
-			}
-		}
-		else if( QMetaType::Type( it.value().type() ) == QMetaType::QVariantMap )
-		{
-			QVariantMap		VM = it.value().toMap();
-
-			objectsToStrings( VM );
-
-			it.value() = VM;
-		}
-	}
-}
-
 void bindProperty( const PropertyData &D, QSqlQuery &Q )
 {
 	Q.bindValue( ":name", D.mName );
@@ -584,29 +516,12 @@ void bindProperty( const PropertyData &D, QSqlQuery &Q )
 				break;
 
 			default:
-#if 0
-				{
-					QByteArray		Buffer;
-
-					{
-						QBuffer		WriteBuffer( &Buffer );
-
-						WriteBuffer.open( QIODevice::WriteOnly );
-
-						QDataStream	WriteStream( &WriteBuffer );
-
-						WriteStream << D.mValue;
-					}
-
-					Q.bindValue( ":value", Buffer.toBase64() );
-				}
-#else
 				{
 					Q.bindValue( ":type", "json" );
 
 					QVariantMap		PrpDat = D.mValue.toMap();
 
-					objectsToStrings( PrpDat );
+					lua_util::objectsToStrings( PrpDat );
 
 					QJsonDocument	Json = QJsonDocument::fromVariant( PrpDat );
 
@@ -614,7 +529,6 @@ void bindProperty( const PropertyData &D, QSqlQuery &Q )
 
 					qDebug() << Json.toJson( QJsonDocument::Compact );
 				}
-#endif
 				break;
 		}
 	}
@@ -1462,11 +1376,11 @@ void ODBSQL::queryToPropertyData( const QSqlQuery &Q, PropertyData &PD )
 
 		PD.mValue = JSON.toVariant();
 
-		if( QMetaType::Type( PD.mValue.type() ) == QMetaType::QVariantMap )
+		if( PD.mValue.type() == QVariant::Map )
 		{
 			QVariantMap		VM = PD.mValue.toMap();
 
-			stringsToObjects( VM );
+			lua_util::stringsToObjects( VM );
 
 			PD.mValue = VM;
 		}

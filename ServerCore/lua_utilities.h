@@ -23,6 +23,12 @@ extern int luaL_pushvariant( lua_State *L, const QVariant &pV );
 class lua_util
 {
 public:
+	static QVariant stringToObject( QVariant V );
+
+	static void stringsToObjects( QVariantMap &PrpDat );
+
+	static void objectsToStrings( QVariantMap &PrpDat );
+
 };
 
 #endif // LUA_UTILITIES_H
