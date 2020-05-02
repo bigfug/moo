@@ -882,7 +882,7 @@ int lua_moo::luaDebug( lua_State *L )
 		{
 			if( lua_isstring( L, i ) )
 			{
-				std::cout << lua_tostring( L, i ) << std::endl;
+				qDebug() << QString::fromLatin1( lua_tostring( L, i ) );
 			}
 		}
 	}
