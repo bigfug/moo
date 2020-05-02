@@ -31,6 +31,7 @@ public:
 private:
 	Connection		*mConnection;
 	LineEdit		 mLineEdit;
+	QStringList		 mCommandHistory;
 };
 
 #endif // INPUTSINKCOMMAND_H

@@ -5,8 +5,32 @@
 InputSinkCommand::InputSinkCommand( Connection *C )
 	: mConnection( C )
 {
+	connect( &mLineEdit, &LineEdit::commandHistoryLookup, [=]( int pIndex )
+	{
+		mLineEdit.setCommandHistoryEntry( mCommandHistory.at( pIndex ).toUtf8() );
+	} );
+
 	connect( &mLineEdit, &LineEdit::lineOutput, [=]( const QByteArray &pLine )
 	{
+		if( !mCommandHistory.isEmpty() )
+		{
+			if( pLine != mCommandHistory.last() )
+			{
+				mCommandHistory << pLine;
+			}
+		}
+		else
+		{
+			mCommandHistory << pLine;
+		}
+
+		while( mCommandHistory.size() > 50 )
+		{
+			mCommandHistory.takeFirst();
+		}
+
+		mLineEdit.setCommandHistoryCount( mCommandHistory.size() );
+
 		mConnection->write( "\r\n" );
 
 		mConnection->performTask( pLine );

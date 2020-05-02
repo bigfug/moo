@@ -2,7 +2,7 @@
 
 LineEdit::LineEdit( QObject *pParent )
 	: QObject( pParent ), mLastChar( 0 ), mEditLinePosition( 10 ), mTerminalWidth( 80 ), mSecretChar( 0 ),
-	  mAnsiEsc( 0 ), mAnsiPos( 0 )
+	  mCommandHistoryCount( 0 ), mAnsiEsc( 0 ), mAnsiPos( 0 )
 {
 	mPrompt = "> ";
 }
@@ -20,6 +20,8 @@ void LineEdit::dataInput( const QByteArray &pData )
 			mLineBuffer.clear();
 
 			mAnsiPos = 0;
+
+			mCommandHistoryPosition = mCommandHistoryCount;
 		}
 		else if( mAnsiEsc == 1 )
 		{
@@ -79,11 +81,15 @@ void LineEdit::dataInput( const QByteArray &pData )
 					processBackspace( Output );
 					break;
 
-				case 0x09:
+				case 0x09:	// TAB
 					break;
 
-				case 0x0e:	// SHIFT OUT
-				case 0x0f:	// SHIFT IN
+				case 0x0e:	// Ctrl + N - Cursor down
+					processCursorDown( Output );
+					break;
+
+				case 0x10:	// Ctrl + P - Cursor up
+					processCursorUp( Output );
 					break;
 
 				case 0x1b:	// ESCAPE
@@ -148,6 +154,11 @@ void LineEdit::redraw()
 	write( A );
 }
 
+void LineEdit::setCommandHistoryEntry( const QByteArray &pData )
+{
+	mCommandHistoryEntry = pData;
+}
+
 void LineEdit::processAnsiSequence( const QByteArray &pData, QByteArray &pOutput )
 {
 	QByteArray	CodeData = pData.mid( 2, pData.size() - 3 );
@@ -155,6 +166,14 @@ void LineEdit::processAnsiSequence( const QByteArray &pData, QByteArray &pOutput
 
 	switch( CodeChar )
 	{
+		case 'A':	// CURSOR UP
+			processCursorUp( pOutput );
+			break;
+
+		case 'B':	// CURSOR DOWN
+			processCursorDown( pOutput );
+			break;
+
 		case 'C':	// CURSOR FORWARD
 			processCursorRight( pOutput );
 			break;
@@ -202,6 +221,68 @@ void LineEdit::processCharacter( QChar ch, QByteArray &pOutput )
 		else
 		{
 			pOutput.append( ch );
+		}
+	}
+}
+
+void LineEdit::processCursorUp( QByteArray &pOutput )
+{
+	if( mCommandHistoryPosition > 0 )
+	{
+		// store current line
+
+		if( mCommandHistoryPosition == mCommandHistoryCount )
+		{
+			mCommandHistoryLineBuffer = mLineBuffer;
+		}
+
+		emit commandHistoryLookup( --mCommandHistoryPosition );
+
+		if( !mCommandHistoryEntry.isEmpty() )
+		{
+			mLineBuffer = mCommandHistoryEntry;
+
+			mAnsiPos = mLineBuffer.size();
+
+			pOutput.append( "\r\x1b[K" );
+
+			pOutput.append( mPrompt );
+			pOutput.append( mLineBuffer );
+
+			pOutput.append( QString( "\x1b[%1G" ).arg( 1 + mAnsiPos + mPrompt.length() ).toLatin1() );
+		}
+	}
+}
+
+void LineEdit::processCursorDown( QByteArray &pOutput )
+{
+	if( mCommandHistoryPosition < mCommandHistoryCount )
+	{
+		mCommandHistoryPosition++;
+
+		if( mCommandHistoryPosition == mCommandHistoryCount )
+		{
+			// restore current line
+
+			mCommandHistoryEntry = mCommandHistoryLineBuffer;
+		}
+		else
+		{
+			emit commandHistoryLookup( mCommandHistoryPosition );
+		}
+
+		if( !mCommandHistoryEntry.isEmpty() )
+		{
+			mLineBuffer = mCommandHistoryEntry;
+
+			mAnsiPos = mLineBuffer.size();
+
+			pOutput.append( "\r\x1b[K" );
+
+			pOutput.append( mPrompt );
+			pOutput.append( mLineBuffer );
+
+			pOutput.append( QString( "\x1b[%1G" ).arg( 1 + mAnsiPos + mPrompt.length() ).toLatin1() );
 		}
 	}
 }

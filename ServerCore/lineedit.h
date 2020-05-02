@@ -25,10 +25,19 @@ public slots:
 		mSecretChar = c;
 	}
 
+	void setCommandHistoryCount( int pCount )
+	{
+		mCommandHistoryCount = pCount;
+	}
+
+	void setCommandHistoryEntry( const QByteArray &pData );
+
 signals:
 	void dataOutput( const QByteArray &pData );		// characters to send to user
 
 	void lineOutput( const QByteArray &pData );		// when user presses return
+
+	void commandHistoryLookup( int pIndex );
 
 protected:
 	void processCursorToStartOfLine( QByteArray &pOutput );
@@ -38,6 +47,9 @@ protected:
 	void processFunctionKey( int pAnsiCode, QByteArray &pOutput );
 
 	void processCharacter( QChar ch, QByteArray &pOutput );
+
+	void processCursorUp( QByteArray &pOutput );
+	void processCursorDown( QByteArray &pOutput );
 
 	void processCursorLeft( QByteArray &pOutput );
 	void processCursorRight( QByteArray &pOutput );
@@ -55,6 +67,10 @@ private:
 	int				 mTerminalWidth;
 	QChar			 mSecretChar;
 	QByteArray		 mPrompt;
+	int				 mCommandHistoryCount;
+	int				 mCommandHistoryPosition;
+	QByteArray		 mCommandHistoryEntry;
+	QByteArray		 mCommandHistoryLineBuffer;
 
 	int				 mAnsiEsc;
 	QByteArray		 mAnsiSeq;
