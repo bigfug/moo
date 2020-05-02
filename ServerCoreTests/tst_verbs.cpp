@@ -141,7 +141,7 @@ void ServerTest::verbArgs( void )
 	QVERIFY( V.matchArgs( OBJECT_NONE, OBJECT_NONE, "", OBJECT_NONE ) );
 	QVERIFY( V.matchArgs( OBJECT_NONE, OBJECT_NONE, "burble", OBJECT_NONE ) );
 
-	V.setPrepositionArgument( "burble/bumflick/doodah" );
+	V.setPrepositionArgument( "burble,bumflick,doodah" );
 
 	QVERIFY( !V.matchArgs( OBJECT_NONE, OBJECT_NONE, "", OBJECT_NONE ) );
 	QVERIFY( V.matchArgs( OBJECT_NONE, OBJECT_NONE, "burble", OBJECT_NONE ) );

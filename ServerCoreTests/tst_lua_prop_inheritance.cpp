@@ -17,7 +17,7 @@ void ServerTest::luaPropInheritance_data()
 	QTest::addColumn<bool>( "pChange" );
 	QTest::addColumn<ObjectId>( "pOwnerId" );
 
-	QTest::newRow( "change" )	<< true  << 6;
+	QTest::newRow( "change" )	<< true  << OBJECT_SYSTEM;
 	QTest::newRow( "!change" )	<< false << 3;
 }
 
@@ -34,7 +34,7 @@ void ServerTest::luaPropInheritance( void )
 
 	O1->setOwner( TD.programmerId() );
 	O2->setOwner( TD.programmerId() );
-	O3->setOwner( TD.programmerId() );
+	O3->setOwner( OBJECT_SYSTEM );
 
 	O2->setParent( O1->id() );
 	O3->setParent( O2->id() );
@@ -94,7 +94,7 @@ void ServerTest::luaPropInheritance( void )
 
 	if( true )
 	{
-		TD.process( QString( "o( %1 ):propclr( 'test' )" ).arg( O3->id() ) );
+		TD.process( QString( "o( %1 ):propclr( 'test' )" ).arg( O3->id() ), OBJECT_SYSTEM );	// called as system
 
 		Property	*P = O3->prop( "test" );
 
