@@ -61,7 +61,7 @@ ObjectId ObjectLogic::create( lua_task &pTask, ObjectId pUserId, ObjectId pParen
 
 	if( pOwnerId != OBJECT_NONE && pOwnerId != OBJECT_UNSPECIFIED && pUserId != pOwnerId && !UserIsWizard )
 	{
-		throw( mooException( E_PERM, "" ) );
+		throw( mooException( E_PERM, "permissions is not owner or wizard" ) );
 	}
 
 	// The owner of the new object is either the programmer (if owner is not provided)
@@ -507,9 +507,9 @@ void ObjectLogic::move( lua_task &pTask, ObjectId pUserId, ObjectId pObjectId, O
 	//   (denoting a location of `nowhere')
 	// otherwise E_INVARG is raised.
 
-	if( pWhereId != -1 && !WhereIsValid )
+	if( pWhereId != OBJECT_NONE && !WhereIsValid )
 	{
-		throw( mooException( E_INVARG, "where should be either a valid object or #-1" ) );
+		throw( mooException( E_INVARG, "where should be either a valid object or O_NONE" ) );
 	}
 
 	// The programmer must be either the owner of what or a wizard;
@@ -556,13 +556,16 @@ void ObjectLogic::move( lua_task &pTask, ObjectId pUserId, ObjectId pObjectId, O
 	// containment hierarchy (i.e., what would contain itself,
 	// even indirectly), then E_RECMOVE is raised instead.
 
-	QList<ObjectId>		ObjDsc;
-
-	objObject->descendants( ObjDsc );
-
-	if( ObjDsc.contains( pWhereId ) )
+	if( pWhereId != OBJECT_NONE )
 	{
-		throw( mooException( E_RECMOVE, "moving what into where would create a loop" ) );
+		QList<ObjectId>		ObjDsc;
+
+		objObject->descendants( ObjDsc );
+
+		if( ObjDsc.contains( pWhereId ) )
+		{
+			throw( mooException( E_RECMOVE, "moving what into where would create a loop" ) );
+		}
 	}
 
 	// The `location' property of what is changed to be where,
