@@ -500,7 +500,7 @@ void ObjectLogic::move( lua_task &pTask, ObjectId pUserId, ObjectId pObjectId, O
 
 	if( !ObjectIsValid )
 	{
-		throw( mooException( E_INVARG, "what is not a valid object" ) );
+		throw( mooException( E_INVARG, "move: what is not a valid object" ) );
 	}
 
 	// where should be either a valid object or #-1
@@ -509,7 +509,7 @@ void ObjectLogic::move( lua_task &pTask, ObjectId pUserId, ObjectId pObjectId, O
 
 	if( pWhereId != OBJECT_NONE && !WhereIsValid )
 	{
-		throw( mooException( E_INVARG, "where should be either a valid object or O_NONE" ) );
+		throw( mooException( E_INVARG, "move: where should be either a valid object or O_NONE" ) );
 	}
 
 	// The programmer must be either the owner of what or a wizard;
@@ -517,7 +517,7 @@ void ObjectLogic::move( lua_task &pTask, ObjectId pUserId, ObjectId pObjectId, O
 
 	if( !UserOwnsObject && !UserIsWizard )
 	{
-		throw( mooException( E_PERM, "The programmer must be either the owner of what or a wizard" ) );
+		throw( mooException( E_PERM, "move: The programmer must be either the owner of what or a wizard" ) );
 	}
 
 	// If where is a valid object, then the verb-call
@@ -536,7 +536,7 @@ void ObjectLogic::move( lua_task &pTask, ObjectId pUserId, ObjectId pObjectId, O
 	{
 		if( !objWhere->verbFind( "accept", &FndVrb, &FndObj ) )
 		{
-			throw( mooException( E_NACC, "where doesn't have an accept verb" ) );
+			throw( mooException( E_NACC, "move: where doesn't have an accept verb" ) );
 		}
 
 		lua_object::lua_pushobject( L, objObject );
@@ -548,7 +548,7 @@ void ObjectLogic::move( lua_task &pTask, ObjectId pUserId, ObjectId pObjectId, O
 
 		if( !Accepted )
 		{
-			throw( mooException( E_NACC, "where would not accept object" ) );
+			throw( mooException( E_NACC, "move: where would not accept object" ) );
 		}
 	}
 
@@ -564,7 +564,7 @@ void ObjectLogic::move( lua_task &pTask, ObjectId pUserId, ObjectId pObjectId, O
 
 		if( ObjDsc.contains( pWhereId ) )
 		{
-			throw( mooException( E_RECMOVE, "moving what into where would create a loop" ) );
+			throw( mooException( E_RECMOVE, "move: moving what into where would create a loop" ) );
 		}
 	}
 
