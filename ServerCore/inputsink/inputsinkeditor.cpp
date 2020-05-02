@@ -36,9 +36,7 @@ bool InputSinkEditor::input( const QString &pData )
 
 void InputSinkEditor::editorOutput( const QString &pData )
 {
-	//qDebug() << "InputSinkEditor::output" << pData;
-
-	mConnection->notify( pData );
+	mConnection->write( pData );
 }
 
 void InputSinkEditor::test()

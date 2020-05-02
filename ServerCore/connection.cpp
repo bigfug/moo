@@ -133,10 +133,7 @@ void Connection::notify( const QString &pText )
 		}
 	}
 
-	if( mLineMode == EDIT )
-	{
-		addToLineBuffer( pText );
-	}
+	addToLineBuffer( pText );
 
 	if( PrintText )
 	{
@@ -210,14 +207,13 @@ void Connection::redrawBuffer()
 
 	for( int y = mTerminalWindow.top() ; y < mTerminalWindow.bottom() ; y++ )
 	{
-		write( QString( "\x1b[%1;%2H" ).arg( y + 1 ).arg( mTerminalWindow.left() + 1 ) );
-
 		if( mLineBuffer.size() <= y )
 		{
 			break;
 		}
 
 		write( mLineBuffer.at( y ) );
+		write( "\r\n" );
 	}
 }
 
@@ -238,16 +234,7 @@ void Connection::setLineMode( Connection::LineMode pLineMode )
 
 void Connection::addToLineBuffer( const QString &pText )
 {
-	int			i = 0;
-
-	while( i < pText.length() )
-	{
-		int		j = std::min( pText.length(), mTerminalWindow.width() );
-
-		mLineBuffer << pText.mid( i, j );
-
-		i += j;
-	}
+	mLineBuffer << pText;
 
 	while( mLineBuffer.size() > mTerminalSize.height() )
 	{
