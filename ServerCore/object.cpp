@@ -352,9 +352,14 @@ void Object::propSet( const QString &pName, const QVariant &pValue )
 		C.setParent( C.object() );
 		C.setObject( id() );
 
+		// If the `c' permissions bit is set, then the owner of the property
+		// on the new object is the same as the owner of the new object itself;
+		// otherwise, the owner of the property on the new object is the same
+		// as that on parent.
+
 		if( P->change() )
 		{
-			C.setOwner( id() );
+			C.setOwner( owner() );
 		}
 
 		if( C.value() != pValue )
