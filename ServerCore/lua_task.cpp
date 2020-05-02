@@ -350,9 +350,15 @@ int lua_task::luaSetPermissions( lua_State *L )
 			throw mooException( E_ARGS, "invalid object" );
 		}
 
-		if( Command->permissions() != O->id() && !Command->isWizard() )
+		if( !Command->isWizard() )
 		{
-			throw mooException( E_PERM, "can't set permissions" );
+			if( Command->permissions() != O->id() )
+			{
+				if( O->id() != Command->task().player() )
+				{
+					throw mooException( E_PERM, "can't set permissions" );
+				}
+			}
 		}
 
 		Command->setPermissions( O->id() );
