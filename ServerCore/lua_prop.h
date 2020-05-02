@@ -81,6 +81,7 @@ private:
 	static int luaPropIndexSet( lua_State *L );
 	static int luaPropIndexClear( lua_State *L );
 	static int luaPropIndexValue( lua_State *L );
+	static int luaPropIndexLen( lua_State *L );
 
 	static LuaMap				 mLuaPropIndexMap;
 

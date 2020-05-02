@@ -63,6 +63,7 @@ const luaL_Reg lua_prop::mLuaPropIndexInstance[] =
 {
 	{ "__index", lua_prop::luaPropIndexGet },
 	{ "__gc", lua_prop::luaPropIndexGC },
+	{ "__len", lua_prop::luaPropIndexLen },
 	{ 0, 0 }
 };
 
@@ -985,28 +986,14 @@ int lua_prop::luaPropIndexValue(lua_State *L)
 {
 	lua_task				*Command = lua_task::luaGetTask( L );
 
-	luaL_checkstring( L, 2 );
-
 	try
 	{
 		luaPropIndex		*LP = propindex( L );
 		Property			*P = LP->mProperty;
-		QString				 S = QString::fromLatin1( lua_tostring( L, 2 ) );
 
 		if( !P )
 		{
 			throw( mooException( E_TYPE, "invalid property" ) );
-		}
-
-		// Look for function in mLuaMap
-
-		lua_CFunction	 F;
-
-		if( ( F = mLuaPropIndexMap.value( S, 0 ) ) != 0 )
-		{
-			lua_pushcfunction( L, F );
-
-			return( 1 );
 		}
 
 		luaPropIndexPath	 Path;
@@ -1015,8 +1002,6 @@ int lua_prop::luaPropIndexValue(lua_State *L)
 		{
 			Path = *LP->mIndex;
 		}
-
-		Path.append( S );
 
 		QVariant			 V = P->value();
 
@@ -1029,7 +1014,7 @@ int lua_prop::luaPropIndexValue(lua_State *L)
 
 				if( it == M.end() )
 				{
-					throw( mooException( E_PROPNF, QString( "property '%1' is not defined" ).arg( S ) ) );
+					throw( mooException( E_PROPNF, QString( "property '%1' is not defined" ).arg( e ) ) );
 				}
 
 				V = *it;
@@ -1041,6 +1026,69 @@ int lua_prop::luaPropIndexValue(lua_State *L)
 		}
 
 		return( luaL_pushvariant( L, V ) );
+	}
+	catch( const mooException &e )
+	{
+		Command->setException( e );
+	}
+	catch( ... )
+	{
+	}
+
+	return( Command->lua_pushexception() );
+}
+
+int lua_prop::luaPropIndexLen(lua_State *L)
+{
+	lua_task				*Command = lua_task::luaGetTask( L );
+
+	try
+	{
+		luaPropIndex		*LP = propindex( L );
+		Property			*P = LP->mProperty;
+
+		if( !P )
+		{
+			throw( mooException( E_TYPE, "invalid property" ) );
+		}
+
+		luaPropIndexPath	 Path;
+
+		if( LP->mIndex )
+		{
+			Path = *LP->mIndex;
+		}
+
+		QVariant			 V = P->value();
+
+		for( QString e : Path )
+		{
+			if( V.type() == QVariant::Map )
+			{
+				QVariantMap		M = V.toMap();
+				QVariantMap::const_iterator it = M.find( e );
+
+				if( it == M.end() )
+				{
+					throw( mooException( E_PROPNF, QString( "property '%1' is not defined" ).arg( e ) ) );
+				}
+
+				V = *it;
+			}
+			else
+			{
+				throw( mooException( E_PROPNF, "map index not a map" ) );
+			}
+		}
+
+		if( V.type() != QVariant::Map )
+		{
+			throw( mooException( E_PROPNF, "map index not a map" ) );
+		}
+
+		lua_pushinteger( L, V.toMap().size() );
+
+		return( 1 );
 	}
 	catch( const mooException &e )
 	{
