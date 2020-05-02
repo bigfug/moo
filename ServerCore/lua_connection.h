@@ -20,6 +20,16 @@ public:
 	static void lua_pushconnection( lua_State *L, Connection *O );
 
 private:
+	typedef enum Fields
+	{
+		ID,
+		NAME,
+		PLAYER,
+		OBJECT,
+	} Fields;
+
+	static const QMap<QString,Fields>		mFieldMap;
+
 	static void initialise( void );
 
 	static void luaRegisterState( lua_State *L );

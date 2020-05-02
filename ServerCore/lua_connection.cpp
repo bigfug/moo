@@ -35,6 +35,14 @@ const luaL_Reg lua_connection::mLuaInstanceFunctions[] =
 	{ 0, 0 }
 };
 
+const QMap<QString,lua_connection::Fields> lua_connection::mFieldMap =
+{
+	{ "id", ID },
+	{ "NAME", NAME },
+	{ "player", PLAYER },
+	{ "object", OBJECT },
+};
+
 void lua_connection::initialise()
 {
 	lua_moo::addGet( mLuaStatic );
@@ -192,30 +200,44 @@ int lua_connection::luaGet( lua_State *L )
 			return( 1 );
 		}
 
-		if( !strcmp( s, "id" ) )
+		switch( mFieldMap.value( QString( s ) ) )
 		{
-			lua_pushinteger( L, C->id() );
+			case ID:
+				{
+					lua_pushinteger( L, C->id() );
 
-			return( 1 );
-		}
+					return( 1 );
+				}
+				break;
 
-		if( !strcmp( s, "name" ) )
-		{
-			lua_pushstring( L, C->name().toLatin1() );
+			case NAME:
+				{
+					lua_pushstring( L, C->name().toLatin1() );
 
-			return( 1 );
-		}
+					return( 1 );
+				}
+				break;
 
-		if( !strcmp( s, "player" ) )
-		{
-			lua_object::lua_pushobjectid( L, C->player() );
+			case PLAYER:
+				{
+					lua_object::lua_pushobjectid( L, C->player() );
 
-			return( 1 );
+					return( 1 );
+				}
+				break;
+
+			case OBJECT:
+				{
+					lua_object::lua_pushobjectid( L, C->object() );
+
+					return( 1 );
+				}
+				break;
 		}
 
 		// Nothing found
 
-		throw( mooException( E_PROPNF, QString( "property '%1' is not defined" ).arg( QString( s ) ) ) );
+		throw( mooException( E_PROPNF, QString( "connection: property '%1' is not defined" ).arg( QString( s ) ) ) );
 	}
 	catch( const mooException &e )
 	{
@@ -246,26 +268,48 @@ int lua_connection::luaSet(lua_State *L)
 			throw( mooException( E_TYPE, "invalid connection" ) );
 		}
 
-		if( !strcmp( s, "player" ) )
+		switch( mFieldMap.value( QString( s ) ) )
 		{
-			if( !Command->isWizard() )
-			{
-				throw mooException( E_PERM, "only wizards can do that" );
-			}
+			case ID:
+				{
+					throw( mooException( E_PERM, "Can't set id of connection" ) );
+				}
+				break;
 
-			Object	*Player = lua_object::argObj( L, 3 );
+			case NAME:
+				{
+					throw( mooException( E_PERM, "Can't set name of connection" ) );
+				}
+				break;
 
-			if( !Player || !Player->player() )
-			{
-				throw mooException( E_INVARG, "object is not valid, or not a player" );
-			}
+			case PLAYER:
+				{
+					Object	*Player = lua_object::argObj( L, 3 );
 
-			return( Command->login( Player ) );
+					if( !Player || !Player->player() )
+					{
+						throw mooException( E_INVARG, "connection: player object is not valid, or not a player" );
+					}
+
+					if( !Command->isWizard() )
+					{
+						throw mooException( E_PERM, "Only wizards can set the player on a connection" );
+					}
+
+					return( Command->login( Player ) );
+				}
+				break;
+
+			case OBJECT:
+				{
+					throw( mooException( E_PERM, "Can't set object of connection" ) );
+				}
+				break;
 		}
 
 		// Nothing found
 
-		throw( mooException( E_PROPNF, QString( "property '%1' is not defined" ).arg( QString( s ) ) ) );
+		throw( mooException( E_PROPNF, QString( "connection: property '%1' is not defined" ).arg( QString( s ) ) ) );
 	}
 	catch( const mooException &e )
 	{
