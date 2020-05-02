@@ -28,9 +28,9 @@ public:
 
 	lua_task eval( const QString &pCmd, ObjectId pProgrammerId );
 
-	void process( const QString &pCmd );
+	int process( const QString &pCmd );
 
-	void process( const QString &pCmd, ObjectId pProgrammerId );
+	int process( const QString &pCmd, ObjectId pProgrammerId );
 
 	inline ObjectId programmerId( void ) const
 	{

@@ -543,7 +543,14 @@ int lua_object::luaGet( lua_State *L )
 
 		if( P || ( P = O->propParent( QString( s ) ) ) != 0 )
 		{
-			return( luaL_pushvariant( L, P->value() ) );
+			if( P->type() == QVariant::Map )
+			{
+				return( lua_prop::lua_pushpropindex( L, P ) );
+			}
+			else
+			{
+				return( luaL_pushvariant( L, P->value() ) );
+			}
 		}
 
 		// Nothing found
@@ -836,60 +843,7 @@ int lua_object::luaSet( lua_State *L )
 			}
 		}
 
-		QVariant					 V;
-
-		if( !strcmp( FndPrp->value().typeName(), lua_object::luaHandle::mTypeName ) )
-		{
-			lua_object::luaHandle		 H;
-
-			H.O = lua_object::argId( L, 3 );
-
-			V.setValue( H );
-		}
-		else
-		{
-			switch( FndPrp->type() )
-			{
-				case QVariant::Bool:
-					{
-						luaL_checktype( L, 3, LUA_TBOOLEAN );
-
-						bool	v = lua_toboolean( L, 3 );
-
-						V.setValue( v );
-					}
-					break;
-
-				case QVariant::Double:
-					{
-						lua_Number	v = luaL_checknumber( L, 3 );
-
-						V.setValue( v );
-					}
-					break;
-
-				case QVariant::String:
-					{
-						size_t		l;
-
-						const char *v = luaL_checklstring( L, 3, &l );
-
-						V.setValue( QString::fromLatin1( v, l ) );
-					}
-					break;
-
-				case QVariant::Map:
-					{
-						luaL_checktype( L, 3, LUA_TTABLE );
-
-						lua_prop::luaNewRecurse( L, 3, V );
-					}
-					break;
-
-				default:
-					throw mooException( E_TYPE, QString( "Unknown property value type: %1" ).arg( FndPrp->type() ) );
-			}
-		}
+		QVariant		V = lua_util::lua_tovariant( L, FndPrp, 3 );
 
 		Command->changeAdd( new change::ObjectSetProperty( O, FndPrp->name(), V ) );
 	}

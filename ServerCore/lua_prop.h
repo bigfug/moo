@@ -25,6 +25,20 @@ public:
 
 	static void luaNewRecurse( lua_State *L, int pIdx, QVariant &pVariant  );
 
+	typedef QStringList					luaPropIndexPath;
+
+	typedef struct luaPropIndex
+	{
+		Property				*mProperty;
+		luaPropIndexPath		*mIndex;
+	} luaPropIndex;
+
+	static int lua_pushpropindex( lua_State *L, Property *pProperty );
+
+	static int lua_pushpropindex( lua_State *L, Property *pProperty, const luaPropIndexPath &pPath );
+
+	static luaPropIndex *propindex( lua_State *L, int pIndex = 1 );
+
 private:
 	typedef enum Fields
 	{
@@ -53,12 +67,25 @@ private:
 	static int luaValue( lua_State *L );
 
 	static const char			*mLuaName;
+	static const char			*mLuaPropIndexName;
 
 	static LuaMap				 mLuaMap;
 
 	static const luaL_Reg		 mLuaStatic[];
 	static const luaL_Reg		 mLuaInstance[];
 	static const luaL_Reg		 mLuaInstanceFunctions[];
+
+	static int luaPropIndexGC( lua_State *L );
+
+	static int luaPropIndexGet( lua_State *L );
+	static int luaPropIndexSet( lua_State *L );
+	static int luaPropIndexClear( lua_State *L );
+	static int luaPropIndexValue( lua_State *L );
+
+	static LuaMap				 mLuaPropIndexMap;
+
+	static const luaL_Reg		 mLuaPropIndexInstance[];
+	static const luaL_Reg		 mLuaPropIndexInstanceFunctions[];
 
 	friend class lua_moo;
 };

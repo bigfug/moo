@@ -627,14 +627,17 @@ int lua_task::eval( void )
 	{
 		QString		Err = QString( lua_tostring( LS, -1 ) );
 
-		Connection	*CON = ConnectionManager::instance()->connection( connectionId() );
-
-		if( CON )
+		if( !Err.isEmpty() )
 		{
-			CON->notify( Err );
-		}
+			Connection	*CON = ConnectionManager::instance()->connection( connectionId() );
 
-		std::cerr << "eval: " << Err.toStdString() << std::endl;
+			if( CON && !Err.isEmpty() )
+			{
+				CON->notify( Err );
+			}
+
+			std::cerr << "eval: " << Err.toStdString() << std::endl;
+		}
 
 		lua_pop( LS, 1 );
 

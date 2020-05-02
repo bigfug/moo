@@ -68,14 +68,14 @@ lua_task LuaTestData::eval( const QString &pCmd, ObjectId pProgrammerId )
 	return( t );
 }
 
-void LuaTestData::process( const QString &pCmd )
+int LuaTestData::process( const QString &pCmd )
 {
-	process( pCmd, programmerId() );
+	return( process( pCmd, programmerId() ) );
 }
 
-void LuaTestData::process( const QString &pCmd, ObjectId pProgrammerId )
+int LuaTestData::process( const QString &pCmd, ObjectId pProgrammerId )
 {
-	lua_task::process( pCmd, CID, pProgrammerId );
+	return( lua_task::process( pCmd, CID, pProgrammerId ) );
 }
 
 ConnectionId LuaTestObject::initLua( qint64 pTimeStamp )

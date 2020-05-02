@@ -80,6 +80,9 @@ private slots:
 	void luaPropInheritance_data( void );
 	void luaPropInheritance( void );
 
+	void luaPropGetIndex( void );
+	void luaPropSetIndex( void );
+
 	void luaVerbVerbCall( void );
 	void luaVerbParentVerbCall( void );
 };

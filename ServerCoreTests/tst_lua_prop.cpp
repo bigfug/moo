@@ -416,3 +416,67 @@ void ServerTest::luaPropGetSet( void )
 
 	ObjectManager::reset();
 }
+
+void ServerTest::luaPropGetIndex( void )
+{
+	LuaTestData		TD;
+
+	Object			*O1 = TD.OM.newObject();
+
+	O1->setOwner( TD.programmerId() );
+
+	TD.process( QString( "o( %1 ):propadd( 'result', 'no result' )" ).arg( O1->id() ) );
+
+	Property		*P1 = O1->prop( "result" );
+
+	QVERIFY( P1 );
+
+	TD.process( QString( "o( %1 ):propadd( 'test', { k1 = { 'v1', 'v2' } } )" ).arg( O1->id() ) );
+
+	QVERIFY( O1->prop( "test" ) );
+
+	TD.process( QString( "o( %1 ).result = o( %1 ).test.k1[ 1 ]" ).arg( O1->id() ) );
+
+	QCOMPARE( P1->value().toString(), QString( "v1" ) );
+
+	TD.process( QString( "o( %1 ).result = o( %1 ).test.k1[ 2 ]" ).arg( O1->id() ) );
+
+	QCOMPARE( P1->value().toString(), QString( "v2" ) );
+}
+
+void ServerTest::luaPropSetIndex( void )
+{
+	LuaTestData		TD;
+
+	Object			*O1 = TD.OM.newObject();
+
+	O1->setOwner( TD.programmerId() );
+
+	TD.process( QString( "o( %1 ):propadd( 'result', 'no result' )" ).arg( O1->id() ) );
+
+	Property		*P1 = O1->prop( "result" );
+
+	QVERIFY( P1 );
+
+	TD.process( QString( "o( %1 ):propadd( 'test', { k1 = { 'v1', k2 = { 'v2', 'v3' } } } )" ).arg( O1->id() ) );
+
+	QVERIFY( O1->prop( "test" ) );
+
+	TD.process( QString( "o( %1 ).test.k1.k2:set( 2, 'v4' )" ).arg( O1->id() ) );
+
+	TD.process( QString( "o( %1 ).result = o( %1 ).test.k1.k2[ 2 ]" ).arg( O1->id() ) );
+
+	QCOMPARE( P1->value().toString(), QString( "v4" ) );
+
+	TD.process( QString( "o( %1 ).test.k1.k2:set( 3, 'v5' )" ).arg( O1->id() ) );
+
+	TD.process( QString( "o( %1 ).result = o( %1 ).test.k1.k2[ 3 ]" ).arg( O1->id() ) );
+
+	QCOMPARE( P1->value().toString(), QString( "v5" ) );
+
+	TD.process( QString( "o( %1 ).test.k1.k2:clear( 3 )" ).arg( O1->id() ) );
+
+	lua_task	T = TD.eval( QString( "o( %1 ).result = o( %1 ).test.k1.k2[ 3 ]" ).arg( O1->id() ) );
+
+	QVERIFY( T.error() );
+}

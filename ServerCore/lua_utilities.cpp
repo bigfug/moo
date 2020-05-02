@@ -6,6 +6,8 @@
 #include "verb.h"
 #include "property.h"
 
+#include "lua_prop.h"
+
 #if LUA_VERSION_NUM < 502
 
 void *luaL_testudata( lua_State *L, int ud, const char *tname )
@@ -193,4 +195,64 @@ void lua_util::objectsToStrings( QVariantMap &PrpDat )
 			it.value() = VM;
 		}
 	}
+}
+
+QVariant lua_util::lua_tovariant( lua_State *L, const Property *pRefPrp, int pIndex )
+{
+	QVariant		V;
+
+	if( !strcmp( pRefPrp->value().typeName(), lua_object::luaHandle::mTypeName ) )
+	{
+		lua_object::luaHandle		 H;
+
+		H.O = lua_object::argId( L, pIndex );
+
+		V.setValue( H );
+	}
+	else
+	{
+		switch( pRefPrp->type() )
+		{
+			case QVariant::Bool:
+				{
+					luaL_checktype( L, pIndex, LUA_TBOOLEAN );
+
+					bool	v = lua_toboolean( L, pIndex );
+
+					V.setValue( v );
+				}
+				break;
+
+			case QVariant::Double:
+				{
+					lua_Number	v = luaL_checknumber( L, pIndex );
+
+					V.setValue( v );
+				}
+				break;
+
+			case QVariant::String:
+				{
+					size_t		l;
+
+					const char *v = luaL_checklstring( L, pIndex, &l );
+
+					V.setValue( QString::fromLatin1( v, l ) );
+				}
+				break;
+
+			case QVariant::Map:
+				{
+					luaL_checktype( L, pIndex, LUA_TTABLE );
+
+					lua_prop::luaNewRecurse( L, pIndex, V );
+				}
+				break;
+
+			default:
+				throw mooException( E_TYPE, QString( "Unknown property value type: %1" ).arg( pRefPrp->type() ) );
+		}
+	}
+
+	return( V );
 }
