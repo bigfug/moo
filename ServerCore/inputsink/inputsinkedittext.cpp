@@ -19,9 +19,9 @@ InputSinkEditText::InputSinkEditText(Connection *C, ObjectId pObjectId, QString 
 
 	mEditor.setText( pText );
 
-	mEditor.redraw();
+	mEditor.addControlSlot( 19, this, "save", "Ctrl+S: Save" );
 
-	mEditor.addControlSlot( 19, this, "save" );
+	mEditor.redraw();
 }
 
 bool InputSinkEditText::input( const QString &pData )

@@ -21,10 +21,10 @@ InputSinkEditor::InputSinkEditor( Connection *C, ObjectId pObjectId, QString pVe
 
 	mEditor.setText( pText );
 
-	mEditor.redraw();
+	mEditor.addControlSlot( 20, this, "test", "Ctrl+T: Test" );
+	mEditor.addControlSlot( 19, this, "save", "Ctrl+S: Save" );
 
-	mEditor.addControlSlot( 20, this, "test" );
-	mEditor.addControlSlot( 19, this, "save" );
+	mEditor.redraw();
 }
 
 bool InputSinkEditor::input( const QString &pData )
@@ -47,7 +47,7 @@ void InputSinkEditor::test()
 
 	int Error = luaL_loadbuffer( L, P, P.size(), mVerbName.toUtf8() );
 
-	if( Error == 0 )
+	if( !Error )
 	{
 		mEditor.setStatusMessage( tr( "No errors detected" ) );
 	}
@@ -71,7 +71,7 @@ void InputSinkEditor::save()
 
 	int Error = luaL_loadbuffer( L, P, P.size(), mVerbName.toUtf8() );
 
-	if( Error == 0 )
+	if( !Error )
 	{
 		Object		*O = ObjectManager::o( mObjectId );
 		Verb		*V = ( O ? O->verb( mVerbName ) : 0 );

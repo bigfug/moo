@@ -12,14 +12,18 @@ Editor::Editor( QObject *pParent )
 	mTextPosition         = QPoint( 0, 0 );
 }
 
-void Editor::addControlSlot(quint8 pASCII, QObject *pObject, QString pSlot)
+void Editor::addControlSlot( quint8 pASCII, QObject *pObject, QString pSlot, QString pDesc )
 {
 	mSlotMap.insert( pASCII, QPair<QObject *,QString>( pObject, pSlot ) );
+
+	mSlotDesc.insert( pASCII, pDesc );
 }
 
 void Editor::remControlSlot( quint8 pASCII )
 {
 	mSlotMap.remove( pASCII );
+
+	mSlotDesc.remove( pASCII );
 }
 
 void Editor::setText( QStringList pText )
@@ -386,7 +390,14 @@ void Editor::drawInfo()
 
 	InfoList << QString( "Line: %1" ).arg( mCursorTextPosition.y() + 1 );
 
-	QString			InfoText = InfoList.join( ' ' );
+	for( QString S : mSlotDesc.values() )
+	{
+		InfoList << S;
+	}
+
+	InfoList << "Ctrl+X: Exit (without saving)";
+
+	QString			InfoText = InfoList.join( " - " );
 
 	if( InfoText.size() > mWindowSize.width() )
 	{

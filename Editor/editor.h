@@ -36,7 +36,7 @@ public:
 		return( mQuit );
 	}
 
-	void addControlSlot( quint8 pASCII, QObject *pObject, QString pSlot );
+	void addControlSlot( quint8 pASCII, QObject *pObject, QString pSlot, QString pDesc );
 	void remControlSlot( quint8 pASCII );
 
 	QStringList text( void ) const
@@ -100,6 +100,8 @@ private:
 	typedef QMap<quint8,QPair<QObject *,QString>>	ObjectSlotMap;
 
 	ObjectSlotMap	mSlotMap;
+
+	QMap<quint8,QString>	 mSlotDesc;
 
 	QString			 mStatusMessage;
 };
