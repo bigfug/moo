@@ -291,10 +291,7 @@ void Editor::processCTRL( QChar pC )
 			break;
 
 		case 0x0d:			// Line Feed
-			break;
-
 		case 0x0a:			// Return
-		case 0x00:
 			if( mCursorTextPosition.x() == mText.at( mCursorTextPosition.y() ).size() )
 			{
 				mCursorTextPosition.rx() = 0;
