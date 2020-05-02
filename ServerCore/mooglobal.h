@@ -7,15 +7,15 @@ typedef	qint32		ObjectId;
 typedef qint32		TaskId;
 typedef qint32		ConnectionId;
 
-constexpr ConnectionId CONNECTION_NONE = 0;
+constexpr ConnectionId CONNECTION_NONE = -1;
 
 constexpr ObjectId OBJECT_ROOT = 1;
 constexpr ObjectId OBJECT_SYSTEM = 0;
 
 constexpr ObjectId OBJECT_NONE = -1;
-constexpr ObjectId OBJECT_AMBIGUOUS = -1;
-constexpr ObjectId OBJECT_FAILED_MATCH = -1;
-constexpr ObjectId OBJECT_UNSPECIFIED = -1;
+constexpr ObjectId OBJECT_AMBIGUOUS = -2;
+constexpr ObjectId OBJECT_FAILED_MATCH = -3;
+constexpr ObjectId OBJECT_UNSPECIFIED = -4;
 
 typedef enum mooError
 {
