@@ -21,7 +21,7 @@ public:
 	{
 		Q_UNUSED( pData )
 
-		return( false );
+		return( true );
 	}
 
 	virtual bool screenNeedsReset( void ) const Q_DECL_OVERRIDE
