@@ -214,11 +214,7 @@ void Editor::processCTRL( QChar pC )
 {
 	switch( pC.unicode() )
 	{
-#if defined( Q_OS_MACX )
-		case 0x7f:			// Delete
-#else
-		case 0x08:			// Backspace
-#endif
+		case 0x7f:	// DELETE
 			if( !mCursorTextPosition.x() )
 			{
 				if( !mCursorTextPosition.y() )
@@ -256,11 +252,7 @@ void Editor::processCTRL( QChar pC )
 			}
 			break;
 
-#if defined( Q_OS_MACX )
-		case 0x08:			// Backspace
-#else
-		case 0x7f:			// Delete
-#endif
+		case 0x04:	// Ctrl + D - Delete the character under the cursor
 			{
 				QString		TmpTxt = mText.at( mCursorTextPosition.y() );
 
@@ -323,21 +315,6 @@ void Editor::processCTRL( QChar pC )
 			updateCursorScreenPosition();
 
 			drawText();
-			break;
-
-		case 0x04:			// ^D
-			if( mCursorTextPosition.y() < mText.size() - 1 )
-			{
-				mText.removeAt( mCursorTextPosition.y() );
-
-				int		LinLen = mText.at( mCursorTextPosition.y() ).length();
-
-				mCursorTextPosition.rx() = qMin( mCursorTextPosition.x(), LinLen );
-
-				updateCursorScreenPosition();
-
-				drawText();
-			}
 			break;
 
 		case 0x18:			// ^X
