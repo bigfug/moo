@@ -806,7 +806,7 @@ int lua_prop::luaPropIndexGet( lua_State *L )
 
 				if( it == M.end() )
 				{
-					throw( mooException( E_PROPNF, QString( "property '%1' is not defined" ).arg( S ) ) );
+					return( 0 );
 				}
 
 				V = *it;
@@ -1014,7 +1014,7 @@ int lua_prop::luaPropIndexValue(lua_State *L)
 
 				if( it == M.end() )
 				{
-					throw( mooException( E_PROPNF, QString( "property '%1' is not defined" ).arg( e ) ) );
+					return( 0 );
 				}
 
 				V = *it;
@@ -1070,7 +1070,7 @@ int lua_prop::luaPropIndexLen(lua_State *L)
 
 				if( it == M.end() )
 				{
-					throw( mooException( E_PROPNF, QString( "property '%1' is not defined" ).arg( e ) ) );
+					return( 0 );
 				}
 
 				V = *it;
