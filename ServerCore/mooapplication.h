@@ -39,6 +39,8 @@ public:
 
 	void deinitialiseApp( void );
 
+	static QString sharedDataPath( void );
+
 signals:
 	void message( QString pMessage );
 

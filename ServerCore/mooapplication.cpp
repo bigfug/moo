@@ -63,6 +63,13 @@ MooApplication::MooApplication( QCoreApplication &a ) :
 	mParser.addHelpOption();
 	mParser.addVersionOption();
 
+	QString		SharedConfiguration = QDir( sharedDataPath() ).filePath( "moo.ini" );
+
+	if( QFile::exists( SharedConfiguration ) )
+	{
+		mOptionConfiguration.setDefaultValue( SharedConfiguration );
+	}
+
 	mParser.addOption( mOptionDataDirectory );
 	mParser.addOption( mOptionConfiguration );
 }
@@ -114,6 +121,18 @@ void MooApplication::process( void )
 	}
 
 	qInfo() << "Using data directory" << DataDirInfo.filePath();
+
+	//-------------------------------------------------------------------------
+
+	if( !QFile::exists( "moo.db" ) )
+	{
+		QString		SrcNam = QDir( sharedDataPath() ).filePath( "moo.db" );
+
+		if( QFile::exists( SrcNam ) )
+		{
+			QFile::copy( SrcNam, "moo.db" );
+		}
+	}
 }
 
 bool MooApplication::initialiseApp()
@@ -296,4 +315,58 @@ void MooApplication::fileMessageHandler(QString pMessage)
 void MooApplication::debugMessageHandler(QString pMessage)
 {
 	std::cout << pMessage.toStdString() << std::endl;
+}
+
+QString MooApplication::sharedDataPath()
+{
+	QDir		TmpDir;
+
+#if !defined( QT_DEBUG )
+	if( false )
+#endif
+	{
+		// In debug mode go relative to this source file
+
+		TmpDir = QDir( __FILE__ );
+
+		TmpDir.cdUp();
+		TmpDir.cdUp();
+
+		return( TmpDir.absoluteFilePath( "share" ) );
+	}
+
+	TmpDir = QDir( QCoreApplication::applicationDirPath() );
+
+#if !defined( Q_OS_WIN )
+	if( false )
+#endif
+	{
+		TmpDir.cdUp();
+
+		return( TmpDir.absoluteFilePath( "share" ) );
+	}
+
+#if !defined( Q_OS_MAC )
+	if( false )
+#endif
+	{
+		// Get out of the app bundle
+
+		TmpDir.cdUp();
+		TmpDir.cdUp();
+		TmpDir.cdUp();
+
+		return( TmpDir.absoluteFilePath( "share" ) );
+	}
+
+#if !defined( Q_OS_LINUX )
+	if( false )
+#endif
+	{
+		TmpDir.cdUp();
+
+		TmpDir.cd( "share" );
+
+		return( TmpDir.absoluteFilePath( "artmoo" ) );
+	}
 }
