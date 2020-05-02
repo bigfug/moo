@@ -545,7 +545,7 @@ int lua_object::luaGet( lua_State *L )
 		{
 			if( P->type() == QVariant::Map )
 			{
-				return( lua_prop::lua_pushpropindex( L, P ) );
+				return( lua_prop::lua_pushpropindex( L, O->id(), P ) );
 			}
 			else
 			{

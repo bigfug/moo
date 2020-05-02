@@ -18,6 +18,7 @@
 #include "changeset/propertysetwrite.h"
 #include "changeset/propertysetchange.h"
 #include "changeset/connectionnotify.h"
+#include "changeset/objectsetproperty.h"
 
 const char	*lua_prop::mLuaName = "moo.prop";
 const char	*lua_prop::mLuaPropIndexName = "moo.propindex";
@@ -689,7 +690,7 @@ int lua_prop::luaValue( lua_State *L )
 // Property Index
 
 
-int lua_prop::lua_pushpropindex( lua_State *L, Property *pProperty )
+int lua_prop::lua_pushpropindex( lua_State *L, ObjectId pObjectId, Property *pProperty )
 {
 	luaPropIndex	*P = reinterpret_cast<luaPropIndex *>( lua_newuserdata( L, sizeof( luaPropIndex ) ) );
 
@@ -701,6 +702,7 @@ int lua_prop::lua_pushpropindex( lua_State *L, Property *pProperty )
 	}
 
 	P->mProperty = pProperty;
+	P->mObjectId = pObjectId;
 	P->mIndex    = Q_NULLPTR;
 
 	luaL_getmetatable( L, mLuaPropIndexName );
@@ -709,7 +711,7 @@ int lua_prop::lua_pushpropindex( lua_State *L, Property *pProperty )
 	return( 1 );
 }
 
-int lua_prop::lua_pushpropindex( lua_State *L, Property *pProperty, const lua_prop::luaPropIndexPath &pPath )
+int lua_prop::lua_pushpropindex( lua_State *L, ObjectId pObjectId, Property *pProperty, const lua_prop::luaPropIndexPath &pPath )
 {
 	luaPropIndex	*P = reinterpret_cast<luaPropIndex *>( lua_newuserdata( L, sizeof( luaPropIndex ) ) );
 
@@ -721,6 +723,7 @@ int lua_prop::lua_pushpropindex( lua_State *L, Property *pProperty, const lua_pr
 	}
 
 	P->mProperty = pProperty;
+	P->mObjectId = pObjectId;
 	P->mIndex    = new luaPropIndexPath( pPath );
 
 	luaL_getmetatable( L, mLuaPropIndexName );
@@ -819,7 +822,7 @@ int lua_prop::luaPropIndexGet( lua_State *L )
 
 		if( V.type() == QVariant::Map || V.type() == QVariant::List )
 		{
-			return( lua_pushpropindex( L, P, Path ) );
+			return( lua_pushpropindex( L, LP->mObjectId, P, Path ) );
 		}
 
 		return( luaL_pushvariant( L, V ) );
@@ -895,7 +898,7 @@ int lua_prop::luaPropIndexSet( lua_State *L )
 			NewV = Index.first;
 		}
 
-		P->setValue( NewV );
+		Command->changeAdd( new change::ObjectSetProperty( ObjectManager::o( LP->mObjectId ), P->name(), NewV ) );
 	}
 	catch( const mooException &e )
 	{
@@ -969,7 +972,7 @@ int lua_prop::luaPropIndexClear(lua_State *L)
 			NewV = Index.first;
 		}
 
-		P->setValue( NewV );
+		Command->changeAdd( new change::ObjectSetProperty( ObjectManager::o( LP->mObjectId ), P->name(), NewV ) );
 	}
 	catch( const mooException &e )
 	{

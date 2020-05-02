@@ -30,12 +30,13 @@ public:
 	typedef struct luaPropIndex
 	{
 		Property				*mProperty;
+		ObjectId				 mObjectId;
 		luaPropIndexPath		*mIndex;
 	} luaPropIndex;
 
-	static int lua_pushpropindex( lua_State *L, Property *pProperty );
+	static int lua_pushpropindex( lua_State *L, ObjectId pObjectId, Property *pProperty );
 
-	static int lua_pushpropindex( lua_State *L, Property *pProperty, const luaPropIndexPath &pPath );
+	static int lua_pushpropindex( lua_State *L, ObjectId pObjectId, Property *pProperty, const luaPropIndexPath &pPath );
 
 	static luaPropIndex *propindex( lua_State *L, int pIndex = 1 );
 
