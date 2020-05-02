@@ -1,5 +1,5 @@
 # moo
-A telnet Multi-user Object Orientated (MOO) server loosely based on LambdaMOO using Lua as its core language
+A Multi-user Object Orientated (MOO) server loosely based on LambdaMOO using Lua as its core language
 
 ![C/C++ CI](https://github.com/bigfug/moo/workflows/C/C++%20CI/badge.svg)
 
@@ -17,11 +17,5 @@ For example, where the MOO manual talks about processing strings, we use Lua fun
 
 http://www.lua.org/manual/5.3/manual.html#6.4
 
-Using Qt5 means it compiles on Windows/OSX/Linux/Raspberry Pi/etc
-
-Lua was chosen for its speed and ease of embedding in a sandbox.
-
-Please note that the server contains a complete implementation of the LambdaMOO security system, and Lua is sandboxed as far I know, but this software is not guaranteed to be secure and may somehow allow a remote user access to your filesystem.
-
-There is no 'core' supplied, so apart from the functions provided by Lua and the LambdaMOO system, you'll have to create your worlds from scratch!
+Using Qt5 means it compiles on Windows/macOS/Linux/Raspberry Pi/etc
 
