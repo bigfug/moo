@@ -15,13 +15,7 @@ void LineEdit::dataInput( const QByteArray &pData )
 
 		if( ch == '\n' || ch == '\r' )
 		{
-			emit lineOutput( mLineBuffer );
-
-			mLineBuffer.clear();
-
-			mAnsiPos = 0;
-
-			mCommandHistoryPosition = mCommandHistoryCount;
+			processEnter( Output );
 		}
 		else if( mAnsiEsc == 1 )
 		{
@@ -33,8 +27,7 @@ void LineEdit::dataInput( const QByteArray &pData )
 			}
 			else
 			{
-				mLineBuffer.append( 0x1B );
-				mLineBuffer.append( ch );
+				processAltCharacter( ch, Output );
 
 				mAnsiEsc = 0;
 			}
@@ -77,11 +70,15 @@ void LineEdit::dataInput( const QByteArray &pData )
 					processCursorRight( Output );
 					break;
 
-				case 0x08:	// BACKSPACE
+				case 0x08:	// Ctrl + H / BACKSPACE
 					processBackspace( Output );
 					break;
 
-				case 0x09:	// TAB
+				case 0x09:	// Ctrl + I / TAB
+					break;
+
+				case 0x0d:	// Ctrl + M - same as Enter
+					processEnter( Output );
 					break;
 
 				case 0x0e:	// Ctrl + N - Cursor down
@@ -142,16 +139,19 @@ void LineEdit::redraw()
 {
 	QByteArray		A;
 
-	//A.append( QString( "\x1b[%1;1H\x1b[K" ).arg( mEditLinePosition + 1 ).toLatin1() );
-
-	A.append( "\x1b[K" );
-
-	A.append( mPrompt );
-	A.append( mLineBuffer );
-
-	A.append( QString( "\x1b[%1G" ).arg( 1 + mAnsiPos + mPrompt.length() ).toLatin1() );
+	redraw( A );
 
 	write( A );
+}
+
+void LineEdit::redraw( QByteArray &pOutput )
+{
+	pOutput.append( "\r\x1b[K" );
+
+	pOutput.append( mPrompt );
+	pOutput.append( mLineBuffer );
+
+	pOutput.append( QString( "\x1b[%1G" ).arg( 1 + mAnsiPos + mPrompt.length() ).toLatin1() );
 }
 
 void LineEdit::setCommandHistoryEntry( const QByteArray &pData )
@@ -225,6 +225,24 @@ void LineEdit::processCharacter( QChar ch, QByteArray &pOutput )
 	}
 }
 
+void LineEdit::processAltCharacter( QChar ch, QByteArray &pOutput )
+{
+	switch( ch.toLatin1() )
+	{
+		case 'b':	// Alt + b - backward one word
+			processBackwardOneWord( pOutput );
+			break;
+
+		case 'd':	// Alt + d - delete one word
+			processDeleteOneWord( pOutput );
+			break;
+
+		case 'f':	// Alt + f - forward one word
+			processForwardOneWord( pOutput );
+			break;
+	}
+}
+
 void LineEdit::processCursorUp( QByteArray &pOutput )
 {
 	if( mCommandHistoryPosition > 0 )
@@ -244,12 +262,7 @@ void LineEdit::processCursorUp( QByteArray &pOutput )
 
 			mAnsiPos = mLineBuffer.size();
 
-			pOutput.append( "\r\x1b[K" );
-
-			pOutput.append( mPrompt );
-			pOutput.append( mLineBuffer );
-
-			pOutput.append( QString( "\x1b[%1G" ).arg( 1 + mAnsiPos + mPrompt.length() ).toLatin1() );
+			redraw( pOutput );
 		}
 	}
 }
@@ -277,12 +290,7 @@ void LineEdit::processCursorDown( QByteArray &pOutput )
 
 			mAnsiPos = mLineBuffer.size();
 
-			pOutput.append( "\r\x1b[K" );
-
-			pOutput.append( mPrompt );
-			pOutput.append( mLineBuffer );
-
-			pOutput.append( QString( "\x1b[%1G" ).arg( 1 + mAnsiPos + mPrompt.length() ).toLatin1() );
+			redraw( pOutput );
 		}
 	}
 }
@@ -358,6 +366,109 @@ void LineEdit::processBackspace( QByteArray &pOutput )
 			pOutput.append( "\x1b[D \x1b[D" );
 		}
 	}
+}
+
+void LineEdit::processEnter(QByteArray &pOutput)
+{
+	Q_UNUSED( pOutput )
+
+	emit lineOutput( mLineBuffer );
+
+	mLineBuffer.clear();
+
+	mAnsiPos = 0;
+
+	mCommandHistoryPosition = mCommandHistoryCount;
+}
+
+void LineEdit::processForwardOneWord( QByteArray &pOutput )
+{
+	if( mAnsiPos >= mLineBuffer.size() )
+	{
+		return;
+	}
+
+	do
+	{
+		mAnsiPos++;
+	}
+	while( mAnsiPos < mLineBuffer.size() - 1 && mLineBuffer.at( mAnsiPos ) != ' ' );
+
+	if( mAnsiPos < mLineBuffer.size() )
+	{
+		do
+		{
+			mAnsiPos++;
+		}
+		while( mAnsiPos < mLineBuffer.size() - 1 && mLineBuffer.at( mAnsiPos ) == ' ' );
+	}
+
+	pOutput.append( QString( "\x1b[%1G" ).arg( 1 + mAnsiPos + mPrompt.length() ).toLatin1() );
+}
+
+void LineEdit::processBackwardOneWord(QByteArray &pOutput)
+{
+	if( !mAnsiPos )
+	{
+		return;
+	}
+
+	do
+	{
+		mAnsiPos--;
+	}
+	while( mAnsiPos > 0 && mLineBuffer.at( mAnsiPos ) == ' ' );
+
+	if( mAnsiPos > 0 )
+	{
+		do
+		{
+			mAnsiPos--;
+		}
+		while( mAnsiPos > 0 && mLineBuffer.at( mAnsiPos ) != ' ' );
+	}
+
+	if( mLineBuffer.at( mAnsiPos ) == ' ' && mAnsiPos < mLineBuffer.size() )
+	{
+		mAnsiPos++;
+	}
+
+	pOutput.append( QString( "\x1b[%1G" ).arg( 1 + mAnsiPos + mPrompt.length() ).toLatin1() );
+}
+
+void LineEdit::processDeleteOneWord( QByteArray &pOutput )
+{
+	if( !mAnsiPos || mLineBuffer.isEmpty() )
+	{
+		return;
+	}
+
+	do
+	{
+		mLineBuffer.remove( mAnsiPos, 1 );
+
+		if( mAnsiPos > 0 )
+		{
+			mAnsiPos--;
+		}
+	}
+	while( mAnsiPos >= 0 && !mLineBuffer.isEmpty() && mLineBuffer.at( mAnsiPos ) == ' ' );
+
+	if( mAnsiPos > 0 && !mLineBuffer.isEmpty() )
+	{
+		do
+		{
+			mLineBuffer.remove( mAnsiPos, 1 );
+
+			if( mAnsiPos > 0 )
+			{
+				mAnsiPos--;
+			}
+		}
+		while( mAnsiPos >= 0 && !mLineBuffer.isEmpty() && mLineBuffer.at( mAnsiPos ) != ' ' );
+	}
+
+	redraw( pOutput );
 }
 
 void LineEdit::write( const char *pData )

@@ -40,6 +40,8 @@ signals:
 	void commandHistoryLookup( int pIndex );
 
 protected:
+	void redraw( QByteArray &pOutput );
+
 	void processCursorToStartOfLine( QByteArray &pOutput );
 	void processCursorToEndOfLine( QByteArray &pOutput );
 
@@ -47,6 +49,7 @@ protected:
 	void processFunctionKey( int pAnsiCode, QByteArray &pOutput );
 
 	void processCharacter( QChar ch, QByteArray &pOutput );
+	void processAltCharacter( QChar ch, QByteArray &pOutput );
 
 	void processCursorUp( QByteArray &pOutput );
 	void processCursorDown( QByteArray &pOutput );
@@ -55,6 +58,12 @@ protected:
 	void processCursorRight( QByteArray &pOutput );
 	void processDelete( QByteArray &pOutput );
 	void processBackspace( QByteArray &pOutput );
+
+	void processEnter( QByteArray &pOutput );
+
+	void processForwardOneWord( QByteArray &pOutput );
+	void processBackwardOneWord( QByteArray &pOutput );
+	void processDeleteOneWord( QByteArray &pOutput );
 
 	void write( const char *pData );
 	void write( const QString &pData );
