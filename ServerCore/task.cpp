@@ -6,44 +6,22 @@
 
 const QList<QString>	 Task::mPrepositionList =
 {
-	"with/using",
-	"at/to",
+	"with,using",
+	"at,to",
 	"in front of",
-	"in/inside/into",
-	"on top of/on/onto/upon",
-	"out of/from inside/from",
+	"in,inside,into",
+	"on top of,on,onto,upon",
+	"out of,from inside,from",
 	"over",
 	"through",
-	"under/underneath/beneath",
+	"under,underneath,beneath",
 	"behind",
 	"beside",
-	"for/about",
+	"for,about",
 	"is",
 	"as",
-	"off/off of",
-	"up"
+	"off,off of"
 };
-
-//const char		*Task::mPrepositionList[] =
-//{
-//	"with/using",
-//	"at/to",
-//	"in front of",
-//	"in/inside/into",
-//	"on top of/on/onto/upon",
-//	"out of/from inside/from",
-//	"over",
-//	"through",
-//	"under/underneath/beneath",
-//	"behind",
-//	"beside",
-//	"for/about",
-//	"is",
-//	"as",
-//	"off/off of",
-//	"up",
-//	0
-//};
 
 Task::Task( const QString &pCommand ) : mCommand( pCommand )
 {
@@ -243,7 +221,7 @@ int Task::findPreposition( const QStringList &pWords )
 
 		for( QString s : mPrepositionList )
 		{
-			QStringList		PrpSet = s.split( '/' );
+			QStringList		PrpSet = s.split( ',' );
 
 			if( PrpSet.contains( CurWrd ) )
 			{

@@ -199,7 +199,7 @@ bool Verb::matchName( const QStringList &pPatternList, const QString &pMatch )
 
 bool Verb::matchPreposition( const QString &pPreposition ) const
 {
-	const QStringList	PrpLst = mVerbData.mPreposition.split( "/" );
+	const QStringList	PrpLst = mVerbData.mPreposition.split( ',' );
 
 	return( PrpLst.contains( pPreposition, Qt::CaseInsensitive ) );
 }
