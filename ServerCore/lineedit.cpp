@@ -15,7 +15,10 @@ void LineEdit::dataInput( const QByteArray &pData )
 
 		if( ch == '\n' || ch == '\r' )
 		{
-			processEnter( Output );
+			if( mLastChar == ch || ( mLastChar != '\n' && mLastChar != '\r' ) )
+			{
+				processEnter( Output );
+			}
 		}
 		else if( mAnsiEsc == 1 )
 		{
@@ -112,6 +115,8 @@ void LineEdit::dataInput( const QByteArray &pData )
 		{
 			write( Output );
 		}
+
+		mLastChar = ch;
 	}
 }
 
@@ -368,7 +373,7 @@ void LineEdit::processBackspace( QByteArray &pOutput )
 	}
 }
 
-void LineEdit::processEnter(QByteArray &pOutput)
+void LineEdit::processEnter( QByteArray &pOutput )
 {
 	Q_UNUSED( pOutput )
 

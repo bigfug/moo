@@ -71,7 +71,7 @@ protected:
 
 private:
 	QByteArray		 mLineBuffer;
-	quint8			 mLastChar;
+	QChar			 mLastChar;
 	int				 mEditLinePosition;
 	int				 mTerminalWidth;
 	QChar			 mSecretChar;
