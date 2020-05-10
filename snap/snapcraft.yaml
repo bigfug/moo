@@ -22,7 +22,22 @@
   confinement: devmode # use 'strict' once you have the right plugs and slots
 
   parts:
-    my-part:
-      # See 'snapcraft plugins'
-      plugin: nil
-  
+    artmoo-daemon:
+      plugin: cmake
+      slots:
+      - network
+      - network-bind
+      - serial-port
+    artmoo-server:
+      plugin: cmake
+      slots:
+      - network
+      - network-bind
+      - serial-port
+
+  apps:
+     artmoo-daemon:
+      command: artmoo-daemon
+     artmoo-server:
+      command: artmoo-server
+ 
