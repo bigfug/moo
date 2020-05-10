@@ -20,9 +20,31 @@ parts:
   artmoo:
     plugin: cmake
     source: https://github.com/bigfug/moo.git
-
+    build-snaps:
+      - kde-frameworks-5-core18-sdk
+      - kde-frameworks-5-core18
+    configflags:
+      - "-DKDE_INSTALL_USE_QT_SYS_PATHS=ON"
+      - "-DCMAKE_INSTALL_PREFIX=/usr"
+      - "-DCMAKE_BUILD_TYPE=Release"
+      - "-DENABLE_TESTING=OFF"
+      - "-DBUILD_TESTING=OFF"
+      - "-DKDE_SKIP_TEST_SETTINGS=ON"
+      
 apps:
   artmoo-daemon:
     command: bin/artmoo-daemon
+    extensions:
+      - kde-neon
+    plugs:
+      - home
+      - network
+      - network-bind
   artmoo-server:
     command: bin/artmoo-server
+    extensions:
+      - kde-neon
+    plugs:
+      - home
+      - network
+      - network-bind
