@@ -25,6 +25,11 @@ parts:
     build-snaps:
       - kde-frameworks-5-core18-sdk
       - kde-frameworks-5-core18
+    build-packages:
+      - libglvnd-dev
+      - libx11-dev
+    configflags:
+      - -DCMAKE_FIND_ROOT_PATH=/snap/kde-frameworks-5-core18-sdk/current
     configflags:
       - "-DKDE_INSTALL_USE_QT_SYS_PATHS=ON"
       - "-DCMAKE_INSTALL_PREFIX=/usr"
@@ -50,7 +55,6 @@ apps:
     plugs:
       - kde-frameworks-5-plug
       - home
-      - opengl
       - network
       - network-bind
       
