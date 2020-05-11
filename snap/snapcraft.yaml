@@ -15,7 +15,9 @@ description: |
 grade: devel
 confinement: devmode
 base: core18
-
+architectures:
+  - build-on: [ amd64, armhf ]
+  
 parts:
   artmoo:
     plugin: cmake
