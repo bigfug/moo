@@ -39,6 +39,7 @@ apps:
     extensions:
       - kde-neon
     plugs:
+      - kde-frameworks-5-plug
       - home
       - network
       - network-bind
@@ -47,6 +48,9 @@ apps:
     extensions:
       - kde-neon
     plugs:
+      - kde-frameworks-5-plug
       - home
+      - opengl
       - network
       - network-bind
+      
