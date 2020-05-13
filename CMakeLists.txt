@@ -63,6 +63,9 @@ endif( WIN32 )
 if( UNIX AND NOT APPLE )
 	set( PATH_APP		bin )
 	set( PATH_SHARE		share/artmoo )
+
+	install( FILES Server/artmoo-server.desktop	DESTINATION share/applications )
+	install( FILES Server/moo-icon.png			DESTINATION share/icons/hicolor/512x512/apps )
 endif()
 
 #------------------------------------------------------------------------------
