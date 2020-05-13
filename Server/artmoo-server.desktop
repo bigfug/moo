@@ -1,6 +1,6 @@
 [Desktop Entry]
 Exec=artmoo-server
-Icon=${SNAP}/meta/gui/artmoo-server.png
+Icon=${SNAP}/share/icons/hicolor/512x512/apps/artmoo-server.png
 Version=1.0.0
 Name=ArtMOO
 Terminal=false

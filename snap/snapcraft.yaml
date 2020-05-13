@@ -41,7 +41,7 @@ parts:
       
 apps:
   artmoo-daemon:
-    command: bin/artmoo-daemon
+	command: $SNAP/bin/artmoo-daemon
     extensions:
       - kde-neon
     plugs:
@@ -50,8 +50,8 @@ apps:
       - network
       - network-bind
   artmoo-server:
-    command: bin/artmoo-server
-    desktop: usr/share/applications/artmoo-server.desktop
+	command: $SNAP/bin/artmoo-server
+	desktop: $SNAP/share/applications/artmoo-server.desktop
     extensions:
       - kde-neon
     plugs:
