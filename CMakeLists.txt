@@ -1,4 +1,4 @@
-cmake_minimum_required( VERSION 3.0 )
+cmake_minimum_required( VERSION 3.1 )
 
 project( moo )
 
@@ -12,6 +12,9 @@ set( CMAKE_INCLUDE_CURRENT_DIR ON )
 set( CMAKE_CXX_STANDARD 11 )
 set( CMAKE_CXX_STANDARD_REQUIRED ON )
 set( CMAKE_CXX_EXTENSIONS OFF )
+
+# Automatically link Qt executables to qtmain target on Windows.
+cmake_policy( SET CMP0020 NEW )
 
 #------------------------------------------------------------------------------
 

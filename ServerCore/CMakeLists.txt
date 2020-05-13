@@ -1,5 +1,3 @@
-cmake_minimum_required( VERSION 2.8 )
-
 set( MOO_DEBUG_TASKS	FALSE CACHE BOOL "Print lots of task debug" )
 
 project( ServerCore )
