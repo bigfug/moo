@@ -1,4 +1,3 @@
-
 name: artmoo
 version: '1.0.0'
 summary: A telnet/websocket text-only Multi-user Object Orientated (MOO) server
