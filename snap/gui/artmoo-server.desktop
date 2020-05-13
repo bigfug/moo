@@ -1,0 +1,7 @@
+[Desktop Entry]
+Exec=artmoo-server
+Icon=${SNAP}/meta/gui/artmoo-server.png
+Version=1.0.0
+Name=ArtMOO
+Terminal=false
+Type=Application
