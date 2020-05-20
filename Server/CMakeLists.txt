@@ -56,6 +56,9 @@ target_link_libraries( ${PROJECT_NAME}
 	lua
 )
 
+#-------------------------------------
+# Apple bundle
+
 if( APPLE )
 	set( MOO_ICON moo-icon.icns )
 
@@ -75,6 +78,8 @@ if( APPLE )
 
 endif( APPLE )
 
+#-------------------------------------
+# Install path
 
 install( TARGETS ${PROJECT_NAME}
 	RUNTIME DESTINATION ${PATH_APP}
