@@ -26,7 +26,7 @@ void LineEdit::dataInput( const QByteArray &pData )
 			{
 				mAnsiEsc++;
 
-				mAnsiSeq.append( ch );
+				mAnsiSeq.append( ch.toLatin1() );
 			}
 			else
 			{
@@ -37,9 +37,9 @@ void LineEdit::dataInput( const QByteArray &pData )
 		}
 		else if( mAnsiEsc == 2 )
 		{
-			mAnsiSeq.append( ch );
+			mAnsiSeq.append( ch.toLatin1() );
 
-			if( ch >= 64 && ch <= 126 )
+			if( ch >= QChar( 64 ) && ch <= QChar( 126 ) )
 			{
 				if( mSecretChar.isNull() )
 				{
@@ -94,7 +94,7 @@ void LineEdit::dataInput( const QByteArray &pData )
 
 				case 0x1b:	// ESCAPE
 					mAnsiSeq.clear();
-					mAnsiSeq.append( ch );
+					mAnsiSeq.append( ch.toLatin1() );
 					mAnsiEsc++;
 					break;
 
@@ -103,7 +103,7 @@ void LineEdit::dataInput( const QByteArray &pData )
 					break;
 
 				default:
-					if( ch >= 0x20 && ch < 0x7f )
+					if( ch.toLatin1() >= 0x20 && ch.toLatin1() < 0x7f )
 					{
 						processCharacter( ch, Output );
 					}
@@ -211,21 +211,21 @@ void LineEdit::processFunctionKey( int pAnsiCode, QByteArray &pOutput )
 
 void LineEdit::processCharacter( QChar ch, QByteArray &pOutput )
 {
-	mLineBuffer.insert( mAnsiPos++, ch );
+	mLineBuffer.insert( mAnsiPos++, ch.toLatin1() );
 
 	if( true ) // echo() )
 	{
 		if( mAnsiPos < mLineBuffer.size() )
 		{
-			pOutput.append( mLineBuffer.mid( mAnsiPos - 1 ).append( QString( "\x1b[%1D" ).arg( mLineBuffer.size() - mAnsiPos ) ) );
+			pOutput.append( mLineBuffer.mid( mAnsiPos - 1 ).append( QString( "\x1b[%1D" ).arg( mLineBuffer.size() - mAnsiPos ).toLatin1() ) );
 		}
 		else if( !mSecretChar.isNull() )
 		{
-			pOutput.append( mSecretChar );
+			pOutput.append( mSecretChar.toLatin1() );
 		}
 		else
 		{
-			pOutput.append( ch );
+			pOutput.append( ch.toLatin1() );
 		}
 	}
 }
@@ -349,7 +349,7 @@ void LineEdit::processDelete( QByteArray &pOutput )
 		if( mSecretChar.isNull() ) //echo() )
 		{
 			pOutput.append( mLineBuffer.mid( mAnsiPos ) );
-			pOutput.append( QString( " \x1b[%1D" ).arg( mLineBuffer.size() + 1 - mAnsiPos ) );
+			pOutput.append( QString( " \x1b[%1D" ).arg( mLineBuffer.size() + 1 - mAnsiPos ).toLatin1() );
 		}
 	}
 }
@@ -364,7 +364,7 @@ void LineEdit::processBackspace( QByteArray &pOutput )
 		{
 			pOutput.append( "\x1b[D" );
 			pOutput.append( mLineBuffer.mid( mAnsiPos ) );
-			pOutput.append( QString( " \x1b[%1D" ).arg( mLineBuffer.size() + 1 - mAnsiPos ) );
+			pOutput.append( QString( " \x1b[%1D" ).arg( mLineBuffer.size() + 1 - mAnsiPos ).toLatin1() );
 		}
 		else
 		{

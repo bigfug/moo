@@ -15,6 +15,7 @@
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QSqlResult>
+#include <stdexcept>
 
 void ODBSQL::initialiseDatabase( QSqlDatabase &pDB )
 {
@@ -1314,7 +1315,7 @@ void ODBSQL::queryToObjectData( const QSqlQuery &Q, ObjectData &D )
 	D.mId = Q.value( "id" ).toInt();
 	D.mLocation = Q.value( "location" ).toInt();
 	D.mName = Q.value( "name" ).toString();
-	D.mAliases = Q.value( "aliases" ).toString().split( ',', QString::SkipEmptyParts );
+	D.mAliases = Q.value( "aliases" ).toString().split( ',', Qt::SkipEmptyParts );
 	D.mFertile = Q.value( "fertile" ).toBool();
 	D.mOwner = Q.value( "owner" ).toInt();
 	D.mParent = Q.value( "parent" ).toInt();
@@ -1343,7 +1344,7 @@ void ODBSQL::queryToVerbData( const QSqlQuery &Q, FuncData &FD, VerbData &VD )
 	FD.mCompiled = Q.value( "code" ).toByteArray();
 	FD.mDirty    = FD.mCompiled.isEmpty();
 
-	VD.mAliases = Q.value( "aliases" ).toString().split( ',', QString::SkipEmptyParts );
+	VD.mAliases = Q.value( "aliases" ).toString().split( ',', Qt::SkipEmptyParts );
 	VD.mDirectObject = Verb::argobj_from( Q.value( "dobj" ).toString().toLatin1() );
 	VD.mIndirectObject = Verb::argobj_from( Q.value( "iobj" ).toString().toLatin1() );
 	VD.mPrepositionType = Verb::argobj_from( Q.value( "preptype" ).toString().toLatin1() );

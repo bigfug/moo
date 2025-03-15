@@ -1,13 +1,14 @@
 
-find_package( Qt5
-	COMPONENTS Core Gui Network Widgets WebSockets SerialPort LinguistTools
-	QUIET )
+find_package(Qt6 COMPONENTS Core Gui Network Widgets WebSockets SerialPort LinguistTools Core5Compat)
+if (NOT Qt6_FOUND)
+	find_package(Qt5 5.15 REQUIRED COMPONENTS Core Gui Network Widgets WebSockets SerialPort LinguistTools )
+endif()
 
-target_link_libraries( ${PROJECT_NAME} Qt5::Core Qt5::Gui Qt5::Network Qt5::Widgets Qt5::WebSockets Qt5::SerialPort )
+target_link_libraries( ${PROJECT_NAME} Qt::Core Qt::Gui Qt::Network Qt::Widgets Qt::WebSockets Qt::SerialPort Qt::Core5Compat)
 
 # Retrieve the absolute path to qmake and then use that path to find
 # the binaries
-get_target_property(_qmake_executable Qt5::qmake IMPORTED_LOCATION)
+get_target_property(_qmake_executable Qt::qmake IMPORTED_LOCATION)
 get_filename_component(_qt_bin_dir "${_qmake_executable}" DIRECTORY)
 
 if( WIN32 AND CMAKE_BUILD_TYPE STREQUAL Release )

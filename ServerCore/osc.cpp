@@ -680,10 +680,10 @@ void OSC::addData( QByteArray &pBundle, const QByteArray &pPacket )
 
 void OSC::oscMessage( QByteArray &pMessage, const QString &pName, const QString &pArgs, const char *pBuffer, qint32 pBufLen )
 {
-	pMessage.append( pName );
+	pMessage.append( pName.toLatin1() );
 	pMessage.append( char( 0 ) );				buffer( pMessage );
 	pMessage.append( ',' );
-	pMessage.append( pArgs );
+	pMessage.append( pArgs.toLatin1() );
 	pMessage.append( char( 0 ) );				buffer( pMessage );
 	pMessage.append( pBuffer, pBufLen );		buffer( pMessage );
 }
@@ -696,7 +696,7 @@ void OSC::processInput( qint64 pTimeStamp )
 
 		for( auto it = OSCData.begin() ; it != OSCData.end() ; it++ )
 		{
-			QStringList		 Path = it.key().split( '/', QString::SkipEmptyParts );
+			QStringList		 Path = it.key().split( '/', Qt::SkipEmptyParts );
 
 			Object		*O = ObjectManager::instance()->rootObject();
 

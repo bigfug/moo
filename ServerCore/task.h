@@ -6,9 +6,9 @@
 #include <QStringList>
 
 #include "mooglobal.h"
-#include "lua.h"
-#include "lualib.h"
-#include "lauxlib.h"
+// #include "lua.h"
+// #include "lualib.h"
+// #include "lauxlib.h"
 
 #include "taskentry.h"
 
@@ -49,7 +49,7 @@ public:
 
 	virtual ~Task( void ) {}
 
-	Task &operator =( const Task &T );
+	Task &operator =( const Task &T ) = default;
 
 	TaskId id( void ) const
 	{

@@ -150,8 +150,6 @@ void lua_object::initialise( void )
 {
 	qRegisterMetaType<lua_object::luaHandle>( "luaHandle" );
 
-	qRegisterMetaTypeStreamOperators<lua_object::luaHandle>( "luaHandle" );
-
 	lua_moo::addFunctions( mLuaStatic );
 
 	// As we're overriding __index, build a static QMap of commands

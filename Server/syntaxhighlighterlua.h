@@ -2,6 +2,7 @@
 #define SYNTAXHIGHLIGHTERLUA_H
 
 #include <QSyntaxHighlighter>
+#include <QRegExp>
 
 class SyntaxHighlighterLua : public QSyntaxHighlighter
 {

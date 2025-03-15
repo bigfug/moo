@@ -1,4 +1,4 @@
-cmake_minimum_required( VERSION 3.1 )
+cmake_minimum_required( VERSION 3.16 )
 
 project( moo )
 
@@ -15,6 +15,8 @@ set( CMAKE_CXX_EXTENSIONS OFF )
 
 # Automatically link Qt executables to qtmain target on Windows.
 cmake_policy( SET CMP0020 NEW )
+
+add_compile_definitions(QT_DISABLE_DEPRECATED_UP_TO=0x050F00)
 
 #------------------------------------------------------------------------------
 

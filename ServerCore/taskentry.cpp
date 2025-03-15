@@ -1,5 +1,4 @@
 #include "taskentry.h"
-#include "connection.h"
 #include <QDateTime>
 #include <QDataStream>
 #include <QDateTime>
@@ -30,7 +29,7 @@ bool TaskEntry::matchScheduleRange( int pValue, const QString &pRange )
 		return( true );
 	}
 
-	QStringList		CommaEntries = pRange.split( ',', QString::SkipEmptyParts );
+	QStringList		CommaEntries = pRange.split( ',', Qt::SkipEmptyParts );
 
 	for( QString CE : CommaEntries )
 	{

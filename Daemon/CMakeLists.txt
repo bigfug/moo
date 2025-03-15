@@ -18,7 +18,7 @@ target_compile_definitions( ${PROJECT_NAME} PRIVATE MOO_VERSION=${MOO_VERSION} )
 
 target_link_libraries( ${PROJECT_NAME}
 	ServerCore
-	SMTPEmail
+	SmtpMime
 	telnet
 	Editor
 	lua

@@ -149,17 +149,21 @@ if( MOO_DEBUG_TASKS )
 	target_compile_definitions( ${PROJECT_NAME} PRIVATE MOO_DEBUG_TASKS )
 endif()
 
-add_dependencies( ${PROJECT_NAME} SMTPEmail telnet lua Editor )
+add_dependencies( ${PROJECT_NAME} SmtpMime telnet lua Editor )
 
-find_package( Qt5 COMPONENTS Core Network Sql SerialPort Xml WebSockets REQUIRED )
+find_package(Qt6 COMPONENTS Core Network Sql SerialPort Xml WebSockets Core5Compat)
+if (NOT Qt6_FOUND)
+	find_package(Qt5 5.15 REQUIRED COMPONENTS Core Network Sql SerialPort Xml WebSockets)
+endif()
 
 target_link_libraries( ${PROJECT_NAME}
-	Qt5::Core
-	Qt5::Network
-	Qt5::Sql
-	Qt5::SerialPort
-	Qt5::Xml
-	Qt5::WebSockets
+	Qt::Core
+	Qt::Network
+	Qt::Sql
+	Qt::SerialPort
+	Qt::Xml
+	Qt::WebSockets
+	Qt::Core5Compat
 )
 
 include_directories(

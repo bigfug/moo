@@ -50,7 +50,7 @@ include_directories(
 
 target_link_libraries( ${PROJECT_NAME}
 	ServerCore
-	SMTPEmail
+	SmtpMime
 	telnet
 	Editor
 	lua

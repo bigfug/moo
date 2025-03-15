@@ -85,7 +85,7 @@ void Editor::input( const QString &pData )
 {
 	for( const QChar ch : pData )
 	{
-		if( ch == 0x1b )
+		if( ch == QChar( 0x1b ) )
 		{
 			if( mANSI == 0 )
 			{
@@ -109,7 +109,7 @@ void Editor::input( const QString &pData )
 				continue;
 			}
 
-			processCTRL( 0x1b );
+			processCTRL( QChar( 0x1b ) );
 
 			mANSI = 0;
 		}
@@ -118,7 +118,7 @@ void Editor::input( const QString &pData )
 		{
 			processANSI( ch );
 		}
-		else if( ch < 0x20 || ch >= 0x7f )
+		else if( ch < QChar( 0x20 ) || ch >= QChar( 0x7f ) )
 		{
 			processCTRL( ch );
 		}

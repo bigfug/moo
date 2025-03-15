@@ -22,7 +22,10 @@ set( SOURCE_FILES
     tst_lua_pass.cpp
 	)
 
-find_package( Qt5 REQUIRED COMPONENTS Core Test )
+find_package(Qt6 COMPONENTS Core Test Core5Compat)
+if (NOT Qt6_FOUND)
+	find_package(Qt5 5.15 REQUIRED COMPONENTS Core Test )
+endif()
 
 include_directories(
 	../ServerCore
@@ -33,11 +36,11 @@ include_directories(
 
 link_libraries(
 	ServerCore
-	SMTPEmail
+	SmtpMime
 	telnet
 	Editor
 	lua
-	Qt5::Core Qt5::Test
+	Qt::Core Qt::Test Qt::Core5Compat
 )
 
 set( TEST_DATA_SOURCES luatestdata.h luatestdata.cpp )

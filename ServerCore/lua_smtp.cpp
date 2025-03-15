@@ -5,7 +5,6 @@
 #include "lua_moo.h"
 #include "lua_task.h"
 #include "mooexception.h"
-#include "objectmanager.h"
 
 #include "smtpclient.h"
 #include "mimetext.h"
@@ -91,17 +90,18 @@ int lua_smtp::luaSetSender(lua_State *L)
 		luaMimeMessage		*UD   = message( L );
 		size_t				 TLen;
 		const char			*Text = luaL_checklstring( L, 2, &TLen );
-		EmailAddress		*Addr = new EmailAddress( QString::fromLatin1( Text, TLen ) );
+		QString				 Addr = QString::fromLatin1( Text, TLen );
+		QString				 Name;
 
 		if( lua_gettop( L ) >= 3 )
 		{
 			size_t				 NLen;
-			const char			*Name = luaL_checklstring( L, 3, &NLen );
+			const char			*NDat = luaL_checklstring( L, 3, &NLen );
 
-			Addr->setName( QString::fromLatin1( Name, NLen ) );
+			Name = QString::fromLatin1( NDat, NLen );
 		}
 
-		UD->mMimeMessage->setSender( Addr );
+		UD->mMimeMessage->setSender( EmailAddress( Addr, Name ) );
 	}
 	catch( const mooException &e )
 	{
@@ -123,17 +123,18 @@ int lua_smtp::luaAddTo( lua_State *L )
 		luaMimeMessage		*UD   = message( L );
 		size_t				 TLen;
 		const char			*Text = luaL_checklstring( L, 2, &TLen );
-		EmailAddress		*Addr = new EmailAddress( QString::fromLatin1( Text, TLen ) );
+		QString				 Addr = QString::fromLatin1( Text, TLen );
+		QString				 Name;
 
 		if( lua_gettop( L ) >= 3 )
 		{
 			size_t				 NLen;
-			const char			*Name = luaL_checklstring( L, 3, &NLen );
+			const char			*NDat = luaL_checklstring( L, 3, &NLen );
 
-			Addr->setName( QString::fromLatin1( Name, NLen ) );
+			Name = QString::fromLatin1( NDat, NLen );
 		}
 
-		UD->mMimeMessage->addTo( Addr );
+		UD->mMimeMessage->addTo( EmailAddress( Addr, Name ) );
 	}
 	catch( const mooException &e )
 	{
@@ -183,7 +184,7 @@ int lua_smtp::luaAddText( lua_State *L )
 
 		UD->mMimeMessage->addPart( Mime );
 
-		Mime->setParent( UD->mMimeMessage.data() );
+		// Mime->setParent( UD->mMimeMessage.data() );
 	}
 	catch( const mooException &e )
 	{
@@ -268,11 +269,8 @@ void SmtpWorkerThread::run( void )
 
 	SmtpClient smtp( Host, Port, Type );
 
-	smtp.setUser( User );
-	smtp.setPassword( Pass );
-
 	smtp.connectToHost();
-	smtp.login();
+	smtp.login( User, Pass );
 	smtp.sendMail( *mMimeMessage );
 	smtp.quit();
 }

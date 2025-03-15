@@ -3,12 +3,9 @@
 #include <QDebug>
 #include <QDateTime>
 #include <QMap>
-#include <QXmlInputSource>
 #include <QSettings>
 
 #include "task.h"
-#include "lua_moo.h"
-#include "lua_object.h"
 #include "inputsink/inputsink.h"
 #include "inputsink/inputsinkcommand.h"
 #include "taskentry.h"

@@ -206,7 +206,7 @@ QMap<ObjectId,QString> ObjectManager::objectNames( ObjectIdVector pIds ) const
 
 	if( !ObjNam.isEmpty() )
 	{
-		return( ObjNam.unite( ObjRet ) );
+		ObjRet.insert( ObjNam );
 	}
 
 	return( ObjRet );

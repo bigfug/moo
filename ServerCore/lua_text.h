@@ -2,16 +2,13 @@
 #define LUA_TEXT_H
 
 #include "lua.h"
-#include "lualib.h"
 #include "lauxlib.h"
 
 #include "lua_utilities.h"
 
-#include <QXmlDefaultHandler>
-#include <QXmlAttributes>
 #include <QVector>
 #include <QSettings>
-
+#include <QXmlSimpleReader>
 #include "lua_moo.h"
 
 class Object;

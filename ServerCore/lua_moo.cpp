@@ -1204,7 +1204,7 @@ int lua_moo::luaGMCP( lua_State *L )
 	if( !Data.isEmpty() )
 	{
 		A.append( ' ' );
-		A.append( Data );
+		A.append( Data.toLatin1() );
 	}
 
 	C->sendGMCP( A );

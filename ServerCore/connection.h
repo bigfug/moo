@@ -8,7 +8,6 @@
 #include <QVector>
 #include <QVariant>
 #include <QString>
-#include <QXmlDefaultHandler>
 #include <QRect>
 
 #include "mooglobal.h"

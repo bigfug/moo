@@ -247,7 +247,7 @@ QString lua_text::XmlOutputParser::preprocessString( const QString &S )
 
 				if( C == 'e' )
 				{
-					O.append( 0x1b ); Escaped = false; continue;
+					O.append( QChar( 0x1b ) ); Escaped = false; continue;
 				}
 
 				if( C == 'f' )
@@ -318,7 +318,7 @@ QString lua_text::XmlOutputParser::preprocessString( const QString &S )
 
 					E.remove( 0, 1 );
 
-					V = E.toUInt( &ok, 16 );
+					V = QChar( E.toUInt( &ok, int( 16 ) ) );
 
 					if( ok )
 					{
@@ -337,7 +337,7 @@ QString lua_text::XmlOutputParser::preprocessString( const QString &S )
 					QChar	V;
 					bool	ok;
 
-					V = E.toUInt( &ok, 8 );
+					V = QChar( E.toUInt( &ok, 8 ) );
 
 					if( ok )
 					{
@@ -380,7 +380,7 @@ bool lua_text::XmlOutputParser::startElement( const QString &namespaceURI, const
 	E.mName         = qName;
 	E.mAttrs        = atts;
 
-	QStringList		NameList = qName.split( ':', QString::SkipEmptyParts );
+	QStringList		NameList = qName.split( ':', Qt::SkipEmptyParts );
 
 	if( NameList.size() == 2 )
 	{
