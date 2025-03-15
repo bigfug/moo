@@ -215,9 +215,23 @@ bool MooApplication::initialiseApp()
 
 	if( mListenerServers.isEmpty() )
 	{
-		qCritical() << "No listeners defined in configuration file";
+		qWarning() << "No listeners defined in configuration file";
 
-		return( false );
+		ListenerServer		*Server = new ListenerServerTCP( 0, 1123 );
+
+		if( !Server )
+		{
+			return( false );
+		}
+
+		mListenerServers << Server;
+
+		if( !CM->connection( 0 ) )
+		{
+			CM->doConnect( 0 );
+		}
+
+		qInfo() << "ArtMOO listening for tcp connections on port 1123";
 	}
 
 	return( true );
