@@ -308,16 +308,7 @@ void MainWindow::setCurrentObject( ObjectId pId )
 
 		// Build up a list of parent object ids
 
-		QList<ObjectId>		ObjIdLst;
-
-		Object		*P = O;
-
-		while( P )
-		{
-			ObjIdLst.prepend( P->id() );
-
-			P = ObjectManager::o( P->parent() );
-		}
+		QList<ObjectId>		ObjIdLst = ObjectManager::instance()->objectHierarchy( O->id() );
 
 		// Go through the model and make sure all the parent nodes are expanded
 		// then select the new object id
@@ -328,6 +319,8 @@ void MainWindow::setCurrentObject( ObjectId pId )
 
 		while( ObjIdLst.size() > 0 )
 		{
+			bool found = false;
+
 			for( int i = 0 ; i < MIM->rowCount( CUR ) ; i++ )
 			{
 				QModelIndex		MI = MIM->index( i, 0, CUR );
@@ -347,8 +340,16 @@ void MainWindow::setCurrentObject( ObjectId pId )
 
 					ObjIdLst.pop_front();
 
+
+					found = true;
+
 					break;
 				}
+			}
+
+			if( !found )
+			{
+				break;
 			}
 		}
 	}
