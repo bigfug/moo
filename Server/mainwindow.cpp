@@ -14,6 +14,8 @@
 #include "lua_object.h"
 #include "lua_moo.h"
 
+#include "mooitemmodel.h"
+
 MainWindow::MainWindow( QWidget *pParent )
 	: QMainWindow( pParent ), ui( new Ui::MainWindow )
 {
@@ -134,8 +136,6 @@ MainWindow::MainWindow( QWidget *pParent )
 		}
 	} );
 
-	ui->mCurrentOwner->setObjectId( QSettings().value( "owner", ui->mCurrentOwner->objectId() ).toInt() );
-
 	connect( ObjectManager::instance(), &ObjectManager::stats, this, &MainWindow::stats );
 }
 
@@ -216,6 +216,8 @@ bool MainWindow::isEditingProperty() const
 void MainWindow::installModel( QAbstractItemModel *pModel )
 {
 	ui->mObjectTree->setModel( pModel );
+
+	setCurrentObject( QSettings().value( "owner", ui->mCurrentOwner->objectId() ).toInt() );
 }
 
 void MainWindow::stats( const ObjectManagerStats &pStats )
@@ -303,6 +305,52 @@ void MainWindow::setCurrentObject( ObjectId pId )
 		ui->mButtonObjectExport->setEnabled(  O->module() != OBJECT_NONE );
 
 		ui->mObjectEditor->setEnabled( true );
+
+		// Build up a list of parent object ids
+
+		QList<ObjectId>		ObjIdLst;
+
+		Object		*P = O;
+
+		while( P )
+		{
+			ObjIdLst.prepend( P->id() );
+
+			P = ObjectManager::o( P->parent() );
+		}
+
+		// Go through the model and make sure all the parent nodes are expanded
+		// then select the new object id
+
+		MooItemModel	*MIM = qobject_cast<MooItemModel *>( ui->mObjectTree->model() );
+
+		QModelIndex		 CUR;
+
+		while( ObjIdLst.size() > 0 )
+		{
+			for( int i = 0 ; i < MIM->rowCount( CUR ) ; i++ )
+			{
+				QModelIndex		MI = MIM->index( i, 0, CUR );
+
+				if( MI.internalId() == ObjIdLst.first() )
+				{
+					if( ObjIdLst.size() > 1 )
+					{
+						ui->mObjectTree->setExpanded( MI, true );
+
+						CUR = MI;
+					}
+					else
+					{
+						ui->mObjectTree->setCurrentIndex( MI );
+					}
+
+					ObjIdLst.pop_front();
+
+					break;
+				}
+			}
+		}
 	}
 	else
 	{
