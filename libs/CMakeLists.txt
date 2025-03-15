@@ -4,40 +4,49 @@ if (NOT Qt6_FOUND)
 	find_package(Qt5 5.15 REQUIRED COMPONENTS Network)
 endif()
 
-add_subdirectory( SMTPEmail )
+add_library( SMTPEmail STATIC
+	SMTPEmail/src/emailaddress.cpp
+	SMTPEmail/src/mimeattachment.cpp
+	SMTPEmail/src/mimebytearrayattachment.cpp
+	SMTPEmail/src/mimefile.cpp
+	SMTPEmail/src/mimehtml.cpp
+	SMTPEmail/src/mimeinlinefile.cpp
+	SMTPEmail/src/mimemessage.cpp
+	SMTPEmail/src/mimepart.cpp
+	SMTPEmail/src/mimetext.cpp
+	SMTPEmail/src/smtpclient.cpp
+	SMTPEmail/src/quotedprintable.cpp
+	SMTPEmail/src/mimemultipart.cpp
+	SMTPEmail/src/mimecontentencoder.cpp
+	SMTPEmail/src/mimebase64encoder.cpp
+	SMTPEmail/src/mimeqpencoder.cpp
+	SMTPEmail/src/mimeqpformatter.cpp
+	SMTPEmail/src/mimebase64formatter.cpp
+	SMTPEmail/src/mimecontentformatter.cpp
+	SMTPEmail/src/emailaddress.h
+	SMTPEmail/src/mimeattachment.h
+	SMTPEmail/src/mimebytearrayattachment.h
+	SMTPEmail/src/mimefile.h
+	SMTPEmail/src/mimehtml.h
+	SMTPEmail/src/mimeinlinefile.h
+	SMTPEmail/src/mimemessage.h
+	SMTPEmail/src/mimepart.h
+	SMTPEmail/src/mimetext.h
+	SMTPEmail/src/smtpclient.h
+	SMTPEmail/src/quotedprintable.h
+	SMTPEmail/src/mimemultipart.h
+	SMTPEmail/src/smtpmime_global.h
+	SMTPEmail/src/mimecontentencoder.h
+	SMTPEmail/src/mimebase64encoder.h
+	SMTPEmail/src/mimeqpencoder.h
+	SMTPEmail/src/mimeqpformatter.h
+	SMTPEmail/src/mimebase64formatter.h
+	SMTPEmail/src/mimecontentformatter.h
+)
 
-# add_library( SMTPEmail STATIC
-# 	SMTPEmail/src/emailaddress.cpp
-# 	SMTPEmail/src/mimeattachment.cpp
-# 	SMTPEmail/src/mimefile.cpp
-# 	SMTPEmail/src/mimehtml.cpp
-# 	SMTPEmail/src/mimeinlinefile.cpp
-# 	SMTPEmail/src/mimemessage.cpp
-# 	SMTPEmail/src/mimepart.cpp
-# 	SMTPEmail/src/mimetext.cpp
-# 	SMTPEmail/src/smtpclient.cpp
-# 	SMTPEmail/src/quotedprintable.cpp
-# 	SMTPEmail/src/mimemultipart.cpp
-# 	SMTPEmail/src/mimecontentformatter.cpp
-# 	SMTPEmail/src/emailaddress.h
-# 	SMTPEmail/src/mimeattachment.h
-# 	SMTPEmail/src/mimefile.h
-# 	SMTPEmail/src/mimehtml.h
-# 	SMTPEmail/src/mimeinlinefile.h
-# 	SMTPEmail/src/mimemessage.h
-# 	SMTPEmail/src/mimepart.h
-# 	SMTPEmail/src/mimetext.h
-# 	SMTPEmail/src/smtpclient.h
-# 	SMTPEmail/src/SmtpMime
-# 	SMTPEmail/src/quotedprintable.h
-# 	SMTPEmail/src/mimemultipart.h
-# 	SMTPEmail/src/mimecontentformatter.h
-# 	SMTPEmail/src/smtpexports.h
-# )
+target_compile_definitions( SMTPEmail PRIVATE SMTP_BUILD )
 
-# target_compile_definitions( SMTPEmail PRIVATE SMTP_BUILD )
-
-# target_link_libraries( SMTPEmail Qt::Network )
+target_link_libraries( SMTPEmail Qt::Network )
 
 add_library( telnet STATIC
 	libtelnet/libtelnet.c

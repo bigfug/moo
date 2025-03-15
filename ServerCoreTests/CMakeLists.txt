@@ -36,7 +36,7 @@ include_directories(
 
 link_libraries(
 	ServerCore
-	SmtpMime
+	SMTPEmail
 	telnet
 	Editor
 	lua

@@ -149,7 +149,7 @@ if( MOO_DEBUG_TASKS )
 	target_compile_definitions( ${PROJECT_NAME} PRIVATE MOO_DEBUG_TASKS )
 endif()
 
-add_dependencies( ${PROJECT_NAME} SmtpMime telnet lua Editor )
+add_dependencies( ${PROJECT_NAME} SMTPEmail telnet lua Editor )
 
 find_package(Qt6 COMPONENTS Core Network Sql SerialPort Xml WebSockets Core5Compat)
 if (NOT Qt6_FOUND)
