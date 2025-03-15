@@ -159,6 +159,8 @@ public:
 
 	QVector<QPair<ObjectId,QString>> objectSignals( ObjectId pSrcObj, QString pSrcVrb );
 
+	ObjectIdVector objectHierarchy( ObjectId pId );
+
 signals:
 	void stats( const ObjectManagerStats &pStats );
 	void taskReady( void );

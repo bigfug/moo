@@ -1011,3 +1011,17 @@ QVector<QPair<ObjectId,QString>> ObjectManager::objectSignals( ObjectId pSrcObj,
 
 	return( QVector<QPair<ObjectId,QString>>() );
 }
+
+ObjectIdVector ObjectManager::objectHierarchy( ObjectId pId )
+{
+	ObjectIdVector		ObjIdLst;
+
+	while( pId != OBJECT_NONE )
+	{
+		ObjIdLst.prepend( pId );
+
+		pId = objectParent( pId );
+	}
+
+	return( ObjIdLst );
+}
