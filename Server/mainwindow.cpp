@@ -13,6 +13,7 @@
 #include "objectmanager.h"
 #include "lua_object.h"
 #include "lua_moo.h"
+#include "lua_task.h"
 
 #include "mooitemmodel.h"
 
@@ -477,15 +478,33 @@ void MainWindow::on_mButtonObjectAdd_clicked()
 	{
 		Object		*O = currentObject();
 
-		MooItemModel	*MIM = qobject_cast<MooItemModel *>( ui->mObjectTree->model() );
+		try
+		{
+			QVariantList		RetVal;
 
-		Object		*N = ObjectManager::instance()->newObject();
+			if( lua_task::process( QString( "return( moo.create( %1, %2 ) )" ).arg( O->id() ).arg( ui->mCurrentOwner->objectId() ), CONNECTION_NONE, 3, &RetVal ) == 1 )
+			{
+				lua_object::luaHandle		LH;
 
-		N->setName( Name );
-		N->setParent( O->id() );
-		N->setOwner( ui->mCurrentOwner->objectId() );
+				LH = RetVal.at( 0 ).value<lua_object::luaHandle>();
 
-		setCurrentObject( N->id() );
+				Object		*N = ObjectManager::o( LH.O );
+
+				if( N )
+				{
+					N->setName( Name );
+
+					setCurrentObject( N->id() );
+				}
+			}
+		}
+		catch( mooException e )
+		{
+			qDebug() << e.message();
+		}
+		catch (...)
+		{
+		}
 	}
 }
 
@@ -499,9 +518,17 @@ void MainWindow::on_mButtonObjectDelete_clicked()
 		return;
 	}
 
-	ObjectManager::instance()->recycle( O );
-
-	ui->mObjectTree->update();
+	try
+	{
+		lua_task::process( QString( "o( %1 ):recycle()" ).arg( O->id() ), CONNECTION_NONE, 3 );
+	}
+	catch( mooException e )
+	{
+		qDebug() << e.message();
+	}
+	catch (...)
+	{
+	}
 }
 
 void MainWindow::on_mButtonVerbAdd_clicked()

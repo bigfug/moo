@@ -9,6 +9,7 @@
 #include "lua_moo.h"
 #include "lua_object.h"
 #include "lua_verb.h"
+#include "lua_prop.h"
 #include "lua_connection.h"
 #include "verb.h"
 #include "object.h"
@@ -1202,17 +1203,32 @@ QStringList lua_task::taskVerbStack() const
 	return( VrbLst );
 }
 
-int lua_task::process( QString pCommand, ConnectionId pConnectionId, ObjectId pPlayerId )
+int lua_task::process( QString pCommand, ConnectionId pConnectionId, ObjectId pPlayerId, QVariantList *pReturnValues )
 {
 	lua_task		 Com( pConnectionId, TaskEntry( pCommand, pConnectionId, pPlayerId ) );
 	int				 Ret = 0;
 
-	try
+	Com.setPermissions( pPlayerId );
+
+	Ret = Com.eval();
+
+	if( pReturnValues )
 	{
-		Ret = Com.eval();
+		pReturnValues->clear();
+
+		for( int i = 0 ; i < Ret ; i++ )
+		{
+			QVariant		V;
+
+			lua_prop::luaNewRecurse( Com.L(), -1 - i, V );
+
+			pReturnValues->append( V );
+		}
 	}
-	catch( ... )
+
+	if( Com.error() )
 	{
+		throw Com.mException;
 	}
 
 	return( Ret );
@@ -1220,7 +1236,14 @@ int lua_task::process( QString pCommand, ConnectionId pConnectionId, ObjectId pP
 
 bool lua_task::isWizard() const
 {
-	return( permissions() == OBJECT_SYSTEM );
+	if( permissions() == OBJECT_SYSTEM )
+	{
+		return( true );
+	}
+
+	Object		*O = ObjectManager::o( permissions() );
+
+	return( O && O->wizard() );
 }
 
 bool lua_task::isProgrammer() const

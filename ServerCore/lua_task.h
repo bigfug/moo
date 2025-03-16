@@ -91,7 +91,7 @@ public:
 		mChanges.add( pChange );
 	}
 
-	static int process( QString pCommand, ConnectionId pConnectionId = CONNECTION_NONE, ObjectId pPlayerId = OBJECT_NONE );
+	static int process( QString pCommand, ConnectionId pConnectionId = CONNECTION_NONE, ObjectId pPlayerId = OBJECT_NONE, QVariantList *pReturnValues = Q_NULLPTR );
 
 	bool isWizard( void ) const;
 

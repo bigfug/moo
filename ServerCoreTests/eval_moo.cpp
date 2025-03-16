@@ -69,13 +69,13 @@ void eval_moo::eval_data()
 
 	//                                     prg      own  err     res
 
-	QTest::newRow( "not programmer" )	<< false << 3 << true  << -1;
-	QTest::newRow( "programmer" )		<< true	 << 3 << false << 23;
-	QTest::newRow( "wizard" )			<< true  << 3 << false << 23;
+	QTest::newRow( "not programmer (3)" )	<< false << 3 << true  << -1;
+	QTest::newRow( "programmer (3)" )		<< true	 << 3 << false << 23;
+	QTest::newRow( "wizard (3)" )			<< true  << 3 << false << 23;
 
-	QTest::newRow( "not programmer" )	<< false << 2 << true  << -1;
-	QTest::newRow( "programmer" )		<< true	 << 2 << true  << -1;
-	QTest::newRow( "wizard" )			<< true  << 2 << true  << -1;
+	QTest::newRow( "not programmer (2)" )	<< false << 2 << true  << -1;
+	QTest::newRow( "programme (2)r" )		<< true	 << 2 << true  << -1;
+	QTest::newRow( "wizard (2)" )			<< true  << 2 << true  << -1;
 }
 
 void eval_moo::eval()
