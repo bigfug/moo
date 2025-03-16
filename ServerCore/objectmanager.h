@@ -165,6 +165,11 @@ signals:
 	void stats( const ObjectManagerStats &pStats );
 	void taskReady( void );
 
+	void objectAdded( ObjectId pId );
+	void objectDeleted( ObjectId pId );
+
+	void objectParentChanged( ObjectId pObjectId, ObjectId pOldParentId, ObjectId pNewParentId );
+
 public slots:
 	void onFrame( qint64 pTimeStamp );
 	void doTask( TaskEntry &pTask );
@@ -219,6 +224,11 @@ public slots:
 
 	void networkRequestFinished( void );
 	void networkRequestReadyRead( void );
+
+	void objectParentUpdated( ObjectId pObjectId, ObjectId pOldParentId, ObjectId pNewParentId )
+	{
+		emit objectParentChanged( pObjectId, pOldParentId, pNewParentId );
+	}
 
 protected:
 	void timeoutObjects( void );

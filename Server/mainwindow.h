@@ -28,6 +28,9 @@ public slots:
 
 	void log( const QString &pMessage );
 
+protected:
+	void updateObjectTree( ObjectId pId );
+
 private:
 	Object *currentObject( void );
 

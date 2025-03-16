@@ -135,9 +135,13 @@ void Object::setParent( ObjectId pNewParentId )
 		}
 	}
 
+	ObjectId OldParentId = mData.mParent;
+
 	mData.mParent = pNewParentId;
 
 	setUpdated();
+
+	ObjectManager::instance()->objectParentUpdated( id(), OldParentId, pNewParentId );
 }
 
 //----------------------------------------------------------------------------

@@ -323,19 +323,20 @@ void MainWindow::setCurrentObject( ObjectId pId )
 
 			for( int i = 0 ; i < MIM->rowCount( CUR ) ; i++ )
 			{
-				QModelIndex		MI = MIM->index( i, 0, CUR );
+				QModelIndex		 MMI = MIM->index( i, 0, CUR );
+				const MooItem	*MI = static_cast<MooItem *>( MMI.internalPointer() );
 
-				if( MI.internalId() == ObjIdLst.first() )
+				if( MI->mId == ObjIdLst.first() )
 				{
 					if( ObjIdLst.size() > 1 )
 					{
-						ui->mObjectTree->setExpanded( MI, true );
+						ui->mObjectTree->setExpanded( MMI, true );
 
-						CUR = MI;
+						CUR = MMI;
 					}
 					else
 					{
-						ui->mObjectTree->setCurrentIndex( MI );
+						ui->mObjectTree->setCurrentIndex( MMI );
 					}
 
 					ObjIdLst.pop_front();
@@ -407,7 +408,64 @@ void MainWindow::on_mPropList_itemClicked(QListWidgetItem *)
 
 void MainWindow::on_mObjectTree_clicked(const QModelIndex &index)
 {
-	setCurrentObject( index.internalId() );
+	MooItemModel	*MIM = qobject_cast<MooItemModel *>( ui->mObjectTree->model() );
+	MooItem			*MI  = static_cast<MooItem *>( index.internalPointer() );
+
+	setCurrentObject( MI->mId );
+}
+
+void MainWindow::updateObjectTree( ObjectId pId )
+{
+	MooItemModel	*MIM = qobject_cast<MooItemModel *>( ui->mObjectTree->model() );
+
+	ObjectIdVector	ObjIdLst = ObjectManager::instance()->objectHierarchy( pId );
+
+	QModelIndex		 CUR;
+
+	while( ObjIdLst.size() > 0 )
+	{
+		bool found = false;
+
+		for( int i = 0 ; i < MIM->rowCount( CUR ) ; i++ )
+		{
+			QModelIndex		MI = MIM->index( i, 0, CUR );
+
+			if( MI.internalId() == ObjIdLst.first() )
+			{
+				if( ObjIdLst.size() > 2 )
+				{
+					if( !ui->mObjectTree->isExpanded( MI ) )
+					{
+						return;
+					}
+
+					CUR = MI;
+				}
+				else
+				{
+					if( !ui->mObjectTree->isExpanded( MI ) )
+					{
+						return;
+					}
+
+					//MIM->updateParent( MI );
+
+					return;
+				}
+
+				ObjIdLst.pop_front();
+
+				found = true;
+
+				break;
+			}
+		}
+
+		if( !found )
+		{
+			break;
+		}
+	}
 }
 
 void MainWindow::on_mButtonObjectAdd_clicked()
@@ -418,6 +476,8 @@ void MainWindow::on_mButtonObjectAdd_clicked()
 	if( OK && !Name.isEmpty() )
 	{
 		Object		*O = currentObject();
+
+		MooItemModel	*MIM = qobject_cast<MooItemModel *>( ui->mObjectTree->model() );
 
 		Object		*N = ObjectManager::instance()->newObject();
 

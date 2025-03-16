@@ -378,6 +378,8 @@ Object *ObjectManager::newObject( void )
 		mData.mObjMap[ O->id() ] = O;
 
 		mAddedObjects << O->id();
+
+		emit objectAdded( O->id() );
 	}
 
 	return( O );
@@ -407,6 +409,8 @@ void ObjectManager::recycle( Object *pObject )
 		// TODO: Verbs, Props
 
 		mDeletedObjects << pObject->id();
+
+		emit objectDeleted( pObject->id() );
 	}
 }
 
